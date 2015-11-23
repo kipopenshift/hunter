@@ -6,6 +6,10 @@ public class HunterUser {
 	private String password;
 	private String email;
 	
+	/*
+	 * Just a comment!!
+	 * */
+	
 	public String getUserName() {
 		return userName;
 	}
