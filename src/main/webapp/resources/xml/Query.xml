@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<queries>
+	<query id="updateTaskStatus">
+		<description>
+		   This updates the status of task for the given ID
+		</description>
+		<statement>
+			UPDATE task SET TSK_STS = ? WHERE TSK_ID = ?
+		</statement>
+	</query>
+	<query id="testingJDBCExec">
+		<description>
+		   Testing testing...
+		</description>
+		<statement>
+			SELECT * FROM GT_WY_MSG WHERE TSK_ID = ?
+		</statement>
+	</query>
+	<query id="getCountryNameAndId">
+		<description>
+		   gets country name and id as pairs for json object
+		</description>
+		<statement>
+			select  CNTRY_ID as countryId ,  CNTRY_NAM as CNTRY_NAM  from cntry
+		</statement>
+	</query>
+	<query id="getCountiesNameAndIdForSelCountry">
+		<description>
+		   gets country name and id as pairs for json object
+		</description>
+		<statement>
+			select  cty.CNTRY_ID as countryId, cty.CNTY_ID as countyId, cty.CNTY_NAM as countyName from CNTY cty where cty.CNTRY_ID = ?
+		</statement>
+	</query>
+	<query id="getCountiesNameAndIdForAll">
+		<description>
+		   gets country name and id as pairs for json object
+		</description>
+		<statement>
+			select  cty.CNTRY_ID as countryId, cty.CNTY_ID as countyId, cty.CNTY_NAM as countyName from CNTY cty
+		</statement>
+	</query>
+	<query id="getConstituenciesNameAndIdForSelCounty">
+		<description>
+		   Gets all constituencies for selected country.
+		</description>
+		<statement>
+			select  cns.CNTY_ID as COUNTY_ID, cns.CNSTTNCY_ID  as CONSTITUENCY_ID, cns.CNSTTNCY_NAM as CONSTITUENCY_NAME from CNSTTNCY cns where cns.CNTY_ID = ?
+		</statement>
+	</query>
+	<query id="getConstituenciesNameAndIdForAllCounties">
+		<description>
+		   Gets all constituencies.
+		</description>
+		<statement>
+			select  cns.CNTY_ID as COUNTY_ID, cns.CNSTTNCY_ID  as CONSTITUENCY_ID, cns.CNSTTNCY_NAM as CONSTITUENCY_NAME from CNSTTNCY cns
+		</statement>
+	</query>
+	<query id="getConstituencyWardsForSelCons">
+		<description>
+		   Gets all wards for selected constituency
+		</description>
+		<statement>
+			select  
+				cward.CNSTTNCY_ID as CNSTTNCY_ID, 
+				cward.WRD_ID  as WARD_ID, 
+				cward.WRD_NAM as WRD_NAME 
+			from 
+				CNSTTNCY_WRD cward 
+			where cward.CNSTTNCY_ID = ?
+		</statement>
+	</query>
+	<query id="getConstituencyWardsForAll">
+		<description>
+		   Gets all constituency wards
+		</description>
+		<statement>
+			select  cward.CNSTTNCY_ID as CNSTTNCY_ID, cward.WRD_ID  as WARD_ID, cward.WRD_NAM as WRD_NAME from CNSTTNCY_WRD cward;
+		</statement>
+	</query>
+	<query id="getMaxPhoneNumberForRandomReceiverInACountry">
+		<description>
+		   Gets a maximum number of phone number of given country in hunter message receivers.
+		</description>
+		<statement>
+			WITH numbers as (SELECT TO_NUMBER(rc.RCVR_CNTCT)"RCVR_CNTCT" FROM HNTR_MSG_RCVR rc WHERE rc.CNTRY_NAM = ?)
+			select max(nmbrs.RCVR_CNTCT) AS "MAX_CONTACT" from numbers nmbrs
+		</statement>
+	</query>
+	<query id="getCountryNameIdAndCodeForCountyId">
+		<description>
+		   Gets country name, code and id for countyId.
+		</description>
+		<statement>
+			SELECT cn.CNTRY_ID as countryId, ct.CNTRY_NAM as countryName, ct.CNTRY_CODE as countryCode,
+			FROM cnty cn, Cntry ct
+			where ct.CNTRY_ID = cn.CNTRY_ID
+			and cn.CNTY_ID = ?
+		</statement>
+	</query>
+	<query id="getCntryCntyCodeNameId">
+		<description>
+		   Gets country code, name and id, country code, name and id for given constituencyId
+		</description>
+		<statement>
+			SELECT 
+				cry.CNTRY_ID AS countryId, 
+				cry.CNTRY_CODE AS countryCode, 
+				cry.CNTRY_NAM AS countryName,
+				Y.CNTY_ID AS countyId, 
+				y.CNTY_CDE AS countyCode, 
+				Y.CNTY_NAM AS countyName  
+			FROM 
+			(
+				SELECT cn.CNTY_ID, cn.CNTY_CDE, cn.CNTY_NAM, cn.CNTRY_ID
+				FROM cnty cn, CNSTTNCY cns
+				WHERE cns.CNTY_ID = cn.CNTY_ID
+				AND cns.CNSTTNCY_ID = ?
+			)Y, 
+			CNTRY cry
+			WHERE cry.CNTRY_ID = Y.CNTRY_ID
+		</statement>
+	</query>
+	<query id="getCntryNmIdAndCdeCntyIdNmAndCdeFrCnsttncyId">
+		<description>
+		   Gets country code, name and id, country code, name and id for given constituencyId
+		</description>
+		<statement>
+			SELECT 
+				cry.CNTRY_ID , 
+				cry.CNTRY_CODE , 
+				cry.CNTRY_NAM,
+				Y.CNTY_ID, 
+				y.CNTY_CDE , 
+				Y.CNTY_NAM, 
+				Y.CNSTTNCY_ID, 
+				Y.CNSTTNCY_CDE, 
+				Y.CNSTTNCY_NAM   
+			FROM 
+			(
+				SELECT 
+					cn.CNTY_ID, 
+					cn.CNTY_CDE, 
+					cn.CNTY_NAM, 
+					cn.CNTRY_ID,
+					cns.CNSTTNCY_ID, 
+					cns.CNSTTNCY_CDE, 
+					cns.CNSTTNCY_NAM
+				FROM cnty cn, CNSTTNCY cns
+				WHERE cns.CNTY_ID = cn.CNTY_ID
+				AND cns.CNSTTNCY_ID = ?
+			)Y, 
+			CNTRY cry
+			WHERE cry.CNTRY_ID = Y.CNTRY_ID
+		</statement>
+	</query>
+	<query id="getCntryCntyConstyConswardIdCodeNameId">
+		<description>
+		   Gets country code, name and id, country code, name and id for given constituencyId
+		</description>
+		<statement>
+			select 
+			    cntr.CNTRY_ID, 
+			    cntr.CNTRY_CODE, 
+			    cntr.CNTRY_NAM,
+			    cn.CNTY_ID, 
+			    cn.CNTY_CDE, 
+			    cn.CNTY_NAM,
+			    cns.CNSTTNCY_ID, 
+			    cns.CNSTTNCY_CDE, 
+			    cns.CNSTTNCY_NAM,
+			    cnswrd.WRD_ID,
+			    cnswrd.CNSTTNCY_WRD_CODE, 
+			    cnswrd.WRD_NAM
+			from CNSTTNCY_WRD cnswrd, CNSTTNCY cns, CNTY cn, CNTRY cntr
+			where cnswrd.CNSTTNCY_ID = cns.CNSTTNCY_ID
+			and cns.CNTY_ID = cn.CNTY_ID
+			and cn.CNTRY_ID = cntr.CNTRY_ID
+			and  cnswrd.WRD_ID = ?
+		</statement>
+	</query>
+	<query id="getRegionIdsForNamesToWard">
+		<description>
+		   Pass the names of all the regions and get ward id : Country, county, State, Constituency, ConstituencyWard
+		</description>
+		<statement>
+			select 
+			    cntr.CNTRY_ID, 
+			    cntr.CNTRY_NAM,
+			    cn.CNTY_ID, 
+			    cn.CNTY_NAM,
+			    cns.CNSTTNCY_ID, 
+			    cns.CNSTTNCY_NAM,
+			    cnswrd.WRD_ID,
+			    cnswrd.WRD_NAM
+			from CNSTTNCY_WRD cnswrd, CNSTTNCY cns, CNTY cn, CNTRY cntr
+			where cnswrd.CNSTTNCY_ID = cns.CNSTTNCY_ID
+			and cns.CNTY_ID = cn.CNTY_ID
+			and cn.CNTRY_ID = cntr.CNTRY_ID
+			and cntr.CNTRY_NAM = ?
+			and cn.CNTY_NAM = ?
+			and cns.CNSTTNCY_NAM = ?
+			and  cnswrd.WRD_NAM = ?
+		</statement>
+	</query>
+	<query id="getRegionIdsForNamesToCons">
+		<description>
+		   Pass the names of all the regions and get ward id : Country, county, State, Constituency, ConstituencyWard
+		</description>
+		<statement>
+			select 
+			    cntr.CNTRY_ID, 
+			    cntr.CNTRY_NAM,
+			    cn.CNTY_ID, 
+			    cn.CNTY_NAM,
+			    cns.CNSTTNCY_ID, 
+			    cns.CNSTTNCY_NAM
+			from CNSTTNCY cns, CNTY cn, CNTRY cntr
+			where cns.CNTY_ID = cn.CNTY_ID
+			and cn.CNTRY_ID = cntr.CNTRY_ID
+			and cntr.CNTRY_NAM = ?
+			and cn.CNTY_NAM = ?
+			and cns.CNSTTNCY_NAM = ?
+		</statement>
+	</query>
+	<query id="getRegionIdsForNamesToCounty">
+		<description>
+		   Pass the names of all the regions and get ward id : Country, county, State, Constituency, ConstituencyWard
+		</description>
+		<statement>
+			select 
+			    cntr.CNTRY_ID, 
+			    cntr.CNTRY_NAM,
+			    cn.CNTY_ID, 
+			    cn.CNTY_NAM
+			from CNTY cn, CNTRY cntr
+			where cn.CNTRY_ID = cntr.CNTRY_ID
+			and cntr.CNTRY_NAM = ?
+			and cn.CNTY_NAM = ?
+		</statement>
+	</query>
+	<query id="getRgnLvlIdsAndNamesForConstituencies">
+		<description>
+		   Pass the names of all the regions and get ward id : Country, county, State, Constituency, ConstituencyWard
+		</description>
+		<statement>
+			    SELECT 
+			      cns.CNTY_ID, 
+			      cn.CNTY_NAM,
+			      cns.CNSTTNCY_ID,
+			      cns.CNSTTNCY_NAM,  
+			      cwrd.WRD_ID,
+			      cwrd.WRD_NAM
+			    FROM CNSTTNCY cns, CNTRY cntry, cnty cn, CNSTTNCY_WRD cwrd
+			    WHERE  cwrd.CNSTTNCY_ID = cns.CNSTTNCY_ID
+			    AND cn.CNTRY_ID = cntry.CNTRY_ID
+			    and cns.CNTY_ID = cn.CNTY_ID
+			    and cntry.CNTRY_ID = cn.CNTRY_ID
+			    and cn.CNTY_NAM = :countryName
+			    and cns.CNSTTNCY_NAM in (:constituencyNames)
+			    and cntry.CNTRY_NAM = :coutryName order by cn.CNTY_NAM, cns.CNSTTNCY_NAM asc
+		</statement>
+	</query>
+	<query id="getUserIdUserNameClientIdForUserName">
+		<description>
+		   gets userid, user name and client id, passing user name.
+		</description>
+		<statement>
+			SELECT hu.USR_ID, hu.USR_NAM, hc.HNTR_CLNT_ID
+			FROM HNTR_CLINT hc, HNTR_USR hu
+			WHERE hc.HNTR_CLNT_ID = hu.USR_ID 
+			AND hu.USR_NAM = ?
+		</statement>
+	</query>
+	<query id="getHntrMsgRcvrsFrmRgn">
+		<description>
+		   gets userid, user name and client id, passing user name.
+		</description>
+		<statement>
+			FROM HunterMessageReceiver h 
+			WHERE h.receiverRegionLevel = :receiverRegionLevel 
+			AND h.receiverRegionLevelName = :receiverRegionLevelName
+			AND h.receiverType = :receiverType
+			AND h.active in (:active);
+		</statement>
+	</query>
+	<query id="getHntrMsgRcvrsFrConsWrdNames">
+		<description>
+		   gets hunter message receivers of given wards. Must supply all region names.
+		</description>
+		<statement>
+			FROM HunterMessageReceiver h 
+			WHERE h.countryName = :countryName 
+			AND h.countyName = :countyName
+			AND h.consName = :consName
+			AND h.consWardName IN(:consWardName)
+			AND h.receiverType = :receiverType
+			AND h.active in (:active)
+		</statement>
+	</query>
+	<query id="getAllReceiverTypesAndContacts">
+		<description>
+		   returns receiver type and receiver contact for all contacts in the sytem for 
+		</description>
+		<statement>
+			SELECT distinct m.RCVR_CNTCT, m.RCVR_TYP FROM HNTR_MSG_RCVR m
+		</statement>
+	</query>
+		<query id="getNamesForIdsToRegionsTillWard">
+			<description>
+			   Pass the IDs for regions and it gives all respective names. 
+			</description>
+			<statement>
+				SELECT distinct m.RCVR_CNTCT, m.RCVR_TYP FROM HNTR_MSG_RCVR m
+			</statement>
+		</query>
+</queries>

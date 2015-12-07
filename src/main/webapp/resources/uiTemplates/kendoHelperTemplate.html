@@ -1,0 +1,51 @@
+
+<div id="templateCover" style="display:none;"  >
+<div id="kendoWarningPopup"></div>
+<div id="popupNotification"></div>
+<div id="kendoWindow" ></div>
+<div id="measuredWindow" ></div>
+<div id="helperKendoWindow" ></div>
+<div id="kendoNotificationDiv" ></div>
+<div id="measuredWindowBackUp" ></div>
+
+
+ <script id="emailTemplate" type="text/x-kendo-template">
+	<div class="new-mail">
+       	<img src="../content/web/notification/envelope.png" />
+		<h3>#= title #</h3>
+		<p>#= message #</p>
+	</div>
+</script>
+
+ <script id="errorTemplate" type="text/x-kendo-template">
+	<div class="wrong-pass">
+		<table style="width:100%;" >
+			<tr style="vertical-align:midde;" >
+				<td><img src="http://localhost:8080/Kendo/static/resources/images/notifErrorIcon.png" />#= title #</td>
+			</tr>
+			<tr>
+				<td>#= message #</td>
+			</tr>
+		</table>
+		<br/>
+		<br/>
+	</div>
+</script>
+
+ <script id="successTemplate" type="text/x-kendo-template">
+    <div class="k-notification-upload-success" style="background-color:rgb(15,166,106);height:100%;" >
+		<table style="width:100%;height:100%;" >
+			<tr style="vertical-align:midde;" >
+				<td>#=message#</td>
+			</tr>
+		</table>
+	</div>
+</script>
+
+<script type="text/javascript">
+console.log("Living prove that kendoHelper template was loading in the DOM"); 
+</script>
+
+
+</div>
+

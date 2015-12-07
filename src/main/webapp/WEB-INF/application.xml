@@ -1,0 +1,26 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="messageDao" class="com.techmaster.hunter.dao.impl.MessageDaoImpl"/>
+	<bean id="hunterUserDao" class="com.techmaster.hunter.dao.impl.HunterUserDaoImpl"/>
+	<bean id="serviceProviderDao" class="com.techmaster.hunter.dao.impl.ServiceProviderDaoImpl"/>
+	<bean id="gateWayMessageDao" class="com.techmaster.hunter.dao.impl.GateWayMessageDaoImpl"/>
+	<bean id="hunterAddressDao" class="com.techmaster.hunter.dao.impl.HunterAddressDaoImpl"/>
+	<bean id="hunterCreditCardDao" class="com.techmaster.hunter.dao.impl.HunterCreditCardDaoImpl"/>
+	<bean id="taskMessageReceiver" class="com.techmaster.hunter.dao.impl.TaskMessageReceiverDaoImpl"/>
+	<bean id="receiverRegionDao" class="com.techmaster.hunter.dao.impl.ReceiverRegionDaoImpl"/>
+	<bean id="taskDao" class="com.techmaster.hunter.dao.impl.TaskDaoImpl"/>
+	<bean id="hunterClientDao" class="com.techmaster.hunter.dao.impl.HunterClientDaoImpl"/>
+	<bean id="taskManager" class="com.techmaster.hunter.task.TaskManagerImpl"/>
+	<bean id="hunterMessageReceiverDao" class="com.techmaster.hunter.dao.impl.HunterMessageReceiverDaoImpl"/>
+	<bean id="regionService" class="com.techmaster.hunter.region.RegionServiceImpl"/>
+	<bean id="receiverGroupDao" class="com.techmaster.hunter.dao.impl.ReceiverGroupDaoImpl"/>
+	<bean id="hunterImportBeanDao" class="com.techmaster.hunter.dao.impl.HunterImportBeanDaoImpl"/>
+	
+	
+	
+
+
+
+</beans>

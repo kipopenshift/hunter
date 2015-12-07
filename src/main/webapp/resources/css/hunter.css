@@ -1,0 +1,151 @@
+@CHARSET "ISO-8859-1";
+
+body{
+	width:98%;
+	margin-left:1%;
+	background-color:#F9FEFF;
+}
+
+
+.button {
+	color: #000;
+	background-color: #D9F4F5;
+	border: 1px solid #AFC1C0;
+	padding: 4px;
+	border-radius: 3px;
+	font-size: 15px;
+	width: 300px;
+	text-align: center;
+}
+
+.userDetailsDivs{
+	width:38%;
+	border-right:1px solid red;
+	margin-top:10px;
+	height:90%;
+}
+
+.hidden {
+	display : none;
+}
+
+.k-button k-upload-button {
+	width:98%;
+}
+
+.hunerKendoButton {
+	background-color:rgb(212,239,249);
+	border : 1px solid rgb(120,186,210);
+}
+
+#hunterLoginForm{
+	width:100%;
+	position:relative;
+	padding:10%;
+	margin-left:10%;
+}
+
+#loginCover{
+	width:30%;
+	margin-left:35%;
+	background-color:#EEFDFF;
+	box-shadow : 3px 3px #F1F9FC;
+	border: 1px solid #DEEFF5;
+	height:25%;
+	margin-top:15%;
+	border-radius:4px;
+	position:relative;
+}
+
+.hunterInput {
+	color: #000;
+	background-color: #F0FFF3;
+	padding: 4px;
+	font-size: 14px;
+	border-radius: 3px;
+	font-family: Courier New, Courier, Times Roman, Times, Sans, Sans Serif;
+	border: 1px solid #BEE9C7;
+	margin: 1px;
+}
+
+.errors{
+	color:red;
+}
+
+#hunterHomeSlideShow{
+	width:76%;
+	margin-left:12%;
+	border: 1px solid #D8EBEF;
+	margin-top:4%;
+	height:300px;
+}
+
+.hunterSlideButtonClass{
+	 position:absolute;
+	 margin-top:5%;
+}
+
+.hunterSlideButtonCircleClass{
+	 background : url(http:localhost:8080/Hunter/static/resources/images/forwardImage);
+}
+
+#currentImagePosition{
+	position:absolute;
+	background : url(http:localhost:8080/Hunter/static/resources/images/forwardImage);
+}
+
+#hunterTopDiv{
+	height:50px;
+	position:relative;
+	/* background : url("../images/icon_strip.png"); */
+	opacity:2;
+	border-radius : 4px;
+	background-size: 100% 100%;
+}
+
+.homeCurrentTab{
+	background-color:#D2E3E6;	
+}
+
+.underLined{
+	border-bottom : 1px solid #93B1B7;
+}
+
+.rightAndLeftBottom{
+	border-right : 1px solid #93B1B7;
+	border-left : 1px solid #93B1B7;
+	border-bottom:1px solid #93B1B7;
+}
+
+.hunter-k-button{
+	background-color:rgb(212,239,249);
+	border : 1px solid rgb(120,186,210);
+}
+
+
+
+
+#hunterUserClientDetailsTable tr { 
+	height: 20px; 
+}
+
+#hunterUserClientTaskDetailsTable tr { 
+	height: 20px; 
+}
+#hunterUserClientTaskRegionTable tr { 
+	height: 20px; 
+}
+#hunterUserClientTaskMessageDetailsTable tr { 
+	height: 20px; 
+}
+
+.bold{
+	font-weight: bold;
+}
+
+
+
+
+
+
+

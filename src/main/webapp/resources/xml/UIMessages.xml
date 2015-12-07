@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<messages>
+    
+    <!-- Validation messages for Hunter Task -->
+    
+    <message id="MSG_TASK_001" >
+        <desc>Validates Task for approved</desc>
+        <text>Task is not approved!</text>
+    </message>
+    <message id="MSG_TASK_002" >
+        <desc>Validates Task for Task Region</desc>
+        <text>Task has no region configured!</text>
+    </message>
+    <message id="MSG_TASK_003" >
+        <desc>Validates task for message</desc>
+        <text>Task has no message configured!</text>
+    </message>
+     <message id="MSG_TASK_004" >
+        <desc>Validates task for message</desc>
+        <text>Task message is not approved!</text>
+    </message>
+    <message id="MSG_TASK_005" >
+        <desc>Validates task for task status</desc>
+        <text>Task has been completed. To process task again, please copy this to a new Task.</text>
+    </message>
+     <message id="MSG_TASK_006" >
+        <desc>Validates task has enough receiver counts</desc>
+        <text>Task must have more than on receiver</text>
+    </message>
+    <message id="MSG_REGION_001" >
+        <desc>Error message conversion of consituency converter</desc>
+        <text>Exception at conversion! Please contact hunter support!</text>
+    </message>
+     <message id="MSG_MSG_001" >
+        <desc>Task Message Must be approved</desc>
+        <text>Task Message is not approved!</text>
+    </message>
+    <message id="MSG_MSG_002" >
+        <desc>Task Message Must have Text!</desc>
+        <text>Task Message has no Text!</text>
+    </message>
+    
+     
+</messages>

@@ -1,0 +1,751 @@
+package com.techmaster.hunter.util;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.log4j.Logger;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.constants.HunterURLConstants;
+import com.techmaster.hunter.exception.HunterRemoteException;
+import com.techmaster.hunter.exception.HunterRunTimeException;
+import com.techmaster.hunter.obj.beans.AuditInfo;
+import com.techmaster.hunter.xml.XMLService;
+import com.techmaster.hunter.xml.XMLServiceImpl;
+import com.techmaster.hunter.xml.XMLTree;
+
+public class HunterUtility {
+
+public static  Logger logger = Logger.getLogger(HunterUtility.class);
+	
+	public static void threadSleepFor(long milliSec) {
+		try {
+			if(!isNumeric(milliSec))
+				throw new IllegalArgumentException("The argument provide must be numeric : " + milliSec);
+			logger.info("Thread with the name " + Thread.currentThread().getName() + " is going to sleep for " + milliSec + " milliseconds.");
+			Thread.sleep(milliSec);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} 
+	}
+	
+	public static JSONArray getJSONArray(JSONObject json){
+		String jsonStr = json.toString(); 
+		if(jsonStr.charAt(0) != '[' && jsonStr.charAt(jsonStr.length() - 1) != ']')
+			jsonStr = "[" + json.toString() + "]";
+		JSONArray array = new JSONArray(new JSONTokener(jsonStr));
+		return array;
+	}
+	
+	public static boolean validateJSON(String json){
+		
+		if(!notNullNotEmpty(json)){
+			return false;
+		}
+		
+		try {
+			JSONObject.testValidity(json);
+		} catch (JSONException e) {
+			logger.error("Error. Json passed in is not valid!! " + e.getMessage()); 
+			return false;
+		} 
+		
+		return true;
+	}
+	
+	public static JSONObject selectivelyCopyJSONObject(JSONObject jsonObject, String[] ignoredKeys){
+		logger.debug("Preparing to selectively copy jsonObject >> " + jsonObject); 
+		JSONObject json = new JSONObject(jsonObject.toString());
+		logger.debug("Copied full jsonObject >> " + json);
+		for(String key : ignoredKeys){
+			if(json.has(key)){
+				json.remove(key);
+			}else{
+				logger.error("Cannot remove key since it doe not exist in the copied json. Key >> " + key); 
+			}
+		}
+		logger.debug("After removing marked elements >>> " + json);  
+		return json;
+		
+	}
+	
+	public static  Object getNullOrValFromJSONObj(JSONObject json, String key){
+		Object obj = null;
+		try {
+			obj = json.get(key);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return obj;
+	}
+	
+	public static Object getSpringBeanFromContext(String cntxtNmsSpace, String beanName){
+		
+		if(cntxtNmsSpace == null || cntxtNmsSpace.trim().equals(""))
+			throw new IllegalArgumentException("Names space provded id either null or empty"); 
+		
+		 ApplicationContext ctx = new ClassPathXmlApplicationContext(cntxtNmsSpace);
+		Object obj = ctx.getBean(beanName);
+		
+		logger.debug("successfully obtained the bean (" + beanName + ") from context(" + cntxtNmsSpace + ") >> " + obj.toString()); 
+		
+		return obj;
+	}
+	
+	public static String stringifySet(Set<?> objects){
+		if(objects == null) return null;
+		StringBuilder builder = new StringBuilder();
+		int counter = 0;
+		for(Object obj : objects){
+			if(counter == 0){
+				counter = 2;
+				builder.append("\n");
+			}
+			builder.append(obj.toString()).append("\n;"); 
+		}
+		return builder.toString();
+	}
+	
+	public static String stringifyList(List<?> objects){
+		if(objects == null) return null;
+		StringBuilder builder = new StringBuilder();
+		int counter = 0;
+		for(Object obj : objects){
+			if(counter == 0){
+				counter = 2;
+				builder.append("\n");
+			}
+			builder.append(obj.toString()).append("\n"); 
+		}
+		return builder.toString();
+	}
+	
+	public static String stringifyMap(Map<?, ?> objects){
+		
+		if(objects.isEmpty()){
+			return null;
+		}
+		
+		StringBuilder builder = new StringBuilder();
+		builder.append("\n");
+		
+		for(Map.Entry<?, ?> entry : objects.entrySet()){
+			String key = entry.getKey() + "";
+			String val = entry.getValue() + "";
+			builder.append(" "+ key + " = " + val + ",");
+		}
+
+		String str = builder.toString();
+		
+		if(str.length() > 1){
+			str = str.endsWith(",") ? str.substring(0, str.length() - 1) : str;
+		}
+		
+		return str;
+	}
+	
+	public static HttpSession getSessionForRequest(HttpServletRequest request){
+		HttpSession session = request.getSession(true);
+		return session;
+	}
+	
+	public static Object getSessionAttribute(HttpServletRequest request, String attrName){
+		return getSessionForRequest(request).getAttribute(attrName);
+	}
+	
+	public static void setSessionAttribute(HttpServletRequest request, String attrName, Object obj){
+		getSessionForRequest(request).setAttribute(attrName, obj);
+	}
+	
+	public static boolean notNullNotEmpty(Object object){
+		return object == null ? false : object instanceof String? (((String)object).trim().equals("") ? false : true) : true;
+	}
+	
+	public static boolean notNullNotEmptyAndEquals(Object object, String base){
+		if(notNullNotEmpty(object) && notNullNotEmpty(base)){ 
+			return object.toString().equals(base);
+		}else{
+			return false;
+		}
+	}
+	
+	public static String[] initArrayOrExpand(String[] rowArr) {
+		if(rowArr == null)
+			return new String [1]; 
+		return Arrays.copyOf(rowArr, rowArr.length + 1);
+	}
+	
+	public static String[] initArrayAndInsert(String[] rowArr, String input) {
+		rowArr = initArrayOrExpand(rowArr);
+		rowArr[rowArr.length - 1] = input;
+		return rowArr;
+	}
+	
+	public static Object[] initArrayOrExpand(Object[] rowArr) {
+		if(rowArr == null)
+			return new Object [1]; 
+		return Arrays.copyOf(rowArr, rowArr.length + 1);
+	}
+	
+	public static Object[] initArrayAndInsert(Object[] rowArr, Object input) {
+		rowArr = initArrayOrExpand(rowArr);
+		rowArr[rowArr.length - 1] = input;
+		return rowArr;
+	}
+	
+	public static Integer[] getIntegerArray(Object[] objects){
+		if(objects != null){
+			Integer[] integers = new Integer[objects.length];
+			for(int i=0; i<objects.length; i++){
+				Integer integer = (Integer)objects[i]; 
+				integers[i] = integer;
+			}
+			return integers;
+		}else{
+			return new Integer[0];
+		}
+	}
+	
+	public static boolean isNumeric(Object obj){
+		
+		String input = String.valueOf(obj);
+		if(!notNullNotEmpty(obj))
+			return false;
+		
+		if(input.length() == 1){
+			char c = input.charAt(0);
+			if(!Character.isDigit(c))
+				return false;
+		}
+		
+		if(input.charAt(0) == '-') // in case it's a negative number.
+			input = input.substring(1,input.length());
+		
+		if (input.contains(".")) {
+			if (input.trim().length() == 1)
+				return false;
+			else {
+				int dotCount = 0;
+				for (char ch : input.toCharArray()) {
+					if (ch == '.')
+						dotCount++;
+					if (dotCount > 1)
+						return false;
+				}
+				input = input.replace(".", "");
+			}
+		}
+		
+		for(char ch : input.toCharArray()){
+			if(!Character.isDigit(ch))
+				return false;
+		}
+		 
+		return true;
+	}
+	
+	public static String getNewDateString(String formatStr){
+		if(formatStr == null)
+			formatStr = HunterConstants.DATE_FORMAT_STRING;
+		java.util.Date now = new java.util.Date();
+		SimpleDateFormat format = new SimpleDateFormat(formatStr);
+		String date = format.format(now);
+		System.out.println(date);
+		return date;
+	}
+	
+	public static String formatDate(java.util.Date date, String formatStr){
+		if(formatStr == null)
+			formatStr = HunterConstants.DATE_FORMAT_STRING;
+		SimpleDateFormat format = new SimpleDateFormat(formatStr);
+		String dateStr = format.format(date);
+		System.out.println(date);
+		return dateStr;
+	}
+	
+	public static Date getFormatedDate(java.util.Date date, String formatStr){
+		if(formatStr == null)
+			formatStr = HunterConstants.DATE_FORMAT_STRING;
+		SimpleDateFormat format = new SimpleDateFormat(formatStr);
+		String dateStr = format.format(date);
+		System.out.println(dateStr);
+		return date;
+	}
+	
+	public static java.util.Date parseDate(String strDate, String format){
+		
+		if(strDate == null || format == null){
+			logger.warn("either strDate of format date is null. strDate (" + strDate +")" + " format(" + format +")" ); 
+			return null;
+		}
+		
+		java.util.Date date = null;
+		
+		try {
+			SimpleDateFormat formatter = new SimpleDateFormat(format);
+			date = formatter.parse(strDate);
+			HunterLogFactory.getLog(HunterUtility.class).debug("Returning parsedDate >> " + getFormatedDate(date, format)); 
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		return date;
+	}
+	
+	public static String getStringOfDoc(Document doc){
+		TransformerFactory tf = TransformerFactory.newInstance();
+		StringWriter writer;
+		String output = null;
+		try {
+			Transformer transformer = tf.newTransformer();
+			//transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			writer = new StringWriter();
+			transformer.transform(new DOMSource(doc), new StreamResult(writer));
+			output = writer.getBuffer().toString().replaceAll("\n|\r", "");
+		} catch (TransformerConfigurationException e) {
+			e.printStackTrace();
+		} catch (TransformerException e) {
+			e.printStackTrace();
+		}
+		return output;
+	}
+	
+	public static Document createXmlDocFromHttpUrl(String url) throws SAXException, IOException, ParserConfigurationException {
+		
+		if((url == null || url.trim().equals("")) || !url.startsWith("http"))
+			throw new IllegalArgumentException("Url string provided to build document from Http URL is not correct.");
+		
+		Document doc = null;
+		
+		try {
+
+			URL URL_ = new URL(url);
+			logger.info("creating a document from the URL = "  + url); 
+			InputStream inputStream = URL_.openStream();
+			DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			doc = db.parse(inputStream);
+			inputStream.close();
+			
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return doc;
+	}
+	
+	public static Document createDocFromStr(String xmlStr) throws SAXException, IOException, ParserConfigurationException {
+		DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		InputSource is = new InputSource();
+		is.setCharacterStream(new StringReader(xmlStr));
+		Document doc = db.parse(is);
+		if(doc == null){
+			throw new NullPointerException();
+		}else{
+			return doc;
+		}
+	}
+	
+	public static Long getLongFromObject(Object obj){
+		if(obj == null || obj.toString().trim().equals("")) return null;
+		if(!isNumeric(obj)) throw new IllegalArgumentException("Object passed in is not numeric. Object > " + obj);
+		String str = obj.toString();
+		if(str.contains(".")){
+			int dotIndx = str.indexOf(".");
+			str = str.substring(0, dotIndx);
+		}
+		Long lng = Long.parseLong(str);
+		return lng;
+	}
+	
+	public static String getStackTrace(Throwable t){
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		t.printStackTrace(pw);
+		return sw.toString();  
+	}
+	
+	public static XMLService getQueryXMLService() throws ParserConfigurationException, HunterRemoteException {
+		String location = HunterURLConstants.QRY_XML_FL_LOC_PATH;
+		XMLTree tree = new XMLTree(location, false);
+		XMLService service = new XMLServiceImpl(tree);
+		return service;
+	}
+	
+	public static String getQueryForSqlId(String id) {
+		XMLService service = null;
+		StringBuilder builder = new StringBuilder();
+		builder.append("queries/query[@id=\"");
+		builder.append(id);
+		builder.append("\"]/statement");
+		String query = null;
+		try {
+			service = getQueryXMLService();
+			query = service.getTextValue(builder.toString());
+			return query.trim();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+			return null;
+		} catch (HunterRemoteException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static XMLService createXMLServiceForDoc(Document doc) throws ParserConfigurationException, HunterRemoteException {
+		XMLTree tree = new XMLTree(doc);
+		XMLService service = new XMLServiceImpl(tree);
+		return service;
+	}
+	
+	public static String removeStartingAndEndingChar(String input){
+		if(input == null) return null;
+		if(input.length() <= 2) return "";
+		input = input.substring(1, input.length());
+		input = input.substring(0, input.length() - 1);
+		return input;
+	}
+
+	public static String getCommaDelimitedStrings(Object[] objects){
+		if(objects == null || objects.length == 0) return null;
+		StringBuilder builder = new StringBuilder();
+		if(objects.length == 1) {
+			return objects[0].toString();
+		}else{
+			for(Object obj : objects){
+				String str = String.valueOf(obj);
+				builder.append(str);
+				builder.append(",");
+			}
+		}
+		String finalStr = builder.toString();
+		return removeLastChar(finalStr);
+	}
+	
+	public static String getCommaDelimitedStrings(List<?> objects){
+		if(objects == null || objects.size() == 0) return null;
+		StringBuilder builder = new StringBuilder();
+		if(objects.size() == 1) {
+			return objects.get(0).toString(); 
+		}else{
+			for(Object obj : objects){
+				String str = String.valueOf(obj);
+				builder.append(str);
+				builder.append(",");
+			}
+		}
+		String finalStr = builder.toString();
+		return removeLastChar(finalStr);
+	}
+	
+	/**
+	 * 
+	 * @param str
+	 * @return if str.length == 1 or str.length == 0, it returns "". 
+	 */
+	public static String removeLastChar(String str){
+		
+		if(str == null)
+			return str;
+		if(str.trim() == "" || str.trim().length() == 1)
+			return "";
+		
+		String returned = str.substring(0, str.length()-1);
+		
+		return returned;
+	}
+	
+	public static String[] convertToStringArray(Object[] objects){
+		String[] strings = null;
+		for(Object obj : objects){
+			String str = String.valueOf(obj);
+			strings = initArrayAndInsert(strings, str);
+		}
+		return strings;
+	}
+	
+	
+	public static String createMessageWithLink(String message, String uiHyperLing, String hyperLinkUrl, String method) {
+		StringBuilder output = new StringBuilder();
+		output.append("<div style=\"text-align:center\" >")
+		.append("<h4>"+ message +"</h4>")
+		.append("<form")
+		.append(" action=\""/*BarakaConstants.BARAKA_ROOT_LOCAL_HOST*/)
+		.append(!hyperLinkUrl.startsWith("/") && !hyperLinkUrl.startsWith("http") ? "/" + hyperLinkUrl : hyperLinkUrl)
+		.append("\" method = ")
+		.append(method == null? "\"GET\"" : "\"" + method + "\"")
+		.append(">")
+		.append("<button type=\"submit\" class=\"button\">")
+		.append(uiHyperLing)
+		.append("</button>")
+		.append("</form>")
+		.append("</div>");
+		return output.toString();
+	}
+	
+	public static void logList(List<?> list){
+		logger.info(Arrays.toString(list.toArray()));
+	}
+	
+	public static String getCommaSeparatedSingleQuoteStrForList(List<?> objects){
+		
+		if(objects == null || objects.isEmpty()){
+			return null;
+		}
+		
+		StringBuilder builder = new StringBuilder();
+		
+		for(int i=0; i<objects.size();i++){
+			builder.append(HunterUtility.singleQuote(objects.get(i))); 
+			if(i <= objects.size() - 2)
+				builder.append(",");
+		}
+		
+		String finalStr = builder.toString();
+		return finalStr;
+	}
+	
+	public static String getParamNamesAsStringsFrmRqst(HttpServletRequest request){
+		String enumsStr = "";
+		Enumeration<?> enms = request.getParameterNames();
+		while(enms.hasMoreElements()){
+			String enm = String.valueOf(enms.nextElement());
+			enumsStr += enm + ",";		
+		}
+		if(enumsStr != null && enumsStr.trim().length() > 0){
+			enumsStr = enumsStr.substring(0, enumsStr.length()-1);
+			return enumsStr.trim();
+		}
+		return enumsStr.trim();
+	}
+	
+	public static String replaceCharAt(String component, int index, char replacement ){
+		logger.info("index >> " + index + " replacement >> " + replacement + " component before replacement >> " + component); 
+		String part1 = component.substring(0, index); 
+		part1 += replacement;
+		String part2 = component.substring(index+1, component.length());
+		String replaced = part1 + part2;
+		logger.info("component after replacement " + replaced); 
+		return replaced;
+	}
+	
+	public static String getFileExtension(File file){
+		String extension = null;
+		if(file != null){
+			String name = file.getName();
+			int i = name.lastIndexOf('.');
+			if (i > 0) {
+			    extension = name.substring(i+1);
+			}
+		}
+		return extension;
+	}
+	
+	public static String getFileExtensionWithDot(File file){
+		String extension = getFileExtension(file);
+		if(extension != null){
+			extension = "." + extension;
+		}
+		return extension;
+	}
+	
+	public static String getRequestBodyAsString(HttpServletRequest request) throws IOException {
+
+	    String body = null;
+	    StringBuilder stringBuilder = new StringBuilder();
+	    BufferedReader bufferedReader = null;
+
+	    try {
+	        InputStream inputStream = request.getInputStream();
+	        if (inputStream != null) {
+	            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+	            char[] charBuffer = new char[128];
+	            int bytesRead = -1;
+	            while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+	                stringBuilder.append(charBuffer, 0, bytesRead);
+	            }
+	        } else {
+	            stringBuilder.append("");
+	        }
+	    } catch (IOException ex) {
+	        throw ex;
+	    } finally {
+	        if (bufferedReader != null) {
+	            try {
+	                bufferedReader.close();
+	            } catch (IOException ex) {
+	                throw ex;
+	            }
+	        }
+	    }
+
+	    body = stringBuilder.toString();
+	    HunterLogFactory.getLog(HunterUtility.class).debug("Returning body >> " + body);
+	    return body;
+	}
+	
+	public static XMLService getXMLServiceForFileLocation(String location){
+		try {
+			XMLTree tree = new XMLTree(location, false);
+			XMLService service = new XMLServiceImpl(tree);
+			HunterLogFactory.getLog(HunterUtility.class).info("Successfully obtained xml for location");  
+			return service;
+		} catch (HunterRunTimeException e) {
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static String singleQuote(Object obj){
+		if(obj == null) return null;
+		return "'" + obj + "'";
+	}
+	
+	public static Object[] getWorkbookFromRequest(HttpServletRequest request){
+		
+		logger.debug("Extracting workbook from request...."); 
+		
+		String originalFileName = null;
+		
+		boolean isMultiPart = ServletFileUpload.isMultipartContent(request);
+		
+		if(!isMultiPart){
+			logger.warn("Request is not mult-part. Returning null workbook!!"); 
+			return null;
+		}
+		
+		FileItemFactory factory = new DiskFileItemFactory();
+		ServletFileUpload upload = new ServletFileUpload(factory);
+		
+		InputStream inputStream = null;
+		Workbook workBook = null;
+		
+		List<?> items = null;
+		Iterator<?> itemItr = null;
+		
+		try {
+			items = upload.parseRequest(request);
+			itemItr = items.iterator();
+			
+			while(itemItr.hasNext()){
+				FileItem item = (FileItem)itemItr.next();
+				if(!item.isFormField()){
+					inputStream = item.getInputStream();
+					originalFileName = item.getName();
+					logger.info("workbook file name >>>" + originalFileName); 
+				}
+			}
+			workBook = WorkbookFactory.create(inputStream);
+			logger.info("Successful workbook extraction!!"); 
+			logger.debug("Finished extracting workbook from request!"); 
+			return new Object[]{workBook, originalFileName};
+		} catch (InvalidFormatException e) {
+			e.printStackTrace();
+		} catch (FileUploadException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		logger.warn("Workbook extraction from request failed. Returning empty array!!"); 
+		return new Object[]{};
+	}
+	
+	public static AuditInfo getAuditInforForNow(Date cretDate, String createdBy, Date lastUpdate, String lastUpdatedBy){
+		AuditInfo auditInfo = new AuditInfo();
+		auditInfo.setCreatedBy(createdBy);
+		auditInfo.setCretDate(cretDate);
+		auditInfo.setLastUpdate(lastUpdate);
+		auditInfo.setLastUpdatedBy(lastUpdatedBy);
+		return auditInfo;
+	}
+	
+	public static AuditInfo getAuditInfoFromRequestForNow(HttpServletRequest request, String userName){
+		Object sessUserName = getSessionAttribute(request, HunterConstants.SECURITY_USER_NAME_STR);
+		if(sessUserName != null)
+			userName =  sessUserName.toString();
+		Date now = new Date();
+		AuditInfo auditInfo = getAuditInforForNow(now, userName, now, userName);
+		return auditInfo;
+	}
+	
+	public static int getSqlType(Object obj){
+		
+		if(obj == null) throw new NullPointerException("Operant cannot be null!!");
+		
+		if(obj.getClass().isAssignableFrom(Long.class)){
+			return java.sql.Types.BIGINT;
+		}else if(obj.getClass().isAssignableFrom(Integer.class)){
+			return java.sql.Types.INTEGER;
+		}else if(obj.getClass().isAssignableFrom(Float.class)){
+			return java.sql.Types.FLOAT;
+		}else if(obj.getClass().isAssignableFrom(Double.class)){
+			return java.sql.Types.DOUBLE;
+		}else if(obj.getClass().isAssignableFrom(Short.class)){
+			return java.sql.Types.SMALLINT;
+		}else if(obj.getClass().isAssignableFrom(Character.class)){
+			return java.sql.Types.CHAR;
+		}else if(obj.getClass().isAssignableFrom(Date.class)){
+			return java.sql.Types.DATE;
+		}else if(obj.getClass().isAssignableFrom(String.class)){
+			return java.sql.Types.VARCHAR;
+		}else if(obj.getClass().isAssignableFrom(Boolean.class)){
+			return java.sql.Types.BOOLEAN;
+		}else{
+			throw new IllegalArgumentException("The class is not yet mapped !! " + obj.getClass().getName());
+		}
+		
+		
+	}
+	
+	
+}
