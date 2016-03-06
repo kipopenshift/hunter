@@ -3,7 +3,7 @@
 <script src="<c:url value='/static/resources/scripts/plain/kendoHelper.js'/>"></script>
 <script src="<c:url value='http://localhost:8080/Hunter/static/resources/scripts/model/regionHierarchy.js'/>"></script>
 
-<div style="width:96%;margin-left:2%;" id="regionHierarchyTreeListVMContainer"  >
+<div style="width:80%;margin-left:10%;" id="regionHierarchyTreeListVMContainer"  >
 
 <div id="countriesDropdownList" >
 	<table style="width:10%;">
@@ -70,6 +70,21 @@
 <div class="toolbar" >
 	<button style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" onClick="RegionHierarchyVM.openSectionToUploadReceivers()" class="k-button k-button-icontext k-grid-add"><span class="k-icon k-i-seek-n"></span>Receivers</button>
 </div>
+</script>
+
+<script type="text/x-kendo-template" id="regionHierarchyToolBarTemplate">
+<input id="countryDropDownList"
+				 	   data-role="dropdownlist"
+	                   data-auto-bind="true"
+	                   data-value-primitive="true"
+	                   data-text-field="countryName"
+	                   data-value-field="countryId"
+	                   placeholder = "Select Country"
+	                   data-bind="value: selCountry,
+	                              source: countryDS,
+	                              events: {
+	                                change: onChangeCountry,
+	                              }"
 </script>
 
 <script type="text/javascript">

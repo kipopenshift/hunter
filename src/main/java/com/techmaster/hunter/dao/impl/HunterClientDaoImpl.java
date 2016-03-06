@@ -1,126 +1,52 @@
 package com.techmaster.hunter.dao.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.types.HunterClientDao;
+import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
+import com.techmaster.hunter.json.HunterClientsDetailsJson;
 import com.techmaster.hunter.obj.beans.HunterClient;
-import com.techmaster.hunter.obj.beans.HunterUser;
 import com.techmaster.hunter.util.HunterHibernateHelper;
-import com.techmaster.hunter.util.HunterLogFactory;
-import com.techmaster.hunter.util.HunterSessionFactory;
 import com.techmaster.hunter.util.HunterUtility;
 
 public class HunterClientDaoImpl implements HunterClientDao{
 	
 	private final Logger logger = Logger.getLogger(getClass());
+	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
 
 	@Override
 	public void insertHunterClient(HunterClient client) {
-		
-		
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			session.save(client);
-			trans.commit();
-			HunterHibernateHelper.closeSession(session);
-			HunterLogFactory.getLog(getClass()).debug("Successfully inserted client >> " + client); 
-		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		} finally{
-			HunterHibernateHelper.closeSession(session); 
-		}
-		
+		logger.debug("Saving hunter client...");
+		HunterHibernateHelper.saveEntity(client);
+		logger.debug("Done saving hunter client!!");
 	}
 
 	@Override
 	public void insertHunterClients(List<HunterClient> hunterClients) {
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			for(HunterClient client : hunterClients){
-				session.save(client);
-			}
-			trans.commit();
-			HunterHibernateHelper.closeSession(session);
-			HunterLogFactory.getLog(getClass()).debug("Successfully inserted client >> " + HunterUtility.stringifyList(hunterClients));  
-		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		} finally{
-			HunterHibernateHelper.closeSession(session); 
-		}
+		logger.debug("Saving hunter clients..."); 
+		HunterHibernateHelper.saveEntities(hunterClients);
+		logger.debug("Done saving hunter clients!!");
 		
 	}
 
 	@Override
 	public void deleteHunterClientById(Long clientId) {
-
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			HunterClient client = (HunterClient)session.get(HunterClient.class, clientId);
-			session.delete(client);
-			trans.commit();
-			HunterLogFactory.getLog(getClass()).debug("Successfull deleted of id >> " + clientId);
-			HunterHibernateHelper.closeSession(session);
-		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		}finally{
-			HunterHibernateHelper.closeSession(session);
-		}
-		
+		logger.debug("Deleting hunter client...");
+		HunterClient client = getHunterClientById(clientId);
+		HunterHibernateHelper.deleteEntity(client);
+		logger.debug("Done deleting hunter client!!"); 
 	}
 
 	@Override
 	public void deleteHunterClient(HunterClient client) {
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			HunterUser user = (HunterUser)session.get(HunterUser.class, client.getClientId());
-			session.delete(user);
-			trans.commit();
-			HunterLogFactory.getLog(getClass()).debug("Successfull deleted user >> " + user.toString());
-			HunterHibernateHelper.closeSession(session);
-		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		}finally{
-			HunterHibernateHelper.closeSession(session);
-		}
-		
+		logger.debug("Deleting hunter client...");
+		HunterHibernateHelper.deleteEntity(client);
+		logger.debug("Done deleting hunter client!!"); 
 	}
 
 	@Override
@@ -134,86 +60,28 @@ public class HunterClientDaoImpl implements HunterClientDao{
 
 	@Override
 	public List<HunterClient> getAllclients() {
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		List<HunterClient> hunterClients = new ArrayList<HunterClient>();
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			Query query = session.createQuery("From HunterClient");
-			List<?> list = query.list();
-			
-			for(Object obj : list){
-				HunterClient client = (HunterClient)obj;
-				hunterClients.add(client);
-			}
-			
-			HunterHibernateHelper.closeSession(session); 
-			
-		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		}finally{
-			HunterHibernateHelper.closeSession(session); 	
-		}
-		
-		return hunterClients;
+		logger.debug("Fetching all clients...");
+		List<HunterClient> clients = HunterHibernateHelper.getAllEntities(HunterClient.class);
+		logger.debug("Successfully fetched clients. Size( " + clients.size() + " )");  
+		return clients;
 	}
 
 	@Override
 	public void updateClient(HunterClient update) {
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		HunterClient client = null;
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			session.save(update);
-			trans.commit();
-			HunterLogFactory.getLog(getClass()).debug("Successfull updated client >> " + client);
-			HunterHibernateHelper.closeSession(session);
-		} catch (HibernateException e) {
-			e.printStackTrace();
-			HunterHibernateHelper.rollBack(trans); 
-		}finally{
-			HunterHibernateHelper.closeSession(session);
-		}
-		
-		
+		logger.debug("Updating hunter client...");
+		HunterHibernateHelper.updateEntity(update); 
+		logger.debug("Done updating hunter client!!");
 	}
 
 	@Override
 	public Long nextClientId() {
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		
-		Long nextId = null;
-		
-		try {
-			session = sessionFactory.openSession();
-			
-			Criteria criteria = session.createCriteria(HunterClient.class).setProjection(Projections.max("clientId"));
-			Long maxId = (Long)criteria.uniqueResult();
-			
-			nextId = maxId == null ? 1 : (maxId + 1);
-			
-			HunterHibernateHelper.closeSession(session); 
-			
-		} catch (HibernateException e) {
-			e.printStackTrace();
-		}finally{
-			HunterHibernateHelper.closeSession(session); 	
-		}
-		HunterLogFactory.getLog(getClass()).debug("Obtained next hunter client id >> " + nextId); 
-		return nextId;
-		
+		logger.debug("Getting next hunter client id...");
+		Long maxClientId = HunterHibernateHelper.getMaxEntityIdAsNumber(HunterClient.class, Long.class, "clientId");
+		if(maxClientId == null)
+			maxClientId = 0L;
+		maxClientId++;
+		logger.debug("Successfully obtained next hunter client Id ( " + maxClientId + " )");  
+		return maxClientId;
 	}
 	
 	
@@ -224,56 +92,61 @@ public class HunterClientDaoImpl implements HunterClientDao{
 
 	@Override
 	public HunterClient getHunterClientForUserId(Long userId) {
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
+		String query = "FROM HunterClient c WHERE c.clientId = '" + userId + "'";
+		List<HunterClient> clients = HunterHibernateHelper.executeQueryForObjList(HunterClient.class, query);
 		HunterClient client = null;
-		
-		try {
-			session = sessionFactory.openSession();
-			Criteria criteria = session.createCriteria(HunterClient.class).add(Restrictions.eq("user.userId", userId));  
-			client = (HunterClient) criteria.uniqueResult();
-			HunterLogFactory.getLog(getClass()).debug("Successfully obtained client for userId("+userId+") >> \n" +  client); 
-			HunterHibernateHelper.closeSession(session); 
-		} catch (HibernateException e) {
-			e.printStackTrace();
-		}finally{
-			HunterHibernateHelper.closeSession(session); 	
+		if(clients.size() > 1){
+			logger.warn("Returned more than one client!!! Will return the first one!!");
 		}
-
+		client = clients != null && !clients.isEmpty() ? clients.get(0) : client;
+		logger.debug("Successfully fetched client : " + client); 
 		return client;
+		
 	}
 
 	@Override
 	public HunterClient editReceiverAndBudget(Long clientId, float budget, boolean isReceiver) {
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		HunterClient client = null;
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			client = (HunterClient)session.get(HunterClient.class, clientId);
-			HunterLogFactory.getLog(getClass()).debug("Successfully obtained client for clientId("+clientId+") >> \n" +  client); 
+		logger.debug("Updating client id..."); 
+		HunterClient client = HunterHibernateHelper.getEntityById(clientId, HunterClient.class);
+		if(client != null){
 			client.setClientTotalBudget(budget);
-			client.setReceiver(isReceiver); 
-			client.setLastUpdate(new Date());
-			client.setLastUpdatedBy(HunterConstants.HUNTER_ADMIN_USER_NAME); 
-			session.update(client);
-			trans.commit();
-			HunterHibernateHelper.closeSession(session); 
-			HunterLogFactory.getLog(getClass()).debug("Successfull updated receiver and budget for client >> " + client);
-		} catch (HibernateException e) {
-			e.printStackTrace();
-			HunterHibernateHelper.rollBack(trans); 
-		}finally{
-			HunterHibernateHelper.closeSession(session); 	
+			client.setReceiver(isReceiver);
+			updateClient(client); 
+			logger.debug("Successfully updated client!!"); 
+		}else{
+			logger.debug("No client found for client id ( " + clientId  + " )");  
 		}
-		
 		return client;
+	}
+
+	@Override
+	public List<HunterClientsDetailsJson> getAllHunterClientDetailsJson() {
 		
+		logger.debug("Fetching all client details...");
+		String query = hunterJDBCExecutor.getQueryForSqlId("getClientDetailsData");
+		List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, null);
+		List<HunterClientsDetailsJson> detailsJson = new ArrayList<HunterClientsDetailsJson>();
+		
+		for(Map<String, Object> rowMap : rowMapList){
+			
+			String firstName = rowMap.get("FRST_NAM").toString();
+			String lastName = rowMap.get("LST_NAM").toString();
+			String userName = rowMap.get("USR_NAM").toString();
+			String clientIdStr = rowMap.get("HNTR_CLNT_ID").toString();
+			Long clientId = HunterUtility.getLongFromObject(clientIdStr);
+			String clientText = lastName + "(" + userName + ")";
+			
+			HunterClientsDetailsJson json = new HunterClientsDetailsJson();
+			json.setClientId(clientId);
+			json.setFirstName(firstName);
+			json.setLastName(lastName);
+			json.setUserName(userName);
+			json.setClientText(clientText); 
+			
+			detailsJson.add(json);
+		}
+		logger.debug("Successfully fetched all client details. Size ( " + detailsJson.size() + " )"); 
+		return detailsJson;
 	}
 	
 	

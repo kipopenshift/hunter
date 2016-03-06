@@ -8,8 +8,8 @@
             		<password>mastertech.90kd?.?458456</password>
 	            </security>
 	            <methods>
-	                <method defaultMethod="false" active="true" type="GET" url="https://localhost:8080/msms/send/get"  />
-	                <method defaultMethod="true" active="false" type="POST" url="https://sgw01.cm.nl/gateway.ashx"  />
+	                <method defaultMethod="false" active="false" type="GET" url="https://localhost:8080/msms/send/get"  />
+	                <method defaultMethod="true" active="true" type="POST" url="https://sgw01.cm.nl/gateway.ashx"  />
 	            </methods>
 	            <denomination>EUR</denomination>
             </context>
@@ -49,6 +49,38 @@
                 <config>
                     <label>sender</label>
                     <value>TechMasters</value>
+                </config>
+            </configs>
+        </configurations>
+    </client>
+    <client clientName="OZEKI" clientId="1" >
+        <configurations>
+            <context>
+                <security>
+                	<userName>admin</userName>
+            		<password>hunterAdmin.1900</password>
+	            </security>
+	            <methods>
+	                <method defaultMethod="false" active="false" type="GET" url="http://127.0.0.1:9501/api"  />
+	                <method defaultMethod="true" active="true" type="POST" url="http://127.0.0.1:9501/api"  />
+	            </methods>
+	            <denomination>EUR</denomination>
+            </context>
+            <configs></configs>
+        </configurations>
+    </client>
+    <client clientName="HUNTER_EMAIL_CONFIGS" clientId="2" >
+        <configurations>
+            <context>
+                <security>
+                	<userName>techmaster.hunter.mail@gmail.com</userName>
+            		<password>hunter.admin.1900</password>
+	            </security>
+            </context>
+            <configs>
+                <config>
+                    <label>from</label>
+                    <value>techmaster.hunter.mail@gmail.com</value>
                 </config>
             </configs>
         </configurations>

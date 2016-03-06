@@ -1,5 +1,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:security="http://www.springframework.org/scehma/security"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
         http://www.springframework.org/schema/beans     
@@ -7,7 +9,9 @@
         http://www.springframework.org/schema/mvc 
         http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
         http://www.springframework.org/schema/context 
-        http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/security/
+        http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
 	<import resource="/application.xml" />
 	<import resource="/hunterDmsBeans.xml" />
@@ -67,18 +71,30 @@
 	
 	<!-- For email -->
 	
-	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-		<property name="host" value="https://google.com/gmail" />
+	<bean id="javaMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.gmail.com" />
+		<property name="port" value="587"/>
+		<property name="username" value="techmaster.hunter.mail@gmail.com" />
+		<property name="password" value="hunter.admin.1900" />
+		 <property name="javaMailProperties">
+            <props>
+                <prop key="mail.transport.protocol">smtp</prop>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+                <prop key="mail.debug">true</prop>
+                <prop key="mail.smtp.sendpartial">true</prop>
+            </props>
+        </property>
 	</bean>
 
 	<!-- this is a template message that we can pre-load with default state -->
 	<bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
-		<property name="from" value="hillangat@gmail.com" />
+		<property name="from" value="hklangats@gmail.com" />
 		<property name="subject" value="Email Sending Test" />
 	</bean>
 
 	<bean id="taskEmailManager" class="com.techmaster.hunter.email.TaskEmailManagerImpl">
-		<property name="mailSender" ref="mailSender" />
+		<property name="javaMailSender" ref="javaMailSender" />
 		<property name="templateMessage" ref="templateMessage" />
 	</bean>
 	
@@ -104,6 +120,69 @@
        </property>
 	</bean>
 	
+	<bean name="methodInvokingFactoryBean3" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.techmaster.hunter.gateway.beans.GateWayClientHelper.wiredUpStaticFields"/>
+        <property name="arguments">
+            <list>
+                <ref bean="regionService"/>
+                <ref bean="hunterJDBCExecutor"/>
+                <ref bean="taskDao"/>
+                <ref bean="hunterJacksonMapper"/>
+                <ref bean="messageDao"/>
+            </list>
+       </property>
+	</bean>
+	
+	<bean name="methodInvokingFactoryBean4" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.techmaster.hunter.dao.impl.HunterUserDaoImpl.wireUpExecutor"/>
+        <property name="arguments">
+            <list>
+                <ref bean="hunterJDBCExecutor"/>
+            </list>
+       </property>
+	</bean>
+	
+	<bean name="methodInvokingFactoryBean5" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.techmaster.hunter.gateway.beans.HunterEmailClient.wireHunterEmailManager"/>
+        <property name="arguments">
+            <list>
+                <ref bean="taskDao"/>
+                <ref bean="hunterJDBCExecutor"/>
+                <ref bean="gateWayMessageDao"/>
+            </list>
+       </property>
+	</bean>
+	
+	<bean name="methodInvokingFactoryBean6" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.techmaster.hunter.email.HunterBusinessEmailService.injectStaticBeans"/>
+        <property name="arguments">
+            <list>
+                <ref bean="javaMailSender"/>
+            </list>
+       </property>
+	</bean>
+	
+	<bean name="methodInvokingFactoryBean7" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.techmaster.hunter.imports.extractors.GroupReceiversExtractor.injectStatisDAOs"/>
+        <property name="arguments">
+            <list>
+                <ref bean="hunterJDBCExecutor"/>
+                <ref bean="hunterImportBeanDao"/>
+                <ref bean="receiverGroupDao"/>
+                <ref bean="receiverGroupReceiverDao"/>
+            </list>
+       </property>
+	</bean>
+	
+	<bean name="methodInvokingFactoryBean8" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.techmaster.hunter.gateway.beans.AbsractGatewayClient.injectStaticBeans"/>
+        <property name="arguments">
+            <list>
+                <ref bean="hunterJDBCExecutor"/>
+            </list>
+       </property>
+	</bean>
+	
 	
     <!--   <context:property-placeholder location="jdbc.properties"/>     -->
     
@@ -115,13 +194,21 @@
 	<context:component-scan base-package="com.techmaster.hunter.beans" />
 	<context:component-scan base-package="com.techmaster.hunter.obj.beans.converters" />
 	<context:component-scan base-package="com.techmaster.hunter.region" />
+	<context:component-scan base-package="com.techmaster.hunter.security" />
 	
-	<mvc:view-controller path="/" view-name="access/login"/>
+	<!-- <mvc:view-controller path="/" view-name="access/login"/> -->
 	
+	<!-- <mvc:interceptors>
+    
+    <bean class="com.techmaster.hunter.security.HunterInterceptor" />
+    </mvc:interceptors>  
+    
+     <context:annotation-config />
+	
+	-->
 	
 	<!-- These are for excel download and processing -->
 	<bean class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping" />
-    <!-- <bean class="com.kendo.kip.mvc.ExcelController" /> -->
     <bean class="org.springframework.web.servlet.view.XmlViewResolver">
 	   <property name="location">
 	       <value>/WEB-INF/spring-excel-views.xml</value>

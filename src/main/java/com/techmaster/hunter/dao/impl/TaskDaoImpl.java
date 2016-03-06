@@ -2,6 +2,8 @@ package com.techmaster.hunter.dao.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
@@ -10,16 +12,16 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.TaskDao;
+import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.obj.beans.HunterClient;
 import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.region.RegionService;
 import com.techmaster.hunter.util.HunterHibernateHelper;
-import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterSessionFactory;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -111,7 +113,7 @@ public class TaskDaoImpl implements TaskDao{
 		}finally{
 			HunterHibernateHelper.closeSession(session); 	
 		}
-		HunterLogFactory.getLog(getClass()).debug("Obtained next hunter user id >> " + nextId); 
+		logger.debug("Obtained next hunter user id >> " + nextId); 
 		return nextId;
 		
 	}
@@ -125,27 +127,10 @@ public class TaskDaoImpl implements TaskDao{
 
 	@Override
 	public List<Task> getTaskForClientId(Long clientId) {
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		List<Task> clientTasks = new ArrayList<>();
-		
-		
-		try {
-			session = sessionFactory.openSession();
-			Criteria criteria = session.createCriteria(Task.class).add(Restrictions.eq("clientId", clientId));
-			List<?> list = criteria.list();
-			for(Object obj : list){
-				Task  task = (Task)obj;
-				clientTasks.add(task);
-			}
-			HunterLogFactory.getLog(getClass()).debug("Successfully obtained clients for clientId(" + clientId + ") " + HunterUtility.stringifyList(clientTasks)); 
-			HunterHibernateHelper.closeSession(session); 
-		} catch (HibernateException e) {
-			e.printStackTrace();
-		}finally{
-			HunterHibernateHelper.closeSession(session); 	
-		}
+		logger.debug("Getting tasks for client : " + clientId); 
+		String query = "FROM Task t where t.clientId = '" + clientId + "'";
+		List<Task> clientTasks = HunterHibernateHelper.executeQueryForObjList(Task.class, query);
+		logger.debug("Finished fetching client tasks!!"); 
 		return clientTasks;
 	}
 
@@ -155,6 +140,72 @@ public class TaskDaoImpl implements TaskDao{
 		regionService.removeAllRegionsForTask(task.getTaskId());
 		HunterHibernateHelper.deleteEntity(task); 
 		logger.debug("Finished deleting task!");
+	}
+
+	@Override
+	public String getTaskMsgType(Long taskId) {
+		
+		String tskMsgType = null;
+		
+		String query = "SELECT t.TSK_MSG_TYP FROM task t WHERE t.TSK_ID = ?";
+		List<Object> values = new ArrayList<>();
+		values.add(taskId);
+		Map<Integer, List<Object>> rowMapList = hunterJDBCExecutor.executeQueryRowList(query, values);
+		
+		if(rowMapList.size() >= 1){
+			List<Object> row = rowMapList.get(1);
+			tskMsgType = row.get(0) + "";
+			logger.debug("Task Message Type obtained for taskId ( " + taskId + " ) : " + tskMsgType); 
+		}
+		
+		return tskMsgType;
+	}
+
+	@Override
+	public String getUserNameForTaskOwnerId(Long taskId) {
+		String query = hunterJDBCExecutor.getQueryForSqlId("getUserNameAndIdForTaskId");
+		logger.debug("Using query : " + query); 
+		List<Object> values = new ArrayList<>();
+		values.add(taskId);
+		Map<Integer, List<Object>>  rowMapList = hunterJDBCExecutor.executeQueryRowList(query, values);
+		if(rowMapList.size() > 1){
+			logger.warn("Warning!!!! Returning more than one row! Using the first row."); 
+		}
+		List<Object> rowList = rowMapList.get(1);
+		logger.debug("Obtained the list >> " + HunterUtility.stringifyList(rowList));
+		String userName = null;
+		if(!rowList.isEmpty()){
+			userName = rowList.get(0).toString();
+			logger.debug("Obtained owner owner :  " + userName); 
+		}
+		return userName;
+	}
+
+	@Override
+	public Set<ReceiverGroupJson> getTaskReceiverGroups(Long taskId) {
+		logger.debug("Fetching receiver groups for task id : " + taskId); 
+		Task task = getTaskById(taskId);
+		Set<ReceiverGroupJson> groups = task.getTaskGroups();
+		logger.debug("Done fetching receiver groups for task id : " + taskId + "! Size ( " + groups.size() + " )"); 
+		return groups;
+	}
+
+	@Override
+	public void updateTaskStatus(Long taskId, String toStatus, String updateBy) {
+		logger.debug("Updating status of taskId ( " + taskId + " ) toStatus ( " + toStatus + " )...");
+		String updateQuery = "UPDATE task SET TSK_LF_STS = ?,LST_UPDTD = sysdate,UPDTD_BY = ? WHERE tsk_id = ?";
+		String approvedUpdateQuery = "UPDATE task SET TSK_LF_STS = ?,LST_UPDTD = sysdate,UPDTD_BY = ?, TSK_APPRVD = to_char('Y'), TSK_APPRVR  = ? WHERE tsk_id = ?";
+		updateQuery = toStatus.equals(HunterConstants.STATUS_APPROVED) ? approvedUpdateQuery : updateQuery;
+		List<Object> values = new ArrayList<>();
+		values.add(toStatus);
+		values.add(updateBy);
+		if(toStatus.equals(HunterConstants.STATUS_APPROVED)){
+			values.add(updateBy);
+		}
+		values.add(taskId);
+		hunterJDBCExecutor.executeUpdate(updateQuery, values);
+		logger.debug("Successfully finished updating task status!!"); 
+		
 	}
 
 

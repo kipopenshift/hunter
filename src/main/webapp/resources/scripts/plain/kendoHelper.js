@@ -7,7 +7,9 @@ var kendoKipHelper = kendo.Class.extend({
 	measuredWindowBackUp : null,
 	measuredWindow : null, 
 	kendoInitTitle : "Kendo Window",
-	notification : null, 
+	notification : null,
+	newNotification : null,
+	kendoWindowWithOnClose : null,
 	
 	beforeInit : function(){
 		console.log("Setting up kendoHelper...");
@@ -32,9 +34,74 @@ var kendoKipHelper = kendo.Class.extend({
 		return input;
 	},
 	afterInit : function(){
-		
+		this.initNewNotification();
+		this.initWindowWithOnClose();
 		console.log("KendoHelper helper initialized successfully!!");
 	}, 
+	initNewNotification : function(){
+		var notif_ = $("#newNotification").data("kendoNotification");
+		if(notif_ == null){
+			$("#newNotification").kendoNotification({
+	            position: {
+	                pinned: true,
+	                top: 30,
+	                right: 30
+	            },
+	            autoHideAfter: 5000,
+	            stacking: "down",
+	            templates: [{
+	                type: "info",
+	                template: $("#emailTemplate").html()
+	            }, {
+	                type: "error",
+	                template: $("#errorTemplate").html()
+	            }, {
+	                type: "upload-success",
+	                template: $("#successTemplate").html()
+	            }]
+
+	        });
+			notif_ = $("#newNotification").data("kendoNotification");
+			this.newNotification = notif_;
+		}
+		$(document).one("kendo:pageUnload", function(){ if (notification) { notification.hide(); } });
+	},
+	showEmailNotification : function(title_, message_){
+		var this_not = this.newNotification;
+		if(this_not == null) 
+			this.initNewNotification();
+		this.newNotification.show({
+             message: message_
+         }, "info");
+	},
+	showErrorNotification : function(message_){
+		var this_not = this.newNotification;
+		if(this_not == null) 
+			this.initNewNotification();
+		this.newNotification.show({
+            message: message_
+        }, "error");
+	},
+	showSuccessNotification : function(message_){
+		var this_not = this.newNotification;
+		if(this_not == null) 
+			this.initNewNotification();
+		this.newNotification.show({
+             message: message_
+         }, "upload-success");
+	},
+	showErrorOrSuccessMsg : function(status, message){
+		if(status != null  && message != null){
+			message = status + " : " + message;
+			if(status === 'Success'){ 
+				this.showSuccessNotification(message);
+			}else{
+				this.showErrorNotification(message);
+			}
+		}else{
+			this.showErrorNotification("Application error ocurred!");
+		}
+	},
 	initKendoWindow : function(){
 		this.kendoWindow = $("#kendoWindow").kendoWindow({
  	        title: kendoKipHelper.kendoInitTitle,
@@ -108,13 +175,14 @@ var kendoKipHelper = kendo.Class.extend({
     closeMeasuredWindowBackUp : function(){
     	this.measuredWindowBackUp.close();
     },
-	getOKCancelKendoWindow : function(){
-		
+	getCloseHelperKendoWindowStr : function(){
+		return "kendoKipHelperInstance.closeHelperKendoWindow()";
 	},
 	showSimplePopup : function(title, content){
 		var OKButton = this.createKendoSmallIconTagTemplateNoIcon("kendoKipHelperInstance.closeHelperKendoWindow()", "<span style='padding-right:10px;padding-left:10px;' >OK</span>", false);
-		if(this.initKendoWindow == null)
+		if(this.kendoWindow == null){
 			this.initKendoWindow();
+		}
 		this.kendoWindow.title = title;
 		this.kendoWindow.content(content + "<br/><br/> " + OKButton);
 		this.kendoWindow.center();
@@ -158,24 +226,56 @@ var kendoKipHelper = kendo.Class.extend({
 		  this.kendoWindow.content(message);
 		  this.kendoWindow.open();
 	 },
-	 showPercentMeasuredOKCancelTitledPopup : function(content, title, width, height){
-		 if(this.measuredWindow != null){
-			 this.measuredWindow = null;
-			 $("#measuredWindow").empty();
-			 $("#measuredWindow").html("");
+	 closeWindowWithOnClose : function(){
+		 this.kendoWindowWithOnClose.close();
+	 },
+	 initWindowWithOnClose : function(){
+		 var window = $("#kendoWindowWithOnCloseFunc").kendoWindow({
+			  pinned : true,
+			  resizable: false,
+			  modal: true,
+			  animation: {
+			    close: {
+			      effects: "fade:out",
+			      duration: 400
+			    },
+			  }
+		  }).data("kendoWindow");
+		 this.kendoWindowWithOnClose = window;
+	 },
+	 showWindowWithOnClose : function(content, title){
+		 if( this.kendoWindowWithOnClose == null ){
+			 this.initWindowWithOnClose();
 		 }
+		this.kendoWindowWithOnClose.title = title;
+		this.kendoWindowWithOnClose.content(content);
+		this.kendoWindowWithOnClose.center();
+		this.kendoWindowWithOnClose.open();
+	 },
+	 showPercentMeasuredOKCancelTitledPopup : function(content, title, width, height){
 		 
 		var window = $("#measuredWindow").kendoWindow({
 			  title : title,
-			  width : width + "%",
-			  height : height + "%",
 			  pinned : true,
-			  resizable: false
+			  resizable: false,
+			  modal: true,
+			  animation: {
+			    close: {
+			      effects: "fade:out",
+			      duration: 400
+			    },
+			    open: {
+			    	effects: "slideIn:down fadeIn",
+	                duration: 800
+				}
+			  }
 		  }).data("kendoWindow");
+		
 		this.measuredWindow = window;
 		this.measuredWindow.content(content);
 		this.measuredWindow.center();
 		this.measuredWindow.open();
+		
 	 },
 	 showBackUpPercentMeasuredOKCancelTitledPopup : function(content, title, width, height){
 		var window = $("#measuredWindowBackUp").kendoWindow({
@@ -183,7 +283,8 @@ var kendoKipHelper = kendo.Class.extend({
 			  width : width + "%",
 			  height : height + "%",
 			  pinned : true,
-			  resizable: false
+			  resizable: false,
+			  modal:true
 		  }).data("kendoWindow");
 		this.measuredWindowBackUp = window;
 		this.measuredWindowBackUp.content(content);
@@ -198,7 +299,24 @@ var kendoKipHelper = kendo.Class.extend({
 		  this.kendoWindow.open();
 	 },
 	 showOKCancelToDeleteTaskRegion : function(id, message){
-		  var b1 = this.createKendoSmallIconTagTemplate("close", "hunterAdminClientUserVM.deleteSelectedTaskRegionGroup(" + id +")", "Delete");
+		 this.initKendoWindow();
+		  var b1 = this.createKendoSmallIconTagTemplate("close", "hunterAdminClientUserVM.deleteSelectedTaskRegion(" + id +")", "Delete");
+		  var b2 = this.createKendoSmallIconTagTemplate("cancel", "kendoKipHelperInstance.closeHelperKendoWindow()", "Cancel");
+		  var butTable = "<br/> <table style='width:60%;margin-left:20%;'><tr><td>" + b1 + "</td><td>" + b2 + "</tr></table>";
+		  this.kendoWindow.content(message + butTable);
+		  this.kendoWindow.open();
+	 },
+	 showOKCancelToDeleteReceiverGroup : function(id, message){
+		  this.initKendoWindow();
+		  var b1 = this.createKendoSmallIconTagTemplate("close", "receiverGroupVM.deleteSelectedGroup(" + id +")", "Delete");
+		  var b2 = this.createKendoSmallIconTagTemplate("cancel", "kendoKipHelperInstance.closeHelperKendoWindow()", "Cancel");
+		  var butTable = "<br/> <table style='width:60%;margin-left:20%;'><tr><td>" + b1 + "</td><td>" + b2 + "</tr></table>";
+		  this.kendoWindow.content(message + butTable);
+		  this.kendoWindow.open();
+	 },
+	 showOKToDeleteItem : function(id,message,methodName){
+		 this.initKendoWindow();
+		  var b1 = this.createKendoSmallIconTagTemplate("close", methodName + "(" + id +")", "Delete");
 		  var b2 = this.createKendoSmallIconTagTemplate("cancel", "kendoKipHelperInstance.closeHelperKendoWindow()", "Cancel");
 		  var butTable = "<br/> <table style='width:60%;margin-left:20%;'><tr><td>" + b1 + "</td><td>" + b2 + "</tr></table>";
 		  this.kendoWindow.content(message + butTable);
@@ -250,10 +368,31 @@ var kendoKipHelper = kendo.Class.extend({
 	 },
 	 createContextEditButton : function(hasText){
 		 if(hasText){
-			 return '<center><a class="k-button k-button-icontext k-grid-edit" href="#"  style="min-width:28px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210)">&nbsp;&nbsp;<span class="k-icon k-edit">Edit</span></a></center>';
+			 return '<center><a class="k-button k-button-icontext k-grid-edit" href="#"  style="min-width:28px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);">&nbsp;&nbsp;<span class="k-icon k-edit">Edit</span></a></center>';
 		 }else{
-			 return '<center><a class="k-button k-button-icontext k-grid-edit" href="#"  style="min-width:28px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210)">&nbsp;&nbsp;<span class="k-icon k-edit"></span></a></center>';
+			 return '<center><a class="k-button k-button-icontext k-grid-edit" href="#"  style="min-width:28px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);">&nbsp;&nbsp;<span class="k-icon k-edit"></span></a></center>';
 		 }
+	 },
+	 createDisabledContextEditButton : function(hasText){
+		 if(hasText){
+			 return '<center><a class="k-button" href="#" style="min-width:28px;background-color:rgb(165,255,204);border : 1px solid rgb(120,186,210);"><span class="k-icon k-edit"></span>Span</a></center>';
+		 }else{
+			 return '<center><a class="k-button" href="#" style="min-width:28px;background-color:rgb(165,255,204);border : 1px solid rgb(120,186,210);"><span class="k-icon k-edit"></span></a></center>';
+		 }
+		 
+	 },
+	 createEditButtonsEditMode : function(hasText){
+		 var both = '<a class="k-button k-button-icontext k-primary k-grid-update" href="#" style="min-width:28px;background-color:rgb(165,255,204);border : 1px solid rgb(120,186,210);" >&nbsp;&nbsp;<span class="k-icon k-update"></span></a>'+
+				 '<a class="k-button k-button-icontext k-grid-cancel" href="#" style="min-width:28px;background-color:rgb(165,255,204);border : 1px solid rgb(120,186,210);" >&nbsp;&nbsp;<span class="k-icon k-cancel"></span></a>';
+		 return both;
+	 },
+	 createUpdateButtonsEditMode : function(hasText){
+		 var update = '<a class="k-button k-button-icontext k-primary k-grid-update" href="#" style="min-width:28px;background-color:rgb(165,255,204);border : 1px solid rgb(120,186,210);" ><span class="k-icon k-update"></span></a>';
+		 return update;
+	 },
+	 createCancelButtonsEditMode : function(hasText){
+		 var cancel = '<a class="k-button k-button-icontext k-grid-cancel" href="#" style="min-width:28px;background-color:rgb(165,255,204);border : 1px solid rgb(120,186,210);" ><span class="k-icon k-cancel"></span></a>';
+		 return cancel;
 	 },
 	 createSearchButton : function(hasText, onClick){
 		 if(hasText){
@@ -276,6 +415,39 @@ var kendoKipHelper = kendo.Class.extend({
 			 return "<center><a onclick='"+ onClick +"' class='k-button' style='min-width:28px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210)'><span class='k-icon k-i-"+ iconName +"'></span></a></center>";
 		 }
 	 },
+	 addKendoOverLay : function(){
+		var html = '<div id="hunterKendoOverLay"  style="display: block; z-index: 10004; opacity: 0.5;" class="k-overlay"></div>';
+		$("body").append(html);
+	 },
+	 removeKendoOverLay : function(){
+		$("#hunterKendoOverLay").remove();
+	 },
+	 createSimpleTable : function(headers, content){
+		 if(headers == null || content == null || headers.length == 0 || content.length == 0){
+			 headers = {"Number1" : "Number One","Number2" : "Number Two"};
+			 content = [{"Number1" : "1","Number2" : "2"},{"Number1" : "3","Number2" : "3"}];
+		 };
+		 var defCss = "width:40%;margin-left:30%;";
+		 var t1 = "<table>", t2 = "</table>";tr1 = "<tr>", tr2 = "</tr>",td1 = "<td>",td2 = "</td>", th1="<th>", th2="</th>";
+		 var headerHtml = "<thead>" + tr1;
+		 for(var i=0; i<headers.length;i++){
+			 headerHtml += th1 + headers[i] + th2;
+		 }
+		 headerHtml += tr2 + "</thead>";
+		 var bodyHtml = "<tbody>";
+		 for(var j=0; j<content.length;j++){
+			 var data = content[j];
+			 var dataTr = tr1;
+			 for(var i=0; i<data.length;i++){
+				 dataTr += td1 + data[i] + td2;
+			 }
+			 dataTr += tr2;
+			 dataTr = dataTr=='' ? '' : dataTr + tr2;
+			 bodyHtml += dataTr;
+		 }
+		 bodyHtml = t1 + headerHtml + bodyHtml + "</tbody>" + t2;
+		 return bodyHtml;
+	 },
 	 showOKCancelToAssociateWorkflowConfig : function(configId, groupId, message){
 		 	var params = configId + '","' + groupId;
 			var b1 = this.createKendoSmallIconTagTemplate("close", 'workflowConfigVM.updateDSAndSyncForAssociateTree("' + params + '")', "Associate");
@@ -286,30 +458,9 @@ var kendoKipHelper = kendo.Class.extend({
 			this.kendoWindow.open();
 	 },
 	popupWarning : function(message, msgTyp){
-		$("#kendoWarningPopup").html(message);
-		$("#kendoWarningPopup").kendoNotification({
-	    	position: {
-	            pinned: true,
-	            top: 53,
-	            right: 10
-	        },
-	        autoHideAfter: 3000,
-	        stacking: "down",
-	        width: 300,
-	        height: 80, 
-	        templates: [
-	         {
-	            type: "upload-success",
-	            template: $("#successTemplate").html()
-	        }]
-	    });
-	    var notificationWidget = $("#kendoWarningPopup").data("kendoNotification");
-	    if(notificationWidget != null)
-		    notificationWidget.show({
-		        message: message
-		    }, "upload-success");
-	    else
-	    	console.log("Error, cannot show notification  sinces it's null!!");
+		//this.showSuccessNotification(message);
+		this.showErrorOrSuccessMsg(msgTyp, message);
+		//this.showEmailNotification("Hey", message);
 	},
 	constainsJavascriptString : function(main,sub){
 		var index = main.indexOf(sub);
@@ -323,6 +474,46 @@ var kendoKipHelper = kendo.Class.extend({
 			  $('#' + elementId).append(contents);
 			  console.log("Successfully loaded contents from URL(" + url +")"); 
 		});
+	},
+	/* 
+	 * Not, this method calls your method 'callAfter'. 
+	 * 'callAfter' must accept the data from the server.
+	 * If the communitcation fails, the method will just show error message.
+	 * Please overload the method for other failure processing needs. 
+	 * Please don't modify this method!
+	 * */
+	ajaxPostData : function(data, contentType, dataType, method, url, callAfter){
+		$.ajax({
+			url: url,
+		    data : data,
+		    method: method,
+		    dataType : dataType, 
+		    contentType : contentType
+		}).done(function(data) {
+			var code = callAfter + "('"+ data +"')";
+			var func = new Function(code);
+			func();
+		 }).fail(function(data) {
+			 kendoKipHelperInstance.popupWarning(data.statusText + " (" + data.status + "). Please contact Production Support.", "Error");
+		 });
+	},
+	/* 
+	 * This method is recommended over the 'ajaxPostData' for json array responses
+	 */
+	ajaxPostDataForJsonResponse : function(data, contentType, dataType, method, url, callAfter){
+		$.ajax({
+			url: url,
+		    data : data,
+		    method: method,
+		    dataType : dataType, 
+		    contentType : contentType
+		}).done(function(data) {
+			var code = callAfter + "('"+ JSON.stringify(data) +"')"; 
+			var func = new Function(code);
+			func();
+		 }).fail(function(data) {
+			 kendoKipHelperInstance.popupWarning(data.statusText + " (" + data.status + "). Please contact Production Support.", "Error");
+		 });
 	}
 });
 

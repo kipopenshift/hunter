@@ -73,5 +73,14 @@ public class HunterAddressDaoImpl implements HunterAddressDao{
 		return maxId;
 	}
 
+	@Override
+	public List<HunterAddress> getAddressesByUserId(Long userId) {
+		logger.debug("Fetching addresses for user id : " + userId + "..."); 
+		String query = "FROM HunterAddress h WHERE h.userId = " + userId;
+		List<HunterAddress> hunterAddresses = HunterHibernateHelper.executeQueryForObjList(HunterAddress.class, query);
+		logger.debug("Finished fetching addresses ! Size ( " +( hunterAddresses != null ? hunterAddresses.size() : 0 ) + " )"); 
+		return hunterAddresses;
+	}
+
 	
 }

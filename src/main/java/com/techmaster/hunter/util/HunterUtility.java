@@ -8,8 +8,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -18,6 +20,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -48,11 +51,13 @@ import org.json.JSONTokener;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
-import com.techmaster.hunter.constants.HunterURLConstants;
 import com.techmaster.hunter.exception.HunterRemoteException;
 import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.obj.beans.AuditInfo;
@@ -64,6 +69,24 @@ public class HunterUtility {
 
 public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	
+   public static String urlEncodeRequestMap(Map<String, ?> params, String encodeFormat) throws UnsupportedEncodingException{ 
+	   StringBuilder builder = new StringBuilder();
+	   for (Entry<String, ?> param : params.entrySet()) {
+           if (builder.length() != 0) {
+        	   builder.append('&');
+           }
+           builder.append(URLEncoder.encode(param.getKey(), encodeFormat));
+           builder.append('=');
+           builder.append(URLEncoder.encode(String.valueOf(param.getValue()), encodeFormat));
+       }
+	   return builder.toString();
+   }
+   
+   public byte[] urlEncodeAndGetBytes(Map<String, ?> params, String encodeFormat) throws UnsupportedEncodingException{
+	   String builder = urlEncodeRequestMap(params, encodeFormat);
+	   return builder.getBytes();
+   }
+
 	public static void threadSleepFor(long milliSec) {
 		try {
 			if(!isNumeric(milliSec))
@@ -73,6 +96,29 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} 
+	}
+	
+	public static String getNullOrStrimgOfObj(Object obj){
+		if(obj == null) return null;
+		else return obj.toString();
+	}
+	
+	public static boolean validateReceiverType(String type){
+		if(type == null) return false;
+		String[] types = new String[]{
+			HunterConstants.RECEIVER_TYPE_CALL,
+			HunterConstants.RECEIVER_TYPE_EMAIL, 
+			HunterConstants.RECEIVER_TYPE_TEXT,
+			HunterConstants.RECEIVER_TYPE_VOICE_MAIL
+		};
+		boolean contains = false;
+		for(String type_ : types){
+			if(type_.equals(type)){
+				contains = true;
+				break;
+			}
+		}
+		return contains;
 	}
 	
 	public static JSONArray getJSONArray(JSONObject json){
@@ -115,14 +161,78 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		
 	}
 	
-	public static  Object getNullOrValFromJSONObj(JSONObject json, String key){
-		Object obj = null;
+	public static boolean validateEmail(String email){
+		if(email == null || email.trim().equals("")){
+			return false;
+		}
+		String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile(ePattern);
+        java.util.regex.Matcher m = p.matcher(email);
+        return m.matches();
+	}
+	
+	public static boolean validatePhoneNumber(String phoneNumber){
+		if(phoneNumber == null || phoneNumber.trim().equals("")){
+			return false;
+		}
+		// +2540726149750
+		if(phoneNumber.matches("^\\+[0-9]{1,3}[0-9]{10}")) return true;
+		//validate phone numbers of format "+254-726-149-750"
+		else if(phoneNumber.matches("^\\+[0-9]{1,3}[-\\.\\s]\\d{3}[-\\.\\s]\\d{3}[-\\.\\s]\\d{4}")) return true;
+		//validate phone numbers of format "254-726-149-750" or "254.726.149.750"
+		else if(phoneNumber.matches("^[0-9]{1,3}[-\\.\\s]\\d{3}[-\\.\\s]\\d{3}[-\\.\\s]\\d{4}")) return true;
+		//validate phone numbers of format "2541234567890"
+		else if (phoneNumber.matches("\\d{13}")) return true;
+		//validate phone numbers of format "1234567890"
+		else if (phoneNumber.matches("\\d{10}")) return true;
+        //validating phone number with -, . or spaces
+        else if(phoneNumber.matches("\\d{3}[-\\.\\s]\\d{3}[-\\.\\s]\\d{4}")) return true;
+        //validating phone number with extension length from 3 to 5
+        //else if(phoneNumber.matches("\\d{3}-\\d{3}-\\d{4}\\s(x|(ext))\\d{3,5}")) return true;
+        //validating phone number where area code is in braces ()
+        else if(phoneNumber.matches("\\(\\d{3}\\)-\\d{3}-\\d{4}")) return true;
+        //return false if nothing matches the input
+        else return false;
+	}
+	
+	public static JSONObject getJSONobjOrNullFromJsonObj(JSONObject json, String key){
+		JSONObject json_ = null; 
 		try {
-			obj = json.get(key);
+			json_ = json.getJSONObject(key);
+			logger.debug("Obtained json object : " + json);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return json_;
+	}
+	
+	public static  Object getNullOrValFromJSONObj(JSONObject msgJson, String key){
+		Object obj = msgJson.has(key) ? msgJson.get(key) : null;
 		return obj;
+	}
+	
+	public static int getIntOrZeroFromJsonStr(JSONObject json, String key){
+		String value = getStringOrNullFromJSONObj(json, key);
+		int int_ = Integer.parseInt(value == null || value.equalsIgnoreCase("null") ? "0" : value);
+		return int_;
+	}
+	
+	public static long getLongOrZeroFromJsonStr(JSONObject json, String key){
+		String value = getStringOrNullFromJSONObj(json, key);
+		long long_ = Long.parseLong(value == null || value.equalsIgnoreCase("null") ? "0" : value);
+		return long_; 
+	}
+	
+	public static float getFloatOrZeroFromJsonStr(JSONObject json, String key){
+		String value = getStringOrNullFromJSONObj(json, key);
+		float float_ = Float.parseFloat(value == null || value.equalsIgnoreCase("null") ? "0" : value);
+		return float_;
+	}
+	
+	public static  String getStringOrNullFromJSONObj(JSONObject msgJson, String key){
+		Object obj = getNullOrValFromJSONObj(msgJson, key);
+		String objStr = obj == null ? null : obj.toString();
+		return objStr;
 	}
 	
 	public static Object getSpringBeanFromContext(String cntxtNmsSpace, String beanName){
@@ -161,7 +271,9 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 				counter = 2;
 				builder.append("\n");
 			}
-			builder.append(obj.toString()).append("\n"); 
+			if(obj != null){
+				builder.append(obj.toString()).append("\n"); 
+			}
 		}
 		return builder.toString();
 	}
@@ -173,7 +285,6 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		}
 		
 		StringBuilder builder = new StringBuilder();
-		builder.append("\n");
 		
 		for(Map.Entry<?, ?> entry : objects.entrySet()){
 			String key = entry.getKey() + "";
@@ -412,31 +523,23 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		return sw.toString();  
 	}
 	
-	public static XMLService getQueryXMLService() throws ParserConfigurationException, HunterRemoteException {
-		String location = HunterURLConstants.QRY_XML_FL_LOC_PATH;
-		XMLTree tree = new XMLTree(location, false);
-		XMLService service = new XMLServiceImpl(tree);
-		return service;
+	public static String getTextValueForEmailTemplate(String xPath) throws ParserConfigurationException, HunterRemoteException{
+		XMLService xmlService = HunterCacheUtil.getInstance().getXMLService(HunterConstants.EMAIL_TEMPLATES_CACHED_SERVICE);
+		String value = xmlService.getTextValue(xPath.toString());
+		logger.debug(value); 
+		return value;
 	}
 	
+	
+	
 	public static String getQueryForSqlId(String id) {
-		XMLService service = null;
 		StringBuilder builder = new StringBuilder();
 		builder.append("queries/query[@id=\"");
 		builder.append(id);
 		builder.append("\"]/statement");
-		String query = null;
-		try {
-			service = getQueryXMLService();
-			query = service.getTextValue(builder.toString());
-			return query.trim();
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-			return null;
-		} catch (HunterRemoteException e) {
-			e.printStackTrace();
-			return null;
-		}
+		XMLService service = HunterCacheUtil.getInstance().getXMLService(HunterConstants.QUERY_XML_CACHED_SERVICE);
+		String query  = service.getTextValue(builder.toString());
+		return query.trim();
 	}
 	
 	public static XMLService createXMLServiceForDoc(Document doc) throws ParserConfigurationException, HunterRemoteException {
@@ -483,6 +586,29 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		}
 		String finalStr = builder.toString();
 		return removeLastChar(finalStr);
+	}
+	
+	public static String getSingleQuotedCommaDelimitedForList(List<?> objects){
+		
+		if(objects == null || objects.isEmpty()){
+			logger.warn("Empty or null list passed in. Returning null..."); 
+			return null;
+		}
+		
+		StringBuilder builder = new StringBuilder();
+		int indx = 0;
+		
+		for(Object obj : objects){
+			String quoted = singleQuote(obj);
+			builder.append(quoted);
+			if(indx != objects.size()-1){
+				builder.append(",");
+			}
+			indx++;
+		}
+		String quoted = builder.toString();
+		logger.debug("Quoted string : " + quoted); 
+		return quoted;
 	}
 	
 	/**
@@ -627,7 +753,7 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	    }
 
 	    body = stringBuilder.toString();
-	    HunterLogFactory.getLog(HunterUtility.class).debug("Returning body >> " + body);
+	    logger.debug("Returning body >> " + body);
 	    return body;
 	}
 	
@@ -645,9 +771,39 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		return null;
 	}
 	
+	public static XMLService getXMLServiceForStringContent(String content){
+		try {
+			XMLTree tree = new XMLTree(content, true);
+			XMLService service = new XMLServiceImpl(tree);
+			logger.info("Successfully obtained xml for content : " + content);  
+			return service;
+		} catch (HunterRunTimeException e) {
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public static String singleQuote(Object obj){
 		if(obj == null) return null;
-		return "'" + obj + "'";
+		StringBuilder builder = new StringBuilder();
+		builder.append("'").append(obj).append("'");
+		return builder.toString(); 
+	}
+	
+	public static String poundQuote(Object obj){
+		if(obj == null) return null;
+		StringBuilder builder = new StringBuilder();
+		builder.append("#").append(obj).append("#");
+		return builder.toString(); 
+	}
+	
+	public static String doublePoundQuote(Object obj){
+		if(obj == null) return null;
+		StringBuilder builder = new StringBuilder();
+		builder.append("##").append(obj).append("##");
+		return builder.toString(); 
 	}
 	
 	public static Object[] getWorkbookFromRequest(HttpServletRequest request){
@@ -710,7 +866,10 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	}
 	
 	public static AuditInfo getAuditInfoFromRequestForNow(HttpServletRequest request, String userName){
-		Object sessUserName = getSessionAttribute(request, HunterConstants.SECURITY_USER_NAME_STR);
+		Object sessUserName = null;
+		if(request != null){
+			sessUserName = getSessionAttribute(request, HunterConstants.SECURITY_USER_NAME_STR);
+		}
 		if(sessUserName != null)
 			userName =  sessUserName.toString();
 		Date now = new Date();
@@ -744,8 +903,44 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 			throw new IllegalArgumentException("The class is not yet mapped !! " + obj.getClass().getName());
 		}
 		
-		
+	}
+	
+	public static String getYNForBoolean(boolean boolean_){
+		String yN = boolean_ ? "Y" : "N";
+		return yN;
+	}
+	
+	public static void testMap(){
+		HunterCacheUtil.getInstance();
+		XMLService xmlService =(XMLServiceImpl) HunterCacheUtil.getInstance().getXMLService(HunterConstants.EMAIL_TEMPLATES_CACHED_SERVICE);
+		NodeList nodeList = xmlService.getNodeListForPathUsingJavax("//template[@name='taskpProcessRequestNotification']/context/miscelaneous/*");
+		if(nodeList != null && nodeList.getLength() >= 1){
+			for(int i=0; i<nodeList.getLength(); i++){
+				Node node = nodeList.item(i);
+				if(node.getNodeName().equals("config")){
+					NodeList configs = node.getChildNodes();
+					String key = configs.item(1).getTextContent();logger.debug("key = " + key);
+					String value = configs.item(3).getTextContent();logger.debug("value = " + value);
+				}
+			}
+		}
+	}
+	
+	public static JSONObject setJSONObjectForSuccess(JSONObject json, String message){
+		json.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_SUCCESS);
+		json.put(HunterConstants.MESSAGE_STRING, message);
+		return json;
+	}
+	
+	public static JSONObject setJSONObjectForFailure(JSONObject json, String message){
+		json.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_FAILED);
+		json.put(HunterConstants.MESSAGE_STRING, message);
+		return json;
 	}
 	
 	
+	public static void main(String[] args) {
+		testMap();
+	}
 }
+

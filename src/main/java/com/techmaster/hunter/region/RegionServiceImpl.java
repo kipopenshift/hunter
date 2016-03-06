@@ -256,24 +256,6 @@ public class RegionServiceImpl extends AbstractRegionService {
 	}
 
 	@Override
-	public List<HunterMessageReceiver> getHunterReceiversForReceiverRegion(ReceiverRegion receiverRegion) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<TaskMessageReceiver> getTaskReceiversFromTaskReceivers(List<HunterMessageReceiver> hunterMessageReceivers) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Task createTaskReceiversForTaskRegion(ReceiverRegion taskRegion) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Task deleteTaskReceiversForRegion(ReceiverRegion taskRegion) {
 		// TODO Auto-generated method stub
 		return null;
@@ -411,6 +393,7 @@ public class RegionServiceImpl extends AbstractRegionService {
 			hunterMessageReceiver.setAuditInfo(HunterUtility.getAuditInforForNow(new Date(), "hlangat01", new Date(), "hlangat01"));
 			hunterMessageReceiver.setBlocked(false);
 			hunterMessageReceiver.setCountryName(rowMap.get("CNTRY_NAM").toString());
+			hunterMessageReceiver.setCountyName(rowMap.get("CNTY_NAM").toString());
 			hunterMessageReceiver.setFailDeliveryTimes(0);
 			hunterMessageReceiver.setReceiverContact(Long.toString(maxPhoneNum)); 
 			hunterMessageReceiver.setReceiverRegionLevelName(rowMap.get("CNTY_NAM").toString()); 
@@ -462,6 +445,8 @@ public class RegionServiceImpl extends AbstractRegionService {
 			hunterMessageReceiver.setAuditInfo(HunterUtility.getAuditInforForNow(new Date(), "hlangat01", new Date(), "hlangat01"));
 			hunterMessageReceiver.setBlocked(false);
 			hunterMessageReceiver.setCountryName(rowMap.get("CNTRY_NAM").toString());
+			hunterMessageReceiver.setCountyName(rowMap.get("CNTY_NAM").toString());
+			hunterMessageReceiver.setConsName(rowMap.get("CNSTTNCY_NAM").toString());
 			hunterMessageReceiver.setFailDeliveryTimes(0);
 			hunterMessageReceiver.setReceiverContact(Long.toString(maxPhoneNum)); 
 			hunterMessageReceiver.setReceiverRegionLevelName(rowMap.get("CNSTTNCY_NAM").toString()); 
@@ -511,6 +496,9 @@ public class RegionServiceImpl extends AbstractRegionService {
 			hunterMessageReceiver.setAuditInfo(HunterUtility.getAuditInforForNow(new Date(), "hlangat01", new Date(), "hlangat01"));
 			hunterMessageReceiver.setBlocked(false);
 			hunterMessageReceiver.setCountryName(rowMap.get("CNTRY_NAM").toString());
+			hunterMessageReceiver.setCountyName(rowMap.get("CNTY_NAM").toString());
+			hunterMessageReceiver.setConsName(rowMap.get("CNSTTNCY_NAM").toString());
+			hunterMessageReceiver.setConsWardName(rowMap.get("WRD_NAM").toString());
 			hunterMessageReceiver.setFailDeliveryTimes(0);
 			hunterMessageReceiver.setReceiverContact(Long.toString(maxPhoneNum)); 
 			maxPhoneNum++;
@@ -663,7 +651,7 @@ public class RegionServiceImpl extends AbstractRegionService {
 	}
 
 	@Override
-	public int getTrueHntrMsgRcvrCntFrTaskRgns(Long taskId) {
+	public Object[] getTrueHntrMsgRcvrCntFrTaskRgns(Long taskId) {
 		
 		List<ReceiverRegionJson> receiverJsons = receiverRegionDao.getReceiverRegionsJsonByTaskId(taskId);
 		Set<String> levels = new HashSet<>();
@@ -806,6 +794,7 @@ public class RegionServiceImpl extends AbstractRegionService {
 		logger.debug("Final count of unique regions : " + levels.size());
 		int uniqueCount = 0;
 		Set<String> dstnctPrcsdLvls = new HashSet<>();
+		List<ReceiverRegionJson> countedRegionsJs = new ArrayList<>();
 		
 		for(ReceiverRegionJson receiverJson : receiverJsons){
 			
@@ -826,6 +815,7 @@ public class RegionServiceImpl extends AbstractRegionService {
 					if(!dstnctPrcsdLvls.contains(level)){
 						uniqueCount += receiverJson.getReceiverCount();
 						dstnctPrcsdLvls.add(level);
+						countedRegionsJs.add(receiverJson);
 					}
 					break;
 				}
@@ -834,11 +824,11 @@ public class RegionServiceImpl extends AbstractRegionService {
 		
 		logger.debug("returnign totals count > " + uniqueCount);
 		
-		return uniqueCount;
+		return new Object[]{uniqueCount, countedRegionsJs};
 	}
 
 	@Override
-	public void addRegionToTask(Long taskId, String country, String county, String constituency, String ward) {
+	public String addRegionToTask(Long taskId, String country, String county, String constituency, String ward) {
 		
 		String query = null;
 		List<Object> values = new ArrayList<>();
@@ -866,11 +856,11 @@ public class RegionServiceImpl extends AbstractRegionService {
 		logger.debug("Executing query : " + query); 
 		
 		Map<Integer, List<Object>>  rowMapList = hunterJDBCExecutor.executeQueryRowList(query, values);
-		if(rowMapList.size() > 0){
+		if(rowMapList.size() > 1){
 			logger.warn("Query returns more than one row!!!!! Using the first row..!");
 		}else if(rowMapList.isEmpty()){
 			logger.debug("No such region found!!! Returning...");
-			return;
+			return "No such region is found!" ;
 		}
 		
 		Long regionId = null;
@@ -881,6 +871,11 @@ public class RegionServiceImpl extends AbstractRegionService {
 			break;
 		}
 		
+		if(isRegionAlreadyAddedToTask(regionId, taskId)){
+			logger.debug("Region is already added to task!! Will not attemp to add again! Returning...");
+			return "Region is already added!";
+		}
+		
 		String insert = "INSERT INTO TSK_RGNS (TSK_ID,RGN_ID) VALUES (:TSK_ID,:RGN_ID)";
 		
 		Map<String, Object> params = new HashMap<>();
@@ -889,19 +884,82 @@ public class RegionServiceImpl extends AbstractRegionService {
 		
 		// there should be a method in the executor for replacing and inserting.
 		hunterJDBCExecutor.replaceAndExecuteUpdate(insert, params); 
+		return null;
 		
+	}
+	
+	
+
+	@Override
+	public boolean isRegionAlreadyAddedToTask(Long regionId, Long taskId) {
 		
+		String checkQuery = "SELECT COUNT(*) as CNT FROM TSK_RGNS tr WHERE tr.TSK_ID = ? AND tr.RGN_ID = ?";
+		List<Object> values = new ArrayList<>();
+		values.clear();
+		values.add(taskId);
+		values.add(regionId);
+		
+		Map<Integer, List<Object>>  cRowMapList = hunterJDBCExecutor.executeQueryRowList(checkQuery, values);
+		int count = new Integer(cRowMapList.get(1).get(0) == null ? 0 : Integer.parseInt(cRowMapList.get(1).get(0)+""));  
+		
+		if(count >= 1){
+			logger.debug("Region is already added to task!! Will not attemp to add again! Returning...");  
+		}
+	
+		return count >= 1;
 	}
 
 	@Override
-	public void removeTaskRegion(Long taskId, Long taskRegionId) {
-		String query = "DELETE FROM TSK_RGNS tr WHERE tr.TSK_ID = :TSK_ID AND tr.RGN_ID = :RGN_ID";
-		Map<String, Object> params = new HashMap<>();
-		params.put(":TSK_ID", taskId);
-		params.put(":RGN_ID", taskRegionId);
-		// there should be a method in the executor for replacing and inserting.
-		hunterJDBCExecutor.replaceAndExecuteUpdate(query, params);
-		logger.debug("Successfully removed region from taskregions!!");  
+	public String removeTaskRegion(Long taskId, Long taskRegionId) {
+		
+		try{
+		
+			String existQuery = hunterJDBCExecutor.getQueryForSqlId("checkIfRegionAndTaskExist");
+			Map<Integer, List<Object>> rowMapList = hunterJDBCExecutor.executeQueryRowList(existQuery, hunterJDBCExecutor.getValuesList(new Object[]{taskId, taskRegionId, taskId, taskRegionId}));
+			List<Object> rowList = rowMapList.get(1);
+			StringBuilder builder = new StringBuilder();
+			
+			for(int i=0; i<rowList.size(); i++){
+				Object obj = rowList.get(i);
+				if(i == 0){
+					int tskCount = obj != null ? Integer.parseInt(obj+"") : 0;
+					if(tskCount == 0){
+						builder.append("No task of id( " + taskId + " ) found!");
+					}
+				}else if(i==1){
+					int regionCount = obj != null ? Integer.parseInt(obj+"") : 0;
+					if(regionCount == 0){
+						builder.append(", No region of id( " + taskRegionId + " ) found!");
+					}
+				}else if(i==2){
+					int taskRgnCount = obj != null ? Integer.parseInt(obj+"") : 0;
+					if(taskRgnCount == 0){
+						builder.append(" , No task region comvination of task id( " + taskRegionId + " ) and region id ("+ taskRegionId + " ) found!");
+					}
+				}
+				
+			}
+			
+			String errMsg = builder.toString();
+			errMsg = errMsg.startsWith(",") ? errMsg.substring(0, errMsg.length() - 1) : errMsg;
+			
+			if(errMsg.length() > 0){
+				logger.debug("Error while removing task region from task : " + errMsg); 
+				return errMsg;
+			}
+			
+			String query = "DELETE FROM TSK_RGNS tr WHERE tr.TSK_ID = :TSK_ID AND tr.RGN_ID = :RGN_ID";
+			Map<String, Object> params = new HashMap<>();
+			params.put(":TSK_ID", taskId);
+			params.put(":RGN_ID", taskRegionId);
+			hunterJDBCExecutor.replaceAndExecuteUpdate(query, params);
+			logger.debug("Successfully removed region from taskregions!!"); 
+		
+		}catch(Exception e){
+			return e.getMessage();
+		}
+		
+		return null;
 	}
 
 	
@@ -959,6 +1017,7 @@ public class RegionServiceImpl extends AbstractRegionService {
 		
 		return regionIds;
 	}
+
 
 	
 	

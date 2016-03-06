@@ -16,6 +16,7 @@
 		<property name="phoneNumber" column="PHN_NUMBR"  type="java.lang.String" length="20"  />
 		<property name="userType" column="USR_TYP"  type="java.lang.String"  not-null="true" />
 		<property name="userName" column="USR_NAM"  type="java.lang.String"  not-null="true" unique="true"  />
+		<property name="active" column="ACTIV"  type="org.hibernate.type.YesNoType" />
 		<property name="password" column="PSSWRD"  type="java.lang.String"   not-null="true" />
 		<property name="profilePhoto" column="PRFL_PHOTO"  type="binary" />
 		
@@ -31,12 +32,19 @@
             <one-to-many class="com.techmaster.hunter.obj.beans.HunterAddress" />
         </set>
         
+        <set name="userRoles" cascade="save-update" table="HNTR_USR_RLS">
+        	<key column="USR_ID"/>
+         	<many-to-many column="ROLE_ID" class="com.techmaster.hunter.obj.beans.UserRole" lazy="false"  />
+      	</set>
+        
 		<set name="creditCards" table="HNTR_CRDT_CRD" cascade="all" inverse="true" lazy="false" fetch="join">
             <key>
                 <column name="USR_ID" not-null="true"/> 
             </key>
             <one-to-many class="com.techmaster.hunter.obj.beans.HunterCreditCard" />
         </set>
+        
+        <one-to-one name="userLoginBean" class="com.techmaster.hunter.obj.beans.UserLoginBean" lazy="false" cascade="all"   />
 		
 	</class>
 	

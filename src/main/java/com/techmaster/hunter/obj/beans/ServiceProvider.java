@@ -1,8 +1,12 @@
 package com.techmaster.hunter.obj.beans;
 
+import org.codehaus.jackson.annotate.JsonAutoDetect;
+import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
+
 import com.techmaster.hunter.dao.impl.ServiceProviderDaoImpl;
 import com.techmaster.hunter.util.HunterLogFactory;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = Visibility.NONE)
 public class ServiceProvider {
 	
 	private Long providerId;

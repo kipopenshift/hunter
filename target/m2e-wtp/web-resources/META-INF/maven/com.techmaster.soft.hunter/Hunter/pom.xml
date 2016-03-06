@@ -1,15 +1,17 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.techmaster.soft.hunter</groupId>
-  <artifactId>Hunter</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <packaging>war</packaging>
-  <name>Hunter Maven Webapp</name>
-  <description>This is a trial for github to get Titus to help out</description>
-  
-  <dependencies>
-  	
-  	<dependency>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.techmaster.soft.hunter</groupId>
+	<artifactId>Hunter</artifactId>
+	<packaging>war</packaging>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>Hunter Maven Webapp</name>
+	<url>http://maven.apache.org</url>
+
+
+	<dependencies>
+
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>3.8.1</version>
@@ -44,6 +46,14 @@
 			<artifactId>spring-tx</artifactId>
 			<version>3.0.5.RELEASE</version>
 		</dependency>
+
+		<!-- This is for spring security -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>3.0.5.RELEASE</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -291,6 +301,12 @@
 			<version>2.3</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>3.0.5.RELEASE</version>
+		</dependency>
+
 
 		<!-- This is for National Weather service -->
 		<dependency>
@@ -372,9 +388,25 @@
 			<artifactId>uribuilder</artifactId>
 			<version>2.0.0</version>
 		</dependency>
-  	
-  	
-  </dependencies>
-  
-  
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.5.2</version>
+		</dependency>
+
+
+
+	</dependencies>
+
+
+
+
+	<build>
+		<finalName>Hunter</finalName>
+	</build>
+
+
+
+
 </project>

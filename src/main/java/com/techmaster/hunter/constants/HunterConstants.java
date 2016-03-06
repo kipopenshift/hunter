@@ -8,6 +8,8 @@ public class HunterConstants {
 	// Hunter specific
 	public static final String HUNTER_ADMIN_USER_NAME = "hunterAdmin";
 	public static final String HUNTER_ADMIN_PSSWRD = "hunterAdmin.1900";
+	public static final String HUNTER_ADMIN_EMAIL_USER_NAM = "techmaster.hunter.mail@gmail.com";
+	public static final String HUNTER_ADMIN_EMAIL_PSSWRD = "hunter.admin.1900";
 	public static final String HUNTER_SYSTEM_USER_NAME = "hunterSystem";
 	
 	// Methods
@@ -77,7 +79,7 @@ public class HunterConstants {
 	
 	
 	// task types 
-	public static final String TASK_TYPE_POLITICAL = "Polytical";
+	public static final String TASK_TYPE_POLITICAL = "Political";
 	public static final String TASK_TYPE_CORPORATE = "Corporate";
 	public static final String TASK_TYPE_EDUCATIONAL = "Educational";
 	public static final String TASK_TYPE_TESTING = "Testing";
@@ -127,6 +129,7 @@ public class HunterConstants {
 	public static final String CLIENT_OZEKI = "OZEKI";
 	public static final String CLIENT_SAFARICOM = "SAFARICOM";
 	public static final String CLIENT_TECH_MASTERS = "TECH MASTERS";
+	public static final String CLIENT_HUNTER_EMAIL = "Hunter Email Provider";
 	
 	// Client Configurations Element Names
 
@@ -145,6 +148,10 @@ public class HunterConstants {
 	public static final String CONFIG_HUNTER_RATING = "hunterRating";
 	public static final String CONFIG_SENDER = "TechMasters";
 	
+	public static final String CONFIG_HUNTER_DEFAULT_EMAIL_CONFIG_NAME = "hunterClientDefaultConfigs";
+	public static final String CONFIG_TEXT_HTML_UTF8 = "text/html; charset=utf-8";
+	public static final String CONFIG_TEXT_HTML_UTF8_KEY = "contentTypeAndCharset";
+	
 	public static final String BASE_URL = "GET_BASE_URL";
 	public static final String TOKEN = "producttoken";
 	public static final String BODY = "body";
@@ -158,9 +165,65 @@ public class HunterConstants {
 	public static final String HUNTER_DATE_FORMAT_MIN = "yyyy-MM-dd HH:mm";
 	
 	
+	// Session Security constants
+	public static final String HNTR_SEC_SESS_BN = "HNTR_SEC_SESS_BN";
+	public static final String HNTR_SESS_ADT_INFO = "HNTR_SESS_ADT_INFO";
+	
+	// Hunter Security Context
+	public static final String USR_SEC_CNTXT_BN = "userSecurityContextBean";
+	public static final String USER_NAME = "userName";
+	public static final String PASSWORD = "password";
+	public static final String ROLES = "ROLES";
+	public static final long ROLE_USER = 2;
+	public static final long ROLE_ADMIN = 1;
+	public static final long ROLE_EXT_APP = 3;
+	public static final long ROLE_TASK_APPROVER = 4;
+	public static final long ROLE_TASK_PROCESSOR = 5;
+	
+	// Message string to return to client.
+	public static final String MESSAGE_STRING = "message"; 
+	
+	// Mail Type.
+	public static final String MAIL_TYPE_TASK_PROCESS_NOTIFICATION = "taskpProcessRequestNotification";
+	public static final String MAIL_TYPE_ASK_PROCESS_OVERDUE_NOTIFICATION = "taskProcessOverdueNotification";
+	public static final String MAIL_TYPE_TASK_PROCESS_INCOMPLETE_NOTIFICATION = "taskProcessIncompleteNotification";
+	public static final String MAIL_TYPE_USER_SIGN_UP_NOTIFICATION = "userSignUpNotification";
+	public static final String MAIL_TYPE_TASK_EMAIL_CLIENT = "taskEmailClient";
 	
 	
+	public static final String[] MAIL_TYPES_NAMES = new String[]{
+		MAIL_TYPE_TASK_PROCESS_NOTIFICATION,
+		MAIL_TYPE_ASK_PROCESS_OVERDUE_NOTIFICATION,
+		MAIL_TYPE_TASK_PROCESS_INCOMPLETE_NOTIFICATION,
+		MAIL_TYPE_USER_SIGN_UP_NOTIFICATION,
+		MAIL_TYPE_TASK_EMAIL_CLIENT
+	};
 	
+	//Email Templates
+	public static final String BLUE_WAVE_TEMPLATE = "blueWaveTemplate";
+	
+	
+	// XML Cached Services
+	public static final String QUERY_XML_CACHED_SERVICE = "QUERY_XML_CACHED_SERVICE";
+	public static final String CLIENT_CONFIG_XML_CACHED_SERVICE = "CLIENT_CONFIG_XML_CACHED_SERVICE";
+	public static final String RESPONSE_CONFIG_CACHED_SERVICE = "RESPONSE_CONFIG_CACHED_SERVICE";
+	public static final String UI_MSG_CACHED_SERVICE = "UI_MSG_CACHED_SERVICE";
+	public static final String EMAIL_TEMPLATES_CACHED_SERVICE = "EMAIL_TEMPLATES_CACHED_SERVICE";
+	public static final String EMAIL_CONFIG_CACHED_SERVICE = "EMAIL_CONFIG_CACHED_SERVICE";
+	
+	public static final String UI_MSG_CACHED_BEANS = "UI_MSG_CACHED_BEANS";
+	
+	//Email content params constants
+	public static final String TO_LIST = "toList";
+	public static final String FROM_EMAIL = "fromEmail";
+	public static final String CC_LIST = "ccList";
+	public static final String FOOTER = "footer";
+	
+	public static final String HUNTER_EMAIL_RESPONSE_CODE = "100";
+	
+	//Hunter Cache Keys
+	public static final String EXISTENT_EMAIL_TEMPLATES = "EXISTENT_EMAIL_TEMPLATES";
+	public static final String EMAIL_TEMPLATE_BEANS = "EMAIL_TEMPLATE_BEANS";
 	
 	
 

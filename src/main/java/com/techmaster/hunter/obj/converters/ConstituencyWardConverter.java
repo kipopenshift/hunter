@@ -11,12 +11,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.UIMessageConstants;
 import com.techmaster.hunter.obj.beans.ConstituencyWard;
 import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
 import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
-import com.techmaster.hunter.util.UIMessageHandler;
 
 public class ConstituencyWardConverter {
 	
@@ -27,7 +27,6 @@ public class ConstituencyWardConverter {
 
 	private static Logger logger = HunterLogFactory.getLog(TaskConverter.class);
 	private HunterJacksonMapper hunterJacksonMapper = new HunterJacksonMapper();
-	private static UIMessageHandler uiMessageHandler = UIMessageHandler.getInstance();
 	
 	public ConstituencyWardConverter(String requestBody, String entityKey) { 
 		super();
@@ -116,7 +115,7 @@ public class ConstituencyWardConverter {
 	
 	public void logAndSetErrorMessage(Throwable e, String msgId){
 		logger.error("Error encountered while converting consituencyward. " + e.getMessage());
-		errorMessage = uiMessageHandler.getMsgTxtForMsgId(msgId);
+		errorMessage = HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(msgId);
 	}
 
 	

@@ -3,7 +3,6 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<bean id="messageDao" class="com.techmaster.hunter.dao.impl.MessageDaoImpl"/>
-	<bean id="hunterUserDao" class="com.techmaster.hunter.dao.impl.HunterUserDaoImpl"/>
 	<bean id="serviceProviderDao" class="com.techmaster.hunter.dao.impl.ServiceProviderDaoImpl"/>
 	<bean id="gateWayMessageDao" class="com.techmaster.hunter.dao.impl.GateWayMessageDaoImpl"/>
 	<bean id="hunterAddressDao" class="com.techmaster.hunter.dao.impl.HunterAddressDaoImpl"/>
@@ -17,6 +16,11 @@
 	<bean id="regionService" class="com.techmaster.hunter.region.RegionServiceImpl"/>
 	<bean id="receiverGroupDao" class="com.techmaster.hunter.dao.impl.ReceiverGroupDaoImpl"/>
 	<bean id="hunterImportBeanDao" class="com.techmaster.hunter.dao.impl.HunterImportBeanDaoImpl"/>
+	<bean id="receiverGroupReceiverDao" class="com.techmaster.hunter.dao.impl.ReceiverGroupReceiverDaoImpl"/>
+	<bean id="receiverGroupJsonDao" class="com.techmaster.hunter.dao.impl.ReceiverGroupJsonDaoImpl"/>
+	<bean id="taskHistoryDao" class="com.techmaster.hunter.dao.impl.TaskHistoryDaoImpl"/>
+	<bean id="userRoleDao" class="com.techmaster.hunter.dao.impl.UserRoleDaoImpl"/>
+	<bean id="hunterUserDao" class="com.techmaster.hunter.dao.impl.HunterUserDaoImpl"/>
 	
 	
 	

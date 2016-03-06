@@ -13,7 +13,7 @@
 		<property name="receiverType" column="RCVR_TYP"  type="java.lang.String"  not-null="true" />
 		<property name="receiverRegionLevel" column="RCVR_RGN_LVL"  type="java.lang.String" not-null="true" />
 		<property name="blocked" column="RCVR_BLCKD" type="org.hibernate.type.YesNoType"  />
-		<property name="active" column="RNDM" type="org.hibernate.type.YesNoType" />
+		<property name="active" column="ACTV" type="org.hibernate.type.YesNoType" />
 		<property name="successDeliveryTimes" column="SCCSS_DEL_TMS"  type="java.lang.Integer" not-null="false" />
 		<property name="failDeliveryTimes" column="FAIL_DEL_TMS"  type="java.lang.Integer" not-null="false" />
 		<property name="countryName" column="CNTRY_NAM"  type="java.lang.String"  not-null="true" />

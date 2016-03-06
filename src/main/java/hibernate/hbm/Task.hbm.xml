@@ -10,9 +10,9 @@
 		</id>
 		
 		<property name="taskType" column="TSK_TYP" type="java.lang.String"  not-null="true" />
-		<property name="taskName" column="TSK_NAM"  type="java.lang.String"  not-null="true"/>
-		<property name="taskObjective" column="TSK_OBJCTV"  type="java.lang.String" />
-		<property name="description" column="TASK_DESC"  type="java.lang.String"  not-null="true"/>
+		<property name="taskName" column="TSK_NAM"  type="java.lang.String"  not-null="true" length="50" />
+		<property name="taskObjective" column="TSK_OBJCTV"  type="java.lang.String" length="100" />
+		<property name="description" column="TASK_DESC"  type="java.lang.String"  not-null="true" length="100" />
 		<property name="tskAgrmntLoc" column="TSK_ARGMNT_LGC"  type="java.lang.String"/>
 		<property name="taskBudget" column="TSK_BDGT"  type="java.lang.Float"  not-null="true" />
 		<property name="taskCost" column="TSK_CST"  type="java.lang.Float"  not-null="true" />
@@ -24,10 +24,14 @@
 		<property name="taskApprover" column="TSK_APPRVR"  type="java.lang.String" />
 		<property name="clientId" column="HNTR_CLNT_ID"  type="java.lang.Long" />
 		<property name="gateWayClient" column="GT_WY_CLNT"  type="java.lang.String" />
+		<property name="tskMsgType" column="TSK_MSG_TYP"  type="java.lang.String" />
 		
 		<property name="desiredReceiverCount" column="DSRD_RCVRS_CNT"  type="java.lang.Integer"  not-null="false" />
 		<property name="availableReceiverCount" column="AVLBL_RCVRS_CNT"  type="java.lang.Integer"  not-null="false" />
 		<property name="confirmedReceiverCount" column="CNFRMD_RCVRS_CNT"  type="java.lang.Integer"  not-null="false" />
+		
+		<property name="processedBy" column="PRCSD_BY"  type="java.lang.String" />
+		<property name="processedOn" column="PRCSD_ON"  type="java.util.Date" />
 		
 		<property name="cretDate" column="CRET_DATE"  type="java.util.Date"  not-null="true"/>
 		<property name="lastUpdate" column="LST_UPDTD"  type="java.util.Date"  not-null="true" />
@@ -35,21 +39,18 @@
 		<property name="createdBy" column="CRTD_BY"  type="java.lang.String"  not-null="true" />
 		
 		
-		<one-to-one name="taskMessage" class="com.techmaster.hunter.obj.beans.Message" cascade="save-update"></one-to-one>
-		<many-to-one name="taskRegion" class="com.techmaster.hunter.obj.beans.ReceiverRegion" column="TSK_RCVR_RGN_ID" cascade="save-update" not-null="false" />
+		<one-to-one name="taskMessage" class="com.techmaster.hunter.obj.beans.Message" cascade="save-update" ></one-to-one>
         
-         <set name="taskRegions" cascade="save-update" table="TSK_RGNS">
+        <set name="taskRegions" cascade="save-update" table="TSK_RGNS">
         	<key column="TSK_ID"/>
-         	<many-to-many column="RGN_ID" class="com.techmaster.hunter.obj.beans.ReceiverRegion"/>
+         	<many-to-many column="RGN_ID" class="com.techmaster.hunter.obj.beans.ReceiverRegion"  />
       	</set>
-        
-		<set name="taskReceivers" table="TSK_RCRS" cascade="save-update" inverse="true" lazy="false" fetch="select">
-            <key>
-                <column name="TSK_ID" /> 
-            </key>
-            <one-to-many class="com.techmaster.hunter.obj.beans.TaskMessageReceiver" />
-        </set>
-		
+      	
+        <set name="taskGroups" cascade="save-update" table="TSK_GRPS">
+        	<key column="TSK_ID"/>
+         	<many-to-many column="GRP_ID" class="com.techmaster.hunter.json.ReceiverGroupJson"/>
+      	</set>
+      	
 	</class>
 	
 </hibernate-mapping>

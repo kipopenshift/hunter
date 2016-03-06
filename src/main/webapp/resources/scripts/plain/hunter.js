@@ -1,14 +1,12 @@
 
+var kendoLoginHelper = null;
+
 $("document").ready(function(){
-	 
-	
-	$( "form#hunterLoginForm" ).submit(function( event ) { 
+	/*$( "form#hunterLoginForm" ).submit(function( event ) { 
 		event.preventDefault(); 
 		handleLogin(); 
-	});
-	
-	
-	
+	});*/
+	kendoLoginHelper = new kendoKipHelper();
 });
 
 
@@ -38,11 +36,12 @@ function handleLogin(){
 		$("#hunterPasswordError").html(" ");
 	}
 	
-	var url = HunterConstants.HUNTER_BASE_URL + "/hunter/login/params";
+	var url = HunterConstants.HUNTER_BASE_URL + "/login/login/home/json";
 	
-	$("#loginCover").fadeOut(800, function(){
+	/*$("#loginCover").animate({top: '250px', opacity: '0.0'},1000, function(){
 		window.location.href = "http://localhost:8080/Hunter/hunter/login/after";
-	});
+		kendoKipHelperInstance.popupWarning("Successfully logged in!", "Success");
+	});*/
 	
 	
 	console.log("Login url >> " + url);
@@ -50,16 +49,18 @@ function handleLogin(){
 	  $.ajax({
 	    url: url,
 	    type: 'POST',
-	    data: {"userName" : userName, "password" : password},
+	    data: JSON.stringify({"userName" : userName, "password" : password}), 
 	    contentType: "application/json",
 	    dataType : "json",
 	}).done(function(data){
 		var data_ = JSON.stringify(data);
 		console.log(data_);
 		var json = jQuery.parseJSON(data);
-		console.log(json.status + "! " + json.message);
+		console.log(json.status + "! " + json.MESSAGE);
 	}).fail(function (data){
-		console.log(data.statusText + "(" + data.status + ")", "Error");
+		var error = data.statusText + "(" + data.status + ")";
+		console.log(error);
+		kendoLoginHelper.popupWarning(error, "FAILED");
 	});
 	  
 }

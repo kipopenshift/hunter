@@ -264,7 +264,7 @@ public class CMClientBean extends AbsractGatewayClient{
 	@Override
 	public void refresh() {
 		
-		Set<TaskMessageReceiver> taskReceivers = this.getTask().getTaskReceivers();
+		Set<TaskMessageReceiver> taskReceivers = getTskMsgRcvrsFrTskId(task.getTaskId());
 		
 		int size = taskReceivers != null ? taskReceivers.size() : 0; 
 		receivers = new String[size];
@@ -541,6 +541,13 @@ public class CMClientBean extends AbsractGatewayClient{
 		CMClientBean cml = new CMClientBean(null);
 		cml.readConfigurations();
 		
+	}
+
+	@Override
+	public String createRequestBody(Map<String, Object> params,
+			List<GateWayMessage> gateWayMessage) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

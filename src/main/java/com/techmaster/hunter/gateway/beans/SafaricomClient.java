@@ -1,5 +1,6 @@
 package com.techmaster.hunter.gateway.beans;
 
+import java.util.List;
 import java.util.Map;
 
 import com.techmaster.hunter.obj.beans.GateWayMessage;
@@ -60,6 +61,11 @@ public class SafaricomClient extends AbsractGatewayClient {
 	public String doGet(Map<String, Object> params, GateWayMessage gateWayMessage) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String createRequestBody(Map<String, Object> params,List<GateWayMessage> gateWayMessage) {
+		throw new IllegalArgumentException("Service unavailable yet.");
 	}
 
 }

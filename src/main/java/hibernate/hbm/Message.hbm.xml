@@ -23,7 +23,7 @@
 		<property name="createdBy" column="CRTD_BY" type="java.lang.String"  />
 		<property name="lastUpdatedBy" column="LST_UPDTD_BY" type="java.lang.String"  />
 		
-		<many-to-one name="provider" class="com.techmaster.hunter.obj.beans.ServiceProvider" cascade="none" fetch="select" />
+		<many-to-one name="provider" class="com.techmaster.hunter.obj.beans.ServiceProvider" cascade="none" lazy="no-proxy"/> 
 		
 		<!-- <set name="receivers" table="ADDRESS" cascade="none"  inverse="false" lazy="false"  fetch="select"> 
             <key>
@@ -48,6 +48,14 @@
 			<property name="toList" column="EMAIL_TO_LIST" type="java.lang.String"  /> 
 			<property name="eFrom" column="EMAIL_FROM" type="java.lang.String" />
 			<property name="ccList" column="EMAIL_CC_LIST" type="java.lang.String" />
+			<property name="multiPart" column="MT_PRT" type="org.hibernate.type.YesNoType" />
+			<property name="hasAttachment" column="HS_ATTCHMNT" type="org.hibernate.type.YesNoType" />
+			<property name="attchmntBnId" column="ATTCHMTNT_BN_ID" type="java.lang.Long" />
+			<property name="attchmtntFileType" column="ATTCHMNT_FLE_TYP" type="java.lang.String" />
+			<property name="contentType" column="CNTNT_TYP" type="java.lang.String" />
+			<property name="replyTo" column="RPLY_TO" type="java.lang.String" />
+			<property name="priority" column="PRRTY" type="java.lang.Integer" />
+			<property name="emailTemplateName" column="EML_TMPLT_NAM" type="java.lang.String" />
 		</union-subclass>
 		
 		<union-subclass name="com.techmaster.hunter.obj.beans.MediaMessage" table="MEDIA_MSG">

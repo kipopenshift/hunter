@@ -18,7 +18,7 @@ import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterUtility;
 
 public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
-
+	
 	private JdbcTemplate jdbcTemplate;
 	private Logger logger = Logger.getLogger(HunterJDBCExecutorImpl.class);
 	
@@ -174,6 +174,38 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void executeUpdate(String query,List<Object> values) {
+		logger.debug("Executing update query : " + query); 
+		Connection conn = null;
+		try {
+			conn = this.jdbcTemplate.getDataSource().getConnection();
+			PreparedStatement ps = conn.prepareStatement(query);
+			if(values != null && values.size() >= 1){
+				for(int i=0; i<values.size(); i++){
+					Object obj = values.get(i);
+					ps.setObject(i+1, obj);
+				}
+			}
+			ps.executeUpdate(); 
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public List<Object> getValuesList(Object[] array) {
+		List<Object> values = new ArrayList<>();
+		if(array != null && array.length > 0){
+			for(Object obj : array){
+				values.add(obj);
+			}
+		}
+		return values;
 	}
 
 	

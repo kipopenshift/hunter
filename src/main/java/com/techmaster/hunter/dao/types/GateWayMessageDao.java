@@ -10,7 +10,10 @@ public interface GateWayMessageDao {
 	
 	public void insertMessage(GateWayMessage message);
 	public void update(GateWayMessage message);
+	public void  updateGatewayMessages(List<GateWayMessage> gateWayMessages);
+	public void  updateGatewayMessages(Set<GateWayMessage> gateWayMessages);
 	public void insertMessages(Set<GateWayMessage> messages);
+	public void insertMessages(List<GateWayMessage> messages);
 	public void deleteMessage(GateWayMessage message);
 	public Set<GateWayMessage> getGateWayMessagesForTask(Task task);
 	public Set<GateWayMessage>  getGateWayMessagesForTaskId(Long taskId);

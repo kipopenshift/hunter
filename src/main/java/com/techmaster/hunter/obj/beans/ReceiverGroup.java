@@ -9,8 +9,12 @@ public class ReceiverGroup {
 	private String ownerUserName;
 	private String groupName;
 	private String groupDesc;
-	private Set<HunterMessageReceiver> hunterMessageReceivers = new HashSet<HunterMessageReceiver>();
+	private int receiverCount;
+	private String receiverType;
+	private Set<ReceiverGroupReceiver> receiverGroupReceivers = new HashSet<ReceiverGroupReceiver>();
 	private AuditInfo auditInfo;
+	// commad delimited string "10,23,45"
+	private String importBeanIds; 
 	
 	public ReceiverGroup() {
 		super();
@@ -19,24 +23,23 @@ public class ReceiverGroup {
 	public long getGroupId() {
 		return groupId;
 	}
-
 	public void setGroupId(long groupId) {
 		this.groupId = groupId;
 	}
-
 	public String getOwnerUserName() {
 		return ownerUserName;
 	}
-
 	public void setOwnerUserName(String ownerUserName) {
 		this.ownerUserName = ownerUserName;
 	}
-	public Set<HunterMessageReceiver> getHunterMessageReceivers() {
-		return hunterMessageReceivers;
+	public Set<ReceiverGroupReceiver> getReceiverGroupReceivers() {
+		return receiverGroupReceivers;
 	}
-	public void setHunterMessageReceivers(Set<HunterMessageReceiver> hunterMessageReceivers) {
-		this.hunterMessageReceivers = hunterMessageReceivers;
+	public void setReceiverGroupReceivers(
+			Set<ReceiverGroupReceiver> receiverGroupReceivers) {
+		this.receiverGroupReceivers = receiverGroupReceivers;
 	}
+
 	public AuditInfo getAuditInfo() {
 		return auditInfo;
 	}
@@ -55,6 +58,24 @@ public class ReceiverGroup {
 	public void setGroupDesc(String groupDesc) {
 		this.groupDesc = groupDesc;
 	}
+	public int getReceiverCount() {
+		return receiverCount;
+	}
+	public void setReceiverCount(int receiverCount) {
+		this.receiverCount = receiverCount;
+	}
+	public String getReceiverType() {
+		return receiverType;
+	}
+	public void setReceiverType(String receiverType) {
+		this.receiverType = receiverType;
+	}
+	public String getImportBeanIds() {
+		return importBeanIds;
+	}
+	public void setImportBeanIds(String importBeanIds) {
+		this.importBeanIds = importBeanIds;
+	}
 
 	@Override
 	public int hashCode() {
@@ -67,12 +88,17 @@ public class ReceiverGroup {
 		result = prime * result + (int) (groupId ^ (groupId >>> 32));
 		result = prime * result
 				+ ((groupName == null) ? 0 : groupName.hashCode());
-		result = prime
-				* result
-				+ ((hunterMessageReceivers == null) ? 0
-						: hunterMessageReceivers.hashCode());
+		result = prime * result
+				+ ((importBeanIds == null) ? 0 : importBeanIds.hashCode());
 		result = prime * result
 				+ ((ownerUserName == null) ? 0 : ownerUserName.hashCode());
+		result = prime * result + receiverCount;
+		result = prime
+				* result
+				+ ((receiverGroupReceivers == null) ? 0
+						: receiverGroupReceivers.hashCode());
+		result = prime * result
+				+ ((receiverType == null) ? 0 : receiverType.hashCode());
 		return result;
 	}
 
@@ -102,15 +128,27 @@ public class ReceiverGroup {
 				return false;
 		} else if (!groupName.equals(other.groupName))
 			return false;
-		if (hunterMessageReceivers == null) {
-			if (other.hunterMessageReceivers != null)
+		if (importBeanIds == null) {
+			if (other.importBeanIds != null)
 				return false;
-		} else if (!hunterMessageReceivers.equals(other.hunterMessageReceivers))
+		} else if (!importBeanIds.equals(other.importBeanIds))
 			return false;
 		if (ownerUserName == null) {
 			if (other.ownerUserName != null)
 				return false;
 		} else if (!ownerUserName.equals(other.ownerUserName))
+			return false;
+		if (receiverCount != other.receiverCount)
+			return false;
+		if (receiverGroupReceivers == null) {
+			if (other.receiverGroupReceivers != null)
+				return false;
+		} else if (!receiverGroupReceivers.equals(other.receiverGroupReceivers))
+			return false;
+		if (receiverType == null) {
+			if (other.receiverType != null)
+				return false;
+		} else if (!receiverType.equals(other.receiverType))
 			return false;
 		return true;
 	}
@@ -119,10 +157,20 @@ public class ReceiverGroup {
 	public String toString() {
 		return "ReceiverGroup [groupId=" + groupId + ", ownerUserName="
 				+ ownerUserName + ", groupName=" + groupName + ", groupDesc="
-				+ groupDesc + ", hunterMessageReceivers="
-				+ hunterMessageReceivers + ", auditInfo=" + auditInfo + "]";
+				+ groupDesc + ", receiverCount=" + receiverCount
+				+ ", receiverType=" + receiverType
+				+ ", receiverGroupReceivers=" + receiverGroupReceivers
+				+ ", auditInfo=" + auditInfo + ", importBeanIds="
+				+ importBeanIds + "]";
 	}
 
+	
+
+	
+
+	
+
+	
 
 	
 	

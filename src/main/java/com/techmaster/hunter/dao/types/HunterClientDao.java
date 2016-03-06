@@ -2,6 +2,7 @@ package com.techmaster.hunter.dao.types;
 
 import java.util.List;
 
+import com.techmaster.hunter.json.HunterClientsDetailsJson;
 import com.techmaster.hunter.obj.beans.HunterClient;
 
 public interface HunterClientDao {
@@ -16,5 +17,6 @@ public interface HunterClientDao {
 	public Long nextClientId();
 	public HunterClient getHunterClientForUserId(Long longFromObject);
 	public HunterClient editReceiverAndBudget(Long clientId, float budget, boolean isReceiver);
+	public List<HunterClientsDetailsJson> getAllHunterClientDetailsJson();
 
 }

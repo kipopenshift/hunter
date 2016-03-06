@@ -15,5 +15,6 @@ public interface HunterAddressDao {
 	public void updateAddress(HunterAddress address);
 	public void insertAddresses(List<HunterAddress> addresses);
 	public Long getNextAddressId();
+	public List<HunterAddress> getAddressesByUserId(Long userId);
 
 }

@@ -2,18 +2,7 @@ package com.techmaster.hunter.obj.beans;
 
 import java.util.Date;
 
-import org.codehaus.jackson.annotate.JsonSubTypes;
-import org.codehaus.jackson.annotate.JsonSubTypes.Type;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
 
-/*@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonSubTypes({ 
-	@Type(value = TextMessage.class, name = "TextMessage"),
-	@Type(value = AudioMessage.class, name = "AudioMessage"), 
-	@Type(value = EmailMessage.class, name = "EmailMessage"),
-	@Type(value = MediaMessage.class, name = "MediaMessage"),
-	@Type(value = VoiceMailMessage.class, name = "VoiceMailMessage")
-})*/
 public abstract class Message {
 	
 	private long msgId;

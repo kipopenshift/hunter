@@ -12,10 +12,14 @@
 		<property name="ownerUserName" column="OWNR_USR_NAM" type="java.lang.String"  not-null="true" />
 		<property name="groupName" column="GRP_NAME" type="java.lang.String"  not-null="true" />
 		<property name="groupDesc" column="GRP_DESC" type="java.lang.String" />
+		<property name="receiverCount" column="RCVR_CNT" type="java.lang.Integer" />
+		<property name="receiverType" column="RCVR_TYP" type="java.lang.String" />
+		<property name="importBeanIds" column="IMPRT_BN_IDS" type="java.lang.String" length="4000" /> 
 		
-		 <set name="hunterMessageReceivers" cascade="save-update" table="RCVRGRP_HNTRCVR">
+		
+		 <set name="receiverGroupReceivers" cascade="save-update" table="RCVRGRP_RCVRGRPRCVR">
         	<key column="GRP_ID"/>
-         	<many-to-many column="RCVR_ID" class="com.techmaster.hunter.obj.beans.HunterMessageReceiver"/>
+         	<many-to-many column="RCVR_ID" class="com.techmaster.hunter.obj.beans.ReceiverGroupReceiver"/>
       	</set>
 		
 		<component name="auditInfo" class="com.techmaster.hunter.obj.beans.AuditInfo">

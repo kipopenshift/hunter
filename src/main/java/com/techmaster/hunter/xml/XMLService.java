@@ -29,6 +29,7 @@ public interface XMLService {
 	public void insertCDataToElement(Element toAppend, String elementName, String cdata);
 	public NodeList getNodeListForCompiledXpath(String xPath);
 	public NodeList getNodeListForXPath(String xPath);
+	public NodeList getNodeListForPathUsingJavax(String xPath);
 	
 	
 

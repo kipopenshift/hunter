@@ -61,7 +61,7 @@ public class HunterImportBean {
 		this.excelBytes = excelBytes;
 	}
 	public Workbook getWorkbook() {
-		return workbook;
+		return ImportHelper.getWorkbookForImportBean(this);  
 	}
 	public void setWorkbook(Workbook workbook) {
 		this.workbook = workbook;

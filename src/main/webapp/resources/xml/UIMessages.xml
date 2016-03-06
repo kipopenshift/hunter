@@ -5,7 +5,7 @@
     
     <message id="MSG_TASK_001" >
         <desc>Validates Task for approved</desc>
-        <text>Task is not approved!</text>
+        <text>Task is not in approved status!</text>
     </message>
     <message id="MSG_TASK_002" >
         <desc>Validates Task for Task Region</desc>
@@ -25,7 +25,15 @@
     </message>
      <message id="MSG_TASK_006" >
         <desc>Validates task has enough receiver counts</desc>
-        <text>Task must have more than on receiver</text>
+        <text>Task must have at least one desired receivers!</text>
+    </message>
+     <message id="MSG_TASK_007" >
+        <desc>A task must have receivers</desc>
+        <text>Task regions and groups configured have no receivers</text>
+    </message>
+    <message id="MSG_TASK_008" >
+        <desc>Task must have either region or groups configured.</desc>
+        <text>Task has no region and no groups configured!</text>
     </message>
     <message id="MSG_REGION_001" >
         <desc>Error message conversion of consituency converter</desc>
@@ -33,11 +41,35 @@
     </message>
      <message id="MSG_MSG_001" >
         <desc>Task Message Must be approved</desc>
-        <text>Task Message is not approved!</text>
+        <text>Task Message is not in approved status!</text>
     </message>
     <message id="MSG_MSG_002" >
         <desc>Task Message Must have Text!</desc>
         <text>Task Message has no Text!</text>
+    </message>
+     <message id="MSG_MSG_003" >
+        <desc>Message is already processed!</desc>
+        <text>Task message is already processed!</text>
+    </message>
+     <message id="EMAIL_MSG_001" >
+        <desc>Template name provided does not exist. Please used the template names in hunter constants.</desc>
+        <text>Template name provided does not exist!</text>
+    </message>
+     <message id="EMAIL_MSG_002" >
+        <desc>Email type provided does not exist. Please use Hunter established email types!</desc>
+        <text>Email type provided does not exist!</text>
+    </message>
+     <message id="MSG_MSG_004" >
+        <desc>For instance, if task is email but message is Text Message</desc>
+        <text>Invalid message type configured!</text>
+    </message>
+     <message id="MSG_MSG_005" >
+        <desc>Message must be in approved status.</desc>
+        <text>Task message must be in approved status</text>
+    </message>
+     <message id="MSG_MSG_006" >
+        <desc>Task Message does not have service provider configured.</desc>
+        <text>Task Message does not have service provider!</text>
     </message>
     
      

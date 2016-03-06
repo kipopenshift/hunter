@@ -5,11 +5,9 @@ import java.lang.reflect.Method;
 
 import org.apache.log4j.Logger;
 
-import com.techmaster.hunter.executors.task.TaskThreadPoolManager;
-
 public class HunterReflection {
 
-private static final Logger logger = Logger.getLogger(TaskThreadPoolManager.class);
+private static final Logger logger = Logger.getLogger(HunterReflection.class);
 	
 	
 	public static void invoke(String forName,String methodName, Class<?>[] paramsTypes, Object[] params){

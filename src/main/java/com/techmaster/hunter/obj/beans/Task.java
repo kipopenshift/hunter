@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.json.ReceiverGroupJson;
 
 
 public class Task {
@@ -15,6 +16,7 @@ public class Task {
 	private String taskObjective;
 	private String description;
 	private String tskAgrmntLoc;
+	private String tskMsgType;
 	private float taskBudget;
 	private float taskCost;
 	private boolean recurrentTask;
@@ -28,6 +30,9 @@ public class Task {
 	private int availableReceiverCount;
 	private int confirmedReceiverCount;
 	
+	private String processedBy;
+	private Date processedOn;
+	
 	private java.util.Date cretDate;
 	private java.util.Date lastUpdate;
 	private String updatedBy;
@@ -35,9 +40,8 @@ public class Task {
 	private Long clientId;
 	
 	private Message taskMessage;
-	private ReceiverRegion taskRegion;
 	private Set<ReceiverRegion> taskRegions  = new HashSet<>();
-	private Set<TaskMessageReceiver> taskReceivers = new HashSet<>();
+	private Set<ReceiverGroupJson> taskGroups = new HashSet<>();
 	
 	public Task() {
 		super();
@@ -168,18 +172,6 @@ public class Task {
 	public void setTaskMessage(Message taskMessage) {
 		this.taskMessage = taskMessage;
 	}
-	public ReceiverRegion getTaskRegion() {
-		return taskRegion;
-	}
-	public void setTaskRegion(ReceiverRegion taskRegion) {
-		this.taskRegion = taskRegion;
-	}
-	public Set<TaskMessageReceiver> getTaskReceivers() {
-		return taskReceivers;
-	}
-	public void setTaskReceivers(Set<TaskMessageReceiver> taskReceivers) {
-		this.taskReceivers = taskReceivers;
-	}
 	public String getGateWayClient() {
 		return gateWayClient;
 	}
@@ -217,6 +209,38 @@ public class Task {
 		this.confirmedReceiverCount = confirmedReceiverCount;
 	}
 
+	public String getTskMsgType() {
+		return tskMsgType;
+	}
+
+	public void setTskMsgType(String tskMsgType) {
+		this.tskMsgType = tskMsgType;
+	}
+
+	public Set<ReceiverGroupJson> getTaskGroups() {
+		return taskGroups;
+	}
+
+	public void setTaskGroups(Set<ReceiverGroupJson> taskGroups) {
+		this.taskGroups = taskGroups;
+	}
+
+	public String getProcessedBy() {
+		return processedBy;
+	}
+
+	public void setProcessedBy(String processedBy) {
+		this.processedBy = processedBy;
+	}
+
+	public Date getProcessedOn() {
+		return processedOn;
+	}
+
+	public void setProcessedOn(Date processedOn) {
+		this.processedOn = processedOn;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -236,6 +260,10 @@ public class Task {
 				+ ((gateWayClient == null) ? 0 : gateWayClient.hashCode());
 		result = prime * result
 				+ ((lastUpdate == null) ? 0 : lastUpdate.hashCode());
+		result = prime * result
+				+ ((processedBy == null) ? 0 : processedBy.hashCode());
+		result = prime * result
+				+ ((processedOn == null) ? 0 : processedOn.hashCode());
 		result = prime * result + (recurrentTask ? 1231 : 1237);
 		result = prime * result + (taskApproved ? 1231 : 1237);
 		result = prime * result
@@ -248,6 +276,8 @@ public class Task {
 				* result
 				+ ((taskDeliveryStatus == null) ? 0 : taskDeliveryStatus
 						.hashCode());
+		result = prime * result
+				+ ((taskGroups == null) ? 0 : taskGroups.hashCode());
 		result = prime * result + (int) (taskId ^ (taskId >>> 32));
 		result = prime * result
 				+ ((taskLifeStatus == null) ? 0 : taskLifeStatus.hashCode());
@@ -258,15 +288,13 @@ public class Task {
 		result = prime * result
 				+ ((taskObjective == null) ? 0 : taskObjective.hashCode());
 		result = prime * result
-				+ ((taskReceivers == null) ? 0 : taskReceivers.hashCode());
-		result = prime * result
-				+ ((taskRegion == null) ? 0 : taskRegion.hashCode());
-		result = prime * result
 				+ ((taskRegions == null) ? 0 : taskRegions.hashCode());
 		result = prime * result
 				+ ((taskType == null) ? 0 : taskType.hashCode());
 		result = prime * result
 				+ ((tskAgrmntLoc == null) ? 0 : tskAgrmntLoc.hashCode());
+		result = prime * result
+				+ ((tskMsgType == null) ? 0 : tskMsgType.hashCode());
 		result = prime * result
 				+ ((updatedBy == null) ? 0 : updatedBy.hashCode());
 		return result;
@@ -317,6 +345,16 @@ public class Task {
 				return false;
 		} else if (!lastUpdate.equals(other.lastUpdate))
 			return false;
+		if (processedBy == null) {
+			if (other.processedBy != null)
+				return false;
+		} else if (!processedBy.equals(other.processedBy))
+			return false;
+		if (processedOn == null) {
+			if (other.processedOn != null)
+				return false;
+		} else if (!processedOn.equals(other.processedOn))
+			return false;
 		if (recurrentTask != other.recurrentTask)
 			return false;
 		if (taskApproved != other.taskApproved)
@@ -342,6 +380,11 @@ public class Task {
 				return false;
 		} else if (!taskDeliveryStatus.equals(other.taskDeliveryStatus))
 			return false;
+		if (taskGroups == null) {
+			if (other.taskGroups != null)
+				return false;
+		} else if (!taskGroups.equals(other.taskGroups))
+			return false;
 		if (taskId != other.taskId)
 			return false;
 		if (taskLifeStatus == null) {
@@ -364,16 +407,6 @@ public class Task {
 				return false;
 		} else if (!taskObjective.equals(other.taskObjective))
 			return false;
-		if (taskReceivers == null) {
-			if (other.taskReceivers != null)
-				return false;
-		} else if (!taskReceivers.equals(other.taskReceivers))
-			return false;
-		if (taskRegion == null) {
-			if (other.taskRegion != null)
-				return false;
-		} else if (!taskRegion.equals(other.taskRegion))
-			return false;
 		if (taskRegions == null) {
 			if (other.taskRegions != null)
 				return false;
@@ -389,6 +422,11 @@ public class Task {
 				return false;
 		} else if (!tskAgrmntLoc.equals(other.tskAgrmntLoc))
 			return false;
+		if (tskMsgType == null) {
+			if (other.tskMsgType != null)
+				return false;
+		} else if (!tskMsgType.equals(other.tskMsgType))
+			return false;
 		if (updatedBy == null) {
 			if (other.updatedBy != null)
 				return false;
@@ -402,22 +440,29 @@ public class Task {
 		return "Task [taskId=" + taskId + ", taskType=" + taskType
 				+ ", taskName=" + taskName + ", taskObjective=" + taskObjective
 				+ ", description=" + description + ", tskAgrmntLoc="
-				+ tskAgrmntLoc + ", taskBudget=" + taskBudget + ", taskCost="
-				+ taskCost + ", recurrentTask=" + recurrentTask
-				+ ", taskDateline=" + taskDateline + ", taskLifeStatus="
-				+ taskLifeStatus + ", taskDeliveryStatus=" + taskDeliveryStatus
+				+ tskAgrmntLoc + ", tskMsgType=" + tskMsgType + ", taskBudget="
+				+ taskBudget + ", taskCost=" + taskCost + ", recurrentTask="
+				+ recurrentTask + ", taskDateline=" + taskDateline
+				+ ", taskLifeStatus=" + taskLifeStatus
+				+ ", taskDeliveryStatus=" + taskDeliveryStatus
 				+ ", taskApproved=" + taskApproved + ", taskApprover="
 				+ taskApprover + ", gateWayClient=" + gateWayClient
 				+ ", desiredReceiverCount=" + desiredReceiverCount
 				+ ", availableReceiverCount=" + availableReceiverCount
 				+ ", confirmedReceiverCount=" + confirmedReceiverCount
-				+ ", cretDate=" + cretDate + ", lastUpdate=" + lastUpdate
-				+ ", updatedBy=" + updatedBy + ", createdBy=" + createdBy
-				+ ", clientId=" + clientId + ", taskMessage=" + taskMessage
-				+ ", taskRegion=" + taskRegion + ", taskRegions=" + taskRegions
-				+ ", taskReceivers=" + taskReceivers + "]";
+				+ ", processedBy=" + processedBy + ", processedOn="
+				+ processedOn + ", cretDate=" + cretDate + ", lastUpdate="
+				+ lastUpdate + ", updatedBy=" + updatedBy + ", createdBy="
+				+ createdBy + ", clientId=" + clientId + ", taskMessage="
+				+ taskMessage + ", taskRegions=" + taskRegions
+				+ ", taskGroups=" + taskGroups + "]";
 	}
 
+	
+
+	
+
+	
 	
 
 	

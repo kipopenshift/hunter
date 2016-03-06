@@ -1,12 +1,14 @@
 package com.techmaster.hunter.dao.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -14,26 +16,38 @@ import org.hibernate.criterion.Projections;
 
 import com.techmaster.hunter.dao.types.HunterAddressDao;
 import com.techmaster.hunter.dao.types.HunterCreditCardDao;
+import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterUserDao;
+import com.techmaster.hunter.json.HunterUserJson;
 import com.techmaster.hunter.obj.beans.HunterAddress;
 import com.techmaster.hunter.obj.beans.HunterCreditCard;
 import com.techmaster.hunter.obj.beans.HunterUser;
+import com.techmaster.hunter.obj.beans.UserLoginBean;
+import com.techmaster.hunter.obj.converters.HunterUserConverter;
 import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterSessionFactory;
+import com.techmaster.hunter.util.HunterUtility;
 
 public class HunterUserDaoImpl implements HunterUserDao{
-	
+
 	private static HunterCreditCardDao hunterCreditCardDao = new HunterCreditCardDaoImpl();
 	private static HunterAddressDao hunterAddressDao = new HunterAddressDaoImpl();
+	private Logger logger = Logger.getLogger(getClass());
 	
 	private static Long maxAddressId;
 	private static Long maxCreditCardId;
 	
+	private static HunterJDBCExecutor hunterJDBCExecutor;
 	
 	static{
 		maxAddressId = hunterAddressDao.getNextAddressId() - 1;
 		maxCreditCardId = hunterCreditCardDao.getNextCreditCardId() - 1;
+	}
+	
+	public static void wireUpExecutor(HunterJDBCExecutor hunterJDBCExecutor){
+		HunterUserDaoImpl.hunterJDBCExecutor = hunterJDBCExecutor;
+		HunterLogFactory.getLog(HunterAddressDaoImpl.class).debug("Successfully wired up jdbc executor for hunter user dao impl!!");  
 	}
 	
 	public void refreshAllMaxIds(){
@@ -54,26 +68,30 @@ public class HunterUserDaoImpl implements HunterUserDao{
 		
 		// set up parent keys for hunter user.
 		
-		if(user.getUserId() == null){
+		if(user.getUserId() == null || user.getUserId().equals(new Long(0))){  
 			
 			Long nextId = getNextUserId();
-			HunterLogFactory.getLog(getClass()).debug("Set next id for the user >> " + nextId);
+			logger.debug("Set next id for the user >> " + nextId);
 			user.setUserId(nextId);
 			
-			HunterLogFactory.getLog(getClass()).debug("Setting id for the addresses");
+			logger.debug("Setting id for the addresses");
 			Set<HunterAddress> addresses = user.getAddresses();
-			for(HunterAddress address : addresses){
-				address.setUserId(user.getUserId());
-				maxAddressId++;
-				address.setId(maxAddressId);
+			if(addresses != null && !addresses.isEmpty()){
+				for(HunterAddress address : addresses){
+					address.setUserId(user.getUserId());
+					maxAddressId++;
+					address.setId(maxAddressId);
+				}
 			}
 			
-			HunterLogFactory.getLog(getClass()).debug("Setting credit card and user id for the creditCards");
+			logger.debug("Setting credit card and user id for the creditCards");
 			Set<HunterCreditCard> creditCards = user.getCreditCards();
-			for(HunterCreditCard card : creditCards){
-				card.setUserId(user.getUserId()); 
-				maxCreditCardId++;
-				card.setCardId(maxCreditCardId); 
+			if(creditCards != null && !creditCards.isEmpty()){
+				for(HunterCreditCard card : creditCards){
+					card.setUserId(user.getUserId()); 
+					maxCreditCardId++;
+					card.setCardId(maxCreditCardId); 
+				}
 			}
 			
 		}
@@ -129,7 +147,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 			HunterUser user = (HunterUser)session.get(HunterUser.class, userId);
 			session.delete(user);
 			trans.commit();
-			HunterLogFactory.getLog(getClass()).debug("Successfull deleted user >> " + user.toString());
+			logger.debug("Successfull deleted user >> " + user.toString());
 			HunterHibernateHelper.closeSession(session);
 		} catch (HibernateException e) {
 			HunterHibernateHelper.rollBack(trans); 
@@ -150,7 +168,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 			trans = session.beginTransaction();
 			session.delete(user);
 			trans.commit();
-			HunterLogFactory.getLog(getClass()).debug("Successfull deleted user >> " + user.toString());
+			logger.debug("Successfull deleted user >> " + user.toString());
 			HunterHibernateHelper.closeSession(session);
 		} catch (HibernateException e) {
 			HunterHibernateHelper.rollBack(trans); 
@@ -172,7 +190,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 			trans = session.beginTransaction();
 			user = (HunterUser)session.get(HunterUser.class, id);
 			trans.commit();
-			HunterLogFactory.getLog(getClass()).debug("Successfull deleted user >> " + user.toString());
+			logger.debug("Successfull deleted user >> " + user.toString());
 			HunterHibernateHelper.closeSession(session);
 		} catch (HibernateException e) {
 			HunterHibernateHelper.rollBack(trans); 
@@ -186,32 +204,10 @@ public class HunterUserDaoImpl implements HunterUserDao{
 
 	@Override
 	public List<HunterUser> getAllUsers() {
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		List<HunterUser> hunterUsers = new ArrayList<HunterUser>();
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			Query query = session.createQuery("From HunterUser");
-			List<?> list = query.list();
-			
-			for(Object obj : list){
-				HunterUser user = (HunterUser)obj;
-				hunterUsers.add(user);
-			}
-			
-			HunterHibernateHelper.closeSession(session); 
-			
-		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		}finally{
-			HunterHibernateHelper.closeSession(session); 	
-		}
-		
-		return hunterUsers;
+		logger.debug("Loading all users...");
+		List<HunterUser> users = HunterHibernateHelper.getAllEntities(HunterUser.class);
+		logger.debug("Finished loading all users! Size ( " + users.size() + " )");
+		return users;
 	}
 
 	@Override
@@ -228,7 +224,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 			session.update(update);
 			trans.commit();
 			HunterHibernateHelper.closeSession(session); 
-			HunterLogFactory.getLog(getClass()).info("Successfully updated user >> " + update);
+			logger.info("Successfully updated user >> " + update);
 			
 		} catch (HibernateException e) {
 			e.printStackTrace();
@@ -236,6 +232,16 @@ public class HunterUserDaoImpl implements HunterUserDao{
 		}finally{
 			HunterHibernateHelper.closeSession(session); 
 		}
+		
+	}
+	
+	public HunterUser getUserByUserName(String userName){
+		logger.debug("Fetching user of user name (" + userName + ")");  
+		String query = "FROM HunterUser h WHERE h.userName = '" + userName + "'";
+		List<HunterUser> hunterUsers = HunterHibernateHelper.executeQueryForObjList(HunterUser.class, query);
+		logger.debug("Successfully obtained user. Size of list : " + hunterUsers.size());
+		// this assumes that userName is a unique field.
+		return hunterUsers.isEmpty() ? null : hunterUsers.get(0);
 		
 	}
 
@@ -265,13 +271,99 @@ public class HunterUserDaoImpl implements HunterUserDao{
 		}finally{
 			HunterHibernateHelper.closeSession(session); 	
 		}
-		HunterLogFactory.getLog(getClass()).debug("Obtained next hunter user id >> " + nextId); 
+		logger.debug("Obtained next hunter user id >> " + nextId); 
 		return nextId;
 	
 	
 	}
 
+	@Override
+	public Map<String, List<String>> getFullNamesForUserNames(List<String> userNames) {
+		logger.debug("Fetching full names...");
+		String query = "SELECT h.FRST_NAM, h.LST_NAM, h.USR_NAM FROM HNTR_USR h WHERE h.USR_NAM in (" + HunterUtility.getSingleQuotedCommaDelimitedForList(userNames) + ")";
+		logger.debug("Executing queqy : " + query);
+		Map<Integer, List<Object>> rowMapList = hunterJDBCExecutor.executeQueryRowList(query, null);
+		Map<String, List<String>>  output = new HashMap<String, List<String>>();
+		if(rowMapList == null || rowMapList.isEmpty()){
+			logger.warn("No data found for userNames : " + HunterUtility.stringifyList(userNames)); 
+			logger.debug("Returning empty map.."); 
+			return output;
+		}else{
+			for(Map.Entry<Integer, List<Object>> entry : rowMapList.entrySet()){
+				List<Object> rowList = entry.getValue();
+				String firstName = rowList.get(0)+"";
+				String lastName = rowList.get(1)+"";
+				String userName = rowList.get(2)+"";
+				List<String> outputList = new ArrayList<>();
+				outputList.add(firstName);
+				outputList.add(lastName);
+				outputList.add(userName); 
+				output.put(userName, outputList);
+			}
+		}
+		logger.debug("Done fetching full names. Size ( " + output.size() + " )"); 
+		return output;
+	}
+
+	@Override
+	public List<HunterUserJson> getAllUserJson() {
+		logger.debug("Fetching all user jsons..."); 
+		List<HunterUser> hunterUsers = getAllUsers(); 
+		List<HunterUserJson> hunterUserJsons = HunterUserConverter.getInstance().createJsonFromUsers(hunterUsers);
+		logger.debug("Finished fetching user jsons. Size ( " + hunterUserJsons.size() + " )");  
+		return hunterUserJsons;
+	}
+
+	@Override
+	public String validateAndDeleteById(Long userId) {
+		StringBuilder taskErrors = null; 
+		String query = hunterJDBCExecutor.getQueryForSqlId("validateHunterUserDelete");
+		List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{userId});
+		Map<Integer, List<Object>> rowListMap = hunterJDBCExecutor.executeQueryRowList(query, values);
+		int index = 0;
+		if(rowListMap != null && !rowListMap.isEmpty()){
+			for(Map.Entry<Integer, List<Object>> entry : rowListMap.entrySet()){
+				List<Object> rowList = entry.getValue();
+				String taskIdStr = rowList.get(0).toString();
+				if(taskErrors == null){
+					taskErrors = new StringBuilder().append("User cannot be deleted. The user has the following tasks " + "( "); 
+				}
+				if(index < rowListMap.size() - 1){
+					taskErrors.append(taskIdStr + ",");
+				}else{
+					taskErrors.append(taskIdStr);
+				}
+				index++;
+			}
+			if(taskErrors != null && taskErrors.toString().contains("(")){
+				taskErrors.append(" )");
+			}
+		}else{
+			logger.debug("User passed delete validations. Deleting the user..."); 
+			deleteHunterUserById(userId); 
+		}
+		
+		logger.debug("Validation finished : " + taskErrors.toString()); 
+		return taskErrors.toString();
+	}
+
+	@Override
+	public List<UserLoginBean> getUserLoginBeanByUserName(String userName) {
+		String query = "SELECT h.userLoginBean FROM HunterUser h WHERE h.userName = '" + userName + "'";
+		logger.debug("Executing query : " + query); 
+		List<UserLoginBean> userLoginBeans = HunterHibernateHelper.executeQueryForObjList(UserLoginBean.class, query);
+		logger.debug("Obtained user login bean : " + HunterUtility.stringifyList(userLoginBeans)); 
+		return userLoginBeans;
+	}
+
+	@Override
+	public void updateUserLoginBean(UserLoginBean userLoginBean) {
+		logger.debug("Updating user login bean : " + userLoginBean); 
+		HunterHibernateHelper.updateEntity(userLoginBean);
+		logger.debug("Successfully updated user login bean!"); 
+	}
+	
 	
 
-
+	
 }

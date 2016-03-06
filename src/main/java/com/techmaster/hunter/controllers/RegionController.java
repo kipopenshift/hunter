@@ -18,6 +18,8 @@ import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +31,8 @@ import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.proc.ProcedureHandler;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.ReceiverRegionDao;
+import com.techmaster.hunter.dao.types.TaskHistoryDao;
+import com.techmaster.hunter.enums.TaskHistoryEventEnum;
 import com.techmaster.hunter.imports.extractors.RegionExtractor;
 import com.techmaster.hunter.json.ConstituencyJson;
 import com.techmaster.hunter.json.ConstituencyWardJson;
@@ -39,9 +43,11 @@ import com.techmaster.hunter.obj.beans.Constituency;
 import com.techmaster.hunter.obj.beans.ConstituencyWard;
 import com.techmaster.hunter.obj.beans.County;
 import com.techmaster.hunter.obj.beans.RegionHierarchy;
+import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.region.RegionHierarchyAdapter;
 import com.techmaster.hunter.region.RegionHierarchyNavBean;
 import com.techmaster.hunter.region.RegionService;
+import com.techmaster.hunter.task.TaskManager;
 import com.techmaster.hunter.util.HunterUtility;
 
 @Controller
@@ -49,9 +55,11 @@ import com.techmaster.hunter.util.HunterUtility;
 public class RegionController {
 	
 	@Autowired private ReceiverRegionDao receiverRegionDao;
-	@Autowired HunterJDBCExecutor hunterJDBCExecutor;
-	@Autowired RegionService regionService;
-	@Autowired ProcedureHandler get_region_names_for_ids;
+	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
+	@Autowired private RegionService regionService;
+	@Autowired private ProcedureHandler get_region_names_for_ids;
+	@Autowired private TaskManager taskManager;
+	@Autowired private TaskHistoryDao taskHistoryDao;
 	
 	RegionHierarchyAdapter regionHierarchyAdapter = RegionHierarchyAdapter.getInstance(); 
 	private static final Logger logger = Logger.getLogger(RegionController.class);
@@ -265,6 +273,8 @@ public class RegionController {
 	
 	
 	/*     Task Regions       */
+	
+	
 
 	@RequestMapping(value="/action/task/regions/read/{taskId}", method=RequestMethod.POST) 
 	@ResponseBody public List<ReceiverRegionJson> getRegionsForTask(@PathVariable("taskId") String taskIdStr){
@@ -281,13 +291,85 @@ public class RegionController {
 	@Produces("applicaiton/json")
 	@RequestMapping(value="/action/task/regions/delete/{selTaskId}", method=RequestMethod.POST) 
 	@ResponseBody public ReceiverRegionJson deleteTaskRegion(@PathVariable("selTaskId") Long selTaskId, @RequestBody ReceiverRegionJson receiverRegionJson){
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String userName = auth.getName();
+		TaskHistory taskHistory = taskManager.getNewTaskHistoryForEventName(selTaskId, TaskHistoryEventEnum.REMOVE_REGION.getEventName(), userName);
+		
 		logger.debug("Selected task : " + selTaskId);
 		if(selTaskId != 0){
 			logger.debug("Removing region : " + receiverRegionJson);
 			logger.debug("From task with task Id : " + selTaskId); 
 			regionService.removeTaskRegion(selTaskId, receiverRegionJson.getRegionId()); 
 		}
+		
+		String regionName = receiverRegionJson.getCountry() + ", " + receiverRegionJson.getCounty() + ", " + receiverRegionJson.getConstituency() + ", " + receiverRegionJson.getWard();
+		taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_SUCCESS, "Successsfully removed region ( "+ regionName +" ) from task");
+		taskHistoryDao.insertTaskHistory(taskHistory);
+		
 		return receiverRegionJson;
+	}
+	
+	@Consumes("applicaiton/json")
+	@Produces("applicaiton/json")
+	@RequestMapping(value="/action/task/regions/delete/requestBody", method=RequestMethod.POST) 
+	@ResponseBody public String deleteTaskRegionRequestBody(HttpServletRequest request){
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String userName = auth.getName();
+		TaskHistory taskHistory = taskManager.getNewTaskHistoryForEventName(null, TaskHistoryEventEnum.REMOVE_REGION.getEventName(), userName);
+		
+		JSONObject jsonObject = new JSONObject();
+		
+		try{
+			
+			String body = HunterUtility.getRequestBodyAsString(request);
+			JSONObject reqBody = new JSONObject(body);
+			String taskIdStr = HunterUtility.getStringOrNullFromJSONObj(reqBody, "taskId");
+			String regionIdStr = HunterUtility.getStringOrNullFromJSONObj(reqBody, "regionId");
+			
+			if(!HunterUtility.isNumeric(taskIdStr) || !HunterUtility.isNumeric(regionIdStr)){
+				jsonObject.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_FAILED);
+				jsonObject.put(HunterConstants.MESSAGE_STRING, "Task ID or region ID is not invalid!");
+				return jsonObject.toString();
+			}
+			
+			Long taskId = HunterUtility.getLongFromObject(taskIdStr);
+			taskHistory.setTaskId(taskId);
+			Long regionId = HunterUtility.getLongFromObject(regionIdStr);
+			logger.debug("Getting ready to remove region ( " + regionId + " ) from task ( " + taskId + " )");  
+			String results = regionService.removeTaskRegion(taskId, regionId);
+			
+			if(results != null){
+				
+				jsonObject.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_FAILED);
+				jsonObject.put(HunterConstants.MESSAGE_STRING, results);
+				
+				taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_FAILED, "Failed to remove region ( "+ regionId +" ) from task. " + results);
+				taskHistoryDao.insertTaskHistory(taskHistory);
+				
+				return jsonObject.toString();
+			}
+			
+			taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_SUCCESS, "Failed to remove region ( "+ regionId +" ) from task");
+			taskHistoryDao.insertTaskHistory(taskHistory);
+			
+			Object count = regionService.getTrueHntrMsgRcvrCntFrTaskRgns(taskId)[0];
+			
+			jsonObject.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_SUCCESS);
+			jsonObject.put(HunterConstants.MESSAGE_STRING, "Successfully removed region from task!");
+			jsonObject.put("regionCount", count);
+			return jsonObject.toString();
+			
+		}catch(Exception e){
+			jsonObject.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_FAILED);
+			jsonObject.put(HunterConstants.MESSAGE_STRING, e.getMessage());
+			return jsonObject.toString();
+		}
+		
+		
+		
+		
 	}
 	
 	@Consumes("applicaiton/json")
@@ -295,7 +377,8 @@ public class RegionController {
 	@RequestMapping(value="/action/task/regions/receivers/uniqueCount/{taskId}", method=RequestMethod.POST) 
 	@ResponseBody public Integer getUniqueTaskRegionsReceiversCount(@PathVariable("taskId") Long taskId){
 		logger.debug("Loading unique receivers count for Task Id : " + taskId);
-		int count = regionService.getTrueHntrMsgRcvrCntFrTaskRgns(taskId);
+		Object [] receiversNumberObj = regionService.getTrueHntrMsgRcvrCntFrTaskRgns(taskId);
+		int count = Integer.parseInt(receiversNumberObj[0]+"");
 		logger.debug("Count obtained ( " + count + " )");
 		return count;
 	}
@@ -304,7 +387,14 @@ public class RegionController {
 	@Consumes("applicaiton/json")
 	@Produces("applicaiton/json")
 	@RequestMapping(value="/action/task/regions/addTotask", method=RequestMethod.POST) 
-	@ResponseBody public Integer addRegionsToTask(HttpServletRequest request){
+	@ResponseBody public String addRegionsToTask(HttpServletRequest request){
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String userName = auth.getName();
+		TaskHistory taskHistory = taskManager.getNewTaskHistoryForEventName(null, TaskHistoryEventEnum.ADD_REGION.getEventName(), userName);
+
+		
+		JSONObject jsonObject = new JSONObject();
 		
 		try {
 			
@@ -312,12 +402,14 @@ public class RegionController {
 			logger.debug("Adding regions Task. Region Ids passed in request body: " + body); 
 			JSONObject taskJson = new JSONObject(body);
 			
-			String taskStr = taskJson.has("selTaskId") ? taskJson.get("selTaskId") != null ? taskJson.get("selTaskId").toString() : null : null;;
+			String taskStr = HunterUtility.getStringOrNullFromJSONObj(taskJson,"selTaskId");
 			Long taskId = HunterUtility.getLongFromObject(taskStr);
-			String countryStr = taskJson.has("selCountry") ? taskJson.get("selCountry") != null ? taskJson.get("selCountry").toString() : null : null;
-			String countyStr = taskJson.has("selCounty") ? taskJson.get("selCounty") != null ? taskJson.get("selCounty").toString() : null : null;
-			String constituencyStr = taskJson.has("selConstituency") ? taskJson.get("selConstituency") != null ? taskJson.get("selConstituency").toString() : null : null;
-			String wardStr = taskJson.has("selConstituencyWard") ? taskJson.get("selConstituencyWard") != null ? taskJson.get("selConstituencyWard").toString() : null : null;
+			String countryStr = HunterUtility.getStringOrNullFromJSONObj(taskJson,"selCountry");
+			String countyStr = HunterUtility.getStringOrNullFromJSONObj(taskJson,"selCounty");
+			String constituencyStr = HunterUtility.getStringOrNullFromJSONObj(taskJson,"selConstituency");
+			String wardStr = HunterUtility.getStringOrNullFromJSONObj(taskJson,"selConstituencyWard");
+			
+			taskHistory.setTaskId(taskId); 
 			
 			Long countryId = HunterUtility.getLongFromObject(HunterUtility.isNumeric(countryStr) ? countryStr : null);
 			Long countyId = HunterUtility.getLongFromObject(HunterUtility.isNumeric(countyStr) ? countyStr : null);
@@ -338,13 +430,40 @@ public class RegionController {
 			
 			logger.debug(HunterUtility.stringifyMap(regionNamesMap));
 			
-			regionService.addRegionToTask(HunterUtility.getLongFromObject(taskId), country, county, constituency, ward); 
+			String regionName = country + ", " + county + ", " + constituency + ", " + ward;
+			
+			String result = regionService.addRegionToTask(HunterUtility.getLongFromObject(taskId), country, county, constituency, ward);
+			if(result != null){
+				jsonObject.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_FAILED);
+				jsonObject.put(HunterConstants.MESSAGE_STRING, result);
+				taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_FAILED, "Failed to add region ( "+ regionName +" ) to task");
+				taskHistoryDao.insertTaskHistory(taskHistory);
+				return jsonObject.toString();
+			}
+			
+			Object [] objs = regionService.getTrueHntrMsgRcvrCntFrTaskRgns(taskId);
+			int count = Integer.parseInt(objs[0]+""); 
+			logger.debug("Total unique count for task regions : " + count);
+			int groupCount = taskManager.getTotalTaskGroupsReceivers(taskId);
+			
+			jsonObject.put("groupCount", groupCount);
+			jsonObject.put("count", count);
+			jsonObject.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_SUCCESS);
+			jsonObject.put(HunterConstants.MESSAGE_STRING, "Successfully added region to task!");
+			
+			taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_SUCCESS, "Successfully added region ( "+ regionName +" ) to task");
+			taskHistoryDao.insertTaskHistory(taskHistory);
+			
+			return jsonObject.toString();
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace(); 
+			jsonObject.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_FAILED);
+			jsonObject.put(HunterConstants.MESSAGE_STRING, e.getMessage());
+			taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_SUCCESS, "Successfully added region to task. " + e.getMessage());
+			taskHistoryDao.insertTaskHistory(taskHistory);
+			return jsonObject.toString();
 		}
-		return 200;
 	}
 	
 

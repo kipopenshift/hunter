@@ -18,6 +18,10 @@ body{
 	text-align: center;
 }
 
+.button:hover {
+	background-color: #C7E9EB;
+}
+
 .userDetailsDivs{
 	width:38%;
 	border-right:1px solid red;
@@ -48,9 +52,8 @@ body{
 #loginCover{
 	width:30%;
 	margin-left:35%;
-	background-color:#EEFDFF;
-	box-shadow : 3px 3px #F1F9FC;
-	border: 1px solid #DEEFF5;
+	background-color:#E0F1F3;
+	border: 1px solid #B3D0D4;
 	height:25%;
 	margin-top:15%;
 	border-radius:4px;
@@ -143,6 +146,9 @@ body{
 	font-weight: bold;
 }
 
+.k-primary{
+	color:black;
+}
 
 
 

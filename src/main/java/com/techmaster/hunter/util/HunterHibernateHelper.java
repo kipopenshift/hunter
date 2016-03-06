@@ -16,8 +16,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
 
-import com.techmaster.hunter.obj.beans.Task;
-
 public class HunterHibernateHelper {
 
 	
@@ -110,6 +108,7 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 			trans = session.beginTransaction();
 			session.save(obj); 
 			trans.commit();
+			session.flush();
 			closeSession(session);
 			
 			logger.debug("Successfully saved Entity(" + getEntitySimpleName(obj.getClass()) + ")");
@@ -137,6 +136,7 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 			trans = session.beginTransaction();
 			session.saveOrUpdate(obj); 
 			trans.commit();
+			session.flush();
 			closeSession(session);
 			
 			logger.debug("Successfully saved Entity(" + getEntitySimpleName(obj.getClass()) + ")");
@@ -150,7 +150,40 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		}
 	}
 	
-	public static void saveOrUpdateEntities(List<?> objs){
+	public static void saveOrUpdateEntities(List<?> objects){
+		
+		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		Session session = null;
+		Transaction trans = null;
+		
+		Class<?> clzz = objects.get(0).getClass();
+		logger.debug("Updating Entity(" + getEntitySimpleName(clzz));
+		
+		logger.debug("Saving or Updating Entity(" + getEntitySimpleName(clzz) + ")");
+		
+		try {
+			
+			session = sessionFactory.openSession();
+			trans = session.beginTransaction();
+			for(Object obj : objects){
+				session.saveOrUpdate(obj); 
+			}
+			trans.commit();
+			session.flush();
+			closeSession(session);
+			
+			logger.debug("Successfully saved Entity(" + getEntitySimpleName(clzz) + ")");
+			
+		} catch (HibernateException e) {
+			logger.debug("Exception saving Entity(" + getEntitySimpleName(clzz) + ")");
+			rollBack(trans); 
+			e.printStackTrace();
+		}finally{
+			closeSession(session); 	
+		}
+	}
+	
+	public static void uppdateEntities(List<?> objs){
 		
 		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
 		Session session = null;
@@ -163,9 +196,10 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 			session = sessionFactory.openSession();
 			trans = session.beginTransaction();
 			for(Object obj : objs){
-				session.saveOrUpdate(obj); 
+				session.update(obj); 
 			}
 			trans.commit();
+			session.flush();
 			closeSession(session);
 			
 			logger.debug("Successfully saved Entities(" + getEntitySimpleName(objs.get(0).getClass()) + ")");
@@ -203,6 +237,7 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 				session.save(obj); 
 			}
 			trans.commit();
+			session.flush();
 			closeSession(session);
 			
 			logger.debug("Successfully saved entities for Entity(" + getEntitySimpleName(clss) + ")");
@@ -232,12 +267,48 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 			trans = session.beginTransaction();
 			session.update(obj); 
 			trans.commit();
+			session.flush();
 			closeSession(session);
 			
 			logger.debug("Finished updating Entity(" + getEntitySimpleName(obj.getClass()) + ")");
 			
 		} catch (HibernateException e) {
 			logger.debug("Exception while updating Entity(" + getEntitySimpleName(obj.getClass()) + ")");
+			rollBack(trans); 
+			e.printStackTrace();
+		}finally{
+			closeSession(session); 	
+		}
+	}
+	
+	public static void updateEntitities(List<?> objects){
+		
+		if(objects == null || objects.isEmpty()){
+			logger.debug("Empty or null list. Returning..."); 
+			return;
+		}
+
+		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		Session session = null;
+		Transaction trans = null;
+		
+		Class<?> clzz = objects.get(0).getClass();
+		logger.debug("Updating Entity(" + getEntitySimpleName(clzz));
+		
+		try {
+			
+			session = sessionFactory.openSession();
+			trans = session.beginTransaction();
+			for(Object obj : objects){
+				session.update(obj); 
+			}
+			trans.commit();
+			closeSession(session);
+			
+			logger.debug("Finished updating Entity(" + getEntitySimpleName(clzz) + ")");
+			
+		} catch (HibernateException e) {
+			logger.debug("Exception while updating Entity(" + getEntitySimpleName(clzz) + ")");
 			rollBack(trans); 
 			e.printStackTrace();
 		}finally{
@@ -259,6 +330,7 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 			trans = session.beginTransaction();
 			session.delete(obj); 
 			trans.commit();
+			session.flush();
 			closeSession(session);
 			
 			logger.debug("Finished deleting entity Entity(" + getEntitySimpleName(obj.getClass()) + ")");
@@ -301,6 +373,7 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		
 		return t;
 	}
+	
 	
 	
 	/**
@@ -402,19 +475,60 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		return ts;
 	}
 	
+	public static void executeVoidTransctnlReadyQuery(String query){
+		logger.debug("Executing hibernate query : " + query); 
+		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		Session session = null;
+		Transaction trans = null;
+		
+		try {
+			session = sessionFactory.openSession();
+			trans = session.beginTransaction();
+			Query query_ = session.createQuery(query);
+			query_.executeUpdate();
+			trans.commit();
+		} catch (HibernateException e) {
+			rollBack(trans); 
+			e.printStackTrace();
+		}finally{
+			closeSession(session); 			
+		}
+		logger.debug("Finished executing query!"); 
+	}
 	
 	public static String getEntitySimpleName(Class<?> clz){
 		String simpleName =  clz.getSimpleName();
 		return simpleName;
 	}
 	
+	public static List<?>  executeQueryForListWithParams(String queryStr, Map<String, Object> params) {
+		logger.debug("Executing query : " + queryStr);
+		logger.debug("With params : " + HunterUtility.stringifyMap(params)); 
+		Session session = null;
+		List<?> list = null;
+		try {
+			session = HunterSessionFactory.getSessionFactory().openSession();
+			Query query = session.createQuery(queryStr);
+			query.setProperties(params);
+			list = query.list();
+			session.close();
+			logger.debug("Successfully retrieved the list. Size ( " + list.size() + " )");  
+		} catch (HibernateException e) {
+			e.printStackTrace();
+		}finally{
+			HunterHibernateHelper.closeSession(session);
+		}
+		return list;
+	}
+	
 	
 	
 	public static void main(String[] args) {
 		
-		String query = "FROM Task t WHERE t.taskId <= '16'"; 
+		/*String query = "FROM Task t WHERE t.taskId <= '16'"; 
 		List<Task> tasks = executeQueryForObjList(Task.class, query); 
-		logger.debug(HunterUtility.stringifyList(tasks));  
+		logger.debug(HunterUtility.stringifyList(tasks));  */
+		executeVoidTransctnlReadyQuery("delete TaskHistory where taskId = " + 13); 
 		
 	}
 	

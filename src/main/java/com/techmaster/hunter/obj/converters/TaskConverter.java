@@ -13,12 +13,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.json.ReceiverGroupJson;
+import com.techmaster.hunter.obj.beans.EmailMessage;
 import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
-import com.techmaster.hunter.obj.beans.TaskMessageReceiver;
 import com.techmaster.hunter.obj.beans.Message;
 import com.techmaster.hunter.obj.beans.ReceiverRegion;
 import com.techmaster.hunter.obj.beans.ServiceProvider;
 import com.techmaster.hunter.obj.beans.Task;
+import com.techmaster.hunter.obj.beans.TaskMessageReceiver;
 import com.techmaster.hunter.obj.beans.TextMessage;
 import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
@@ -26,16 +28,14 @@ import com.techmaster.hunter.util.HunterUtility;
 public class TaskConverter {
 	
 	private String requestBody;
-	private Class<? extends Message> msgClss;
 	private JSONObject taskJson = null;
 	private static Logger logger = HunterLogFactory.getLog(TaskConverter.class);
 	
 	private HunterJacksonMapper hunterJacksonMapper = new HunterJacksonMapper();
 	
-	public TaskConverter(String requestBody, Class<? extends Message> msgClss) { 
+	public TaskConverter(String requestBody) { 
 		super();
 		this.requestBody = requestBody;
-		this.msgClss = msgClss;
 		this.taskJson = new JSONObject(this.requestBody); 
 	}
 
@@ -44,15 +44,12 @@ public class TaskConverter {
 		logger.debug("Beginning task conversion process.."); 
 		
 		Task task = getBasicTask();
-		Message message = getMessageForClass();
-		ReceiverRegion region = getTaskRegion();
+		Message message = getTaskMessage();
 		Set<ReceiverRegion> taskRegions = getTaskReceiverRegions();
-		task.setTaskRegions(taskRegions); 
-		 Set<TaskMessageReceiver> taskReceivers = getTaskReceivers();
-		
+		Set<ReceiverGroupJson> taskGroups = getTaskGroups();
+		task.setTaskGroups(taskGroups); 
 		task.setTaskMessage(message); 
-		task.setTaskRegion(region); 
-		task.setTaskReceivers(taskReceivers); 
+		task.setTaskRegions(taskRegions);
 		
 		logger.debug("Completed task conversion process successfully..");
 		logger.debug("Resultant task >> " + task);
@@ -60,6 +57,61 @@ public class TaskConverter {
 		return task;
 	}
 	
+	private Set<ReceiverGroupJson> getTaskGroups() {
+		logger.debug("Extracting task groups json..."); 
+		Set<ReceiverGroupJson> taskGroups = new HashSet<>();
+		JSONArray groupJsonArray = null;
+		try {
+			groupJsonArray = taskJson.getJSONArray("taskGroups");
+			logger.debug("Successfully obtained group json \n " + groupJsonArray); 
+		} catch (JSONException e) {
+			logger.error("Failed to get task message. Exception >> " + e.getMessage()); 
+			return taskGroups;
+		}
+		if(groupJsonArray != null){
+			for(int i=0; i<groupJsonArray.length();i++){
+				
+				Object groupJson_ = groupJsonArray.get(i);
+				JSONObject groupJson = new JSONObject(groupJson_.toString());
+				
+				String firsName = HunterUtility.getStringOrNullFromJSONObj(groupJson, "firstName");
+				String lastName = HunterUtility.getStringOrNullFromJSONObj(groupJson, "lastName");
+				String lastUpdatedBy = HunterUtility.getStringOrNullFromJSONObj(groupJson, "lastUpdatedBy");
+				String groupName = HunterUtility.getStringOrNullFromJSONObj(groupJson, "groupName");
+				String groupDesc = HunterUtility.getStringOrNullFromJSONObj(groupJson, "groupDesc");
+				String createdBy = HunterUtility.getStringOrNullFromJSONObj(groupJson, "createdBy");
+				String receiverType = HunterUtility.getStringOrNullFromJSONObj(groupJson, "receiverType");
+				String groupIdStr = HunterUtility.getStringOrNullFromJSONObj(groupJson, "groupId");
+				Long groupId = HunterUtility.getLongFromObject(groupIdStr == null ? "0" : groupIdStr);
+				String lastUpdateStr = HunterUtility.getStringOrNullFromJSONObj(groupJson, "lastUpdate");
+				Date lastUpdate = HunterUtility.parseDate(lastUpdateStr+":00", HunterConstants.DATE_FORMAT_STRING);
+				String receiverCountStr = HunterUtility.getStringOrNullFromJSONObj(groupJson, "receiverCount");
+				int receiverCount = Integer.parseInt(receiverCountStr == null ? "0" : receiverCountStr);
+				String ownerUserName = HunterUtility.getStringOrNullFromJSONObj(groupJson, "ownerUserName");
+				String cretDateStr = HunterUtility.getStringOrNullFromJSONObj(groupJson, "cretDate");
+				Date cretDate = HunterUtility.parseDate(cretDateStr+":00", HunterConstants.DATE_FORMAT_STRING);
+				
+				ReceiverGroupJson receiverGroupJson = new ReceiverGroupJson();
+				receiverGroupJson.setCreatedBy(createdBy);
+				receiverGroupJson.setCretDate(cretDate);
+				receiverGroupJson.setFirstName(firsName);
+				receiverGroupJson.setGroupDesc(groupDesc);
+				receiverGroupJson.setGroupId(groupId);
+				receiverGroupJson.setGroupName(groupName);
+				receiverGroupJson.setLastName(lastName);
+				receiverGroupJson.setLastUpdate(lastUpdate);
+				receiverGroupJson.setLastUpdatedBy(lastUpdatedBy);
+				receiverGroupJson.setOwnerUserName(ownerUserName);
+				receiverGroupJson.setReceiverCount(receiverCount);
+				receiverGroupJson.setReceiverType(receiverType);
+				
+				taskGroups.add(receiverGroupJson);
+			}
+		}
+		logger.debug("Successfully reconstructed receiver group jsons : \n " + HunterUtility.stringifySet(taskGroups)); 
+		return taskGroups;
+	}
+
 	public Task convertBasic(){
 		return getBasicTask();
 	}
@@ -79,11 +131,13 @@ public class TaskConverter {
 		long taskId = taskJson.getLong("taskId");
 		Boolean recurrentTask = taskJson.getBoolean("recurrentTask");
 		Long clientId = taskJson.getLong("clientId");
+		
 		String taskDeliveryStatus = taskJson.has("taskDeliveryStatus") ? taskJson.get("taskDeliveryStatus") != null ? taskJson.get("taskDeliveryStatus").toString() : null : null;
 		String taskLifeStatus = taskJson.has("taskLifeStatus") ? taskJson.get("taskLifeStatus") != null ? taskJson.get("taskLifeStatus").toString() : null : null;
 		String taskDateline = taskJson.has("taskDateline") ? taskJson.get("taskDateline") != null ? taskJson.get("taskDateline").toString() : null : null;
 		String taskApprover = taskJson.has("taskApprover") ? taskJson.get("taskApprover") != null ? taskJson.get("taskApprover").toString() : null : null;
 		String gateWayClient = taskJson.has("gateWayClient") ? taskJson.get("gateWayClient") != null ? taskJson.get("gateWayClient").toString() : null : null;
+		String tskMsgType = taskJson.has("tskMsgType") ? taskJson.get("tskMsgType") != null ? taskJson.get("tskMsgType").toString() : null : null;
 		Boolean taskApproved = taskJson.getBoolean("taskApproved");
 		String tskAgrmntLoc = taskJson.has("tskAgrmntLoc") ? taskJson.get("tskAgrmntLoc") != null ? taskJson.get("tskAgrmntLoc").toString() : null : null;
 		
@@ -107,6 +161,7 @@ public class TaskConverter {
 		task.setTaskLifeStatus(taskLifeStatus); 
 		task.setTaskDateline(HunterUtility.parseDate(taskDateline, HunterConstants.HUNTER_DATE_FORMAT_MIN));
 		task.setTaskApprover(taskApprover);
+		task.setTskMsgType(tskMsgType); 
 		task.setTaskApproved(taskApproved);
 		task.setGateWayClient(gateWayClient); 
 		task.setTskAgrmntLoc(tskAgrmntLoc); 
@@ -128,14 +183,21 @@ public class TaskConverter {
 		return task;
 	}
 	
-	private ServiceProvider getServiceProviderForMsgJson(JSONObject msgJson){
+	private ServiceProvider getServiceProviderForMsgJson(JSONObject providerJson){
 		
-		logger.debug("Constructing provider for messageJSON >> " + msgJson); 
+		if(providerJson == null || providerJson.length() == 0){
+			logger.debug("Service provider is not set for message. Returning null..."); 
+			return null;
+		}
 		
-		Long providerId = msgJson.getLong("providerId");
-		String providerName = msgJson.getString("providerName"); 
-		float cstPrAudMsg = (float)msgJson.getInt("cstPrAudMsg");
-		float cstPrTxtMsg = (float)msgJson.getInt("cstPrTxtMsg");
+		logger.debug("Constructing provider for messageJSON >> " + providerJson); 
+		
+		String providerStr = HunterUtility.getStringOrNullFromJSONObj(providerJson, "providerId"); 
+		Long providerId = HunterUtility.getLongFromObject(providerStr); 
+		
+		String providerName = HunterUtility.getStringOrNullFromJSONObj(providerJson, "providerName"); 
+		float cstPrAudMsg = HunterUtility.getFloatOrZeroFromJsonStr(providerJson, "cstPrAudMsg");
+		float cstPrTxtMsg = HunterUtility.getFloatOrZeroFromJsonStr(providerJson, "cstPrTxtMsg");
 		
 		ServiceProvider provider = new ServiceProvider();
 		
@@ -144,22 +206,119 @@ public class TaskConverter {
 		provider.setCstPrAudMsg(cstPrAudMsg);
 		provider.setCstPrTxtMsg(cstPrTxtMsg); 
 		
-		logger.debug("Successfully consted provider >> " + provider); 
+		logger.debug("Successfully constructed provider >> " + provider); 
 		
 		return provider;
 	}
 	
-	private TextMessage getTextMessage(){
-		
-		TextMessage message = new TextMessage();
+	private Message getTaskMessage(){
+		String tskMsgType = HunterUtility.getStringOrNullFromJSONObj(taskJson, "tskMsgType");
+		logger.debug("Getting task message for task message type : " + tskMsgType); 
+		if(tskMsgType != null){
+			if(tskMsgType.equalsIgnoreCase(HunterConstants.MESSAGE_TYPE_TEXT)){
+				return getTextMessage();
+			}else if(tskMsgType.equalsIgnoreCase(HunterConstants.MESSAGE_TYPE_EMAIL)){
+				return getEmailMessage();
+			}else{
+				throw new IllegalArgumentException("Please implement extraction for message type : " + tskMsgType);
+			}
+		}
+		return null;	
+	}
+	
+	private JSONObject getTskMsgJson(){
 		JSONObject msgJson = null;
-		
 		try {
 			msgJson = taskJson.getJSONObject("taskMessage");
+			logger.debug("Successfully obtained task message json : " + msgJson); 
+			return msgJson;
 		} catch (JSONException e) {
 			logger.error("Failed to get task message. Exception >> " + e.getMessage()); 
 			return null;
 		}
+	}
+	
+	private EmailMessage getEmailMessage(){
+		logger.debug("Extracting email message..."); 
+		EmailMessage emailMsg = new EmailMessage();
+		JSONObject json = getTskMsgJson();
+		
+		if(json == null){
+			logger.debug("No email messag found! Returning null");
+			return null;
+		}
+		
+		boolean multiPart = json.getBoolean("multiPart");
+		String msgDeliveryStatus = HunterUtility.getStringOrNullFromJSONObj(json, "msgDeliveryStatus");
+		int actualReceivers = HunterUtility.getIntOrZeroFromJsonStr(json, "actualReceivers");
+		String eBody = HunterUtility.getStringOrNullFromJSONObj(json, "eBody");
+		Long msgId = HunterUtility.getLongOrZeroFromJsonStr(json, "msgId");
+		String toList = HunterUtility.getStringOrNullFromJSONObj(json, "toList");
+		String msgTaskType = HunterUtility.getStringOrNullFromJSONObj(json, "msgTaskType");
+		String attchmtntFileType = HunterUtility.getStringOrNullFromJSONObj(json, "attchmtntFileType");
+		boolean hasAttachment =  json.getBoolean("hasAttachment");
+		String cssObject = HunterUtility.getStringOrNullFromJSONObj(json, "cssObject");
+		String msgOwner = HunterUtility.getStringOrNullFromJSONObj(json, "msgOwner");
+		JSONObject providerJson = HunterUtility.getJSONobjOrNullFromJsonObj(json, "provider");
+		ServiceProvider provider = getServiceProviderForMsgJson(providerJson);
+		String msgLifeStatus = HunterUtility.getStringOrNullFromJSONObj(json, "msgLifeStatus");
+		String ccList = HunterUtility.getStringOrNullFromJSONObj(json, "ccList");
+		String msgText = HunterUtility.getStringOrNullFromJSONObj(json, "msgText");
+		String cretDateStr = HunterUtility.getStringOrNullFromJSONObj(json, "cretDate");
+		Date cretDate = HunterUtility.parseDate(cretDateStr, HunterConstants.DATE_FORMAT_STRING);
+		String contentType = HunterUtility.getStringOrNullFromJSONObj(json, "contentType");
+		String eFrom = HunterUtility.getStringOrNullFromJSONObj(json, "eFrom");
+		String lastUpdatedBy = HunterUtility.getStringOrNullFromJSONObj(json, "lastUpdatedBy");
+		String msgSendDateStr = HunterUtility.getStringOrNullFromJSONObj(json, "msgSendDate");
+		Date msgSendDate = HunterUtility.parseDate(msgSendDateStr, HunterConstants.DATE_FORMAT_STRING);
+		int confirmedReceivers = HunterUtility.getIntOrZeroFromJsonStr(json, "confirmedReceivers");
+		int priority = HunterUtility.getIntOrZeroFromJsonStr(json, "priority");
+		long attchmntBnId = HunterUtility.getLongOrZeroFromJsonStr(json, "attchmntBnId");
+		String createdBy = HunterUtility.getStringOrNullFromJSONObj(json, "createdBy");
+		String lastUpdateStr  = HunterUtility.getStringOrNullFromJSONObj(json, "lastUpdate");
+		Date lastUpdate  = HunterUtility.parseDate(lastUpdateStr, HunterConstants.DATE_FORMAT_STRING);
+		String eFooter = HunterUtility.getStringOrNullFromJSONObj(json, "eFooter");
+		String eSubject = HunterUtility.getStringOrNullFromJSONObj(json, "eSubject");
+		int desiredReceivers = HunterUtility.getIntOrZeroFromJsonStr(json, "desiredReceivers");
+		String emailTemplateName = HunterUtility.getStringOrNullFromJSONObj(json, "emailTemplateName");
+		
+		emailMsg.setMultiPart(multiPart);
+		emailMsg.setMsgDeliveryStatus(msgDeliveryStatus);
+		emailMsg.setActualReceivers(actualReceivers);
+		emailMsg.seteBody(eBody);
+		emailMsg.setMsgId(msgId); 
+		emailMsg.setToList(toList);
+		emailMsg.setMsgTaskType(msgTaskType);
+		emailMsg.setAttchmtntFileType(attchmtntFileType);
+		emailMsg.setHasAttachment(hasAttachment);
+		emailMsg.setCssObject(cssObject);
+		emailMsg.setMsgOwner(msgOwner);
+		emailMsg.setProvider(provider);
+		emailMsg.setMsgLifeStatus(msgLifeStatus);
+		emailMsg.setCcList(ccList);
+		emailMsg.setMsgText(msgText);
+		emailMsg.setCretDate(cretDate);
+		emailMsg.setContentType(contentType);
+		emailMsg.seteFrom(eFrom);
+		emailMsg.setLastUpdatedBy(lastUpdatedBy); 
+		emailMsg.setMsgSendDate(msgSendDate);
+		emailMsg.setConfirmedReceivers(confirmedReceivers);
+		emailMsg.setPriority(priority); 
+		emailMsg.setAttchmntBnId(attchmntBnId);
+		emailMsg.setCreatedBy(createdBy);
+		emailMsg.setLastUpdate(lastUpdate);
+		emailMsg.seteFooter(eFooter);
+		emailMsg.seteSubject(eSubject);
+		emailMsg.setDesiredReceivers(desiredReceivers);
+		emailMsg.setEmailTemplateName(emailTemplateName); 
+		
+		return emailMsg;
+	}
+	
+	private TextMessage getTextMessage(){
+		logger.debug("Extracting text message...");
+		TextMessage message = new TextMessage();
+		JSONObject msgJson = getTskMsgJson();
 		
 		if(msgJson == null) {
 			logger.warn("Null task message!! Returning null!");
@@ -169,20 +328,20 @@ public class TaskConverter {
 		logger.debug("Creating textMessage for json >> " + msgJson); 
 		
 		long msgId = msgJson.getLong("msgId");
-		String msgDeliveryStatus = msgJson.getString("msgDeliveryStatus"); 
-		String msgLifeStatus = msgJson.getString("msgLifeStatus"); 
-		String msgSendDate_ = msgJson.getString("msgSendDate");
+		String msgDeliveryStatus = HunterUtility.getStringOrNullFromJSONObj(msgJson, "msgDeliveryStatus"); 
+		String msgLifeStatus = HunterUtility.getStringOrNullFromJSONObj(msgJson, "msgLifeStatus"); 
+		String msgSendDate_ = HunterUtility.getStringOrNullFromJSONObj(msgJson, "msgSendDate");
 		Date msgSendDate = HunterUtility.parseDate(msgSendDate_, HunterConstants.HUNTER_DATE_FORMAT_MIN);
-		String msgTaskType = msgJson.getString("msgTaskType"); 
-		String msgText = msgJson.getString("msgText"); 
+		String msgTaskType = HunterUtility.getStringOrNullFromJSONObj(msgJson, "msgTaskType");
+		String msgText = HunterUtility.getStringOrNullFromJSONObj(msgJson, "msgText"); 
 		int desiredReceivers = msgJson.getInt("desiredReceivers");
 		int actualReceivers = msgJson.getInt("actualReceivers");
 		int confirmedReceivers = msgJson.getInt("confirmedReceivers");
-		String msgOwner = msgJson.getString("msgOwner");
-		String text = msgJson.getString("text");
-		String disclaimer = msgJson.getString("disclaimer"); 
-		String fromPhone = msgJson.getString("fromPhone");
-		String toPhone = msgJson.getString("toPhone");
+		String msgOwner = HunterUtility.getStringOrNullFromJSONObj(msgJson, "msgOwner");
+		String text = HunterUtility.getStringOrNullFromJSONObj(msgJson, "text");
+		String disclaimer = HunterUtility.getStringOrNullFromJSONObj(msgJson, "disclaimer"); 
+		String fromPhone = HunterUtility.getStringOrNullFromJSONObj(msgJson, "fromPhone");
+		String toPhone = HunterUtility.getStringOrNullFromJSONObj(msgJson, "toPhone");
 		int pageWordCount = msgJson.getInt("pageWordCount");
 		
 		String cretDate_ = msgJson.getString("cretDate");
@@ -221,15 +380,6 @@ public class TaskConverter {
 		
 		
 		return message;
-	}
-	
-	private Message getMessageForClass(){
-		if(this.msgClss == TextMessage.class){
-			logger.debug("Returning message type >> " + msgClss.getSimpleName()); 
-			return getTextMessage();
-		}
-		
-		return null;
 	}
 	
 	private Set<ReceiverRegion> getTaskReceiverRegions(){
@@ -328,8 +478,8 @@ public class TaskConverter {
 		String city = rgnJson.has("city") ? rgnJson.get("city") != null ? rgnJson.get("city").toString() : null : null;
 		String ward = rgnJson.has("ward") ? rgnJson.get("ward") != null ? rgnJson.get("ward").toString() : null : null;
 		String village = rgnJson.has("village") ? rgnJson.get("village") != null ? rgnJson.get("village").toString() : null : null;
-		double longitude = rgnJson.has("longitude") ? (double)rgnJson.get("longitude") : 0;
-		double latitude =  rgnJson.has("latitude") ?  (double)rgnJson.get("latitude") : 0; 
+		double longitude = rgnJson.has("longitude") ? rgnJson.getDouble("longitude") : 0;
+		double latitude =  rgnJson.has("latitude") ?  rgnJson.getDouble("latitude") : 0; 
 		String currentLevel = rgnJson.has("currentLevel") ? rgnJson.get("currentLevel") != null ? rgnJson.get("currentLevel").toString() : null : null;
 		String borderLongLats = rgnJson.has("borderLongLats") ? rgnJson.get("borderLongLats") != null ? rgnJson.get("borderLongLats").toString() : null : null;
 		
@@ -402,8 +552,13 @@ public class TaskConverter {
 	}
 
 	
-	
-	
+	public TextMessage convertTextMessage(){
+		if(taskJson == null){
+			return null;
+		}
+		TextMessage textMessage = getTextMessage();
+		return textMessage;
+	}
 	
 	
 	

@@ -72,4 +72,27 @@ public class GateWayMessageDaoImpl implements GateWayMessageDao{
 		return gatewayMessages;
 	}
 
+	@Override
+	public void updateGatewayMessages(List<GateWayMessage> gateWayMessages) {
+		logger.debug("Updating gate way messages...");
+		HunterHibernateHelper.updateEntitities(gateWayMessages);
+		logger.debug("Finished updating gate way messages!");
+	}
+
+	@Override
+	public void updateGatewayMessages(Set<GateWayMessage> gateWayMessages) {
+		List<GateWayMessage> newList = new ArrayList<>();
+		newList.addAll(gateWayMessages);
+		updateGatewayMessages(newList);
+	}
+
+	@Override
+	public void insertMessages(List<GateWayMessage> messages) {		
+		Set<GateWayMessage> set = new HashSet<>();
+		set.addAll(messages);
+		insertMessages(set); 
+	}
+
+	
+	
 }

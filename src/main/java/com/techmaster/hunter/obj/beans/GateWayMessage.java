@@ -22,6 +22,7 @@ public class GateWayMessage {
 	private Long duration;
 	private byte[] requestBody;
 	private String errorText;
+	private String clientTagKey;
 	
 	public GateWayMessage() {
 		super();
@@ -130,12 +131,20 @@ public class GateWayMessage {
 	public void setErrorText(String errorText) {
 		this.errorText = errorText;
 	}
+	public String getClientTagKey() {
+		return clientTagKey;
+	}
+	public void setClientTagKey(String clientTagKey) {
+		this.clientTagKey = clientTagKey;
+	}
 
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result
+				+ ((clientTagKey == null) ? 0 : clientTagKey.hashCode());
 		result = prime * result
 				+ ((clntRspCode == null) ? 0 : clntRspCode.hashCode());
 		result = prime * result
@@ -176,6 +185,11 @@ public class GateWayMessage {
 		if (getClass() != obj.getClass())
 			return false;
 		GateWayMessage other = (GateWayMessage) obj;
+		if (clientTagKey == null) {
+			if (other.clientTagKey != null)
+				return false;
+		} else if (!clientTagKey.equals(other.clientTagKey))
+			return false;
 		if (clntRspCode == null) {
 			if (other.clntRspCode != null)
 				return false;
@@ -273,8 +287,11 @@ public class GateWayMessage {
 				+ ", status=" + status + ", createdOn=" + createdOn
 				+ ", createdBy=" + createdBy + ", duration=" + duration
 				+ ", requestBody=" + Arrays.toString(requestBody)
-				+ ", errorText=" + errorText + "]";
+				+ ", errorText=" + errorText + ", clientTagKey=" + clientTagKey
+				+ "]";
 	}
+
+
 
 	
 	

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,9 +17,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.dao.types.HunterClientDao;
 import com.techmaster.hunter.dao.types.HunterUserDao;
+import com.techmaster.hunter.json.HunterClientsDetailsJson;
 import com.techmaster.hunter.obj.beans.HunterUser;
-import com.techmaster.hunter.util.HunterLogFactory;
 
 
 @Controller
@@ -26,6 +28,8 @@ import com.techmaster.hunter.util.HunterLogFactory;
 public class UserController {
 	
 	@Autowired private HunterUserDao userDao;
+	@Autowired private HunterClientDao hunterClientDao;
+	private Logger logger = Logger.getLogger(getClass());
 	
 	@RequestMapping(value="/action/create", method=RequestMethod.POST )
 	@Produces("application/json")
@@ -34,7 +38,7 @@ public class UserController {
 		
 		HunterUser hunterUser = new HunterUser();
 		Long userId = userDao.getNextUserId();
-		HunterLogFactory.getLog(getClass()).debug("Assigned the id to the user >> " + userId); 
+		logger.debug("Assigned the id to the user >> " + userId); 
 		hunterUser.setUserId(userId);
 		hunterUser.setAddresses(null); 
 		hunterUser.setCreatedBy("hlangat01"); 
@@ -51,7 +55,7 @@ public class UserController {
 		hunterUser.setProfilePhoto(null);
 		hunterUser.setUserName(data.get("userName"));
 		hunterUser.setUserType(HunterConstants.HUNTER_CLIENT_USER);  
-		HunterLogFactory.getLog(getClass()).debug("created the following user >> " + hunterUser); 
+		logger.debug("created the following user >> " + hunterUser); 
 		userDao.insertHunterUser(hunterUser); 
 		
 		return hunterUser;
@@ -68,7 +72,7 @@ public class UserController {
 	@Produces("application/json")
 	@Consumes("application/json")
 	public @ResponseBody HunterUser updateUser(@RequestBody HunterUser hunterUser){
-		HunterLogFactory.getLog(getClass()).debug("Received user to update from kendo >> " + hunterUser); 
+		logger.debug("Received user to update from kendo >> " + hunterUser); 
 		userDao.updateUser(hunterUser); 
 		return hunterUser;
 	}
@@ -77,10 +81,37 @@ public class UserController {
 	@Produces("application/json")
 	@Consumes("application/json")
 	public @ResponseBody HunterUser deleteUser(@RequestBody HunterUser hunterUser){
-		HunterLogFactory.getLog(getClass()).debug("Received user delete from kendo >> " + hunterUser); 
+		logger.debug("Received user delete from kendo >> " + hunterUser); 
 		userDao.deleteHunterUser(hunterUser); 
 		return hunterUser;
 	}
+	
+	
+	@RequestMapping(value="/action/loginError", method=RequestMethod.GET )
+	public String loginError(HttpServletResponse response){
+		logger.debug("Redirected successfully!!"); 
+		return "access/loginError";
+	}
+	
+	@RequestMapping(value="/action/login", method=RequestMethod.GET )
+	public String login(HttpServletResponse response){
+		logger.debug("Redirected successfully!!"); 
+		return "access/login";
+	}
+	
+	@RequestMapping(value="/action/user/profile/home", method=RequestMethod.GET )
+	public String goToMyHunterHome(HttpServletResponse response){
+		logger.debug("Redirected successfully!!"); 
+		return "views/myHunter";
+	}
+	
+	@RequestMapping(value="/action/client/getAllClientsDetails", method=RequestMethod.POST )
+	@Produces("application/json")
+	@ResponseBody public List<HunterClientsDetailsJson> getClientDetailsData(){
+		 List<HunterClientsDetailsJson> jsons = hunterClientDao.getAllHunterClientDetailsJson();
+		 return jsons;
+	}
+	
 	
 	
 

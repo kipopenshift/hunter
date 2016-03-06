@@ -28,7 +28,6 @@ public class ServiceProviderDaoImpl implements ServiceProviderDao{
 
 	@Override
 	public ServiceProvider getServiceProviderById(Long id) {
-		
 		logger.debug("Getting service provider by id : " + id); 
 		ServiceProvider serviceProvider = HunterHibernateHelper.getEntityById(id, ServiceProvider.class);
 		logger.debug("Finished gettting Service provider : " + serviceProvider); 
@@ -37,7 +36,6 @@ public class ServiceProviderDaoImpl implements ServiceProviderDao{
 
 	@Override
 	public ServiceProvider getServiceProviderByName(String name) {
-		
 		logger.debug("Getting service provider by name : " + name); 
 		String query = "FROM ServiceProvider s where s.providerName = '" + name + "'";
 		List<ServiceProvider> serviceProviders = HunterHibernateHelper.executeQueryForObjList(ServiceProvider.class, query);

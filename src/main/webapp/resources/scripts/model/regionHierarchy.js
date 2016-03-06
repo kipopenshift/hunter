@@ -207,7 +207,7 @@ var RegionHierarchyVM = kendo.observable({
 		$("#regionHierarchyTreeList").kendoTreeList({
 			toolbar : kendo.template($("#regionHierarchyToolBarTemplate").html()),
 			dataSource : RegionHierarchyTreeListDS,
-			height: 600,
+			height: 700,
 			 messages: {
 				 loading: "Loading region hierarchies..."
 			 },
@@ -217,14 +217,13 @@ var RegionHierarchyVM = kendo.observable({
 			 pageable :false,
 	        columns: [	
 						{ field:'name', title:'Name', filterable: true },
-						{ field:'population', title:'Population', filterable: true },
-						{ field:'hunterPopuplation', title:'Hunter Population', width:250, filterable: true },
-						{ field:'mapDots', title:'Map Dots', filterable: true },
-						{ field:'levelType', title:'Type', filterable: true },
-						{ field:'regionCode', title:'Code', filterable: true },
-						{ field:'city', title:'City',  filterable: true },
-						{ field:'hasState', title:'Has State',  filterable: true },
-						{ field:'receivers', title:'Receivers',  filterable: true },
+						{ field:'population', title:'Population', filterable: true,width:140 },
+						{ field:'hunterPopuplation', title:'Hunter Population', width:140, filterable: true },
+						{ field:'city', title:'City',  filterable: true, width:200 },
+						{ field:'levelType', title:'Type', filterable: true,width:110  },
+						{ field:'regionCode', title:'Code', filterable: true,width:110 },
+						{ field:'hasState', title:'Has State',  filterable: true,width:110},
+						{ field:'receivers', title:'Receivers',  filterable: true,width:110 },
 						{ field: "editTask", title : "Edit", width:60, template : "#=getEditHierarchyTemplate()#"}
 	         ],
 	          editable: "inline"

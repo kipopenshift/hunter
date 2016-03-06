@@ -34,9 +34,6 @@ public interface RegionService {
 	public void addConstituencyWardsToConsituency(Long constituencyId, List<ConstituencyWard> constituencyWard); 
 	
 	public ReceiverRegion createReceiverRegion(String regionLevel, Long countryId, Long stateId, Long countyId,Long consituencyId, Long constituencyWardId);
-	public List<HunterMessageReceiver> getHunterReceiversForReceiverRegion(ReceiverRegion receiverRegion);
-	public List<TaskMessageReceiver> getTaskReceiversFromTaskReceivers(List<HunterMessageReceiver> hunterMessageReceivers);
-	public Task createTaskReceiversForTaskRegion(ReceiverRegion taskRegion);
 	public Task deleteTaskReceiversForRegion(ReceiverRegion taskRegion);
 	public Task addRandomReceiversToTask(List<HunterMessageReceiver> hunterMessageReceivers);
 	
@@ -55,12 +52,13 @@ public interface RegionService {
 	public List<Map<String, Object>> getNmsAndIdsFrRgnNmsFrCnsttncs(String countryName, String countyName, List<String> constituencies);
 	
 	public List<Long> getRegionsIdForNames(String country, String county, String constituency, String ward);
-	public void addRegionToTask(Long taskId, String country, String county, String constituency, String ward);
-	public void removeTaskRegion(Long taskId, Long taskRegionId);
+	public String addRegionToTask(Long taskId, String country, String county, String constituency, String ward);
+	public String removeTaskRegion(Long taskId, Long taskRegionId);
 	public void removeAllRegionsForTask(Long taskId);
+	public boolean isRegionAlreadyAddedToTask(Long regionId, Long taskId);
 	
 	public ReceiverRegionJson creatRcvrRgnJsnFrmRcvrRgn(ReceiverRegion receiverRegion);
-	public int getTrueHntrMsgRcvrCntFrTaskRgns(Long taskId);
+	public Object[] getTrueHntrMsgRcvrCntFrTaskRgns(Long taskId);
 	
 }
 

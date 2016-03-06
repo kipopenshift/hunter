@@ -202,8 +202,6 @@ public class HunterClientTest {
 		receiverRegion.setVillage(null);
 		receiverRegion.setWard(null); 
 		
-		task.setTaskRegion(receiverRegion); 
-		
 		Long nextReiverId = new TaskMessageReceiverDaoImpl().getNextHunterMessageReceiver();
 		
 		TaskMessageReceiver receiver1 = new TaskMessageReceiver();
@@ -242,8 +240,6 @@ public class HunterClientTest {
 		receivers.add(receiver1);
 		receivers.add(receiver2);
 		receivers.add(receiver3);
-		
-		task.setTaskReceivers(receivers); 
 		
 		Set<Task> tasks = new HashSet<>();
 		tasks.add(task);

@@ -1,8 +1,8 @@
 <%@include file="../common/HeaderFile.jsp"%>
 
-<div id="hunterHomeConainer" style="background-color:red">
+<div id="hunterHomeConainer" style="background-color:white;color:green;">
 
-dasdasdfasdfasdf
+Welcome to Techmaster Hunter!
 
 </div>
 

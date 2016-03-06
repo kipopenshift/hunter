@@ -9,6 +9,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -26,6 +27,7 @@ public class XMLTree {
 
 	private Document doc = null;
 	private String path = null;
+	private Logger logger = Logger.getLogger(getClass());
 	
 	private DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	
@@ -51,7 +53,7 @@ public class XMLTree {
 					if(pathOrXmlString.startsWith("<" + root + ">") && pathOrXmlString.endsWith("</" + root + ">")){
 						
 						this.doc = HunterUtility.createDocFromStr(pathOrXmlString);
-						HunterLogFactory.getLog(getClass()).info("Successfully created a xml document from the string >> " + this.doc); 
+						logger.info("Successfully created a xml document from the string >> " + this.doc); 
 						
 					}else{
 						throw new IllegalArgumentException("The string provided does not seem valid >> " + pathOrXmlString);

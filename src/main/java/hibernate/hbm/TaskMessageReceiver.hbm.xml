@@ -15,6 +15,22 @@
 		<property name="blocked" column="RCVR_BLCKD" type="org.hibernate.type.YesNoType" />
 		<property name="random" column="RNDM" type="org.hibernate.type.YesNoType" />
 		<property name="taskId" column="TSK_ID"  type="java.lang.Long" not-null="true" />
+		<property name="active" column="ACTV" type="org.hibernate.type.YesNoType" />
+		<property name="countryName" column="CNTRY_NAM"  type="java.lang.String"  not-null="true" />
+		<property name="stateName" column="STATE_NAM"  type="java.lang.String"  />
+		<property name="countyName" column="CNTY_NAM"  type="java.lang.String"  />
+		<property name="consName" column="CONS_NAM"  type="java.lang.String"   />
+		<property name="consWardName" column="WRD_NAM"  type="java.lang.String"  />
+		<property name="receiverRegionLevelName" column="RCVR_RGN_LVL_NAM"  type="java.lang.String"  length="100" not-null="true" />
+		
+		 <component name="auditInfo" class="com.techmaster.hunter.obj.beans.AuditInfo">
+         	<property name="cretDate" column="CRET_DATE"  type="java.util.Date"/>
+			<property name="lastUpdate" column="LST_UPDT_DATE"  type="java.util.Date"/>
+			<property name="createdBy" column="CRTD_BY" type="java.lang.String"  />
+			<property name="lastUpdatedBy" column="LST_UPDTD_BY" type="java.lang.String"  />
+      	</component>
+		
+		
 		
 	</class>
 	

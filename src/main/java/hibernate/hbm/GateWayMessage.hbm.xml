@@ -55,5 +55,8 @@
         <property name="errorText" type="java.lang.String" length="2000" > 
             <column name="ERR_TXT" />
         </property>
+         <property name="clientTagKey" type="java.lang.String" length="100" > 
+            <column name="CLNT_TG_KY" />
+        </property>
     </class>
 </hibernate-mapping>

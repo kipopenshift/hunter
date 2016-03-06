@@ -23,7 +23,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.techmaster.hunter.exception.HunterRunTimeException;
-import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
 
 
@@ -245,7 +244,7 @@ public class XMLServiceImpl implements XMLService{
 			e.printStackTrace();
 		}
         xml = sw.toString();
-        HunterLogFactory.getLog(getClass()).info("converted the documet to string >> " + xml);
+        log.info("converted the documet to string >> " + xml);
         return sw.toString();
 		
 	}
@@ -263,6 +262,19 @@ public class XMLServiceImpl implements XMLService{
 		}
 		
 		return nodes;
+	}
+	@Override
+	public NodeList getNodeListForPathUsingJavax(String xPathStr) {
+		try {
+			javax.xml.xpath.XPathFactory xPathfactory = XPathFactory.newInstance();
+			javax.xml.xpath.XPath xpath = xPathfactory.newXPath();
+			javax.xml.xpath.XPathExpression expr = xpath.compile(xPathStr);
+			NodeList nl = (NodeList) expr.evaluate(this.getXmlTree().getDoc(), XPathConstants.NODESET);
+			return nl;
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	

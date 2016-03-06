@@ -8,6 +8,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Produces;
 
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,19 +24,20 @@ import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.types.HunterClientDao;
 import com.techmaster.hunter.dao.types.HunterUserDao;
 import com.techmaster.hunter.obj.beans.HunterClient;
-import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
 
 @Controller
 @RequestMapping(value="/client")
-public class ClientController {
+public class ClientController extends HunterBaseController{
 	
 	@Autowired private HunterClientDao hunterClientDao;
 	@Autowired private HunterUserDao hunterUserDao;
+	private Logger logger = Logger.getLogger(ClientController.class);
 	
 	@RequestMapping(value="/action/read", method = RequestMethod.GET)
 	@Produces("application/json") 
 	public @ResponseBody String readHunterClientUser(){
+		logger.debug("Loading clients from db..."); 
 		List<HunterClient> clients = hunterClientDao.getAllclients();
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
@@ -52,7 +54,8 @@ public class ClientController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		HunterLogFactory.getLog(getClass()).debug("Successfully returned clients >> " + HunterUtility.stringifyList(clients));  
+		logger.debug("Successfully returned clients >> " + HunterUtility.stringifyList(clients));
+		logger.debug("Finished loading clients from db..."); 
 		return clientString;
 	}
 	
@@ -76,11 +79,12 @@ public class ClientController {
 	public @ResponseBody String getClientForUserId(HttpServletRequest request){
 		
 		String paramNames = HunterUtility.getParamNamesAsStringsFrmRqst(request);
-		HunterLogFactory.getLog(getClass()).debug("param names > " + paramNames);
+		logger.debug("param names > " + paramNames);
 		Object userId = request.getParameter("userId");
-		HunterLogFactory.getLog(getClass()).debug("Getting client for  user id >> " + userId);  
+		logger.debug("Getting client for  user id >> " + userId);  
 		HunterClient client = hunterClientDao.getHunterClientForUserId(HunterUtility.getLongFromObject(userId)); 
-		HunterLogFactory.getLog(getClass()).debug("Obtained client >> " + client);
+		System.out.println(client);
+		logger.debug("Obtained client >> " + client);
 		
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
@@ -90,7 +94,7 @@ public class ClientController {
 		
 		try {
 			clientString = mapper.writeValueAsString(client);
-			HunterLogFactory.getLog(getClass()).debug("client String >> " + clientString); 
+			logger.debug("client String >> " + clientString); 
 		} catch (JsonGenerationException e) {
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
@@ -99,7 +103,7 @@ public class ClientController {
 			e.printStackTrace();
 		}
 		
-		HunterLogFactory.getLog(getClass()).debug("Successfully returned client >> " + clientString);  
+		logger.debug("Successfully returned client >> " + clientString);  
 		return clientString;
 		
 	}
@@ -113,13 +117,13 @@ public class ClientController {
 		try {
 			
 			String paramNames = HunterUtility.getParamNamesAsStringsFrmRqst(request);
-			HunterLogFactory.getLog(getClass()).debug("param names " + paramNames); 
+			logger.debug("param names " + paramNames); 
 			
 			Long clientId = HunterUtility.getLongFromObject(request.getParameter("clientId"));  
 			Float budget = Float.parseFloat(request.getParameter("clientTotalBudget").toString());  
 			boolean isReceiver = Boolean.parseBoolean(request.getParameter("receiver").toString()); 
 
-			HunterLogFactory.getLog(getClass()).debug("editHunterClientDetails . Client id = " + clientId);
+			logger.debug("editHunterClientDetails . Client id = " + clientId);
 			
 			HunterClient client =  hunterClientDao.editReceiverAndBudget(clientId, budget, isReceiver);
 			

@@ -1,50 +1,67 @@
 package com.techmaster.hunter.task;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.UIMessageConstants;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterMessageReceiverDao;
+import com.techmaster.hunter.dao.types.MessageDao;
 import com.techmaster.hunter.dao.types.ReceiverRegionDao;
+import com.techmaster.hunter.dao.types.ServiceProviderDao;
+import com.techmaster.hunter.dao.types.TaskDao;
+import com.techmaster.hunter.email.HunterBusinessEmailService;
 import com.techmaster.hunter.exception.HunterRunTimeException;
-import com.techmaster.hunter.gateway.beans.CMClientBean;
+import com.techmaster.hunter.gateway.beans.CMClient;
 import com.techmaster.hunter.gateway.beans.GatewayClient;
+import com.techmaster.hunter.gateway.beans.HunterEmailClient;
 import com.techmaster.hunter.gateway.beans.OzekiClient;
 import com.techmaster.hunter.gateway.beans.SafaricomClient;
+import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.EmailMessage;
 import com.techmaster.hunter.obj.beans.GateWayMessage;
 import com.techmaster.hunter.obj.beans.HunterClient;
+import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
 import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
 import com.techmaster.hunter.obj.beans.Message;
 import com.techmaster.hunter.obj.beans.ReceiverGroup;
 import com.techmaster.hunter.obj.beans.ReceiverRegion;
+import com.techmaster.hunter.obj.beans.ServiceProvider;
 import com.techmaster.hunter.obj.beans.Task;
+import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.obj.beans.TaskMessageReceiver;
 import com.techmaster.hunter.obj.beans.TextMessage;
+import com.techmaster.hunter.region.RegionService;
 import com.techmaster.hunter.util.HunterHibernateHelper;
-import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
-import com.techmaster.hunter.util.UIMessageHandler;
 
 public class TaskManagerImpl implements TaskManager{
 	
-	private static UIMessageHandler uiMessageHandler = UIMessageHandler.getInstance();
 	private static final Logger logger = Logger.getLogger(TaskManagerImpl.class);
 	
 	@Autowired private ReceiverRegionDao receiverRegionDao;
 	@Autowired private HunterMessageReceiverDao hunterMessageReceiverDao;
 	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
+	@Autowired private ServiceProviderDao serviceProviderDao;
+	@Autowired private RegionService regionService;
+	@Autowired private MessageDao messageDao;
+	@Autowired private HunterJacksonMapper hunterJacksonMapper;
+	@Autowired private TaskDao taskDao;
 	
 	@Override
 	public List<HunterMessageReceiver> getHntrMsgRcvrsFrmRgn(String countryName, String regionLevel, String regionLevelName, String contactType, boolean activeOnly) {
@@ -108,46 +125,100 @@ public class TaskManagerImpl implements TaskManager{
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	private List<String> validateGroupsAndRegions(Task task){
+		String groupQuery = hunterJDBCExecutor.getQueryForSqlId("getTotalTaskGroupsReceivers");
+		int groupCount = 0;
+		List<Object> values = new ArrayList<>();
+		values.add(task.getTaskId());
+		Map<Integer, List<Object>> rowListsMap = hunterJDBCExecutor.executeQueryRowList(groupQuery, values);
+		if(rowListsMap != null && !rowListsMap.isEmpty()){
+			List<Object> rowList = rowListsMap.get(1);
+			if(rowList != null && !rowList.isEmpty()){
+				String obj = HunterUtility.getNullOrStrimgOfObj(rowList.get(0));
+				if(obj != null)
+					groupCount = Integer.parseInt(obj); 
+				logger.debug("Total receiver for task group : " + groupCount);
+			}
+		}
+		List<String> errorList = new ArrayList<>();
+		//Does is have region or group configured?
+		boolean noRegionConfigured = task.getTaskRegions().isEmpty();
+		boolean noGroupConfigured = task.getTaskGroups().isEmpty();
+		
+		if(noRegionConfigured && noGroupConfigured){
+			errorList.add("No group or region is configured!");
+		}
+		
+		Object [] receiversNumberObj = regionService.getTrueHntrMsgRcvrCntFrTaskRgns(task.getTaskId());
+		int regionCount = Integer.parseInt(receiversNumberObj[0]+"");
+		
+		if((regionCount+groupCount) < 1){
+			errorList.add("No receivers found for tsk groups and regions!");
+		}
+		
+		return errorList;
+		
+	}
 
 	@Override
 	public List<String> validateTask(Task task) {
-		
 		logger.debug("Starting task validation process"); 
 		List<String> errors = new ArrayList<String>();
-		Set<ReceiverRegion> regions = task.getTaskRegions();
-		
-		
 		if(task.getDesiredReceiverCount() < 1 ){
-			errors.add(uiMessageHandler.getMsgTxtForMsgId(UIMessageConstants.MSG_TASK_006));
+			//Task must have more than one receiver
+			errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_006)); 
+		}
+		String taskLifeStatus = task.getTaskLifeStatus();
+		if(!taskLifeStatus.equals(HunterConstants.STATUS_APPROVED)){
+			//Task is not in approved status!
+			errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_001));
+		}
+		String query = "SELECT t.TSK_DEL_STS FROM task t WHERE t.TSK_ID = '" +  task.getTaskId() + "'";
+		Map<Integer, List<Object>> rowListMap = hunterJDBCExecutor.executeQueryRowList(query, null);
+		List<Object> rowList = rowListMap.get(1);
+		String delStatus = rowList != null && !rowList.isEmpty() ? rowList.get(0).toString() : null;
+		if(delStatus != null && (delStatus.equals(HunterConstants.STATUS_PARTIAL) || delStatus.equals(HunterConstants.STATUS_PROCESSED)) ){
+			errors.add("Task has been processed already!"); 
 		}
 		
-		if(!task.getTaskLifeStatus().equals(HunterConstants.STATUS_APPROVED)){
-			errors.add(uiMessageHandler.getMsgTxtForMsgId(UIMessageConstants.MSG_TASK_001));
-		}
-		
-		if(regions == null || regions.isEmpty()){
-			errors.add(uiMessageHandler.getMsgTxtForMsgId(UIMessageConstants.MSG_TASK_002)); 
+		List<String> regionGroupErrors = validateGroupsAndRegions(task);
+		if(!regionGroupErrors.isEmpty()){
+			logger.debug("Groups and regions validation failed : " + HunterUtility.stringifyList(regionGroupErrors)); 
+			errors.addAll(regionGroupErrors);
 		}
 		
 		
 		if(task.getTaskMessage() == null){
-			errors.add(uiMessageHandler.getMsgTxtForMsgId(UIMessageConstants.MSG_TASK_003));
+			//Task has no message configured!
+			errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_003));
 		}else{
-			
-			Message message = task.getTaskMessage();
+			Message message = messageDao.getMessageById(task.getTaskId());
 			String lifeStatus = message.getMsgLifeStatus();
-			
-			if(!lifeStatus.equals(HunterConstants.STATUS_APPROVED)){
-				errors.add(uiMessageHandler.getMsgTxtForMsgId(UIMessageConstants.MSG_MSG_001)); 
-			}else if(lifeStatus.equals(HunterConstants.STATUS_COMPLETED)){
-				errors.add(uiMessageHandler.getMsgTxtForMsgId(UIMessageConstants.MSG_TASK_005)); 
+			boolean isApproved = lifeStatus.equals(HunterConstants.STATUS_APPROVED);
+			boolean isCompleted = lifeStatus.equals(HunterConstants.STATUS_PROCESSED);
+			if(!isApproved && !isCompleted){
+				//Task Message is not in approved status!
+				errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_MSG_001)); 
+			}else if(isCompleted && !isApproved){ 
+				//Task message is already processed!
+				errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_MSG_003));
 			}
-			
-			if(message.getMsgText() == null){
-				errors.add(uiMessageHandler.getMsgTxtForMsgId(UIMessageConstants.MSG_MSG_002));
+			if(message.getMsgText() == null || message.getMsgText().trim().equals("")){ 
+				//Task Message has no Text!
+				errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_MSG_002));
 			}
-			
+			ServiceProvider serviceProvider  = message.getProvider();
+			if(serviceProvider == null && !(task.getTaskMessage() instanceof EmailMessage)){
+				errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_MSG_006)); 
+			}
 		}
+		
+		// make sure that the money is enough!!
+		List<String> errors_ = validateTaskFinance(task);
+		errors.addAll(errors_);
+		
+		
 		if(!errors.isEmpty()){
 			logger.debug("Completed task validation. Task is not valid >> " + HunterUtility.stringifyList(errors)); 
 		}else{
@@ -158,11 +229,69 @@ public class TaskManagerImpl implements TaskManager{
 	
 
 	@Override
-	public List<String> validateTask(Task task, String status) {
-		List<String> errors = new ArrayList<String>();
-		if(status.equals(HunterConstants.STATUS_APPROVED)){
-			errors = validateTask(task);
+	public List<String> validateStatusChange(Long taskId, String status) {
+		
+		logger.debug("Starting task status change validation process. Task Id = " + taskId + ". To status = " + status); 
+		
+		// there is no validation for changing it back to draft at the moment.
+		if(status != null && status.equals(HunterConstants.STATUS_DRAFT)){
+			return new ArrayList<>();
 		}
+		
+		Task task = taskDao.getTaskById(taskId);
+		Message message = task.getTaskMessage();
+		Set<ReceiverGroupJson> taskGroups = task.getTaskGroups();
+		List<String> errors = new ArrayList<>();
+		
+		/*
+		 * for review and draft status, just ensure that the message is there 
+		 * and that either groups or regions is not empty.
+		 */
+		if(status != null && !status.equals(HunterConstants.STATUS_APPROVED)){
+			if(message == null){
+				errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_003 ));
+			}
+			if(taskGroups.isEmpty() && task.getTaskRegions().isEmpty()){
+				//Task has no region and no groups configured!
+				errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_008 ));
+			}
+			String errorMsg = errors.isEmpty() ? "Not errors found!!" : "Errors found : \n" + HunterUtility.stringifyList(errors);
+			logger.debug(errorMsg);
+			return errors;
+		}
+		
+		if(message != null){
+			//Task message must be in approved status
+			String msgStatus = message.getMsgLifeStatus();
+			if( !msgStatus.equals(HunterConstants.STATUS_APPROVED )){
+				errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_MSG_005 ));
+			}
+		}else{
+			//Task has no message configured!
+			errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_MSG_003 )); 
+		}
+		
+		int groupCount = 0;
+		
+		if(taskGroups != null && !taskGroups.isEmpty()){
+			for(ReceiverGroupJson group : taskGroups){
+				int count = group.getReceiverCount();
+				groupCount += count;
+			}
+		}
+		
+		Object[] countData = regionService.getTrueHntrMsgRcvrCntFrTaskRgns(taskId);
+		int regionCount = countData != null ? Integer.parseInt(countData[0]+"") : 0; 
+		int totalCount = groupCount + regionCount;
+		
+		if(totalCount == 0){
+			//Task regions and groups configured have no receivers
+			errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_007 ));
+		}
+		
+		String errorMsg = errors.isEmpty() ? "Not errors found!!" : "Errors found !! : \n" + HunterUtility.stringifyList(errors);
+		logger.debug(errorMsg);
+		
 		return errors;
 	}
 
@@ -177,14 +306,33 @@ public class TaskManagerImpl implements TaskManager{
 		Message message = HunterHibernateHelper.getEntityById(taskId, Message.class);
 		return message;
 	}
+	
+	
+	@Override
+	public Map<String, Object> getGateWayClientExecuteMap(Task task) {
+		Map<String, Object> executeClientMap = null;
+		String type = task.getTskMsgType();
+		if(type.equals(HunterConstants.MESSAGE_TYPE_EMAIL)){
+			executeClientMap = new HashMap<>();
+			executeClientMap.put(GatewayClient.TASK_BEAN, task);
+		}
+		return executeClientMap;
+	}
 
 	@Override
-	public Map<String, Object> processTask(Task task) {
+	public Map<String, Object> processTask(Task task, AuditInfo auditInfo) {
 		Map<String, Object> results = new HashMap<String, Object>();
 		List<String> errors = validateTask(task);
 		if(errors.size() == 0){
+			logger.debug("No processing validation errors found. Sending task process notification email..."); 
+			Map<String, Object> cntntParams = getCntntParamsFrTskBsnsEmail(HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION, task.getTaskId());
+			sendTaskBusinessEmail(HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION, cntntParams, HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION);
+			logger.debug("Done sending email!!");
+			task.setProcessedOn(new Date());
+			task.setProcessedBy(auditInfo.getLastUpdatedBy()); // this is set immediately.
 			GatewayClient gatewayClient = getClientForTask(task);
-			gatewayClient.execute(null);
+			Map<String, Object> executeParams = getGateWayClientExecuteMap(task);
+			gatewayClient.execute(executeParams);
 		}else{
 			results.put(GatewayClient.TASK_VALIDATION_ERRORS, errors);
 			results.put(GatewayClient.TASK_VALIDATION_STATUS, HunterConstants.STATUS_FAILED);
@@ -208,7 +356,7 @@ public class TaskManagerImpl implements TaskManager{
 		
 		logger.debug("Starting task cloning process..."); 
 		
-		String query = hunterJDBCExecutor.getQueryForSqlId("getUserIdUserNameClientIdForUserName"); 
+		String query = hunterJDBCExecutor.getQueryForSqlId("getClientDetailsForTaskOwner"); 
 		List<Object> values = new ArrayList<>();
 		values.add(newOwner);
 		
@@ -235,19 +383,20 @@ public class TaskManagerImpl implements TaskManager{
 		copy.setTaskLifeStatus(HunterConstants.STATUS_DRAFT);
 		copy.setTaskName(taskName);
 		copy.setTaskObjective(task.getTaskObjective());
-		copy.setTaskRegion(task.getTaskRegion());
 		copy.setTaskType(task.getTaskType());
 		copy.setTskAgrmntLoc(task.getTskAgrmntLoc());
 		copy.setDesiredReceiverCount(task.getDesiredReceiverCount());
 		copy.setAvailableReceiverCount(task.getAvailableReceiverCount());
 		copy.setConfirmedReceiverCount(task.getConfirmedReceiverCount()); 
+		copy.setTskMsgType(task.getTskMsgType()); 
+		copy.setProcessedBy(task.getProcessedBy());
+		copy.setProcessedOn(task.getProcessedOn());
+		copy.setGateWayClient(task.getGateWayClient()); 
 		
 		copy.setCreatedBy(auditInfo.getCreatedBy());
 		copy.setCretDate(new Date());
 		copy.setUpdatedBy(auditInfo.getLastUpdatedBy()); 
 		copy.setLastUpdate(new Date());
-		
-		copy.setTaskRegion(task.getTaskRegion()); // region should be one to one.
 		
 		Message message = task.getTaskMessage();
 		
@@ -281,6 +430,17 @@ public class TaskManagerImpl implements TaskManager{
 			
 		}
 		
+		logger.debug("Copying task receiver groups..."); 
+		Set<ReceiverGroupJson> receiverGroups = task.getTaskGroups();
+		copy.setTaskGroups(receiverGroups);
+		logger.debug("Finished copying task receiver groups!");
+		
+		logger.debug("Copying task regions..."); 
+		Set<ReceiverRegion> receiverRegions = task.getTaskRegions();
+		copy.setTaskRegions(receiverRegions); 
+		logger.debug("Finished copying task receiver regions!");
+
+		
 		return copy;
 	}
 
@@ -291,11 +451,16 @@ public class TaskManagerImpl implements TaskManager{
 		String client = task.getGateWayClient();
 		
 		if(client != null && client.equals(HunterConstants.CLIENT_CM)){
-			gatewayClient = new CMClientBean(task);
+			gatewayClient = new CMClient(task);
 		}else if(client != null && client.equals(HunterConstants.CLIENT_OZEKI)){
 			gatewayClient = new OzekiClient(task);
 		}else if(client != null && client.equals(HunterConstants.CLIENT_SAFARICOM)){
 			gatewayClient = new SafaricomClient(task);
+		}else if(client != null && client.equals(HunterConstants.CLIENT_HUNTER_EMAIL)){
+			gatewayClient = HunterEmailClient.getInstance();
+		}else{
+			logger.warn("Gateway client configured does not exist or it's not implemented yet!"); 
+			throw new IllegalArgumentException("No service for the requested parameter : " + client);
 		}
 		
 		return gatewayClient;
@@ -347,6 +512,15 @@ public class TaskManagerImpl implements TaskManager{
 		copyEmailMessage.setMsgTaskType(emailMessage.getMsgTaskType());
 		copyEmailMessage.setMsgText(emailMessage.getMsgText());
 		copyEmailMessage.setProvider(emailMessage.getProvider());
+		copyEmailMessage.setEmailTemplateName(emailMessage.getEmailTemplateName()); 
+		copyEmailMessage.setPriority(emailMessage.getPriority());
+		copyEmailMessage.setCssObject(emailMessage.getCssObject());
+		copyEmailMessage.setReplyTo(emailMessage.getReplyTo());
+		copyEmailMessage.setAttchmtntFileType(emailMessage.getAttchmtntFileType()); 
+		copyEmailMessage.setAttchmntBnId(emailMessage.getAttchmntBnId()); 
+		copyEmailMessage.setHasAttachment(emailMessage.isHasAttachment());
+		copyEmailMessage.setMultiPart(emailMessage.isMultiPart()); 
+		
 		
 		copyEmailMessage.setCcList(emailMessage.getCcList());
 		copyEmailMessage.seteBody(emailMessage.geteBody());
@@ -359,21 +533,321 @@ public class TaskManagerImpl implements TaskManager{
 		
 	}
 
-	@Override
-	public ReceiverGroup createReceiverGroup(String name, String desc, String userName, List<HunterMessageReceiver> hntMsgRcvrs, AuditInfo auditInfo) {
-		
-		Set<HunterMessageReceiver> hunterMessageReceivers = new HashSet<>();
-		hunterMessageReceivers.addAll(hntMsgRcvrs);
-		
-		ReceiverGroup receiverGroup = new ReceiverGroup();
-		receiverGroup.setGroupName(name);
-		receiverGroup.setAuditInfo(auditInfo);
-		receiverGroup.setHunterMessageReceivers(hunterMessageReceivers);
-		receiverGroup.setOwnerUserName(userName); 
-		
-		return receiverGroup;
+	private static void setDefaultMessageFields(Message message){
+		message.setActualReceivers(0);
+		message.setConfirmedReceivers(0);
+		message.setCreatedBy(null);
+		message.setCretDate(new Date());
+		message.setDesiredReceivers(0);
+		message.setLastUpdate(new Date());
+		message.setMsgDeliveryStatus(HunterConstants.STATUS_CONCEPTUAL);
+		message.setMsgLifeStatus(HunterConstants.STATUS_DRAFT);
+		message.setMsgText(null); 
 	}
-	
+
+	@Override
+	public Message getTaskDefaultMessage(Long taskId, String type) {
+		Message message = null;
+		if(type.equals(HunterConstants.MESSAGE_TYPE_TEXT)){
+			message = new TextMessage();
+			setDefaultMessageFields(message);
+			return (TextMessage)message;
+		}
+		return message;
+	}
+
+	@Override
+	public TextMessage convertTextMessage(String json) {
+		
+		logger.debug("Converting json to TextMessage : " + json); 
+		
+		if(json == null)
+			return null;
+		
+		TextMessage message = new TextMessage();
+		JSONObject msgJson = new JSONObject(json);
+		
+		logger.debug("Creating textMessage for json >> " + msgJson); 
+		
+		long msgId = msgJson.getLong("msgId");
+		String msgSendDate_ = msgJson.has("msgSendDate") ? msgJson.get("msgSendDate") != null ? msgJson.get("msgSendDate").toString() : null : null;
+		
+		if(msgSendDate_ != null){
+			msgSendDate_ = msgSendDate_.replaceAll("T", " ");
+			msgSendDate_ = msgSendDate_.replaceAll("Z", "");
+		}
+		
+		Date msgSendDate = HunterUtility.parseDate(msgSendDate_, HunterConstants.HUNTER_DATE_FORMAT_MIN);
+		String msgTaskType = msgJson.has("msgTaskType") ? msgJson.get("msgTaskType") != null ? msgJson.get("msgTaskType").toString() : null : null;
+		
+		int desiredReceivers = msgJson.has("desiredReceivers") ? msgJson.getInt("desiredReceivers") : 0;
+		int actualReceivers = msgJson.has("actualReceivers") ? msgJson.getInt("actualReceivers") : 0;
+		int confirmedReceivers = msgJson.has("confirmedReceivers") ? msgJson.getInt("confirmedReceivers") : 0;
+		
+		String msgDeliveryStatus = msgJson.has("msgDeliveryStatus") ? msgJson.get("msgDeliveryStatus") != null ? msgJson.get("msgDeliveryStatus").toString() : null : null;
+		String msgLifeStatus = msgJson.has("msgLifeStatus") ? msgJson.get("msgLifeStatus") != null ? msgJson.get("msgLifeStatus").toString() : null : null;
+		String msgText = msgJson.has("msgText") ? msgJson.get("msgText") != null ? msgJson.get("msgText").toString() : null : null;
+		
+		String msgOwner = msgJson.has("msgOwner") ? msgJson.get("msgOwner") != null ? msgJson.get("msgOwner").toString() : null : null;
+		String text = msgJson.has("text") ? msgJson.get("text") != null ? msgJson.get("text").toString() : null : null;
+		String disclaimer = msgJson.has("disclaimer") ? msgJson.get("disclaimer") != null ? msgJson.get("disclaimer").toString() : null : null;
+		String fromPhone = msgJson.has("fromPhone") ? msgJson.get("fromPhone") != null ? msgJson.get("fromPhone").toString() : null : null;
+		String toPhone = msgJson.has("toPhone") ? msgJson.get("toPhone") != null ? msgJson.get("toPhone").toString() : null : null;
+		int pageWordCount = msgJson.has("pageWordCount") ? msgJson.getInt("pageWordCount") : 0;
+		
+		String cretDate_ = msgJson.has("cretDate") ? msgJson.get("cretDate") != null ? msgJson.get("cretDate").toString() : null : null;
+		Date cretDate = HunterUtility.parseDate(cretDate_, HunterConstants.HUNTER_DATE_FORMAT_MIN);
+		String lastUpdate_ = msgJson.has("lastUpdate") ? msgJson.get("lastUpdate") != null ? msgJson.get("lastUpdate").toString() : null : null;
+		Date lastUpdate = HunterUtility.parseDate(lastUpdate_, HunterConstants.HUNTER_DATE_FORMAT_MIN);
+		String createdBy = msgJson.has("createdBy") ? msgJson.get("createdBy") != null ? msgJson.get("createdBy").toString() : null : null;
+		String lastUpdatedBy = msgJson.has("lastUpdatedBy") ? msgJson.get("lastUpdatedBy") != null ? msgJson.get("lastUpdatedBy").toString() : null : null;
+		
+		message.setMsgId(msgId);
+		message.setMsgDeliveryStatus(msgDeliveryStatus);
+		message.setMsgLifeStatus(msgLifeStatus);
+		message.setMsgSendDate(msgSendDate);
+		message.setMsgTaskType(msgTaskType);
+		message.setMsgText(msgText);
+		message.setDesiredReceivers(desiredReceivers);
+		message.setActualReceivers(actualReceivers);
+		message.setConfirmedReceivers(confirmedReceivers);
+		message.setMsgOwner(msgOwner);
+		
+		message.setCretDate(cretDate);
+		message.setLastUpdate(lastUpdate);
+		message.setCreatedBy(createdBy);
+		message.setLastUpdatedBy(lastUpdatedBy);
+		
+		message.setText(text);
+		message.setDisclaimer(disclaimer); 
+		message.setFromPhone(fromPhone);
+		message.setToPhone(toPhone); 
+		message.setPageWordCount(pageWordCount); 
+		
+		String providerStr = HunterUtility.getStringOrNullFromJSONObj(msgJson, "provider"); 
+		ServiceProvider pvdr = null;
+		
+		try {
+			if(providerStr != null && !HunterUtility.isNumeric(providerStr)){
+				logger.debug("Provider is json. Reading value... " + providerStr);
+				JSONObject providerJson = new JSONObject(providerStr);
+				providerJson = HunterUtility.selectivelyCopyJSONObject(providerJson, new String[]{"handler","hibernateLazyInitializer"});
+				pvdr = hunterJacksonMapper.readValue(providerJson.toString(), ServiceProvider.class);
+			}else{
+				logger.debug("Provider value is numerice : " + providerStr); 
+			}
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Long providerId = null; 
+		ServiceProvider serviceProvider = null;
+		
+		if(pvdr == null){
+			providerId = HunterUtility.getLongFromObject(providerStr);
+			logger.debug("Successfully obtained provider id : " + providerId);
+			serviceProvider = serviceProviderDao.getServiceProviderById(providerId);
+			message.setProvider(serviceProvider); 
+		}else{
+			message.setProvider(pvdr); 
+		}
+		
+		logger.debug("Successfully created textMessage >> " + message); 
+		
+		
+		return message;
+	}
+
+	@Override
+	public String addGroupToTask(Long groupId, Long taskId) {
+		
+		String checkQuery = hunterJDBCExecutor.getQueryForSqlId("checkExistentForTaskAndReceiverGroup");
+		List<Object> values = new ArrayList<>();
+		values.add(taskId);
+		values.add(groupId);
+		values.add(taskId);
+		values.add(groupId);
+		
+		Map<Integer, List<Object>> rowMapList = hunterJDBCExecutor.executeQueryRowList(checkQuery, values);
+		List<Object> counts = rowMapList.get(1);
+		
+		int taskCount = Integer.parseInt(counts.get(0)+""); 
+		int groupCount = Integer.parseInt(counts.get(1)+"");
+		int alreadyCount = Integer.parseInt(counts.get(2)+"");
+		
+		if(alreadyCount >= 1){
+			logger.debug("Task group is already added to the task! Returning..."); 
+			return "Receiver group is already added to task!";
+		}else if(taskCount == 0 && groupCount == 0){
+			logger.debug("No task and no group found for ( task id : " + taskId + ", group id : " + groupId + " )"); 
+			return "No task and no group found for ( task id : " + taskId + ", group id : " + groupId + " )";
+		}else if(taskCount == 0 && groupCount != 0){
+			logger.debug("No task found for ( task id : " + taskId + " )");
+			return "No task found for ( task id : " + taskId + " )";
+		}else if(taskCount != 0 && groupCount == 0){
+			logger.debug("No group found for ( group id : " + groupId + " )");
+			return "No group found for ( group id : " + groupId + " )";
+		}
+		
+		String insertQuery = "INSERT INTO TSK_GRPS (TSK_ID,GRP_ID) VALUES(?, ?) ";
+		values.clear();
+		values.add(taskId);
+		values.add(groupId);
+		
+		logger.debug("Executing query to insert group to task : " + insertQuery); 
+		
+		try {
+			hunterJDBCExecutor.executeUpdate(insertQuery, values);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+		
+		return null;
+	}
+
+	@Override
+	public void removeGroupFromTask(Long groupId, Long taskId) {
+		String delQuery = "DELETE FROM TSK_GRPS WHERE TSK_ID = ? AND GRP_ID = ?";
+		logger.debug("Executing query to remove group from task : " + delQuery); 
+		List<Object> values = Arrays.asList(new Object[]{taskId,groupId});
+		hunterJDBCExecutor.executeUpdate(delQuery, values); 
+		logger.debug("Finished executing query to remove group from task"); 
+	}
+
+	@Override
+	public int getTotalTaskGroupsReceivers(Long taskId) {
+		logger.debug("Fetching groups receiver count for task id : " + taskId); 
+		String query = hunterJDBCExecutor.getQueryForSqlId("getTotalTaskGroupsReceivers");
+		List<Object> values = new ArrayList<>();
+		values.add(taskId);
+		Map<Integer, List<Object>> groups = hunterJDBCExecutor.executeQueryRowList(query, values);
+		List<Object> rowList = groups != null && !groups.isEmpty() ? groups.get(1) : new ArrayList<>();
+		int count = Integer.parseInt((rowList.isEmpty() ? 0 : rowList.get(0)).toString());
+		logger.debug("Receiver count obtained : " + count); 
+		return count;
+	}
+
+	@Override
+	public void sendTaskBusinessEmail(String mailType, Map<String, Object> cntntParams, String templateName) {
+		logger.debug("Sending task business email...");
+		logger.debug("Mail type : " + mailType + ", template name : " + templateName + ", content params : " + HunterUtility.stringifyMap(cntntParams));  
+		HunterBusinessEmailService.getInstance().send(mailType, cntntParams, templateName);	
+		logger.debug("Finished sending task business email!!");
+	}
+
+	@Override
+	public Map<String, Object> getCntntParamsFrTskBsnsEmail(String emailType, Long taskId) {
+		logger.debug("Retrieving email template content params for email type : " + emailType + ", task id : " + taskId);
+		Map<String, Object> params = new HashMap<>();
+		String query = null;
+		if(emailType != null && emailType.equals(HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION)){
+			query = hunterJDBCExecutor.getQueryForSqlId("getClientDetailsForTaskOwnerForTaskId");
+			List<Object> values = new ArrayList<>();
+			values.add(taskId);
+			List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, values);
+			if(rowMapList != null &&  !rowMapList.isEmpty()){
+				Map<String, Object> data = rowMapList.get(0);
+				Map<String, Object> pounded = new HashMap<>();
+				for(Map.Entry<String, Object> entry : data.entrySet()){
+					String key = entry.getKey();
+					key = HunterUtility.doublePoundQuote(key);
+					pounded.put(key, entry.getValue());
+				}
+				logger.debug("Obtained values : " + HunterUtility.stringifyMap(data)); 
+				return pounded;
+			}else{
+				logger.debug("No data found for the params : Mail type : " + emailType + ", task id : " + taskId); 
+			}
+		}
+		return params;
+	}
+
+	@Override
+	public List<String> validateTaskFinance(Task task) {
+		
+		String msgType = task.getTskMsgType();
+		List<String> errors = new ArrayList<>();
+		
+		if(msgType != null && msgType.equals(HunterConstants.MESSAGE_TYPE_EMAIL)){
+			logger.debug("Sending emails does not take money. Returning."); 
+			return errors;
+		}
+		Message message = task.getTaskMessage();
+		if(message == null){
+			// we are not validating message here.
+			logger.debug("Task does not have message configured!!"); 
+			return errors;
+		}
+		ServiceProvider serviceProvider = task.getTaskMessage().getProvider();
+		float budget = task.getTaskBudget();
+		if(budget <= 0){
+			errors.add("Task cannot have negative budget!");
+		}
+		float perMsg = serviceProvider.getCstPrTxtMsg();
+		Object[] countData = regionService.getTrueHntrMsgRcvrCntFrTaskRgns(task.getTaskId());
+		int regionCount = (Integer)countData[0];
+		int groupCount = getTotalTaskGroupsReceivers(task.getTaskId());
+		int totalCount = regionCount + groupCount;
+		
+		logger.debug("Total receivers for the task : " + totalCount);
+		logger.debug("Cost per message : " + perMsg);
+		
+		int totalCost = 0;
+		for(int i=0; i<totalCount;i++){
+			totalCost += perMsg;
+		}
+		logger.debug("Total cost : " + totalCost);
+		if(budget < totalCost){
+			//Task budget insufficient for # receivers configured.
+			errors.add("Task budget insufficient for <b>" + totalCount + " </b> receivers configured!");
+		}
+		
+		return errors;
+	}
+
+	@Override
+	public List<Object> validateMessageDelete(Long msgId) {
+		List<Object> errors = new ArrayList<>();
+		String query = hunterJDBCExecutor.getQueryForSqlId("getValidateDeleteTaskMessage");
+		Map<Integer, List<Object>> errorsListMap = hunterJDBCExecutor.executeQueryRowList(query, hunterJDBCExecutor.getValuesList(new Object[]{msgId}));
+		errors = errorsListMap.get(1);
+		return errors;
+	}
+
+	@Override
+	public int getTaskGroupTotalNumber(Long taskId) {
+		String query = hunterJDBCExecutor.getQueryForSqlId("getTotalTaskGroupsForTaskId");
+		logger.debug("Executing query : " + query); 
+		List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{taskId});
+		Map<Integer, List<Object>>  rowMapLists = hunterJDBCExecutor.executeQueryRowList(query, values);
+		List<Object> result = rowMapLists != null && !rowMapLists.isEmpty() ? rowMapLists.get(1) : new ArrayList<>();
+		int totalGroups = result.isEmpty() ? 0 : Integer.parseInt(result.get(0)+""); 
+		logger.debug("Total groups obtained for task : " + totalGroups); 
+		return totalGroups;
+	}
+
+	@Override
+	public TaskHistory getNewTaskHistoryForEventName(Long taskId,String evenName,String eventUser) {
+		TaskHistory taskHistory = new TaskHistory();
+		taskHistory.setEvenName(evenName);
+		taskHistory.setEventDate(new Date());
+		taskHistory.setEventUser(eventUser);
+		taskHistory.setTaskId(taskId); 
+		return taskHistory;
+	}
+
+	@Override
+	public void setTaskHistoryStatusAndMessage(TaskHistory taskHistory,String eventStatus, String message) {
+		taskHistory.setEventStatus(eventStatus);
+		taskHistory.setEventMessage(message);
+	}
+
+
 	
 
 	

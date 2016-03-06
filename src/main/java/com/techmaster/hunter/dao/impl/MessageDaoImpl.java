@@ -1,237 +1,111 @@
 package com.techmaster.hunter.dao.impl;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.beanutils.BeanUtils;
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.criterion.Projections;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.MessageDao;
 import com.techmaster.hunter.obj.beans.Message;
 import com.techmaster.hunter.util.HunterHibernateHelper;
-import com.techmaster.hunter.util.HunterLogFactory;
-import com.techmaster.hunter.util.HunterSessionFactory;
+import com.techmaster.hunter.util.HunterUtility;
 
 public class MessageDaoImpl implements MessageDao{
+	
+	Logger logger = Logger.getLogger(getClass());
+	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
 
 	@Override
 	public void insertMessage(Message message) {
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			session.save(message);
-			trans.commit();
-			HunterHibernateHelper.closeSession(session);
-		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		} finally{
-			HunterHibernateHelper.closeSession(session); 
-		}
+		logger.debug("Inserting message...");
+		HunterHibernateHelper.saveEntity(message);
+		logger.debug("Done inserting message!!"); 
 		
 	}
 
 	@Override
 	public void insertMessages(List<Message> messages) {
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			for(Message message : messages){
-				session.save(message);
-			}
-			trans.commit();
-			HunterHibernateHelper.closeSession(session);
-		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		} finally{
-			HunterHibernateHelper.closeSession(session); 
-		}
+		logger.debug("Inserting messages...");
+		HunterHibernateHelper.saveEntities(messages);
+		logger.debug("Done inserting messages!!"); 
 	}
 
 	@Override
 	public void deleteMessage(Message message) {
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			session.delete(message);
-			trans.commit();
-			HunterLogFactory.getLog(getClass()).debug("Successfull deleted message >> " + message.toString());
-			HunterHibernateHelper.closeSession(session);
-		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		}finally{
-			HunterHibernateHelper.closeSession(session);
-		}
-		
-		
+		logger.debug("Deleting messages...");
+		HunterHibernateHelper.deleteEntity(message); 
+		logger.debug("Done deleting messages!!"); 
 	}
 
 	@Override
 	public void deleteMessageById(Long msgId) {
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			Message message = (Message)session.get(Message.class, msgId);
-			session.delete(message); 
-			trans.commit();
-			HunterLogFactory.getLog(getClass()).debug("Successfull deleted message >> " + message.toString());
-			HunterHibernateHelper.closeSession(session);
-		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		}finally{
-			HunterHibernateHelper.closeSession(session);
-		}
+		logger.debug("Deleting message with msgId = " + msgId);
+		Message message = HunterHibernateHelper.getEntityById(msgId, Message.class);
+		HunterHibernateHelper.deleteEntity(message); 
+		logger.debug("Done deleting message!!"); 
 	}
 
 	@Override
 	public Message getMessageById(Long msgId) {
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		Message message = null;
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			message = (Message)session.get(Message.class, msgId);
-			HunterHibernateHelper.closeSession(session); 
-			HunterLogFactory.getLog(getClass()).debug("Successfull obtained >> " + message.toString());
-		}catch(HibernateException e){
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		}finally{
-			HunterHibernateHelper.closeSession(session);
-		}
-		
+		logger.debug("Fetching message for msgId : " + msgId);
+		Message message = HunterHibernateHelper.getEntityById(msgId, Message.class);
+		logger.debug("Successfully obtained message : " + message);
 		return message;
 	}
 
 	@Override
 	public List<Message> getAllMessages() {
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		List<Message> messages = new ArrayList<Message>();
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			Query query = session.createQuery("From Message");
-			List<?> list = query.list();
-			
-			for(Object obj : list){
-				Message message = (Message)obj;
-				messages.add(message);
-			}
-			
-			HunterHibernateHelper.closeSession(session); 
-			
-		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		}finally{
-			HunterHibernateHelper.closeSession(session); 	
-		}
-		
+		logger.debug("Getting all messages...");
+		List<Message> messages = HunterHibernateHelper.getAllEntities(Message.class);
+		logger.debug("Obtained messages. Size ( " + messages.size() + " )");
 		return messages;
-		
 	}
 
 	@Override
 	public void updateMessage(Message update) {
-		
-		if(update == null || update.getMsgId() == 0) return;
-		Session session = null;
-		Transaction trans = null;
-		try {
-			SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			Message existent = (Message) session.get(Message.class, update.getMsgId());
-			if(existent == null){
-				throw new IllegalArgumentException("The message passed in for update does not exist >> " + update);
-			}
-			HunterLogFactory.getLog(getClass()).info("Message before updates >> " + existent);
-			HunterLogFactory.getLog(getClass()).info("Message to update with >> " + update); 
-			BeanUtils.copyProperties(existent, update);
-			HunterLogFactory.getLog(getClass()).info("Message after update >> " + existent);
-			trans.commit();
-			HunterHibernateHelper.closeSession(session); 
-		} catch (HibernateException e) {
-			e.printStackTrace();
-			HunterHibernateHelper.rollBack(trans); 
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-			HunterHibernateHelper.rollBack(trans);
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-			HunterHibernateHelper.rollBack(trans);
-		}finally{
-			HunterHibernateHelper.closeSession(session); 
-		}
-		
+		logger.debug("Updating message");
+		HunterHibernateHelper.updateEntity(update);
+		logger.debug("Successfully updated message : " + update);
 	}
 
 	@Override
 	public Long getNextMessageId(Class<?> clss) { 
+		logger.debug("Fetching next message id..."); 
+		Long max = HunterHibernateHelper.getMaxEntityIdAsNumber(clss, Long.class,"msgId");
+		max = max == null ? 1 : max + 1;
+		logger.debug("Successfully obtained max id for entity : " + clss.getSimpleName() + " : Max Id = " + max);
+		return max;
 		
-		if(clss == null) throw new IllegalArgumentException("Class for which the id is sought is required. clss >> " + clss);  
-		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction trans = null;
-		
-		Long nextId = null;
-		
-		try {
-			session = sessionFactory.openSession();
-			trans = session.beginTransaction();
-			
-			Criteria criteria = session.createCriteria(clss).setProjection(Projections.max("msgId"));
-			Long maxId = (Long)criteria.uniqueResult();
-			
-			nextId = maxId == null ? 1 : (maxId + 1);
-			
-			HunterHibernateHelper.closeSession(session); 
-			
-		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
-			e.printStackTrace();
-		}finally{
-			HunterHibernateHelper.closeSession(session); 	
-		}
-		HunterLogFactory.getLog(getClass()).debug("Obtained next hunter address id >> " + nextId); 
-		return nextId;
+	}
+
+	@Override
+	public void updateTaskMsgLifeStatus(Long taskId, String msgLifeStatus) {
+		logger.debug("Updating msg status :  "+ msgLifeStatus);
+		Message message = HunterHibernateHelper.getEntityById(taskId, Message.class);
+		message.setMsgLifeStatus(msgLifeStatus); 
+		logger.debug("Successfully updated task message life status!" );
+	}
+	
+	@Override
+	public void updateTaskMsgDelStatus(Long taskId, String msgDelStatus) {
+		logger.debug("Updating msg status :  "+ msgDelStatus);
+		Message message = HunterHibernateHelper.getEntityById(taskId, Message.class);
+		message.setMsgDeliveryStatus(msgDelStatus); 
+		logger.debug("Successfully updated task message delivery status!" );
+	}
+
+	@Override
+	public Map<String, Object> getEmailMsgRefreshData(Long msgId) {
+		logger.debug("Fetching email msg refresh data..."); 
+		String query = hunterJDBCExecutor.getQueryForSqlId("getEmailMsgRefreshData");
+		List<Map<String, Object>> mapList = hunterJDBCExecutor.executeQueryRowMap(query, hunterJDBCExecutor.getValuesList(new Object[]{msgId}));
+		Map<String,Object> map = mapList != null && !mapList.isEmpty() ? mapList.get(0) : new HashMap<String, Object>();
+		logger.debug("Finished getting email msg data!");
+		logger.debug(HunterUtility.stringifyMap(map)); 
+		return map;
 	}
 
 }
