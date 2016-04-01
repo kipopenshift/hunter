@@ -16,9 +16,13 @@ public class HunterConstants {
 	public static final String METHOD_POST = "POST";
 	public static final String METHOD_GET = "GET";
 	
-	// Methods
+	// Credentials
 	public static final String SECURITY_USER_NAME_STR = "userName";
 	public static final String SECURITY_USER_PSWRD_STR = "password";
+	
+	//Excel Sheets
+	public static final String DOT_XLS = ".xls";
+	public static final String DOT_XLSX = ".xlsx";
 	
 	// Hunter user types
 	public static final String HUNTER_EMPL_USER = "1000";
@@ -45,11 +49,11 @@ public class HunterConstants {
 	public static final String STATUS_TYPE_DELIVERY = "deliveryStatus";
 	
 	// message type audio, message, email, etc.
-	public static final String MESSAGE_TYPE_AUDIO = "AUDIO";
-	public static final String MESSAGE_TYPE_EMAIL = "EMAIL";
-	public static final String MESSAGE_TYPE_TEXT = "TEXT";
-	public static final String MESSAGE_TYPE_PHONE_CALL = "CALL";
-	public static final String MESSAGE_TYPE_VOICE_MAIL = "VOICE_MAIL";
+	public static final String MESSAGE_TYPE_AUDIO = "Audio";
+	public static final String MESSAGE_TYPE_EMAIL = "Email";
+	public static final String MESSAGE_TYPE_TEXT = "Text";
+	public static final String MESSAGE_TYPE_PHONE_CALL = "Call";
+	public static final String MESSAGE_TYPE_VOICE_MAIL = "Voice Mail";
 	
 	// Contact type 
 	public static final String CONTACT_TYPE_TEXT = "TEXT";
@@ -129,7 +133,7 @@ public class HunterConstants {
 	public static final String CLIENT_OZEKI = "OZEKI";
 	public static final String CLIENT_SAFARICOM = "SAFARICOM";
 	public static final String CLIENT_TECH_MASTERS = "TECH MASTERS";
-	public static final String CLIENT_HUNTER_EMAIL = "Hunter Email Provider";
+	public static final String CLIENT_HUNTER_EMAIL = "Hunter Email";
 	
 	// Client Configurations Element Names
 
@@ -147,6 +151,7 @@ public class HunterConstants {
 	public static final String CONFIG_HUNTER_MSG_BAL_COUNT = "blncMsgCnt";
 	public static final String CONFIG_HUNTER_RATING = "hunterRating";
 	public static final String CONFIG_SENDER = "TechMasters";
+	public static final String CONFIG_SENDER_KEY = "sender";
 	
 	public static final String CONFIG_HUNTER_DEFAULT_EMAIL_CONFIG_NAME = "hunterClientDefaultConfigs";
 	public static final String CONFIG_TEXT_HTML_UTF8 = "text/html; charset=utf-8";
@@ -210,6 +215,11 @@ public class HunterConstants {
 	public static final String UI_MSG_CACHED_SERVICE = "UI_MSG_CACHED_SERVICE";
 	public static final String EMAIL_TEMPLATES_CACHED_SERVICE = "EMAIL_TEMPLATES_CACHED_SERVICE";
 	public static final String EMAIL_CONFIG_CACHED_SERVICE = "EMAIL_CONFIG_CACHED_SERVICE";
+	public static final String TASK_PROCESS_JOBS_TEMPLATE = "TASK_PROCESS_JOBS_TEMPLATE";
+	
+	//Hunter Cache service names 
+	public static final String EMAIL_TEMPLATES_CACHE_SERVICE = "emailTemplateCacheService";
+	public static final String ALL_XML_SERVICES = "allXMLServices";
 	
 	public static final String UI_MSG_CACHED_BEANS = "UI_MSG_CACHED_BEANS";
 	
@@ -224,6 +234,8 @@ public class HunterConstants {
 	//Hunter Cache Keys
 	public static final String EXISTENT_EMAIL_TEMPLATES = "EXISTENT_EMAIL_TEMPLATES";
 	public static final String EMAIL_TEMPLATE_BEANS = "EMAIL_TEMPLATE_BEANS";
+	public static final String COUNTRIES = "COUNTRIES";
+	public static final String RECEIVERS = "RECEIVERS";
 	
 	
 

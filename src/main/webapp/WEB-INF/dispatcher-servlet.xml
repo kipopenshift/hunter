@@ -99,7 +99,7 @@
 	</bean>
 	
 	<!-- This is for statically injecting DAO beans to HunterMsgReceiverExtractor -->
-	<bean name="methodInvokingFactoryBean" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+	<!-- <bean name="methodInvokingFactoryBean" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="com.techmaster.hunter.imports.extractors.HunterMsgReceiverExtractor.staticInjectDaos"/>
         <property name="arguments">
             <list>
@@ -108,9 +108,9 @@
                 <ref bean="hunterImportBeanDao"/>
             </list>
        </property>
-	</bean>
+	</bean> -->
 	<!-- This is for statically injecting DAO beans to RegionCache -->
-	<bean name="methodInvokingFactoryBean2" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+<!-- 	<bean name="methodInvokingFactoryBean2" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="com.techmaster.hunter.region.RegionCache.setReceiverRegionDao"/>
         <property name="arguments">
             <list>
@@ -118,8 +118,8 @@
                 <ref bean="hunterMessageReceiverDao"/>
             </list>
        </property>
-	</bean>
-	
+	</bean> -->
+	<!-- 
 	<bean name="methodInvokingFactoryBean3" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="com.techmaster.hunter.gateway.beans.GateWayClientHelper.wiredUpStaticFields"/>
         <property name="arguments">
@@ -131,7 +131,7 @@
                 <ref bean="messageDao"/>
             </list>
        </property>
-	</bean>
+	</bean> -->
 	
 	<bean name="methodInvokingFactoryBean4" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="com.techmaster.hunter.dao.impl.HunterUserDaoImpl.wireUpExecutor"/>

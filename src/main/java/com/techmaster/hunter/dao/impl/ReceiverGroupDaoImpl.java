@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.ReceiverGroupDao;
+import com.techmaster.hunter.json.ReceiverGroupDropDownJson;
 import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.obj.beans.ReceiverGroup;
 import com.techmaster.hunter.obj.converters.ReceiverGroupConverter;
@@ -145,12 +146,38 @@ public class ReceiverGroupDaoImpl implements ReceiverGroupDao{
 	}
 
 	@Override
-	public List<ReceiverGroup> getAllGroupsOfMsgType(String messageType) {
+	public List<ReceiverGroupDropDownJson> getAllRcvrGrpDrpDwnJsnForMsgTyp(String messageType) {
+		messageType = messageType.toLowerCase();
 		logger.debug("Getting all groups of message type : " + messageType);
-		String query = "FROM ReceiverGroup r where lower(r.receiverType) like lower('%"+ messageType +"%')";
-		List<ReceiverGroup> groups = HunterHibernateHelper.executeQueryForObjList(ReceiverGroup.class, query);
-		logger.debug("Successfully retrieved groups. Size ( " + (groups != null ? groups.size() : 0) + " )" );
-		return groups;
+		String query = "SELECT rr.GRP_ID,rr.GRP_NAME FROM RCVR_GRP rr WHERE lower(rr.RCVR_TYP) like  '%"+ messageType +"%'";
+		List<ReceiverGroupDropDownJson> dropDownJsons = new ArrayList<>();
+		List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, null); 
+		if(rowMapList != null && !rowMapList.isEmpty()){
+			for(Map<String,Object> rowMap : rowMapList){
+				ReceiverGroupDropDownJson downJson = new ReceiverGroupDropDownJson();
+				String groupId = rowMap.get("GRP_ID").toString();
+				String groupName = rowMap.get("GRP_NAME").toString();
+				String groupText = groupId + "_" + groupName;
+				downJson.setGroupId(HunterUtility.getLongFromObject(groupId)); 
+				downJson.setText(groupText);
+				dropDownJsons.add(downJson);
+			}
+		}
+		return dropDownJsons;
+	}
+
+	@Override
+	public String getGroupNameById(Long groupId) {
+		String query = "SELECT tg.GRP_NAME FROM RCVR_GRP tg WHERE tg.GRP_ID = ?";
+		List<Object> values = new ArrayList<>();
+		values.add(groupId);
+		List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, values);
+		if(rowMapList != null && !rowMapList.isEmpty()){
+			String groupName = rowMapList.get(0).get("GRP_NAME").toString();
+			logger.debug("Returned the group name : " + groupName); 
+			return groupName;
+		}
+		return null;
 	}
 	
 

@@ -418,7 +418,7 @@
 		</description>
 		<statement>
 			select NVL(SUM(CNT),0) "COUNT"  FROM (
-			SELECT count(*) aS CNT
+			SELECT count(*) AS CNT
 			FROM TSK_GRPS tgrps
 			where  tgrps.TSK_ID = ?
 			)x
@@ -535,7 +535,7 @@
 		</description>
 		<statement>
 		  select distinct r.RCVR_ID,r.RCVR_CNTCT from RCVR_GRP_RCVR r, RCVRGRP_RCVRGRPRCVR rg 
-		  where r.ACTV = 'Y' AND r.APPVD = 'Y' and rg.GRP_ID  in (?) and rg.RCVR_ID = r.RCVR_ID
+		  where r.ACTV = 'Y' AND r.APPVD = 'Y' and rg.GRP_ID  in (:GRP_ID) and rg.RCVR_ID = r.RCVR_ID
 		</statement>
 	</query>
 	<query id="uncompleteTask">
@@ -578,6 +578,18 @@
 			from HNTR_USR_RLS ru WHERE ru.USR_ID = ?
 		</statement>
 	</query>
+	<query id="getTaskNamesForClientUserName">
+		<description>
+		    Returns comma separated task already existent task names
+		</description>
+		<statement>
+	  		SELECT listagg(t.TSK_NAM, ',') within group (order by t.TSK_NAM) as "TSK_NAMS"
+			FROM task t, HNTR_CLINT c, HNTR_USR u
+			WHERE t.HNTR_CLNT_ID = c.HNTR_CLNT_ID
+			AND c.HNTR_CLNT_ID = u.USR_ID
+			and u.USR_NAM = ?
+		</statement>
+	</query>
 	<query id="getUserLoginBeanDetails">
 		<description>
 		    user login bean details. Needs user id.
@@ -585,6 +597,68 @@
 		<statement>
 	  		SELECT ul.USR_ID, ul.FLD_LGN_CNT, ul.BLCKD FROM USR_LGN_BN ul, HNTR_USR hu where ul.USR_ID = hu.USR_ID
 			and hu.USR_NAM = ?
+		</statement>
+	</query>
+	<query id="getAllGroupsDetails">
+		<description>
+		    user login bean details. Needs user id.
+		</description>
+		<statement>
+		  	 SELECT 
+				  distinct
+				  grp.GRP_ID,
+				  grp.OWNR_USR_NAM,
+				  usr.FRST_NAM,
+				  usr.LST_NAM,
+				  grp.GRP_NAME,
+				  grp.GRP_DESC,
+				  CNT_DATA.RCVR_CNT, 
+				  grp.RCVR_TYP,
+          		  TO_CHAR(grp.CRET_DATE, 'yyyy-MM-dd HH:mm:ss')"CRET_DATE",
+				  grp.CRTD_BY,
+          		  TO_CHAR(grp.LST_UPDT_DATE, 'yyyy-MM-dd HH:mm:ss')"LST_UPDT_DATE",
+				  grp.LST_UPDTD_BY
+			  FROM RCVR_GRP grp,HNTR_USR usr,(
+			  select cnt.GRP_ID, count(cnt.GRP_ID) RCVR_CNT
+			    from RCVRGRP_RCVRGRPRCVR cnt
+			    group by cnt.GRP_ID
+			  UNION ALL
+			  (
+			  SELECT 
+			    p.GRP_ID,
+			    (SELECT 0 FROM DUAL) AS RCVR_CNT
+			    from RCVR_GRP p 
+			    WHERE p.GRP_ID NOT IN (SELECT cnt1.GRP_ID FROM RCVRGRP_RCVRGRPRCVR cnt1)
+			  )
+			)CNT_DATA where CNT_DATA.GRP_ID = grp.GRP_ID
+			and usr.USR_NAM = grp.OWNR_USR_NAM
+		</statement>
+	</query>
+	<query id="getAllTaskGroupReceiversForTask">
+		<description>
+		    Returns receivers details for all task groups of a given task id.
+		</description>
+		<statement>
+		  	select
+    		  	distinct
+			  	rgc.RCVR_ID,
+		        rgc.RCVR_CNTCT,
+		        rgc.RCVR_TYPE,
+		        rgc.APPVD,
+		        rgc.APPVR,
+		        TO_CHAR(rgc.CRET_DATE, 'yyyy-MM-dd HH:mm:ss')"CRET_DATE",
+		        rgc.CRTD_BY,
+		        TO_CHAR(rgc.LST_UPDT_DATE, 'yyyy-MM-dd HH:mm:ss')"LST_UPDT_DATE",
+		        rgc.LST_UPDTD_BY,
+		        rgc.ACTV
+			from 
+			  TSK_GRPS tg,
+			  RCVR_GRP_RCVR rgc,
+			  RCVRGRP_RCVRGRPRCVR rr
+			WHERE tg.GRP_ID = rr.GRP_ID
+			AND rgc.RCVR_ID = rr.RCVR_ID
+			AND rr.GRP_ID = tg.GRP_ID
+			and tg.TSK_ID = ?
 		</statement>
 	</query>
 </queries>

@@ -2,6 +2,7 @@ package com.techmaster.hunter.xml;
 
 import javax.xml.xpath.XPathExpressionException;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -10,8 +11,11 @@ import org.w3c.dom.NodeList;
 
 public interface XMLService {
 	
+	public XMLService copyXMLService(XMLService xmlService);
 	public String getElementVal(String xPath);
-	public void addElement(String xPath, Element e);
+	public Element createNewElemet(String name);
+	public Attr createAttrNode(String name, String value);
+	public void addElement(String parentPath, Element e, int position);
 	public String getTextValue(String xPath);
 	public void transform(Document xml, Document xsl); 
 	public Node getTheFirstElement() throws XPathExpressionException;

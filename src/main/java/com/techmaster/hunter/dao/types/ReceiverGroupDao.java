@@ -2,6 +2,7 @@ package com.techmaster.hunter.dao.types;
 
 import java.util.List;
 
+import com.techmaster.hunter.json.ReceiverGroupDropDownJson;
 import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.obj.beans.ReceiverGroup;
 
@@ -15,7 +16,8 @@ public interface ReceiverGroupDao {
 	public void updateGroup(ReceiverGroup update);
 	public List<ReceiverGroupJson> getAllGrouspJson();
 	public String getGroupImportBeansDetails(Long groupId);
-	public List<ReceiverGroup> getAllGroupsOfMsgType(String messageType);
-	
+	public List<ReceiverGroupDropDownJson> getAllRcvrGrpDrpDwnJsnForMsgTyp(String messageType);
+	public String getGroupNameById(Long groupId);
+	 
 
 }

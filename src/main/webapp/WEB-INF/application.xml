@@ -22,6 +22,40 @@
 	<bean id="userRoleDao" class="com.techmaster.hunter.dao.impl.UserRoleDaoImpl"/>
 	<bean id="hunterUserDao" class="com.techmaster.hunter.dao.impl.HunterUserDaoImpl"/>
 	
+	<bean name="gateWayClientHelper" class="com.techmaster.hunter.gateway.beans.GateWayClientHelper" factory-method="getInstance" >
+		<property name="regionService" ref="regionService" />
+		<property name="hunterJDBCExecutor" ref="hunterJDBCExecutor"/> 
+		<property name="hunterJacksonMapper" ref="hunterJacksonMapper"/> 
+		<property name="messageDao" ref="messageDao"/>
+		<property name="taskDao" ref="taskDao"/>     
+	</bean>
+	
+	<bean name="hunterDaoFactory" class="com.techmaster.hunter.dao.impl.HunterDaoFactory" factory-method="getInstance" >
+		<property name="daosMap">
+			<map>
+				<entry key="messageDao" value-ref="messageDao" />
+				<entry key="serviceProviderDao" value-ref="serviceProviderDao" />
+				<entry key="gateWayMessageDao" value-ref="gateWayMessageDao" />
+				<entry key="hunterAddressDao" value-ref="hunterAddressDao" />
+				<entry key="hunterCreditCardDao" value-ref="hunterCreditCardDao" />
+				<entry key="receiverRegionDao" value-ref="receiverRegionDao" />
+				<entry key="taskDao" value-ref="taskDao" />
+				<entry key="hunterClientDao" value-ref="hunterClientDao" />
+				<entry key="hunterMessageReceiverDao" value-ref="hunterMessageReceiverDao" />
+				<entry key="receiverGroupDao" value-ref="receiverGroupDao" />
+				<entry key="hunterImportBeanDao" value-ref="hunterImportBeanDao" />
+				<entry key="receiverGroupReceiverDao" value-ref="receiverGroupReceiverDao" />
+				<entry key="receiverGroupJsonDao" value-ref="receiverGroupJsonDao" />
+				<entry key="taskHistoryDao" value-ref="taskHistoryDao" />
+				<entry key="userRoleDao" value-ref="userRoleDao" />
+				<entry key="hunterUserDao" value-ref="hunterUserDao" />
+				<entry key="hunterJDBCExecutor" value-ref="hunterJDBCExecutor" />
+				<entry key="regionService" value-ref="regionService" />
+				<entry key="hunterJacksonMapper" value-ref="hunterJacksonMapper" />
+				<entry key="jdbcTemplate" value-ref="jdbcTemplate" />
+			</map>
+		</property>
+	</bean>
 	
 	
 

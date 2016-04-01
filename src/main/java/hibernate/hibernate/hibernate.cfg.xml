@@ -38,6 +38,7 @@
 <mapping resource="hibernate/hbm/ReceiverGroupReceiver.hbml.xml" />
 <mapping resource="hibernate/hbm/TaskHistory.hbm.xml" />
 <mapping resource="hibernate/hbm/UserLoginBean.hbm.xml" />
+<mapping resource="hibernate/hbm/TaskProcessJob.hbm.xml" />
 
  
 </session-factory>

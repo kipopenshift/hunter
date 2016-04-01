@@ -41,7 +41,6 @@ public class OzekiClient extends AbsractGatewayClient{
 	private String activeMethodUrl = null;
 	private String [] receivers;
 	private List<String> taskProcessErrors = new ArrayList<>();
-	private String taskProcessStatus = null;
 	private Logger logger = Logger.getLogger(CMClient.class);
 	private Set<GateWayMessage> gateWayMessages = new HashSet<>();
 	private GateWayMessageDao gateWayMessageDao = new GateWayMessageDaoImpl();
@@ -69,6 +68,7 @@ public class OzekiClient extends AbsractGatewayClient{
 		
 		if(activeMethod != null && activeMethod.equals(HunterConstants.METHOD_POST)){
 			
+			@SuppressWarnings("unused")
 			String response_ = doPost(params, null);
 			XMLService xmlService = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.OZEKI_TEST_RSPONSE_XML_LOCL_PATH);
 			String response = xmlService.toString();
@@ -81,7 +81,7 @@ public class OzekiClient extends AbsractGatewayClient{
 			logger.debug("No OZEKI active method is configured. Please check."); 
 		}
 		
-		return null;
+		return results;
 	}
 
 	@Override

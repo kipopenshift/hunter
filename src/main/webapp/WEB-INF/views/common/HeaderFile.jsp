@@ -96,6 +96,10 @@
 
 <style type="text/css" > 
 		/*style the main menu*/
+	.k-tooltip-validation k-invalid-msg {
+		background-color: #FF9191;
+	}
+		
 	.myMenu {
 		padding:0;
 		position:relative;

@@ -13,7 +13,6 @@ import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
 import com.techmaster.hunter.obj.beans.ReceiverRegion;
 import com.techmaster.hunter.obj.beans.State;
 import com.techmaster.hunter.obj.beans.Task;
-import com.techmaster.hunter.obj.beans.TaskMessageReceiver;
 
 
 

@@ -1,47 +1,52 @@
 package com.techmaster.hunter.gateway.beans;
 
-import javax.xml.parsers.ParserConfigurationException;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
-import com.techmaster.hunter.constants.HunterURLConstants;
 import com.techmaster.hunter.obj.beans.GateWayMessage;
+import com.techmaster.hunter.util.HunterUtility;
 import com.techmaster.hunter.xml.XMLService;
-import com.techmaster.hunter.xml.XMLServiceImpl;
-import com.techmaster.hunter.xml.XMLTree;
 
 public class GateWayResponseHanlder {
 
 	
-	private static XMLService xmlService;
+	private XMLService respXMLService = HunterCacheUtil.getInstance().getXMLService(HunterConstants.RESPONSE_CONFIG_CACHED_SERVICE);
 	private static GateWayResponseHanlder instance;
 	private GateWayResponseHanlder(){};
-	
 	private Logger logger = Logger.getLogger(GateWayResponseHanlder.class);
 	
 	static{
-		
 		if(instance == null){
 			synchronized (GateWayResponseHanlder.class) {
 				instance = new GateWayResponseHanlder();
 			}
 		}
-		
-		try {
-			String configPath = HunterURLConstants.RESOURCE_BASE_XML_PATH + "ResponseConfig.xml";
-			XMLTree tree = new XMLTree(configPath, false);
-			xmlService = new XMLServiceImpl(tree); 
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		}
-				
 	}
 	
 	public static GateWayResponseHanlder getInstance(){
 		return instance;
+	}
+	
+	public void setAllStatuses(String status, Set<GateWayMessage> messages){
+		if(messages != null && !messages.isEmpty()){
+			for(GateWayMessage msg : messages){
+				msg.setStatus(status); 
+			}
+		}
+	}
+	
+	public String setStatusFromResponseText(String responseText, String clientName, Set<GateWayMessage> messages){
+		String status = null;
+		if(clientName != null && HunterConstants.CLIENT_CM.equals(clientName)){
+			status = HunterUtility.notNullNotEmpty(responseText) ? HunterConstants.STATUS_FAILED : HunterConstants.STATUS_SUCCESS;
+			setAllStatuses(status, messages);
+		}
+		return status;
 	}
 	
 	public void updateGateWayMessageForStatus(String clientName, String responseCode, GateWayMessage gateWayMessage, String statusType){
@@ -79,7 +84,7 @@ public class GateWayResponseHanlder {
 	public String getClientTextForCode(String clientName, String responseCode, String statusType){
 		
 		String xPath = "//client[@clientName=\""+ clientName +"\"]/configs/config[@configType=\""+ statusType +"\"]/metadata[code=\""+ responseCode +"\"]";
-		NodeList nodeList = xmlService.getNodeListForXPath(xPath);
+		NodeList nodeList = respXMLService.getNodeListForXPath(xPath);
 		
 		Node node = nodeList.item(0); 
 		NodeList metadata = node.getChildNodes();
@@ -109,7 +114,8 @@ public class GateWayResponseHanlder {
 	
 	public static void main(String[] args) {
 		
-		new GateWayResponseHanlder().getClientTextForCode("CM", "7", HunterConstants.STATUS_TYPE_CLIENT); 
+		String value = new GateWayResponseHanlder().getClientTextForCode("CM", "7", HunterConstants.STATUS_TYPE_CLIENT);
+		System.out.println(value); 
 		
 	}
 	

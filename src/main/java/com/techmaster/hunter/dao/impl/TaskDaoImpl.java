@@ -207,6 +207,35 @@ public class TaskDaoImpl implements TaskDao{
 		logger.debug("Successfully finished updating task status!!"); 
 		
 	}
+	
+
+	@Override
+	public void updateTaskDelStatus(Long taskId, String toStatus, String updateBy) {
+		logger.debug("Updating status of taskId ( " + taskId + " ) toStatus ( " + toStatus + " )...");
+		String query = "UPDATE task SET TSK_DEL_STS = ?,LST_UPDTD = sysdate,UPDTD_BY = ?, TSK_APPRVD = to_char('Y'), TSK_APPRVR  = ? WHERE tsk_id = ?";
+		List<Object> values = new ArrayList<>();
+		values.add(toStatus);
+		values.add(updateBy);
+		values.add(updateBy);
+		values.add(taskId);
+		hunterJDBCExecutor.executeUpdate(query, values);
+		logger.debug("Successfully finished updating task status!!"); 
+		
+	}
+
+	@Override
+	public String getCmmSprtdTskNamsFrUsrNam(String userName) {
+		logger.debug("Fetching task names for user name : " + userName); 
+		String query = hunterJDBCExecutor.getQueryForSqlId("getTaskNamesForClientUserName");
+		List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{userName});
+		Map<Integer, List<Object>> rowMapList = hunterJDBCExecutor.executeQueryRowList(query, values);
+		List<Object> rowList = rowMapList == null ? new ArrayList<>() : rowMapList.get(1); 
+		String taskNames = rowList.isEmpty() ? null : rowList.get(0).toString();
+		logger.debug("Task names : " + taskNames); 
+		return taskNames;
+	}
+	
+	
 
 
 }

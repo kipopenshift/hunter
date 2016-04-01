@@ -48,6 +48,7 @@
                			 error: onError
                			}"
   >
+
 <p style="text-align: left;margin-top:10px;" >
 	<button style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" onClick="RegionHierarchyVM.closeUploadDivAndShowGrid()" class="k-button k-button-icontext k-grid-add"><span class="k-icon k-i-arrowhead-w"></span>Go Back</button>
 </p>
@@ -72,19 +73,39 @@
 </div>
 </script>
 
+<script type="text/x-kendo-template" id="regionHierarchyToolBarTemplateNew">
+<div id='regionHierarchyKendoUpload'  style='width:350px;height:auto;background-color:#EBF7FF;border:1px solid #B6D2E2;border-radius:4px;' >
+ <div style="width:90%;margin-left:5%;margin-top:15px;padding:5px;" >
+	<form method="post">
+        <div class="demo-section k-content">
+            <input name="hunterHierarchyFiles" 
+				id="hunterHierarchyFiles" 
+				type="file"  
+				placeholder = "Select File" />
+        </div>
+    </form>
+	<table style="width:30%;margin-left:35%;margin-top:10px;" >
+		<tr>
+			<td><button onClick="kendoKipHelperInstance.closeWindowWithOnClose()" class="k-button" style="width:100%;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" ><span class="k-icon k-i-close"></span>Close</button></td>
+		</tr>
+	<table>
+ </div>
+</div>
+</script>
+
 <script type="text/x-kendo-template" id="regionHierarchyToolBarTemplate">
 <input id="countryDropDownList"
-				 	   data-role="dropdownlist"
-	                   data-auto-bind="true"
-	                   data-value-primitive="true"
-	                   data-text-field="countryName"
-	                   data-value-field="countryId"
-	                   placeholder = "Select Country"
-	                   data-bind="value: selCountry,
-	                              source: countryDS,
-	                              events: {
-	                                change: onChangeCountry,
-	                              }"
+	data-role="dropdownlist"
+	data-auto-bind="true"
+	data-value-primitive="true"
+	data-text-field="countryName"
+	data-value-field="countryId"
+	placeholder = "Select Country"
+	data-bind="value: selCountry,
+		source: countryDS,
+		events: {
+		change: onChangeCountry,
+	}"
 </script>
 
 <script type="text/javascript">

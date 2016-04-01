@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,7 +17,6 @@ public class TaskEmailManagerImpl extends AbstractEmailManager{
 
 	@Autowired private JavaMailSender javaMailSender;
 	@Autowired private SimpleMailMessage templateMessage;
-	private Logger logger = Logger.getLogger(TaskEmailManagerImpl.class);
 	
 	public void setJavaMailSender(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;

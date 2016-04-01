@@ -5,10 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
-import com.techmaster.hunter.dao.types.HunterMessageReceiverDao;
-import com.techmaster.hunter.dao.types.ReceiverRegionDao;
+import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.obj.beans.Country;
 import com.techmaster.hunter.obj.beans.County;
 import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
@@ -18,12 +15,8 @@ import com.techmaster.hunter.util.HunterUtility;
 public class RegionCache {
 	
 	private static RegionCache instance;
-	private static volatile List<Country> countries = new ArrayList<Country>();
-	private static volatile List<HunterMessageReceiver> hunterMessageReceivers = new ArrayList<>();
-	private static ReceiverRegionDao receiverRegionDao;
-	private static HunterMessageReceiverDao hunterMessageReceiverDao;
-	
-	private static Logger logger = Logger.getLogger(RegionCache.class);
+	private static volatile List<Country> countries = HunterCacheUtil.getInstance().getAllCountries();
+	private static volatile List<HunterMessageReceiver> hunterMessageReceivers = HunterCacheUtil.getInstance().getAllReceivers();
 	
 	static{
 		if(instance == null){
@@ -32,33 +25,12 @@ public class RegionCache {
 			}
 		}
 	}
-
-	public static void setReceiverRegionDao(ReceiverRegionDao receiverRegionDao, HunterMessageReceiverDao hunterMessageReceiverDao) {
-		RegionCache.receiverRegionDao = receiverRegionDao;
-		RegionCache.hunterMessageReceiverDao = hunterMessageReceiverDao;
-		logger.debug("Successfully wired DAO for Region Cache!!");
-		loadCountries();
-		loadReceivers();
-	}
-
-	private static void loadReceivers() {
-		logger.debug("Loading receivers cache..");
-		hunterMessageReceivers.clear();
-		List<HunterMessageReceiver> hunterMessageReceivers_ = hunterMessageReceiverDao.getAllHunterMessageReceivers();
-		hunterMessageReceivers.addAll(hunterMessageReceivers_); 
-		logger.debug("Done Loading receivers cache!!");
-		logger.debug("Done Loading receivers cache!! Size ( " + hunterMessageReceivers.size() + " )");
-	}
-
-	private static void loadCountries(){
-		logger.debug("Loading regions cache..");
-		countries.clear();
-		List<Country> countries_ = receiverRegionDao.getAllCountries();
-		countries.addAll(countries_);
-		logger.debug("Done Loading regions cache!! Size ( " + countries.size() + " )");
-	}
 	
-	public static Set<County> getCountiesForCountryName(String countryName){
+	public static RegionCache getInstance(){
+		return instance;
+	}
+
+	public Set<County> getCountiesForCountryName(String countryName){
 		Set<County> counties_ = new HashSet<>();
 		Set<County> counties = new HashSet<>();;
 		for(Country country : countries){
@@ -71,7 +43,7 @@ public class RegionCache {
 		return counties_;
 	}
 	
-	public static List<HunterMessageReceiver> getReceiversForWard(String countryName, String stateName,String countyName, String consName, String consWardName){
+	public List<HunterMessageReceiver> getReceiversForWard(String countryName, String stateName,String countyName, String consName, String consWardName){
 		List<HunterMessageReceiver> wardReceivers = new ArrayList<>();
 		for(HunterMessageReceiver hunterMessageReceiver : hunterMessageReceivers){
 			boolean isCountryNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getCountryName(), countryName);
@@ -85,7 +57,7 @@ public class RegionCache {
 		return wardReceivers;
 	}
 	
-	public static List<HunterMessageReceiver> getReceiversForConstituency(String countryName, String stateName,String countyName, String consName){
+	public List<HunterMessageReceiver> getReceiversForConstituency(String countryName, String stateName,String countyName, String consName){
 		List<HunterMessageReceiver> wardReceivers = new ArrayList<>();
 		for(HunterMessageReceiver hunterMessageReceiver : hunterMessageReceivers){
 			boolean isCountryNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getCountryName(), countryName);
@@ -98,7 +70,7 @@ public class RegionCache {
 		return wardReceivers;
 	}
 	
-	public static List<HunterMessageReceiver> getReceiversForCounty(String countryName, String stateName,String countyName){
+	public List<HunterMessageReceiver> getReceiversForCounty(String countryName, String stateName,String countyName){
 		List<HunterMessageReceiver> wardReceivers = new ArrayList<>();
 		for(HunterMessageReceiver hunterMessageReceiver : hunterMessageReceivers){
 			boolean isCountryNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getCountryName(), countryName);
@@ -110,7 +82,7 @@ public class RegionCache {
 		return wardReceivers;
 	}
 	
-	public static List<HunterMessageReceiver> getReceiversForCountry(String countryNam){
+	public List<HunterMessageReceiver> getReceiversForCountry(String countryNam){
 		List<HunterMessageReceiver> wardReceivers = new ArrayList<>();
 		for(HunterMessageReceiver hunterMessageReceiver : hunterMessageReceivers){
 			boolean isCountryNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getCountryName(), countryNam);
@@ -121,12 +93,12 @@ public class RegionCache {
 		return wardReceivers;
 	}
 	
-	public static int getReceiverCountForRegion(ReceiverRegion receiverRegion){
+	public int getReceiverCountForRegion(ReceiverRegion receiverRegion){
 		List<HunterMessageReceiver> receivers = getReceiversForReceiverRegion(receiverRegion);
 		return receivers.size();
 	}
 	
-	public static List<HunterMessageReceiver> getReceiversForReceiverRegion(ReceiverRegion receiverRegion){
+	public List<HunterMessageReceiver> getReceiversForReceiverRegion(ReceiverRegion receiverRegion){
 		List<HunterMessageReceiver> receivers = new ArrayList<>();
 		if(receiverRegion.getCountry() != null && receiverRegion.getCounty() != null && receiverRegion.getConstituency() != null && receiverRegion.getWard() != null){
 			receivers = getReceiversForWard(receiverRegion.getCountry(), receiverRegion.getState() ,receiverRegion.getCounty(), receiverRegion.getConstituency(), receiverRegion.getWard());
@@ -144,7 +116,7 @@ public class RegionCache {
 		return receivers;
 	}
 	
-	public static Set<County> getCountiesForCountryId(Long countryId){
+	public Set<County> getCountiesForCountryId(Long countryId){
 		Set<County> counties_ = new HashSet<>();
 		Set<County> counties = new HashSet<>();;
 		for(Country country : countries){
@@ -157,7 +129,7 @@ public class RegionCache {
 		return counties_;
 	}
 
-	public static List<Country> getCountries(){
+	public List<Country> getCountries(){
 		List<Country> copy = new ArrayList<>();
 		copy.addAll(countries);
 		return copy;

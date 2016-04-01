@@ -15,7 +15,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.techmaster.hunter.exception.HunterRunTimeException;
-import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
 /**
  * @author hillangat

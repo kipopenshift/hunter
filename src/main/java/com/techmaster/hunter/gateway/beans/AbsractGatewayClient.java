@@ -69,12 +69,11 @@ public abstract class AbsractGatewayClient implements GatewayClient {
 			e.printStackTrace();
 		} 
 	}
-
 	
 
 	@Override
 	public Set<TaskMessageReceiver> getTskMsgRcvrsFrTskId(Long taskId) {
-		List<HunterMessageReceiver> receivers = GateWayClientHelper.getInstance().getTaskReceivers(taskId);
+		List<HunterMessageReceiver> receivers = GateWayClientHelper.getInstance().getTaskRegionReceivers(taskId);
 		Set<TaskMessageReceiver> taskMsgRcvers = new HashSet<TaskMessageReceiver>();
 		logger.debug("Creating task message receivers from hunterMessage receivers...");
 		int counter = 0;

@@ -14,6 +14,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
@@ -28,10 +29,12 @@ import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -51,6 +54,7 @@ import org.json.JSONTokener;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -248,6 +252,14 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		return obj;
 	}
 	
+	public static List<Object> getObjectList(List<?> objects){
+		List<Object> objs = new ArrayList<Object>();
+		for(Object obj : objects){
+			objs.add(obj);
+		}
+		return objs;
+	}
+	
 	public static String stringifySet(Set<?> objects){
 		if(objects == null) return null;
 		StringBuilder builder = new StringBuilder();
@@ -301,6 +313,27 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		return str;
 	}
 	
+	public static String stringifyElement(Element element, boolean omitDeclation){
+		try {
+			TransformerFactory transFactory = TransformerFactory.newInstance();
+			Transformer transformer = transFactory.newTransformer();
+			StringWriter buffer = new StringWriter();
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, omitDeclation ? "yes" : "no");  
+			transformer.transform(new DOMSource(element),new StreamResult(buffer));
+			String str = buffer.toString();
+			return str;
+		} catch (TransformerConfigurationException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (TransformerFactoryConfigurationError e) {
+			e.printStackTrace();
+		} catch (TransformerException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public static HttpSession getSessionForRequest(HttpServletRequest request){
 		HttpSession session = request.getSession(true);
 		return session;
@@ -315,7 +348,7 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	}
 	
 	public static boolean notNullNotEmpty(Object object){
-		return object == null ? false : object instanceof String? (((String)object).trim().equals("") ? false : true) : true;
+		return object == null ? false : object.toString().trim().equals("") ? false : true;
 	}
 	
 	public static boolean notNullNotEmptyAndEquals(Object object, String base){
@@ -908,6 +941,11 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	public static String getYNForBoolean(boolean boolean_){
 		String yN = boolean_ ? "Y" : "N";
 		return yN;
+	}
+	
+	public static boolean getBooleanForYN(String yn){
+		boolean ynb = yn.equalsIgnoreCase("Y") ? true : false;
+		return ynb;
 	}
 	
 	public static void testMap(){

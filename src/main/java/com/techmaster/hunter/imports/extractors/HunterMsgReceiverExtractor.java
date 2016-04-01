@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterImportBeanDao;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterMessageReceiverDao;
@@ -37,16 +38,16 @@ public class HunterMsgReceiverExtractor extends AbstractExcelExtractor<HunterMes
 	private static Logger logger = Logger.getLogger(HunterMsgReceiverExtractor.class);
 
 	// Important!! These four beans are statically injected by spring - please look at file > dispatcher-servlet.xml
-	private static HunterMessageReceiverDao hunterMessageReceiverDao;
-	private static HunterJDBCExecutor hunterJDBCExecutor;
-	private static HunterImportBeanDao hunterImportBeanDao;
-	
+	private static HunterMessageReceiverDao hunterMessageReceiverDao = HunterDaoFactory.getInstance().getDaoObject(HunterMessageReceiverDao.class);
+	private static HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+	private static HunterImportBeanDao hunterImportBeanDao = HunterDaoFactory.getInstance().getDaoObject(HunterImportBeanDao.class);
+	/*
 	public static void staticInjectDaos(HunterMessageReceiverDao hunterMessageReceiverDao, HunterJDBCExecutor hunterJDBCExecutor, HunterImportBeanDao hunterImportBeanDao) {
 		HunterMsgReceiverExtractor.hunterMessageReceiverDao = hunterMessageReceiverDao;
 		HunterMsgReceiverExtractor.hunterJDBCExecutor = hunterJDBCExecutor;
 		HunterMsgReceiverExtractor.hunterImportBeanDao = hunterImportBeanDao;
 		logger.debug("Successfully statically injected DAOs!!!"); 
-	}
+	}*/
 	
 	private static Map<Integer, List<Object>> rowLists;
 	
@@ -151,7 +152,7 @@ public class HunterMsgReceiverExtractor extends AbstractExcelExtractor<HunterMes
 		
 		logger.debug("Validating hunter message receiver data extracted..." ); 
 		Map<Integer, List<String>> errors = new HashMap<>();
-		List<Country> countries = RegionCache.getCountries();
+		List<Country> countries = RegionCache.getInstance().getCountries();
 		List<String> localDuplicateCheck = new ArrayList<>();
 		
 		loadContactTypePairs();

@@ -680,7 +680,7 @@
                 
                 #hunterClientTasksPopupViewTemplateTable tr td:nth-child(2) {
                 	width:50%;
-                	max-width:300px;
+                	max-width:100px;
                 	text-shadow: 1px 1px #BFDBFF;
                 	color:#0A2FA9;
                 	font-family: Courier New, Courier, Sans Serif;
@@ -689,6 +689,38 @@
                 #hunterClientTasksPopupViewTemplateTable tr td{
                 	height:20px;
                 }
+
+		.tasProcessJobResultDiv{
+		     float:left;
+		     margin-left:2%;
+		     margin-top:2%;
+		     width:47%;
+		     background-color : #E4F4F9;
+		     height:340px;
+		     border-radius:4px;
+		     border : 1px solid #AFCAD2;
+		  }
+		 .prcssJbDtlsTblLbl tr td:first-child{
+		    color:#0C2941;
+		    font-size:16px;
+		    width:40%;
+		    text-align:left;
+		  }
+		.prcssJbDtlsTblLbl tr td:nth-child(2){
+		    width:60%;
+		    padding-left:3px;
+		    text-align:left;
+		    font-size:14px;
+		    color:#000B18;
+		    font-family : courier new, courier, sans serif, new times roman;
+		  }
+		.prcssJbDtlsTblLbl td{
+		  padding:4px;
+		  border-bottom:1px solid #D3E4E9;
+		}
+
+
+
 </style>
 
 
@@ -732,7 +764,6 @@
 <script type="text/x-kendo-template" id="hunterUserToolBar">
 <div class="toolbar" >
 	<button data-command="create" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" class="k-button k-button-icontext k-grid-add"><span class="k-icon k-add"></span>New</button>
-	<button id="loadHunterUserDetails" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" class="item-group k-button" style="width:150px" onClick="hunterAdminClientUserVM.loadSelUserDetails()"><span class='k-icon k-i-search' ></span>Load</button>
 </div>
 </script>
 
@@ -914,8 +945,8 @@
 </div>
 
 <div id="hunterClientTasksPopupViewTemplate" style="display:none;">
-	<div class="k-header" style="border:1px solid rgb(187,207,230); border-radius:4px;padding:10px;height:96%;"> 
-        <table id="hunterClientTasksPopupViewTemplateTable" style="width:80%;margin-left:3%;height:90%;border : 1px solid rgb(218,239,242); border-radius:4px;color:\\#1D7BD8;">
+	<div class="k-header" style="border:1px solid rgb(187,207,230); border-radius:4px;padding:10px;height:96%;width:96%;align:center;"> 
+        <table id="hunterClientTasksPopupViewTemplateTable" style="width:100%;height:90%;border : 1px solid rgb(218,239,242); border-radius:4px;color:\\#1D7BD8;table-layout:fixed">
         	<tr>
         		<td>Task ID : </td>
         		<td>#= taskId #</td>
@@ -930,7 +961,11 @@
         	</tr>
         	<tr>
         		<td>Task Objective:</td>
-        		<td>#= taskObjective #</td>
+        		<td style="width:400px;overflow: hidden; height: 2.5em;" >
+        			<div style="width: 400px;overflow: hidden;">
+				    	#= taskObjective #
+				  	</div>
+        		</td>
         	</tr>
         	<tr>
         		<td>Task Description:</td>
@@ -1006,7 +1041,7 @@
         		</td>
         	</tr>
         </table>
-        <div style="text-align: center;margin-top:20px;"><button class="k-button" onClick="kendoKipHelperInstance.closeMeasuredWindow()" style='background-color:rgb(212,239,249);width:15%;'>OK</button></div>
+        <div style="text-align: center;margin-top:20px;"><button class="k-button" onClick="kendoKipHelperInstance.closeWindowWithOnClose()" style='background-color:rgb(212,239,249);width:15%;'>OK</button></div>
         </div>
     </div>
     
@@ -1052,33 +1087,88 @@
     </div>
 
 <script type="text/x-kendo-template" id="processTaskProgressPopupTemplate">
-<div id="processTaskProgressPopup" style='min-width:500px;min-height:400px;background-color:#F9FFFF;border:1px solid #B6D2E2;border-radius:4px;' >
+<div id="processTaskProgressPopup" style='min-width:500px;min-height:400px;background-color:#F9FFFF;border:1px solid #B6D2E2;border-radius:4px;display:none;' >
 	<div id="taskProcessValidationContainer">
  		<table style="margin:4px;table-layout:fixed;padding:3px;margin-left:10px;" >
 			<tr>
-				<td>Validating : </td>
-				<td><div id="validationProgressBar"></div></td>
+				<td id="taskProcessValidationTd" >Validating : </td>
+				<td><span id="validationProgressBarSpinner" ><div id="validationProgressBar"></span></div></td>
 			</tr>
 			<tr>	
 				<td id="validationResultsLabel" ></td>
-				<td id="validationResultsMessages" style="border:1px solid #56A8B5;border-radius:3px;padding:5px;" ><div id="taskValidationResults"></div></td>
+				<td id="validationResultsMessages" style="max-width:50px;" ><div id="taskValidationResults"></div></td>
 			</tr>
 			<tr>
-				<td>Preempting : </td>
-				<td><div id="preemptionProgressBar"></div></td>
+				<td>Processing : </td>
+				<td><div id="processTaskProgressBar"></div></td>
 			</tr>
 			<tr>	
 				<td id="preemptionResultsLabel" ></td>
-				<td id="preemptingResultsMessages" style="border:1px solid #56A8B5;border-radius:3px;padding:5px;" ><div id="taskPremptingResults"></div></td>
+				<td id="preemptingResultsMessages" style="max-width:50px" ><div id="taskPremptingResults"></div></td>
 			</tr>
 		</table>
 	</div>
-	<table id="closeTaskProcessingWindowTable" style="width:20%;margin-left:40%;" >
+	<table id="closeTaskProcessingWindowTable" style="width: 0 auto;margin-left:40%;" >
 		<tr>
 			<td><button onClick="kendoKipHelperInstance.closeWindowWithOnClose()"  class="k-button" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:100px;" >Close</button></td>
 		</tr>
-	</table>	
+	</table>
+  <div id="taskProcessProgressBar" >
+ </div>	
 </div>
+<div style="width:350px;min-height:150px;background-color:#F9FFFF;border:1px solid #B6D2E2;border-radius:4px;" id="taskProcessPrompPopup"  >
+	<div style="width:80%;margin-left:10%;margin-top:20px;">
+		<b style="color:red;" >Task processing is an irreversible process</b><br/>
+		This action will process task (<span style="font-weight:bold;" id="taskProcessPopupTaskName"></span>)<br/>
+		Are you sure?  
+	</div>
+	<br/>
+	<table style="width:40%;margin-left:23%;" >
+		<tr>
+			<td><td><button onClick="hunterAdminClientUserVM.unhideProcessTaskSection()"  class="k-button" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:100px;" >Process</button></td></td>
+			<td><td><button onClick="kendoKipHelperInstance.closeWindowWithOnClose()"  class="k-button" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:100px;" >Cancel</button></td></td>
+		</tr>
+	</table>
+</div>
+</script>
+
+<script type="text/x-kendo-template" id="cloneTaskPopupContainer">
+	<div style="width:100%;" >
+		<p>
+			<div class="cloneTaskHiddenFields" style="display:none;" >
+				<table style="margin-left:5%;" id="cloneTaskHiddenFieldsTable" >
+					<tr id='cloneTaskNameTr' >
+				       	<td>Task Name</td>
+					 	<td>
+							<input type="textbox" placeholder="Enter Task Name..." class="k-textbox" id="cloneTaskPTaskName" style="width: 220px" />
+				        </td>
+				    </tr>
+					<tr  id='cloneTaskDescTr' >
+				       	<td>Task Description</td>
+					 	<td>
+							 <textarea type="textarea" class="k-textbox" placeholder="Enter Task Description..." id="cloneTaskPTaskDesc" style="width: 220px" ></textarea>
+				        </td>
+				    </tr>
+					<tr>
+						<td>New User</td>
+						<td>
+							<input type="text" class="k-textbox" id="cloneTaskNewUser" style="width: 220px" />
+						</td>
+					</tr>
+				</table>
+				<div id="cloneTaskProgressBar" style="display:none;"  >
+					Processing Task...
+				</div>
+			</div>
+		</p>
+		<span class='cloneTaskWarningMessage' style="width:200px;" >A copy of <span id="cloneTaskNameLabel" style="font-weight:bold;font-size:14px;text-decoration: underline;" ></span> will be created.<br/>Are you sure?</span>
+		<table style="width:30%;margin-left:30%;margin-bottom:10px;" >
+			<tr>
+				<td><button id="startTaskClongingButton"  onClick="hunterAdminClientUserVM.processCloning()"  class="k-button" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:100px;" ><span class='k-icon k-i-tick' ></span><span id='startTaskClongingLabel' >Yes</span></button></td>
+				<td><button onClick="kendoKipHelperInstance.closeWindowWithOnClose()"  class="k-button" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:100px;" ><span class='k-icon k-i-cancel' ></span>Cancel</button></td>
+			</tr>
+		</table>
+	</div>
 </script>
 
 <div id='allHunterEmailTemplates' style='display:none;' >
@@ -1087,15 +1177,101 @@
 
 
 
+<script type="text/x-kendo-template" id="taskProcessJobDetailsTemplate">
+<div style='width:1100px;max-height:850px;' >
+<div id="taskProcessWorkerContainer"  style="width:96%;margin-left:2%;padding:4px;background-color:rgb(215,234,240);max-height:735px;min-height:380px;border-radius:4px;border:1px solid rgb(175,202,210);overflow-y:scroll;" >
+  
+</div>
+</div>
+<button class="k-button"  onClick="kendoKipHelperInstance.closeWindowWithOnClose()" style="margin-bottom:7px;margin-top:10px;margin-left:47%;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-close" ></span>Close</button>
+</script>
 
 
 
 
+<script type="text/x-kendo-template" id="taskProcessJobWorkerTemplate">
+
+#for(var i=0; i<data.length;i++){#
+<div class="tasProcessJobResultDiv" >
+   <table style="width:90%;margin-left:5%;margin-top:2%;border-radius:3px;" class="prcssJbDtlsTblLbl"  >
+     <tr>
+         <td style="color:red;font-size:17px;font-weight:bold;" >#=data[i].workerNo#</td>
+		 <td></td>
+      </tr> 
+	 <tr>
+         <td>Worker Name : </td>
+         <td>#=data[i].workerName#</td>
+      </tr>
+      <tr style="border-bottom:1px solid red;">
+         <td>Worker Status : </td>
+         <td>
+			 #if(data[i].workerStatus == 'Failed'){#
+            	<span style="color:red;" >#:data[i].workerStatus#</span>
+        	#}else{#
+           	 	<span style="color:green;" >#:data[i].workerStatus#</span>
+        	#}#
+		 </td>
+      </tr>
+      <tr>
+         <td>Response Code : </td>
+         <td>#=data[i].responseCode#</td>
+      </tr>
+      <tr>
+         <td>Response Text : </td>
+         <td>#=data[i].responseText#</td>
+      </tr>
+      <tr>
+         <td>Error Type : </td>
+         <td>#=data[i].errorType#</td>
+      </tr>
+      <tr>
+         <td>Error Text: </td>
+         <td>#=data[i].errorText#</td>
+      </tr>
+      <tr>
+         <td>Process Duration : </td>
+         <td>#=data[i].duration# milliseconds</td>
+      </tr>
+      <tr>
+         <td>Connection Status : </td>
+		<td>
+			 #if(data[i].cnnStatus == 'Failed'){#
+            	<span style="color:red;" >#:data[i].cnnStatus#</span>
+        	#}else{#
+           	 	<span style="color:green;" >#:data[i].cnnStatus#</span>
+        	#}#
+		 </td>
+      </tr>
+      <tr>
+         <td>Message Count : </td>
+         <td>#=data[i].msgCount#</td>
+      </tr>
+    </table>
+ </div>
+ <div class="tasProcessJobResultDiv" >
+ 	<div style="word-wrap: break-word;width:88%;margin:5%;margin-bottom:3%;height:75%;overflow-y:scroll;font-size:13px;" >
+		#=data[i].msgIds#
+ 	</div>
+ </div>
+#}#
+
+</script>
 
 
+<script type="text/x-kendo-template" id="taskProcessJobNoDataFoundTemplate">
+	<div id="taskProcessJobLoadingIcon"  style="font-size:18px;color:black;text-align:center;background-color:#;margin-top:15%;"> Loading Process Results..... </div>
+</script>
 
 
+<script type="text/javascript">
 
+var processJobData = 
+	
+	[{"processJobId":49,"genStatus":null,"genDuration":-1056,"startDate":"2016-03-29 22:32:44","workerJsons":[{"responseCode":"200","duration":"1056","processJobId":49,"taskId":139,"msgIds":"106750,106780,106823,106772,106843,106806,106830,106844,106751,106809,106766,106781,106792,106791,106810,106848,106752,106847,106799,106827,106777,106841,106821,106776,106832,106842,106785,106779,106814,106788,106775,106769,106794,106761,106838,106818,106764,106770,106839,106765,106786,106760,106813,106802,106808,106816,106763,106817,106796,106789,106807,106815,106783,106825,106835,106829,106834,106849,106773,106820,106756,106762,106778,106826,106836,106831,106840,106790,106824,106768,106801,106767,106804,106845,106822,106795,106798,106805,106754,106753,106757,106771,106759,106819,106846,106833,106782,106793,106774,106812,106758,106828,106784,106800,106787,106811,106837,106755,106803,106797","workerNo":0,"workerStatus":"Failed","responseText":"Error: ERROR Unknown error","errorType":"response","cnnStatus":"Success","msgCount":100,"workerName":"pool-1-thread-8-8","errorText":"Error: ERROR Unknown error"},{"responseCode":"200","duration":"1056","processJobId":49,"taskId":139,"msgIds":"106413,106405,106411,106436,106444,106368,106415,106371,106419,106387,106374,106369,106430,106412,106376,106373,106364,106361,106440,106418,106433,106360,106423,106439,106431,106437,106401,106355,106384,106378,106404,106421,106441,106353,106375,106393,106443,106370,106388,106399,106372,106402,106424,106382,106446,106392,106434,106426,106449,106425,106432,106438,106428,106367,106389,106427,106414,106417,106435,106385,106383,106395,106350,106429,106381,106357,106397,106359,106352,106442,106400,106354,106366,106445,106420,106447,106351,106358,106403,106448,106407,106406,106380,106396,106356,106398,106379,106363,106365,106390,106409,106362,106394,106410,106386,106391,106408,106377,106416,106422","workerNo":1,"workerStatus":"Failed","responseText":"Error: ERROR Unknown error","errorType":"response","cnnStatus":"Success","msgCount":100,"workerName":"pool-1-thread-4-4","errorText":"Error: ERROR Unknown error"},{"responseCode":"200","duration":"1056","processJobId":49,"taskId":139,"msgIds":"106858,106935,106910,106933,106891,106853,106908,106897,106859,106852,106909,106896,106926,106876,106917,106941,106873,106903,106930,106928,106884,106911,106938,106942,106921,106868,106862,106883,106855,106881,106894,106946,106901,106892,106915,106850,106866,106856,106904,106905,106885,106922,106872,106895,106863,106940,106890,106860,106898,106947,106857,106887,106907,106877,106874,106914,106949,106920,106912,106900,106944,106886,106880,106869,106906,106919,106861,106939,106888,106913,106916,106924,106899,106937,106851,106931,106875,106925,106936,106867,106889,106927,106864,106918,106943,106870,106865,106934,106929,106879,106948,106893,106945,106932,106882,106923,106902,106854,106878,106871","workerNo":2,"workerStatus":"Failed","responseText":"Error: ERROR Unknown error","errorType":"response","cnnStatus":"Success","msgCount":100,"workerName":"pool-1-thread-9-9","errorText":"Error: ERROR Unknown error"},{"responseCode":"200","duration":"1056","processJobId":49,"taskId":139,"msgIds":"107011,106968,107031,106959,107009,107024,107010,106983,106981,106974,107043,106998,107017,107034,106988,106970,107039,106986,106991,107023,106995,107020,106964,107026,107008,106965,106954,107021,107030,107025,106994,106969,106985,107016,107041,107028,107042,106957,106967,107033,106989,106990,106987,107032,106955,106993,106962,106963,106992,106996,107044,106960,107006,107027,107004,107019,107003,106999,107005,107001,107015,107002,106975,106961,106977,107013,106950,106980,106979,106953,107038,106951,106978,107022,107029,106952,106971,107018,106956,107046,106982,106973,107035,106997,107036,106972,106984,107049,106966,107045,106976,106958,107037,107040,107000,107014,107007,107012,107048,107047","workerNo":3,"workerStatus":"Failed","responseText":"Error: ERROR Unknown error","errorType":"response","cnnStatus":"Success","msgCount":100,"workerName":"pool-1-thread-10-10","errorText":"Error: ERROR Unknown error"},{"responseCode":"200","duration":"1129","processJobId":49,"taskId":139,"msgIds":"106267,106268,106270,106259,106264,106285,106312,106289,106338,106308,106334,106258,106272,106251,106313,106269,106250,106319,106262,106329,106260,106284,106314,106278,106288,106287,106307,106306,106345,106318,106255,106282,106342,106275,106317,106309,106343,106340,106337,106323,106281,106346,106277,106311,106332,106315,106276,106321,106298,106291,106303,106325,106336,106292,106279,106283,106305,106261,106271,106304,106295,106316,106293,106290,106320,106347,106280,106328,106254,106327,106333,106349,106294,106253,106252,106300,106331,106257,106263,106286,106274,106330,106266,106256,106299,106301,106339,106324,106348,106310,106341,106302,106335,106344,106273,106265,106322,106326,106296,106297","workerNo":4,"workerStatus":"Failed","responseText":"Error: ERROR Unknown error","errorType":"response","cnnStatus":"Success","msgCount":100,"workerName":"pool-1-thread-3-3","errorText":"Error: ERROR Unknown error"},{"responseCode":"200","duration":"1128","processJobId":49,"taskId":139,"msgIds":"106095,106094,106066,106149,106139,106124,106073,106082,106128,106054,106140,106051,106084,106113,106074,106114,106078,106071,106101,106110,106117,106063,106083,106138,106120,106081,106107,106069,106105,106143,106096,106115,106106,106067,106131,106116,106119,106052,106093,106057,106097,106102,106077,106145,106127,106144,106141,106055,106058,106135,106076,106129,106089,106092,106126,106085,106109,106072,106080,106121,106122,106079,106056,106118,106134,106142,106098,106064,106112,106108,106090,106091,106130,106099,106075,106103,106136,106053,106132,106061,106068,106060,106087,106088,106146,106070,106062,106086,106147,106137,106123,106125,106104,106148,106059,106050,106065,106100,106111,106133","workerNo":5,"workerStatus":"Failed","responseText":"Error: ERROR Unknown error","errorType":"response","cnnStatus":"Success","msgCount":100,"workerName":"pool-1-thread-1-1","errorText":"Error: ERROR Unknown error"},{"responseCode":"200","duration":"1179","processJobId":49,"taskId":139,"msgIds":"106245,106182,106187,106212,106238,106214,106179,106201,106181,106184,106163,106183,106200,106170,106189,106169,106247,106194,106209,106228,106175,106233,106229,106205,106164,106165,106227,106188,106172,106178,106150,106210,106196,106192,106180,106221,106158,106156,106220,106215,106159,106243,106217,106223,106226,106241,106198,106168,106222,106166,106218,106242,106213,106248,106244,106235,106240,106176,106237,106151,106224,106236,106162,106177,106152,106186,106195,106216,106208,106190,106219,106225,106204,106193,106155,106234,106246,106174,106199,106202,106157,106153,106206,106171,106185,106197,106211,106230,106161,106191,106160,106249,106203,106231,106239,106167,106207,106173,106232,106154","workerNo":6,"workerStatus":"Failed","responseText":"Error: ERROR Unknown error","errorType":"response","cnnStatus":"Success","msgCount":100,"workerName":"pool-1-thread-2-2","errorText":"Error: ERROR Unknown error"},{"responseCode":"200","duration":"1128","processJobId":49,"taskId":139,"msgIds":"106593,106561,106635,106578,106556,106598,106619,106636,106629,106632,106611,106572,106638,106603,106592,106563,106557,106623,106550,106639,106596,106569,106562,106597,106618,106560,106630,106574,106581,106631,106617,106609,106594,106624,106604,106577,106606,106591,106580,106582,106625,106637,106584,106613,106616,106576,106587,106607,106589,106599,106647,106552,106570,106634,106646,106612,106640,106610,106553,106641,106585,106601,106605,106558,106622,106600,106621,106633,106566,106568,106583,106567,106644,106626,106565,106627,106645,106575,106586,106608,106614,106571,106642,106573,106649,106648,106620,106615,106551,106579,106588,106555,106602,106595,106559,106564,106643,106554,106628,106590","workerNo":7,"workerStatus":"Failed","responseText":"Error: ERROR Unknown error","errorType":"response","cnnStatus":"Success","msgCount":100,"workerName":"pool-1-thread-6-6","errorText":"Error: ERROR Unknown error"},{"responseCode":"200","duration":"1181","processJobId":49,"taskId":139,"msgIds":"106506,106504,106516,106520,106512,106461,106458,106498,106544,106540,106489,106510,106453,106522,106537,106484,106531,106513,106503,106534,106508,106487,106494,106452,106526,106455,106466,106528,106462,106493,106469,106485,106536,106533,106496,106543,106451,106524,106525,106491,106488,106545,106521,106549,106479,106499,106501,106517,106538,106477,106541,106497,106500,106460,106478,106535,106450,106502,106459,106530,106474,106548,106480,106482,106542,106468,106457,106490,106454,106529,106509,106486,106507,106481,106515,106527,106475,106539,106465,106472,106547,106463,106464,106456,106495,106519,106546,106492,106532,106467,106471,106470,106511,106514,106483,106523,106518,106476,106473,106505","workerNo":8,"workerStatus":"Failed","responseText":"Error: ERROR Unknown error","errorType":"response","cnnStatus":"Success","msgCount":100,"workerName":"pool-1-thread-5-5","errorText":"Error: ERROR Unknown error"},{"responseCode":"200","duration":"1184","processJobId":49,"taskId":139,"msgIds":"106688,106669,106665,106695,106742,106680,106748,106690,106691,106672,106683,106661,106687,106682,106702,106740,106650,106712,106651,106728,106703,106708,106715,106693,106707,106720,106706,106700,106724,106736,106663,106686,106701,106662,106664,106679,106749,106722,106653,106660,106730,106659,106747,106734,106652,106678,106657,106697,106713,106718,106746,106668,106743,106714,106655,106711,106744,106671,106699,106685,106725,106727,106739,106733,106737,106732,106676,106694,106710,106717,106709,106677,106723,106696,106716,106719,106673,106656,106689,106667,106681,106726,106675,106721,106729,106674,106658,106705,106738,106745,106692,106670,106698,106704,106731,106654,106666,106741,106735,106684","workerNo":9,"workerStatus":"Failed","responseText":"Error: ERROR Unknown error","errorType":"response","cnnStatus":"Success","msgCount":100,"workerName":"pool-1-thread-7-7","errorText":"Error: ERROR Unknown error"}],"totalMsgs":1000,"endDate":"2016-03-29 22:32:44","numberOfWorkers":"10","clientName":"CM"}];
+	
+	;
+
+</script>
 
 
 

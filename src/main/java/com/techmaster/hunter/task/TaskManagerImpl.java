@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.UIMessageConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterMessageReceiverDao;
 import com.techmaster.hunter.dao.types.MessageDao;
@@ -25,8 +26,11 @@ import com.techmaster.hunter.dao.types.ReceiverRegionDao;
 import com.techmaster.hunter.dao.types.ServiceProviderDao;
 import com.techmaster.hunter.dao.types.TaskDao;
 import com.techmaster.hunter.email.HunterBusinessEmailService;
+import com.techmaster.hunter.enums.HunterUserRolesEnums;
 import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.gateway.beans.CMClient;
+import com.techmaster.hunter.gateway.beans.CMClientService;
+import com.techmaster.hunter.gateway.beans.GateWayClientService;
 import com.techmaster.hunter.gateway.beans.GatewayClient;
 import com.techmaster.hunter.gateway.beans.HunterEmailClient;
 import com.techmaster.hunter.gateway.beans.OzekiClient;
@@ -35,11 +39,10 @@ import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.EmailMessage;
 import com.techmaster.hunter.obj.beans.GateWayMessage;
-import com.techmaster.hunter.obj.beans.HunterClient;
 import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
 import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
+import com.techmaster.hunter.obj.beans.HunterUser;
 import com.techmaster.hunter.obj.beans.Message;
-import com.techmaster.hunter.obj.beans.ReceiverGroup;
 import com.techmaster.hunter.obj.beans.ReceiverRegion;
 import com.techmaster.hunter.obj.beans.ServiceProvider;
 import com.techmaster.hunter.obj.beans.Task;
@@ -62,6 +65,7 @@ public class TaskManagerImpl implements TaskManager{
 	@Autowired private MessageDao messageDao;
 	@Autowired private HunterJacksonMapper hunterJacksonMapper;
 	@Autowired private TaskDao taskDao;
+	@Autowired private HunterDaoFactory hunterDaoFactory;
 	
 	@Override
 	public List<HunterMessageReceiver> getHntrMsgRcvrsFrmRgn(String countryName, String regionLevel, String regionLevelName, String contactType, boolean activeOnly) {
@@ -76,7 +80,8 @@ public class TaskManagerImpl implements TaskManager{
 		values.put(":active", active); 
 		
 		List<HunterMessageReceiver> hunterMessageReceivers = HunterHibernateHelper.replaceQueryAndExecuteForList(HunterMessageReceiver.class, query, values);
-		logger.debug("Finished fetting Hunter Message Reiceivers! Size( " + hunterMessageReceivers.size() + " )" );  
+		logger.debug("Finished fetting Hunter Message Reiceivers! Size( " + hunterMessageReceivers.size() + " )" );
+		
 		
 		return hunterMessageReceivers;
 	}
@@ -114,18 +119,6 @@ public class TaskManagerImpl implements TaskManager{
 		return tskMsgRcvr;
 	}
 
-	@Override
-	public List<TaskMessageReceiver> getHunterReceiversForReceiverGroup(ReceiverGroup group, String contactType) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	@Override
-	public List<TaskMessageReceiver> getPreviousReceiversForClient(HunterClient client) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 	private List<String> validateGroupsAndRegions(Task task){
 		String groupQuery = hunterJDBCExecutor.getQueryForSqlId("getTotalTaskGroupsReceivers");
 		int groupCount = 0;
@@ -163,6 +156,7 @@ public class TaskManagerImpl implements TaskManager{
 
 	@Override
 	public List<String> validateTask(Task task) {
+		
 		logger.debug("Starting task validation process"); 
 		List<String> errors = new ArrayList<String>();
 		if(task.getDesiredReceiverCount() < 1 ){
@@ -227,21 +221,58 @@ public class TaskManagerImpl implements TaskManager{
 		return errors;
 	}
 	
+	@Override
+	public boolean userHasRole(String roleName, String userName) {
+		String query = hunterJDBCExecutor.getQueryForSqlId("getUserRoleDetails");
+		List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{userName,userName});
+		Map<Integer, List<Object>> rowMapList = hunterJDBCExecutor.executeQueryRowList(query, values);
+		boolean hasApproveRole = false;
+		if(rowMapList != null && !rowMapList.isEmpty()){
+			for(Map.Entry<Integer, List<Object>> entry : rowMapList.entrySet()){
+				List<Object> role = entry.getValue();
+				String inRoleName = role.get(2).toString(); 
+				hasApproveRole = roleName.equals(inRoleName); 
+				if(hasApproveRole)
+					break;
+			}
+		}
+		return hasApproveRole;
+	}
 
 	@Override
-	public List<String> validateStatusChange(Long taskId, String status) {
+	public List<String> validateStatusChange(Long taskId, String status, String userName) {
 		
 		logger.debug("Starting task status change validation process. Task Id = " + taskId + ". To status = " + status); 
-		
-		// there is no validation for changing it back to draft at the moment.
-		if(status != null && status.equals(HunterConstants.STATUS_DRAFT)){
-			return new ArrayList<>();
-		}
 		
 		Task task = taskDao.getTaskById(taskId);
 		Message message = task.getTaskMessage();
 		Set<ReceiverGroupJson> taskGroups = task.getTaskGroups();
 		List<String> errors = new ArrayList<>();
+		
+		String stsQuery = "SELECT TSK_LF_STS FROM TASK WHERE TSK_ID = ?";
+		List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{taskId});
+		Map<Integer, List<Object>> stsRowListMap = hunterJDBCExecutor.executeQueryRowList(stsQuery, values);
+		String currentStatus = stsRowListMap == null || stsRowListMap.isEmpty() ? null : stsRowListMap.get(1).get(0).toString();
+		values.clear();
+		/*
+		 * User must have approver role to approve or unapprove a task.
+		 * */
+		if(status.equals(HunterConstants.STATUS_APPROVED) || (status.equals(HunterConstants.STATUS_DRAFT) && currentStatus.equals(HunterConstants.STATUS_APPROVED))){ 
+			if(!userHasRole(HunterUserRolesEnums.ROLE_TASK_APPROVER.getName(), userName)){
+				errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_009));
+				return errors;
+			}
+		}
+		
+		/*
+		 * Moving it to draft needs nothing much else. 
+		 */
+		
+		if(HunterConstants.STATUS_DRAFT.equals(status)){
+			logger.debug("Moving task to draft. No more validations required."); 
+			return errors;
+		}
+		
 		
 		/*
 		 * for review and draft status, just ensure that the message is there 
@@ -321,8 +352,22 @@ public class TaskManagerImpl implements TaskManager{
 
 	@Override
 	public Map<String, Object> processTask(Task task, AuditInfo auditInfo) {
+		
 		Map<String, Object> results = new HashMap<String, Object>();
+		
+		//user must have task processor privileges
+		if(!userHasRole(HunterUserRolesEnums.ROLE_TASK_PROCESSOR.getName(), auditInfo.getLastUpdatedBy())){ 
+			List<String> processErrors = validateTask(task);
+			String message = HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_010 );
+			logger.debug(message); 
+			processErrors.add(message);
+			results.put(GatewayClient.TASK_VALIDATION_ERRORS, processErrors);
+			results.put(GatewayClient.TASK_VALIDATION_STATUS, HunterConstants.STATUS_FAILED);
+			return results;
+		}
+		
 		List<String> errors = validateTask(task);
+		
 		if(errors.size() == 0){
 			logger.debug("No processing validation errors found. Sending task process notification email..."); 
 			Map<String, Object> cntntParams = getCntntParamsFrTskBsnsEmail(HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION, task.getTaskId());
@@ -330,13 +375,22 @@ public class TaskManagerImpl implements TaskManager{
 			logger.debug("Done sending email!!");
 			task.setProcessedOn(new Date());
 			task.setProcessedBy(auditInfo.getLastUpdatedBy()); // this is set immediately.
-			GatewayClient gatewayClient = getClientForTask(task);
-			Map<String, Object> executeParams = getGateWayClientExecuteMap(task);
-			gatewayClient.execute(executeParams);
+			if(task.getGateWayClient().equals(HunterConstants.CLIENT_CM)){
+				GateWayClientService client = new CMClientService();
+				Map<String, Object> executeParams = new HashMap<>();
+				executeParams.put(GateWayClientService.PARAM_AUDIT_INFO, auditInfo);
+				executeParams.put(GateWayClientService.TASK_BEAN, task);
+				client.execute(executeParams);
+			}else{
+				GatewayClient gatewayClient = getClientForTask(task);
+				Map<String, Object> executeParams = getGateWayClientExecuteMap(task);
+				gatewayClient.execute(executeParams);
+			}
 		}else{
 			results.put(GatewayClient.TASK_VALIDATION_ERRORS, errors);
 			results.put(GatewayClient.TASK_VALIDATION_STATUS, HunterConstants.STATUS_FAILED);
 		}
+		
 		return results;
 		
 	}
@@ -356,6 +410,9 @@ public class TaskManagerImpl implements TaskManager{
 		
 		logger.debug("Starting task cloning process..."); 
 		
+		//append '_(#id#)' for identification
+		taskName = taskName + "_" + task.getTaskId();
+		
 		String query = hunterJDBCExecutor.getQueryForSqlId("getClientDetailsForTaskOwner"); 
 		List<Object> values = new ArrayList<>();
 		values.add(newOwner);
@@ -369,14 +426,18 @@ public class TaskManagerImpl implements TaskManager{
 		Long clientId = HunterUtility.getLongFromObject(results.get(1).get(2));
 		logger.debug("Obtained client id : " + clientId); 
 		
+		Long nextTaskId = HunterHibernateHelper.getMaxEntityIdAsNumber(Task.class, Long.class, "taskId");
+		nextTaskId = nextTaskId == null ? 1 : (nextTaskId+1);
+		
 		Task copy = new Task();
+		copy.setTaskId(nextTaskId); 
 		copy.setClientId(clientId);
 		copy.setDescription(taskDescription);
 		copy.setGateWayClient(task.getGateWayClient());
 		copy.setRecurrentTask(task.isRecurrentTask());
 		copy.setTaskApproved(false); // make this un-approved since it's just a copy.
 		copy.setTaskApprover(null); 
-		copy.setTaskBudget(0); // make the budget zero first.
+		copy.setTaskBudget(task.getTaskBudget()); // make the budget zero first.
 		copy.setTaskCost(task.getTaskCost()); 
 		copy.setTaskDateline(null);
 		copy.setTaskDeliveryStatus(HunterConstants.STATUS_CONCEPTUAL);
@@ -410,6 +471,7 @@ public class TaskManagerImpl implements TaskManager{
 			copyTextMessage.setLastUpdatedBy(auditInfo.getLastUpdatedBy());
 			copyTextMessage.setCretDate(auditInfo.getCretDate()); 
 			
+			logger.debug("Text message copied : " + copyTextMessage); 
 			copy.setTaskMessage(copyTextMessage);
 			
 		} else if (message instanceof EmailMessage){
@@ -430,6 +492,9 @@ public class TaskManagerImpl implements TaskManager{
 			
 		}
 		
+		//it is a one to one relationship.
+		copy.getTaskMessage().setMsgId(copy.getTaskId()); 
+		
 		logger.debug("Copying task receiver groups..."); 
 		Set<ReceiverGroupJson> receiverGroups = task.getTaskGroups();
 		copy.setTaskGroups(receiverGroups);
@@ -440,7 +505,6 @@ public class TaskManagerImpl implements TaskManager{
 		copy.setTaskRegions(receiverRegions); 
 		logger.debug("Finished copying task receiver regions!");
 
-		
 		return copy;
 	}
 
@@ -490,6 +554,8 @@ public class TaskManagerImpl implements TaskManager{
 		copyTextMessage.setProvider(textMessage.getProvider());
 		copyTextMessage.setText(textMessage.getText());
 		copyTextMessage.setToPhone(textMessage.getToPhone()); 
+		copyTextMessage.setMsgLifeStatus(HunterConstants.STATUS_DRAFT);
+		copyTextMessage.setMsgSendDate(textMessage.getMsgSendDate());
 		
 		return copyTextMessage;
 	}
@@ -520,7 +586,8 @@ public class TaskManagerImpl implements TaskManager{
 		copyEmailMessage.setAttchmntBnId(emailMessage.getAttchmntBnId()); 
 		copyEmailMessage.setHasAttachment(emailMessage.isHasAttachment());
 		copyEmailMessage.setMultiPart(emailMessage.isMultiPart()); 
-		
+		copyEmailMessage.setMsgLifeStatus(HunterConstants.STATUS_DRAFT);
+		copyEmailMessage.setMsgSendDate(emailMessage.getMsgSendDate());
 		
 		copyEmailMessage.setCcList(emailMessage.getCcList());
 		copyEmailMessage.seteBody(emailMessage.geteBody());
@@ -804,7 +871,7 @@ public class TaskManagerImpl implements TaskManager{
 		logger.debug("Total cost : " + totalCost);
 		if(budget < totalCost){
 			//Task budget insufficient for # receivers configured.
-			errors.add("Task budget insufficient for <b>" + totalCount + " </b> receivers configured!");
+			errors.add("Task budget insufficient for " + totalCount + " receivers configured!");
 		}
 		
 		return errors;
@@ -845,6 +912,11 @@ public class TaskManagerImpl implements TaskManager{
 	public void setTaskHistoryStatusAndMessage(TaskHistory taskHistory,String eventStatus, String message) {
 		taskHistory.setEventStatus(eventStatus);
 		taskHistory.setEventMessage(message);
+	}
+
+	@Override
+	public String deleteTask(Long taskId) {
+		return null;
 	}
 
 

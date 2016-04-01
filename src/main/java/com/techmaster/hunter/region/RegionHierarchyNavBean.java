@@ -157,7 +157,7 @@ public class RegionHierarchyNavBean {
 		String quotedStr = countyNameList.toString();
 		quotedStr = quotedStr == null ? null : quotedStr.substring(0, quotedStr.length() - 1);
 		logger.debug(quotedStr); 
-		Set<County> counties = RegionCache.getCountiesForCountryId(countryId);
+		Set<County> counties = RegionCache.getInstance().getCountiesForCountryId(countryId);
 		
 		for(County county : counties){
 			 List<RegionHierarchy> cntyRgnHrrchs = RegionHierarchyAdapter.getInstance().getRgnHrrchsUndrCnty(county, true, false);

@@ -20,6 +20,8 @@ public interface TaskDao {
 	public void deleteTask(Task task);
 	public String getUserNameForTaskOwnerId(Long taskId);
 	public Set<ReceiverGroupJson> getTaskReceiverGroups(Long taskId);
+	public String getCmmSprtdTskNamsFrUsrNam(String userName);
+	public void updateTaskDelStatus(Long taskId, String toStatus, String updateBy); 
 	
 	
 

@@ -26,8 +26,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,7 +68,7 @@ public class MessageReceiverController extends HunterBaseController{
 	@Autowired private TaskDao taskDao;
 
 	@RequestMapping(value = "/action/import/receivers/post/save", method = RequestMethod.POST)
-	public @ResponseBody Map<String, Object>  importMessageReceivers(HttpServletRequest request, HttpServletResponse response){
+	public @ResponseBody String  importMessageReceivers(HttpServletRequest request, HttpServletResponse response){
 		
 		logger.debug("Extracting workbook and creating message receiver extractor.."); 
 		
@@ -88,7 +86,7 @@ public class MessageReceiverController extends HunterBaseController{
 		Map<String, Object> results = new HashMap<String, Object>();
 		results.put("status", HunterConstants.STATUS_SUCCESS);
 		
-		return results;
+		return HunterUtility.stringifyMap(results); 
 		
 	}
 	
@@ -102,28 +100,16 @@ public class MessageReceiverController extends HunterBaseController{
 	@Consumes("application/json")
 	public @ResponseBody List<ReceiverGroupDropDownJson> groupDropDown(@PathVariable("selTaskId") Long selTaskId){
 		String msgType = taskDao.getTaskMsgType(selTaskId);
-		List<ReceiverGroup> groups = receiverGroupDao.getAllGroupsOfMsgType(msgType.toLowerCase());
-		List<ReceiverGroupDropDownJson> dropdowns = new ArrayList<ReceiverGroupDropDownJson>();
-		if(groups != null && !groups.isEmpty()){
-			for(ReceiverGroup group : groups){
-				ReceiverGroupDropDownJson dropdown = new ReceiverGroupDropDownJson();
-				StringBuilder builder = new StringBuilder();
-				builder.append(group.getGroupId()).append("_");
-				builder.append(group.getGroupName());
-				dropdown.setText(builder.toString());
-				dropdown.setGroupId(group.getGroupId()); 
-				dropdowns.add(dropdown);
-			}
-		}
-		return dropdowns;
+		logger.debug("Fetching dropdown group values for message type : " + msgType); 
+		List<ReceiverGroupDropDownJson> dropDownJsons = receiverGroupDao.getAllRcvrGrpDrpDwnJsnForMsgTyp(msgType.toLowerCase());
+		return dropDownJsons;
 	}
 	
 	@RequestMapping(value="/action/group/read", method=RequestMethod.POST)
 	@Produces("application/json")
 	@Consumes("application/json")
 	public @ResponseBody List<ReceiverGroupJson> groupsRead(){
-		List<ReceiverGroup> groups = receiverGroupDao.getAllReceiverGroups();
-		 List<ReceiverGroupJson> receiverGroupJsons = ReceiverGroupConverter.getInstance().getGroupsJsons(groups);
+		 List<ReceiverGroupJson> receiverGroupJsons = ReceiverGroupConverter.getInstance().getAllReceiverGroupJsons();
 		 return receiverGroupJsons;
 	}
 	
@@ -172,10 +158,23 @@ public class MessageReceiverController extends HunterBaseController{
 		List<Object> clientDetailsList = results.get(1);
 		String firstName = clientDetailsList.get(3) + "";
 		String lastName = clientDetailsList.get(4) + "";
+		String groupName = receiverGroupJson.getGroupName();
+		String groupDesc = receiverGroupJson.getGroupDesc();
+		String receiverType = receiverGroupJson.getReceiverType();
+		
+		query = "UPDATE RCVR_GRP SET OWNR_USR_NAM = ?, GRP_NAME = ?, GRP_DESC = ?, RCVR_TYP = ? WHERE GRP_ID = ?";
+		values.clear();
+		values.add(userName);
+		values.add(groupName);
+		values.add(groupDesc);
+		values.add(receiverType);
+		values.add(receiverGroupJson.getGroupId());
+		hunterJDBCExecutor.executeUpdate(query, values); 
+
 		receiverGroupJson.setFirstName(firstName);
 		receiverGroupJson.setLastName(lastName);
-		ReceiverGroup receiverGroup = ReceiverGroupConverter.getInstance().getReceiverGroupForJson(receiverGroupJson);
-		receiverGroupDao.updateGroup(receiverGroup); 
+		//ReceiverGroup receiverGroup = ReceiverGroupConverter.getInstance().getReceiverGroupForJson(receiverGroupJson);
+		//receiverGroupDao.updateGroup(receiverGroup); 
 		return receiverGroupJson;
 	}
 	
@@ -241,8 +240,7 @@ public class MessageReceiverController extends HunterBaseController{
 		Object[] wbkExtracts = HunterUtility.getWorkbookFromRequest(request);
 		Workbook workbook = (Workbook)wbkExtracts[0];
 		String fileName = (String)wbkExtracts[1];
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String userName = auth.getName();
+		String userName = getUserName();
 		AuditInfo auditInfo = HunterUtility.getAuditInfoFromRequestForNow(request, userName);
 		GroupReceiversExtractor receiverExtractor = new GroupReceiversExtractor(workbook,auditInfo, fileName, groupId);
 		

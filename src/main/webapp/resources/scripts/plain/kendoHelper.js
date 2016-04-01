@@ -178,6 +178,28 @@ var kendoKipHelper = kendo.Class.extend({
 	getCloseHelperKendoWindowStr : function(){
 		return "kendoKipHelperInstance.closeHelperKendoWindow()";
 	},
+	spinnerWindow : null,
+	initSpinnerWindow : function(){
+		this.spinnerWindow = $("#spinnerWindow").kendoWindow({
+ 	        title: "Hunter Loading...",
+ 	        modal: true,
+ 	        visible: false,
+ 	        resizable: false,
+ 	        width: 300
+     }).data("kendoWindow");
+    	if(this.spinnerWindow != null)
+    		this.initSpinnerWindow();
+	},
+	showSpinnerOnSimpleWindow : function(){
+		if(this.spinnerWindow == null){
+			this.initSpinnerWindow();
+		}
+		var OKButton = this.createKendoSmallIconTagTemplateNoIcon("kendoKipHelperInstance.closeHelperKendoWindow()", "<span style='padding-right:10px;padding-left:10px;' >Cancel</span>", false);
+		this.spinnerWindow.content("<div style='width:200px;height:150px;'></div>" + OKButton);
+		this.spinnerWindow.center();
+		this.spinnerWindow.open();
+		kendo.ui.progress(this.spinnerWindow.element, true);
+	},
 	showSimplePopup : function(title, content){
 		var OKButton = this.createKendoSmallIconTagTemplateNoIcon("kendoKipHelperInstance.closeHelperKendoWindow()", "<span style='padding-right:10px;padding-left:10px;' >OK</span>", false);
 		if(this.kendoWindow == null){

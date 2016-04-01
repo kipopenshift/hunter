@@ -39,7 +39,7 @@
 		<property name="createdBy" column="CRTD_BY"  type="java.lang.String"  not-null="true" />
 		
 		
-		<one-to-one name="taskMessage" class="com.techmaster.hunter.obj.beans.Message" cascade="save-update" ></one-to-one>
+		<one-to-one name="taskMessage" class="com.techmaster.hunter.obj.beans.Message" cascade="all"  ></one-to-one>
         
         <set name="taskRegions" cascade="save-update" table="TSK_RGNS">
         	<key column="TSK_ID"/>

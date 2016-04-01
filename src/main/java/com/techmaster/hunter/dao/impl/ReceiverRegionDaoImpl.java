@@ -80,7 +80,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 			List<Object> data = entry.getValue();
 			ReceiverRegion receiverRegion = getReceiverRegionById(HunterUtility.getLongFromObject(data.get(1)));
 			ReceiverRegionJson json = regionService.creatRcvrRgnJsnFrmRcvrRgn(receiverRegion);
-			int receiverCount = RegionCache.getReceiverCountForRegion(receiverRegion);
+			int receiverCount = RegionCache.getInstance().getReceiverCountForRegion(receiverRegion);
 			json.setReceiverCount(receiverCount);
 			receiverRegions.add(json);
 		}

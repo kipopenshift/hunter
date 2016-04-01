@@ -172,9 +172,41 @@ var RegionHierarchyVM = kendo.observable({
 	onChangeCountry : function(){
 		console.log("Selected country >> " + selCountry); 
 	},
+	displayUploadWindow : function(){
+		var r = $.Deferred();
+		var content = $("#regionHierarchyToolBarTemplateNew").html();
+		kendoKipHelperInstance.showWindowWithOnClose(content, "Task Hierarchy Upload");
+		return r;
+	},
+	getFileInfo : function(e){
+		return $.map(e.files, function(file) {
+            var info = file.name;
+            // File size is not available in all browsers
+            if (file.size > 0) {
+                info  += " (" + Math.ceil(file.size / 1024) + " KB)";
+            }
+            return info;
+        }).join(", ");
+	},
+	onKendoUploadError : function(e){
+		var message = "Error (" + e.operation + ") :: " + RegionHierarchyVM.getFileInfo(e);
+		kendoKipHelperInstance.showErrorNotification(message);
+		 var err = e.XMLHttpRequest.responseText;
+	        alert(err);
+	},
+	onSuccessUploadFile : function(e){
+		kendoKipHelperInstance.showSuccessNotification("Successfully uploaded file!");
+	},
 	openSectionToUploadReceivers : function(){
-		$("#regionHierarchyTreeList").slideUp(1000, function(){
-			$("#uploadReceiversContainer").slideDown(1000);
+		this.displayUploadWindow();
+		$("#hunterHierarchyFiles").kendoUpload({
+			async:{ 
+				saveUrl: 'http://localhost:8080/Hunter/messageReceiver/action/import/receivers/post/save', 
+  			  	removeUrl: 'http://localhost:8080/Hunter/messageReceiver/action/import/receivers/post/save', 
+  			  	autoUpload: true 
+  			},
+  			 error : RegionHierarchyVM.onKendoUploadError,
+  			 success : RegionHierarchyVM.onSuccessUploadFile
 		});
 	},
 	cancelUploadPopup : function(){

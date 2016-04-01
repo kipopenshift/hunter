@@ -2,6 +2,7 @@ package com.techmaster.hunter.xml;
 
 import java.io.StringWriter;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -15,6 +16,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
+import org.w3c.dom.Attr;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -28,7 +30,7 @@ import com.techmaster.hunter.util.HunterUtility;
 
 public class XMLServiceImpl implements XMLService{
 	
-	private static final Logger log = Logger.getLogger(XMLServiceImpl.class);
+	private static final Logger logger = Logger.getLogger(XMLServiceImpl.class);
 	
 	public XMLServiceImpl(XMLTree xmlTree) throws HunterRunTimeException{ 
 		super();
@@ -51,6 +53,17 @@ public class XMLServiceImpl implements XMLService{
 		this.xmlTree = xmlTree;
 	}
 
+	@Override
+	public XMLService copyXMLService(XMLService xmlService) {
+		XMLService xmlService2 = null;
+		try {
+			XMLTree tree = new XMLTree(xmlService.toString(), true);
+			xmlService2 = new XMLServiceImpl(tree);
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+		return xmlService2;
+	}
 	@Override
 	public String getElementVal(String xPath) {
 		String val = null;
@@ -97,7 +110,7 @@ public class XMLServiceImpl implements XMLService{
 		Element root = xmlTreeDoc.getDocumentElement();
 		NodeList nodeList =  root.getChildNodes();
 		if(nodeList.getLength() < 1)
-			log.info(">>>>>>>>>>>> node list is empty"); 
+			logger.info(">>>>>>>>>>>> node list is empty"); 
 		return nodeList;
 	}
 	
@@ -203,28 +216,44 @@ public class XMLServiceImpl implements XMLService{
 	}
 	
 	@Override
-	public void addElement(String xPath, Element e) {
-		
-		NodeList nodes = null;
-		try {
-			nodes = (NodeList)this.xpath.evaluate(xPath, this.xmlTree.getDoc().getDocumentElement(), XPathConstants.NODESET);
-		} catch (XPathExpressionException e1) {
-			e1.printStackTrace();
+	public void addElement(String parentPath, Element e, int position) {
+		logger.debug("Adding element to path : " + parentPath);
+		NodeList nodes = this.xmlTree.getDoc().getElementsByTagName(parentPath);
+		if(nodes == null || nodes.getLength() == 0){
+			String message = "No node found for the path : " + parentPath;
+			logger.debug(message); 
+			throw new IllegalArgumentException(message);
 		}
-		
-		nodes.item(0).getParentNode().appendChild(e);
-		
+		if(nodes.getLength() <= position + 1){
+			logger.debug("Position given( "+ position +" ) is larger than the position of the last element("+ (nodes.getLength() - 1) +")"); 
+			position = nodes.getLength() - 1;
+			logger.debug("Position set to : " + position); 
+		}
+		logger.debug(nodes); 
+		nodes.item(0).appendChild(e);
+		logger.debug(nodes.item(position)); 
 	}
+	
+	@Override
+	public Element createNewElemet(String name) {
+		Element ele = this.xmlTree.getDoc().createElement(name);
+		return ele;
+	}
+	
+	@Override
+	public Attr createAttrNode(String name, String value) {
+		Attr attr = this.xmlTree.getDoc().createAttribute(name);
+		attr.setNodeValue(value); 
+		return attr;
+	}
+	
 	@Override
 	public void removeAttribute(Element element, String name) {
 		element.removeAttribute(name);
 	}
 	
-	
 	@Override
 	public String toString() {
-		String xml = null;
-		
 		StringWriter sw = new StringWriter();
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer = null;
@@ -243,8 +272,6 @@ public class XMLServiceImpl implements XMLService{
 		} catch (TransformerException e) {
 			e.printStackTrace();
 		}
-        xml = sw.toString();
-        log.info("converted the documet to string >> " + xml);
         return sw.toString();
 		
 	}

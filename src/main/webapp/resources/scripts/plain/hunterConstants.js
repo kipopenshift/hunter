@@ -11,6 +11,8 @@ HunterConstants.STATUS_STRING = "status";
 HunterConstants.STATUS_FAILED = "Failed";
 HunterConstants.STATUS_SUCCESS = "Success";
 
+HunterConstants.OVERLAY_ID = "hunterKendoOverLay";
+
 HunterConstants.TASK_TYPES_ARRAY = 
 	[
 	 	{"text" : "Political", "value" : "Political"},
@@ -25,7 +27,7 @@ HunterConstants.GATE_WAY_CLIENT_ARRAY =
 	 	{"text" : "Ozeki", "value" : "OZEKI"},
 	 	{"text" : "Safaricom", "value" : "SAFARICOM"},
 	 	{"text" : "Tech Masters", "value" : "TECH MASTERS"},
-	 	{"text" : "Hunter Email Provider", "value" : "Hunter Email Provider"}
+	 	{"text" : "Hunter Email", "value" : "Hunter Email"}
     ];
 
 HunterConstants.SERVICE_PROVIDER_DATA = [
@@ -45,11 +47,11 @@ HunterConstants.HUNTER_LIFE_STATUSES = [
       ];
 
 HunterConstants.TASK_MSG_TYP_ARRAY = [
-			{"msgTypVal" : "AUDIO", "msgTypText" : "Audio"},
-			{"msgTypVal" : "EMAIL", "msgTypText" : "Email"},
-			{"msgTypVal" : "TEXT", "msgTypText" : "Text"},
-			{"msgTypVal" : "CALL", "msgTypText" : "Call"},
-			{"msgTypVal" : "VOICE_MAIL", "msgTypText" : "Voice Mail"}
+			{"msgTypVal" : "Audio", "msgTypText" : "Audio"},
+			{"msgTypVal" : "Email", "msgTypText" : "Email"},
+			{"msgTypVal" : "Text", "msgTypText" : "Text"},
+			{"msgTypVal" : "Call", "msgTypText" : "Call"},
+			{"msgTypVal" : "Voice Mail", "msgTypText" : "Voice Mail"}
         ];
 
 HunterConstants.RECEIVER_TYP_ARRAY = [

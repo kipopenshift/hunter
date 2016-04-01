@@ -1,13 +1,10 @@
 package com.techmaster.hunter.obj.converters;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,12 +12,10 @@ import org.json.JSONObject;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.obj.beans.EmailMessage;
-import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
 import com.techmaster.hunter.obj.beans.Message;
 import com.techmaster.hunter.obj.beans.ReceiverRegion;
 import com.techmaster.hunter.obj.beans.ServiceProvider;
 import com.techmaster.hunter.obj.beans.Task;
-import com.techmaster.hunter.obj.beans.TaskMessageReceiver;
 import com.techmaster.hunter.obj.beans.TextMessage;
 import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
@@ -30,8 +25,6 @@ public class TaskConverter {
 	private String requestBody;
 	private JSONObject taskJson = null;
 	private static Logger logger = HunterLogFactory.getLog(TaskConverter.class);
-	
-	private HunterJacksonMapper hunterJacksonMapper = new HunterJacksonMapper();
 	
 	public TaskConverter(String requestBody) { 
 		super();
@@ -450,107 +443,6 @@ public class TaskConverter {
 		
 		return region;
 	}
-	
-	private ReceiverRegion getTaskRegion() {
-		
-		JSONObject rgnJson = null;
-		
-		try {
-			rgnJson = taskJson.getJSONObject("taskRegion");
-		} catch (JSONException e) {
-			logger.error("Failed to get task region. Exception >> " + e.getMessage()); 
-			return null;
-		}
-		
-		if(rgnJson == null) {
-			logger.warn("Null task region!! Returning null!");
-			return null;
-		}
-		
-		logger.debug("Constructing receiver region for regionJson >> " + rgnJson); 
-		
-		Long regionId = rgnJson.getLong("regionId"); 
-		String country = rgnJson.getString("country");
-		String state = rgnJson.has("state") ? rgnJson.get("state") != null ? rgnJson.get("state").toString() : null : null;
-		boolean hasState = rgnJson.getBoolean("hasState"); 
-		String county = rgnJson.has("county") ? rgnJson.get("county") != null ? rgnJson.get("county").toString() : null : null;
-		String constituency = rgnJson.has("constituency") ? rgnJson.get("constituency") != null ? rgnJson.get("constituency").toString() : null : null;
-		String city = rgnJson.has("city") ? rgnJson.get("city") != null ? rgnJson.get("city").toString() : null : null;
-		String ward = rgnJson.has("ward") ? rgnJson.get("ward") != null ? rgnJson.get("ward").toString() : null : null;
-		String village = rgnJson.has("village") ? rgnJson.get("village") != null ? rgnJson.get("village").toString() : null : null;
-		double longitude = rgnJson.has("longitude") ? rgnJson.getDouble("longitude") : 0;
-		double latitude =  rgnJson.has("latitude") ?  rgnJson.getDouble("latitude") : 0; 
-		String currentLevel = rgnJson.has("currentLevel") ? rgnJson.get("currentLevel") != null ? rgnJson.get("currentLevel").toString() : null : null;
-		String borderLongLats = rgnJson.has("borderLongLats") ? rgnJson.get("borderLongLats") != null ? rgnJson.get("borderLongLats").toString() : null : null;
-		
-		ReceiverRegion region = new ReceiverRegion();
-		region.setRegionId(regionId);
-		region.setCountry(country);
-		region.setState(state);
-		region.setHasState(hasState);
-		region.setCounty(county);
-		region.setConstituency(constituency);
-		region.setCity(city);
-		region.setWard(ward);
-		region.setVillage(village);
-		region.setLongitude(longitude);
-		region.setLatitude(latitude);
-		region.setCurrentLevel(currentLevel);
-		region.setBorderLongLats(borderLongLats); 
-		
-		logger.debug("Successfully constructed receiver region >> " + region); 
-		
-		return region;
-	}
-	
-	private Set<TaskMessageReceiver> getTaskReceivers(){
-		
-		Set<TaskMessageReceiver> taskReceivers = new HashSet<>();
-		JSONArray receivers = null;
-		
-		try {
-			receivers = taskJson.getJSONArray("taskReceivers");
-		} catch (JSONException e1) {
-			logger.error("Failed to get task receivers. Exception >> " + e1.getMessage()); 
-			return null;
-		}
-		
-		if(receivers == null) {
-			logger.warn("Null receivers!! Returning empty Set!");
-			return new HashSet<>();
-		}
-		
-		logger.debug("constructing set of receivers from json array >> " + receivers); 
-		
-		for(int i=0; i<receivers.length(); i++){
-			
-			JSONObject receiverJ = receivers.getJSONObject(i);
-			TaskMessageReceiver receiver = null;
-			
-			if(hunterJacksonMapper == null) continue;
-			
-			try {
-				receiver = hunterJacksonMapper.readValue(receiverJ.toString(), TaskMessageReceiver.class);
-			} catch (JsonParseException e) {
-				logger.error("HunterJacksonMapper failed to get task receiver. Exception >> " + e.getMessage()); 
-				continue;
-			} catch (JsonMappingException e) {
-				logger.error("HunterJacksonMapper failed  to get task receiver. Exception >> " + e.getMessage()); 
-				continue;
-			} catch (IOException e) {
-				logger.error("HunterJacksonMapper failed  to get task receiver. Exception >> " + e.getMessage()); 
-				continue;
-			} 
-			
-			taskReceivers.add(receiver);
-			
-		}
-		 
-		logger.debug("Successfully constructed receivers set >> " + HunterUtility.stringifySet(taskReceivers));  
-		
-		return taskReceivers;
-	}
-
 	
 	public TextMessage convertTextMessage(){
 		if(taskJson == null){

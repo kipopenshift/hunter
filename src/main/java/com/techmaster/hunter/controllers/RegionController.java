@@ -18,8 +18,6 @@ import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,7 +50,7 @@ import com.techmaster.hunter.util.HunterUtility;
 
 @Controller
 @RequestMapping(value="/region")
-public class RegionController {
+public class RegionController extends HunterBaseController {
 	
 	@Autowired private ReceiverRegionDao receiverRegionDao;
 	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
@@ -292,8 +290,7 @@ public class RegionController {
 	@RequestMapping(value="/action/task/regions/delete/{selTaskId}", method=RequestMethod.POST) 
 	@ResponseBody public ReceiverRegionJson deleteTaskRegion(@PathVariable("selTaskId") Long selTaskId, @RequestBody ReceiverRegionJson receiverRegionJson){
 		
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String userName = auth.getName();
+		String userName = getUserName();
 		TaskHistory taskHistory = taskManager.getNewTaskHistoryForEventName(selTaskId, TaskHistoryEventEnum.REMOVE_REGION.getEventName(), userName);
 		
 		logger.debug("Selected task : " + selTaskId);
@@ -315,8 +312,7 @@ public class RegionController {
 	@RequestMapping(value="/action/task/regions/delete/requestBody", method=RequestMethod.POST) 
 	@ResponseBody public String deleteTaskRegionRequestBody(HttpServletRequest request){
 		
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String userName = auth.getName();
+		String userName = getUserName();
 		TaskHistory taskHistory = taskManager.getNewTaskHistoryForEventName(null, TaskHistoryEventEnum.REMOVE_REGION.getEventName(), userName);
 		
 		JSONObject jsonObject = new JSONObject();
@@ -389,8 +385,7 @@ public class RegionController {
 	@RequestMapping(value="/action/task/regions/addTotask", method=RequestMethod.POST) 
 	@ResponseBody public String addRegionsToTask(HttpServletRequest request){
 		
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String userName = auth.getName();
+		String userName = getUserName();
 		TaskHistory taskHistory = taskManager.getNewTaskHistoryForEventName(null, TaskHistoryEventEnum.ADD_REGION.getEventName(), userName);
 
 		

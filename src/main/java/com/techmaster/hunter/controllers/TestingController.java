@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping(value="/test")
-public class TestingController {
+public class TestingController extends HunterBaseController{
 	
 	@RequestMapping(value="/task/action/taskPage" )
 	public String goToNewTaskPage(){

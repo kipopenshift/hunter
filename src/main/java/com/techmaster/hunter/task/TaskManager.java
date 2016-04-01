@@ -7,10 +7,8 @@ import com.techmaster.hunter.gateway.beans.GatewayClient;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.EmailMessage;
 import com.techmaster.hunter.obj.beans.GateWayMessage;
-import com.techmaster.hunter.obj.beans.HunterClient;
 import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
 import com.techmaster.hunter.obj.beans.Message;
-import com.techmaster.hunter.obj.beans.ReceiverGroup;
 import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.obj.beans.TaskMessageReceiver;
@@ -21,9 +19,7 @@ public interface TaskManager {
 	
 	public abstract List<HunterMessageReceiver> getHntrMsgRcvrsFrmRgn(String countryName, String regionLevel, String regionLevelName, String contactType, boolean  activeOnly);
 	public abstract List<TaskMessageReceiver> genTaskMsgRcvrsFrmRgn(String countryName,String regionLevel, String regionLevelName, String contactType, boolean activeOnly, Long taskId);
-	public abstract List<TaskMessageReceiver> getHunterReceiversForReceiverGroup(ReceiverGroup group, String contactType);
-	public abstract List<TaskMessageReceiver> getPreviousReceiversForClient(HunterClient client);
-	public abstract List<String> validateStatusChange(Long taskId, String status);
+	public abstract List<String> validateStatusChange(Long taskId, String status, String userName);
 	public abstract TaskMessageReceiver createTskMsgRcvrFrmHntrMsgRcvr(HunterMessageReceiver hntrMsgRcvr, Long taskId, boolean random);
 	public abstract List<String> validateTask(Task task);
 	public abstract Message getTaskMessage(Task task);
@@ -47,6 +43,8 @@ public interface TaskManager {
 	public int getTaskGroupTotalNumber(Long taskId);
 	public TaskHistory getNewTaskHistoryForEventName(Long taskId, String evenName, String eventUser);
 	public void setTaskHistoryStatusAndMessage(TaskHistory taskHistory,String eventStatus, String message);
+	public boolean userHasRole(String roleName, String userName);
+	public String deleteTask(Long taskId);
 	
 	
 	

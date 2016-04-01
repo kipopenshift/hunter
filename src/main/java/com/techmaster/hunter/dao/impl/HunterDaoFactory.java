@@ -1,60 +1,44 @@
 package com.techmaster.hunter.dao.impl;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import com.techmaster.hunter.dao.types.EmailMessageDao;
-import com.techmaster.hunter.dao.types.GateWayMessageDao;
-import com.techmaster.hunter.dao.types.HunterAddressDao;
-import com.techmaster.hunter.dao.types.HunterClientDao;
-import com.techmaster.hunter.dao.types.HunterCreditCardDao;
-import com.techmaster.hunter.dao.types.TaskMessageReceiverDao;
-import com.techmaster.hunter.dao.types.HunterUserDao;
-import com.techmaster.hunter.dao.types.MessageDao;
-import com.techmaster.hunter.dao.types.ReceiverRegionDao;
-import com.techmaster.hunter.dao.types.ServiceProviderDao;
-import com.techmaster.hunter.dao.types.TaskDao;
 
 public class HunterDaoFactory {
 	
-	public static Map<Class<?>, Object> daosMap; 
 	
-	static {
-		popuplateMap();
-	}
-
-	public HunterDaoFactory() {
+	private static HunterDaoFactory instance = null;
+	private Map<String, Object> daosMap = new HashMap<String, Object>();
+	
+	private HunterDaoFactory() {
 		super();
 	}
 
-	private static void popuplateMap() {
-		daosMap.put(HunterClientDao.class, new HunterClientDaoImpl());
-		daosMap.put(EmailMessageDao.class, new EmailMessageDaoImpl());
-		daosMap.put(GateWayMessageDao.class, new GateWayMessageDaoImpl());
-		daosMap.put(HunterAddressDao.class, new HunterAddressDaoImpl());
-		daosMap.put(HunterCreditCardDao.class, new HunterCreditCardDaoImpl());
-		daosMap.put(TaskMessageReceiverDao.class, new TaskMessageReceiverDaoImpl());
-		daosMap.put(HunterUserDao.class, new HunterUserDaoImpl());
-		daosMap.put(MessageDao.class, new MessageDaoImpl());
-		daosMap.put(ReceiverRegionDao.class, new ReceiverRegionDaoImpl());
-		daosMap.put(ServiceProviderDao.class, new ServiceProviderDaoImpl());
-		daosMap.put(TaskDao.class, new TaskDaoImpl());
+	public static synchronized HunterDaoFactory getInstance(){
+		if(instance == null){
+			synchronized (HunterDaoFactory.class) {
+				instance = new HunterDaoFactory();
+			}
+		}
+		return instance;
 	}
 
-	public Map<Class<?>, Object> getDaosMap() {
-		return daosMap;
+	public void setDaosMap(Map<String, Object> daosMap) {
+		this.daosMap = daosMap; 
 	}
-	public void setDaosMap(Map<Class<?>, Object> daosMap) {
-		HunterDaoFactory.daosMap = daosMap; 
-	}
-	public static Object get(Class<?> clzz){
-		Object obj = daosMap.get(clzz);
-		if(!obj.getClass().isAssignableFrom(clzz)){
-			throw new IllegalArgumentException("Found a class not assignable to the class for which it was store. Key class >> " + clzz.getCanonicalName());
-		}
+	public Object get(String key){
+		Object obj = daosMap.get(key);
 		return obj;
 	}
-	public void put(Class<?> clzz, Object obj){
-		daosMap.put(clzz, obj);
+	
+	public <T>T getDaoObject(Class<T> clzz){
+		String key = clzz.getSimpleName();
+		key = (key.substring(0,1)).toLowerCase()+ key.substring(1,key.length());
+		@SuppressWarnings("unchecked") T t = (T)get(key);
+		return t;
+	}
+	
+	public void put(String key, Object obj){
+		daosMap.put(key, obj);
 	}
 
 	@Override
@@ -65,6 +49,5 @@ public class HunterDaoFactory {
 		return result;
 	}
 
-	
 
 }

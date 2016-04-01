@@ -11,6 +11,9 @@ public interface UIMessageConstants {
 	public static String MSG_TASK_006 = "MSG_TASK_006";
 	public static String MSG_TASK_007 = "MSG_TASK_007";
 	public static String MSG_TASK_008 = "MSG_TASK_008";
+	public static String MSG_TASK_009 = "MSG_TASK_009";
+	public static String MSG_TASK_010 = "MSG_TASK_010";
+	public static String MSG_TASK_011 = "MSG_TASK_011";
 	
 	// Task Message validations. 
 	public static String MSG_MSG_002 = "MSG_MSG_002";

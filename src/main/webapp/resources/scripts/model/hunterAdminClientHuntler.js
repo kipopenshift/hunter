@@ -306,15 +306,6 @@ var hunterUserModel = kendo.data.Model.define({
 		  var html = kendoKipHelperInstance.createDeleteButton(false, 'kendoKipHelperInstance.showOKCancelToDeleteHunterUser('+  idString + message+ ')',"Delete");
 		  return html;
 	},
-	getHunterUserCheckBox : function(){
-		var id = "hunter_model_check_box_class_" + this.get("userId");
-		var clazz = "hunter_model_check_box_class";
-		var onChange = "hunterAdminClientUserVM.unCheckOthersAndSaveSelected(this)";
-		var booleanChecked = false;
-		var booleanDisabled = false;
-		var html = kendoKipHelperInstance.createCheckBox(id, clazz, onChange, booleanChecked, booleanDisabled);
-		return html;
-	},
 	getEditTemplate : function(){
 		return kendoKipHelperInstance.createContextEditButton(false);
 	},
@@ -752,14 +743,24 @@ var hunterTaskModel = kendo.data.Model.define({
 		return html;
 	},
 	getEditTaskTemplate : function(){
-		var delStatus = this.get("taskLifeStatus");
-		if(delStatus === "Processed"){
-			return "";
-			//return kendoKipHelperInstance.createDisabledContextEditButton(false);
-		}else{
+		var lifeStatus = this.get("taskLifeStatus");
+		if(lifeStatus === "Draft" ){
 			return kendoKipHelperInstance.createContextEditButton(false);
+		}else{
+			return "";
 		}
 		
+	},
+	getCloneTaskTemplate : function(){
+		var taskLifeStatus = this.get("taskLifeStatus");
+		if(taskLifeStatus === "Draft" || taskLifeStatus === "Review"){
+			return "";
+		}else{
+			var id = this.get("taskId");
+			var idString = "\""+ id +"\"";
+			var html = kendoKipHelperInstance.createSimpleHunterButton("restore",null, "hunterAdminClientUserVM.cloneSelTask("+ idString +")" );
+			return html;
+		}
 	},
 	getTaskDeleteTemplate : function(){
 		var delStatus = this.get("taskLifeStatus");
@@ -780,14 +781,19 @@ var hunterTaskModel = kendo.data.Model.define({
 		return html;
 	},
 	getTaskProcessTemplate : function(){
-		var delStatus = this.get("taskLifeStatus");
-		if(delStatus === "Processed"){
+		var lifeSts = this.get("taskLifeStatus");
+		var action = "hunterAdminClientUserVM.showPopupForProcessTask";
+		var iconName = "arrow-e";
+		if(lifeSts != "Approved" && lifeSts != "Processed" ){
 			return "";
 			//return kendoKipHelperInstance.createDisabledContextEditButton(false);
+		}else if(lifeSts === "Processed"){
+			action = "hunterAdminClientUserVM.showTaskProcessJobDetails";
+			iconName = "insert-m";
 		}
 		var id = this.get("taskId");
 		var idString = "\""+ id +"\"";
-		var html = kendoKipHelperInstance.createSimpleHunterButton("arrow-e",null, "hunterAdminClientUserVM.showPopupForProcessTask("+ idString +")" );
+		var html = kendoKipHelperInstance.createSimpleHunterButton(iconName,null, action +"("+ idString +")" );
 		return html;
 	},
 	getTaskEditStatusTemplate : function(){
@@ -822,6 +828,10 @@ var hunterTaskModel = kendo.data.Model.define({
 		return "<center><a style='color:#"+ color +"; cursor:pointer'>"+ dStatus +"</a></center>";
 	}
 });
+
+function newOwnersNames (){
+	return hunterAdminClientUserVM.get("newUsersDetailsData"); 
+}
 
 var hunterAdminClientUserVM = kendo.observable({
 	
@@ -901,6 +911,9 @@ var hunterAdminClientUserVM = kendo.observable({
 		this.createTaskTypesDS();
 		this.loadExistentEmailTemplates();
 		console.log("hunterAdminClientUserVM successfully initialized!!");
+	},
+	newGetHunterUserCheckBox : function(userId){
+		alert(userId);
 	},
 	taskHistoryDS : new kendo.data.DataSource({
 	  batch: true,
@@ -1052,20 +1065,30 @@ var hunterAdminClientUserVM = kendo.observable({
 		taskDs.sync();
 		kendoKipHelperInstance.closeHelperKendoWindow();
 	},
-	unCheckOthersAndSaveSelected  : function(this_){
-		var thisElement = $(this_);
-		var id = $(this_).attr("id");
-		this.set("selUserId", id);
-		var clazz = $(".hunter_model_check_box_class");
-		if(thisElement.prop( "checked" )){
-			$( clazz ).attr( "checked", false );
-			thisElement.prop( "checked",true );
-		}else{
-			this.set("selUserId", null);
+	loadSelUserDetails : function(userId){
+		
+		var checkBox = $("#hunterTaskClientUser_"+userId);
+		var checked_ = $(checkBox).prop("checked"); 
+		if(!checked_){
+			$(checkBox).prop("checked",true);
+			//return since it's the same grid
+			return;
 		}
-		console.log("Selected >> " + this.get("selUserId")); 
-	},
-	loadSelUserDetails : function(){
+		
+		//uncheck all others first
+		var data = this.get("userGrid").dataSource.view();
+		var len = data.length;
+		for(var i=0; i<len; i++){
+			var model = data[i];
+			var userId_ = model["userId"];
+			if(userId != userId_){
+				var id_ = "hunterTaskClientUser_" + userId_;
+				$("#"+id_).prop("checked", false);
+			}else{
+				hunterAdminClientUserVM.set("selUser",model);
+			}
+		}
+		this.set("selUserId", userId);
 		
 		var isRegionViewOpen = this.get("isTaskRegionOpen");
 		var isMsgViewOpen = this.get("isMsgViewOpen");
@@ -1085,12 +1108,11 @@ var hunterAdminClientUserVM = kendo.observable({
 			console.log("Successfull closed email message view !!!");
 		}
 		
-		var userId = this.get("selUserId"); 
+		/*var userId = this.get("selUserId"); 
 		if(userId == null){
 			kendoKipHelperInstance.showErrorNotification("Please select user first!!");
 			return;
-		}
-		userId = userId.replace("hunter_model_check_box_class_","");
+		}*/
 		var userIdData = {"userId":userId};
 		$.ajax({
 			url: "http://localhost:8080/Hunter/client/action/getClientForUserId",
@@ -1128,7 +1150,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		$("#selectedUserNameSpan").html(fullName);
 		
 		// then load user details in the bottom pane.
-		this.loadSelUserDetails();
+		this.loadSelUserDetails(userId);
 		
 		$("#hunterUserGrid").slideUp(800, function(){
 			$("#expandGridButtonDiv").removeClass("hidden");
@@ -1584,11 +1606,12 @@ var hunterAdminClientUserVM = kendo.observable({
 	},
 	saveCurrentEditMessageAndClose : function(){
 		kendoKipHelperInstance.popupWarning("Successfully saved the changes.", "Success");
-		var sendDate = $("#selTaskMsgSendDatePicker").val();
+		//var sendDate = $("#selTaskMsgSendDatePicker").val();
 		this.getMessageDetails();
 		this.closeEditMessageView();
 		// refresh the grid when you close taskMsgDetails.
-		this.loadSelUserDetails();
+		var userId = this.get("selUserId");
+		this.loadSelUserDetails(userId);
 	},
 	saveCurrentEditMessage : function(){
 		this.getMessageDetails();
@@ -1608,7 +1631,8 @@ var hunterAdminClientUserVM = kendo.observable({
 	},
 	canceltEditMessageAndClose : function(){
 		this.closeEditMessageView();
-		this.loadSelUserDetails();
+		var userId = this.get("selUserId");
+		this.loadSelUserDetails(userId);
 	},
 	loadNewTaskEmailMessageView : function(task){
 		$("#hunterUserDetailsStrip").slideUp(500,function(){
@@ -1626,7 +1650,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		kendoKipHelperInstance.closeHelperKendoWindow();
 		var task = this.get("hunterClientTaskGrid").dataSource.get(taskId);
 		
-		if(task.get("tskMsgType") === 'EMAIL' ){
+		if(task.get("tskMsgType") === 'Email' ){
 			console.log("Loading email section...");
 			this.loadNewTaskEmailMessageView(task);
 			return;
@@ -1750,18 +1774,46 @@ var hunterAdminClientUserVM = kendo.observable({
 		 });
 		
 	},
-	showPopupForProcessTask : function(taskId){
-		var taskDesc = "<b>" + this.get("hunterClientTaskGrid").dataSource.get(taskId).get("description") + "</b>"; 
-		console.log("Task description found >> " + taskDesc ); 
-		var msgTxt = "Task ( " + taskDesc + " ) will be processed. Are you sure?<br/><br/>";
-		var processButton = "<td>" + kendoKipHelperInstance.createSimpleHunterButton("tick","process", 'hunterAdminClientUserVM.ajaxProcessTask("'+ taskId +'")') + "</td>";
-		var cancelButton = "<td>" + kendoKipHelperInstance.createSimpleHunterButton("cancel","cancel", 'kendoKipHelperInstance.closeHelperKendoWindow()') + "</td>";
-		var creatButtTable = msgTxt + "<table style='width:56%;margin-left:22%;' ></tr>" + processButton + cancelButton + "</tr></table>";
-		kendoKipHelperInstance.showPopupWithNoButtons("Task Message", creatButtTable);
+	displayProcessJobWindow : function(){
+		var r = $.Deferred();
+		var container = $("#taskProcessJobDetailsTemplate").html();
+		kendoKipHelperInstance.showWindowWithOnClose(container,"Task Process Progress");
+		return r;
 	},
-	ajaxProcessTask : function(taskId){
-		kendoKipHelperInstance.closeHelperKendoWindow();
+	afterFetchingTaskProcessJobResults : function(data){
+		if(data != null){
+			data = $.parseJSON(data);
+			if(data.length != 0){
+				for(var i=0; i<data.length;i++){
+					var job = data[i];
+					var workers = job["workerJsons"]; 
+					var template = kendo.template($("#taskProcessJobWorkerTemplate").html());
+					template = template(workers);
+					$("#taskProcessWorkerContainer").html(template); 
+				}
+			}else{
+				$("#taskProcessJobLoadingIcon").html("No process data found for Task!");
+				$("#taskProcessJobLoadingIcon").css({"color":"red"}); 
+			}
+		}else{
+			$("#taskProcessJobLoadingIcon").html("No process data found for Task!"); 
+			$("#taskProcessJobLoadingIcon").css({"color":"red"}); 
+		}
+		kendo.ui.progress($("#taskProcessJobLoadingIcon"), false);
+	},
+	showTaskProcessJobDetails : function(taskId){
+		this.displayProcessJobWindow();
+		$("#taskProcessWorkerContainer").closest(".k-window").css({top: 55,left: 450});
+		$("#taskProcessWorkerContainer").html($("#taskProcessJobNoDataFoundTemplate").html());
+		 kendo.ui.progress($("#taskProcessJobLoadingIcon"), true);
+		 setTimeout(function(){ 
+			 var url = HunterConstants.HUNTER_BASE_URL + "/task/action/task/process/results/" + taskId;
+			 kendoKipHelperInstance.ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterFetchingTaskProcessJobResults");
+		 }, 800);
+	},
+	showPopupForProcessTask : function(taskId){
 		this.set("selTaskId", taskId);
+		var desc = this.get("hunterClientTaskGrid").dataSource.get(taskId).get("description");
 		/*
 		var model = this.get("hunterClientTaskGrid").dataSource.get(taskId);
 		var data  = JSON.stringify(model);
@@ -1769,9 +1821,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		kendoKipHelperInstance.ajaxPostDataForJsonResponse(data, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterProcessTask");*/
 		var html = $("#processTaskProgressPopupTemplate").html();
 		kendoKipHelperInstance.showWindowWithOnClose(html,"Task Process Progress");
-		$(".k-window-action k-link").css("visibility", "hidden");
-		var taskProcessManager_ = this.get("taskProcessManager");
-		taskProcessManager_.execute();
+		$("#taskProcessPopupTaskName").html(desc);
 	},
 	afterProcessTask : function(data){
 		var json = jQuery.parseJSON(data);
@@ -1783,9 +1833,22 @@ var hunterAdminClientUserVM = kendo.observable({
 		}else if(status == null || status === ""){ 
 			kendoKipHelperInstance.showSimplePopup("Success!!","<span style='color:green;' >Successfully processed Task!</span>");
 		}
-		
 		var ds = hunterAdminClientUserVM.get("hunterClientTaskGrid").dataSource;
 		ds.read();
+	},
+	unhideProcessTaskSection : function(){
+		$("#taskProcessPrompPopup").fadeOut(50);
+		$("#processTaskProgressPopup").closest(".k-window").animate({"top": "20%","left": "38%"},200,function(){
+			$("#processTaskProgressPopup").toggle(800,function(){
+				kendo.ui.progress($("#taskProcessProgressBar"), true);
+				 setTimeout(function(){ 
+					 var html = $("#processTaskProgressPopupTemplate").html();
+					 $(".k-window-action k-link").css("visibility", "hidden");
+						var taskProcessManager_ = hunterAdminClientUserVM.get("taskProcessManager");
+						taskProcessManager_.execute();
+				 }, 400);
+			});
+		});
 	},
 	performTaskNumericKendoConversions : function(){
 		$("#taskTaskBudgetNumericInput").kendoNumericTextBox({
@@ -1797,6 +1860,118 @@ var hunterAdminClientUserVM = kendo.observable({
 		$("#desiredReceiverCountInput").kendoNumericTextBox({
 		    downArrowText: "Less"
 		});
+	},
+	createKendoWidgetsForTaskCloning : function(){
+		$("#cloneTaskNewUser").kendoDropDownList({
+            dataTextField: "fullName",
+            dataValueField: "userName",
+            dataPrimitive : true,
+            dataSource: newOwnersNames()
+		});
+	},
+	submitCloneRequest : function(){
+		
+		$(".cloneTaskFieldsErrors").remove();
+		
+		var taskName = $("#cloneTaskPTaskName").val();
+		var taskDesc = $("#cloneTaskPTaskDesc").val();
+		var userId = $("#cloneTaskNewUser").val();
+		
+		var taskNameMsg = null;
+		var invalid = false;
+		
+		if(taskName == null || taskName.trim() === ''){
+			taskNameMsg = "Task name is required!";
+			invalid = true;
+		}else if(taskName.length > 50){
+			taskNameMsg = "Task name cannot be more than 50 characters";
+			invalid = true;
+		}
+		
+		if(taskNameMsg != null && taskNameMsg !== 'null'){ 
+			$("#cloneTaskNameTr").after("<tr style='display:none;height:30px;' class='cloneTaskFieldsErrors' ><td></td><td style='background-color:#FCA59B;border-radius:3px;border:1px solid #B2584E;padding-left:3%;max-width: 220px;' >"+ taskNameMsg +"</td></tr>");
+		}
+		
+		var taskDescMsg = null;
+		
+		if(taskDesc == null || taskDesc.trim() === ''){
+			taskDescMsg = "Task description is required!";
+			invalid = true;
+		}else if(taskDesc.length > 100){
+			taskDescMsg = "Task description cannot be more than 100 characters";
+			invalid = true;
+		}
+		
+		if(taskDescMsg != null && taskDescMsg !== 'null'){ 
+			$("#cloneTaskDescTr").after("<tr style='display:none;height:30px;' class='cloneTaskFieldsErrors' ><td></td><td style='background-color:#FCA59B;border-radius:3px;border:1px solid #B2584E;padding-left:3%;max-width: 220px;' >"+ taskDescMsg +"</td></tr>");
+		}
+		
+		if(invalid){
+			$(".cloneTaskFieldsErrors").slideDown(200);
+			return;
+		}
+		
+		var taskId = this.get("selTaskId");
+		var data = {"newOwner" : userId, "taskName" : taskName,"taskDescription" : taskDesc, "taskId" : taskId};
+		data = JSON.stringify(data);
+		var url = HunterConstants.HUNTER_BASE_URL + "/task/action/task/clone";
+		kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterCloneTask");
+	},
+	afterCloneTask : function(data){
+		data = jQuery.parseJSON(data);
+		var status = data["status"]; 
+		var message = data["message"];
+		var duplicate = data["duplicate"];
+		console.log("Duplicate : " + duplicate);
+		
+		if(duplicate != null && duplicate === 'true'){
+			$("#cloneTaskDescTr").after("<tr style='display:none;height:30px;' class='cloneTaskFieldsErrors' ><td></td><td style='background-color:#FCA59B;border-radius:3px;border:1px solid #B2584E;padding-left:3%;max-width: 220px;' >"+ message +"</td></tr>");
+			$(".cloneTaskFieldsErrors").slideDown(200);
+			return;
+		}
+		
+		kendoKipHelperInstance.showErrorOrSuccessMsg(status,message);
+		kendoKipHelperInstance.closeWindowWithOnClose();
+	},
+	newUsersDetailsData : null,
+	processCloning : function(){
+		var name =  $("#startTaskClongingButton").text();
+		if(name === 'Yes'){
+			$(".k-widget k-tooltip k-tooltip-validation k-invalid-msg").css({"background-color" : "#FF9191"});
+			$("#startTaskClongingLabel").text("Submit");
+		}else{
+			$("#startTaskClongingButton").unbind().bind("click", hunterAdminClientUserVM.submitCloneRequest());
+			return;
+		}
+		var progBar = null;
+		$(".cloneTaskHiddenFields").toggle(600, function(){
+			progBar = $("#cloneTaskProgressBar").kendoProgressBar({
+                type: "percent",
+                animation: {
+                    duration: 600
+                }
+            }).data("kendoProgressBar");
+			progBar.value(20);
+		});
+		$(".cloneTaskWarningMessage").toggle();
+		this.createKendoWidgetsForTaskCloning();
+	},
+	loadCloneTaskNewUserData : function(data){
+		if(data != null && data === "LOAD_CLONE_USERS"){
+			var url = HunterConstants.HUNTER_BASE_URL + "/hunteruser/action/client/getAllClientsDetails";
+			kendoKipHelperInstance.ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url , "hunterAdminClientUserVM.loadCloneTaskNewUserData");
+		}else{
+			data = $.parseJSON(data);
+			hunterAdminClientUserVM.set("newUsersDetailsData", data);
+		}
+	},
+	cloneSelTask : function(taskId){
+		this.loadCloneTaskNewUserData("LOAD_CLONE_USERS");
+		this.set("selTaskId", taskId);
+		var container = "<div id='cloneTaskPopupContainer' style='width:400px;min-height:100px;' >"+  $("#cloneTaskPopupContainer").html() +"</div>";
+		kendoKipHelperInstance.showWindowWithOnClose(container,"Task Process Progress");
+		var taskName = hunterAdminClientUserVM.getSelectedTaskBean().get("taskName");
+		$("#cloneTaskNameLabel").text(taskName);
 	},
 	createTasksGrid : function(json){
 		
@@ -1825,21 +2000,21 @@ var hunterAdminClientUserVM = kendo.observable({
             columns: [
                { field: "taskId", title: "ID", width: 30 },
                { field: "taskName", title: "Name", width: 150 },
-               { field: "taskType", title: "Task Type", width: 150},
-               { field: "gateWayClient", title: "Client", width: 100 },
-               { field: "taskDateline", title: "Date Line", width: 120 },
-               { field: "tskMsgType", title: "Type", width: 65 },
+               { field: "taskType", title: "Task Type", width: 80},
+               { field: "gateWayClient", title: "Client", width: 90 },
+               { field: "tskMsgType", title: "Type", width: 80 },
                { field: "cretDate", title: "Created On", width: 120 },
-               { field: "createdBy", title: "Created By", width: 150 },
+               { field: "createdBy", title: "Created By", width: 120 },
                { field: "lastUpdate", title: "Last Motified", width: 120 },
-               { field: "updatedBy", title: "Motified By", width: 150 },
+               { field: "updatedBy", title: "Motified By", width: 90 },
                { field: "taskDeliveryStatus", title: "Progress", width: 80 , template : "#=getProgressTemplate()#" },
                { field: "taskLifeStatus", title: "Status", width: 70, template : "#=getTaskEditStatusTemplate()#"},
-               { field: "message", title: "Message", width: 60 , template : "#=getTaskMessageTemplate()#" },
+               { field: "message", title: "Message", width: 70 , template : "#=getTaskMessageTemplate()#" },
                { field: "taskRegion", title: "Region", width: 60,template : "#=getTaskRegionTemplate()#"  },
                { field: "loadDetails", title : "Details", width:60, template : "#=getTaskLoadDetailsTemplate()#"},
                { "name": "taskHistory", title : "History", width:60, template : "#=getTaskHistoryTemplate()#"},
-               { field: "editTask", title : "Edit", width:60, template : "#=getEditTaskTemplate()#"},
+               { "name": "cloneTask", title : "clone", width:60, template : "#=getCloneTaskTemplate()#"},
+               { "name": "editTask", title : "Edit", width:60, template : "#=getEditTaskTemplate()#"}, 
                { "name": "Delete", "title": "Delete","width": 60, template : "#=getTaskDeleteTemplate()#", filterable: false,resizable: false  },
                { "name": "Process", "title": "Process","width": 60, template : "#=getTaskProcessTemplate()#", filterable: false,resizable: false  }
                
@@ -1864,7 +2039,9 @@ var hunterAdminClientUserVM = kendo.observable({
 		var model = this.get("hunterClientTaskGrid").dataSource.get(id);
         var detailsTemplate = kendo.template($("#hunterClientTasksPopupViewTemplate").html());
         var content = detailsTemplate(model);
-        kendoKipHelperInstance.showPercentMeasuredOKCancelTitledPopup(content, "Task Details", "45", "70");
+        var div = "<div id='hunterClientTasksPopupViewTemplate_' style='width:600px;min-height:500px;' ></div>";
+        kendoKipHelperInstance.showWindowWithOnClose(div, "Task Details");
+        $("#hunterClientTasksPopupViewTemplate_").html(content);
     },
 	createUserGrid : function(){
 		console.log("Creating user grid..");
@@ -1883,7 +2060,7 @@ var hunterAdminClientUserVM = kendo.observable({
 				template: kendo.template($("#hunterUserEditTemplate").html())
             },
             columns: [
-               { template : "#=getHunterUserCheckBox()#", width:30 }, 
+               { field: "", width:'40px',title : '', 'template' : '<input id=hunterTaskClientUser_#=userId# type=checkbox onClick=hunterAdminClientUserVM.loadSelUserDetails(#=userId#)></input>'}, 
                { field: "firstName",title: "First Name",width: 150 }, 
                { field: "lastName", title: "Last Name", width: 150 }, 
                { field: "email", title: "Email",width: 150 }, 
@@ -2419,30 +2596,22 @@ var hunterAdminClientUserVM = kendo.observable({
 	currentTemplateIndx : -1,
 	getNextTemplateName : function(){
     	var current = this.get("currentTemplateIndx");
-    	console.log(":::::::::::current:::::::: " + current);
-    	console.log("Length : " + this.get("existentTemplateNames").length);
     	if( (current + 1) >= this.get("existentTemplateNames").length){  
     		current = -1;
     	}
     	current += 1;
-    	console.log(":::::::::::current after:::::::: " + current);
     	this.set("currentTemplateIndx", current);
     	var name = this.get("existentTemplateNames")[current];
-    	console.log("returning name ( " + name + " )"); 
     	return name;
     },
     getPrevTemplateName : function(){
     	var current = this.get("currentTemplateIndx");
-    	console.log(":::::::::::current:::::::: " + current);
-    	console.log("Length : " + this.get("existentTemplateNames").length);
     	if( (current - 1) <= 0){  
     		current = (this.get("existentTemplateNames").length);
     	}
     	current -= 1;
-    	console.log(":::::::::::current after:::::::: " + current);
     	this.set("currentTemplateIndx", current);
     	var name = this.get("existentTemplateNames")[current];
-    	console.log("returning name ( " + name + " )"); 
     	return name;
     },
 	loadExistentEmailTemplates : function(){
@@ -2467,7 +2636,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		return this.get("taskEmailHtml"); 
 	},
 	onChangeTaskEmailHtml: function() {
-        console.log("event :: change (" + kendo.htmlEncode(this.get("taskEmailHtml")) + ")");
+		
     },
     saveCurrentEditorContent : function(){
     	if(this.getWordCount() >= 4000 || this.getWordCount() == 0 ){
@@ -2498,7 +2667,6 @@ var hunterAdminClientUserVM = kendo.observable({
     	kendoKipHelperInstance.ajaxPostDataForJsonResponse(data, "application/json", "json", "POST",url,"hunterAdminClientUserVM.afterSaveEmailMsgConfigs" );
     },
     afterSaveEmailMsgConfigs : function(data){
-    	console.log(data);
     	kendoKipHelperInstance.showErrorOrSuccessMsg("Success", "Configurations Saved!");
     },
     clearCurrentEditorContent : function(){
@@ -2524,7 +2692,6 @@ var hunterAdminClientUserVM = kendo.observable({
     		console.log("...............................Loaded..................................................");
     		var replaced = hunterAdminClientUserVM.sanitizeString(data);
     		var html = $( "#allHunterEmailTemplates" ).html();
-    		console.log(data);
     		$("#templateContentContainer").html(replaced);
     	});
     },
@@ -2565,7 +2732,7 @@ var hunterAdminClientUserVM = kendo.observable({
     	var name = this.get("existentTemplateNames")[current];
     	hunterAdminClientUserVM.set("emailTemplateName",name);
     	kendoKipHelperInstance.showErrorOrSuccessMsg("Success", "Successfully save template!");
-    	hunterAdminClientUserVM.closeTemplatesWindow()
+    	hunterAdminClientUserVM.closeTemplatesWindow();
     },
     showPopupToDeleteEmail : function(){
     	var messageId = 1;

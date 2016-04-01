@@ -35,6 +35,18 @@
         <desc>Task must have either region or groups configured.</desc>
         <text>Task has no region and no groups configured!</text>
     </message>
+    <message id="MSG_TASK_009" >
+        <desc>User must have privileges to approve task</desc>
+        <text>You do not have privileges to approve or unapprove tasks</text>
+    </message>
+    <message id="MSG_TASK_010" >
+        <desc>User must have privileges to process task</desc>
+        <text>You do not have privileges to process tasks</text>
+    </message>
+     <message id="MSG_TASK_011" >
+        <desc>No task receivers found while processing</desc>
+        <text>No task receivers found while processing</text>
+    </message>
     <message id="MSG_REGION_001" >
         <desc>Error message conversion of consituency converter</desc>
         <text>Exception at conversion! Please contact hunter support!</text>
