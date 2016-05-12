@@ -9,6 +9,7 @@ public class TaskProcessJob {
 	private Long jobId;
 	private Long taskId;
 	private Blob docBlob;
+	private String status;
 	private XMLService xmlService;
 	private AuditInfo auditInfo;
 	
@@ -43,6 +44,12 @@ public class TaskProcessJob {
 		this.auditInfo = auditInfo;
 	}
 	
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -77,9 +84,10 @@ public class TaskProcessJob {
 	@Override
 	public String toString() {
 		return "TaskProcessJob [jobId=" + jobId + ", taskId=" + taskId
-				+ ", xmlService=" + xmlService + ", auditInfo=" + auditInfo
-				+ "]";
+				+ ", status=" + status + ", xmlService=" + xmlService
+				+ ", auditInfo=" + auditInfo + "]";
 	}
+	
 	
 	
 	

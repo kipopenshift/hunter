@@ -10,8 +10,7 @@ public class ConstituencyWardJson {
 		super();
 	}
 	
-	public ConstituencyWardJson(String constituencyWardName,
-			Long constituencyWardId, Long constituencyId) {
+	public ConstituencyWardJson(String constituencyWardName,Long constituencyWardId, Long constituencyId) {
 		super();
 		this.constituencyWardName = constituencyWardName;
 		this.constituencyWardId = constituencyWardId;

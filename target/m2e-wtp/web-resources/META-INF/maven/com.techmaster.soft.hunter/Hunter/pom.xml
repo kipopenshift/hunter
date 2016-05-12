@@ -395,6 +395,11 @@
 			<version>2.5.2</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.0-alpha4</version>
+		</dependency>
 
 
 	</dependencies>

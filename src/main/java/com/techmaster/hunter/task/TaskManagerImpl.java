@@ -25,23 +25,23 @@ import com.techmaster.hunter.dao.types.MessageDao;
 import com.techmaster.hunter.dao.types.ReceiverRegionDao;
 import com.techmaster.hunter.dao.types.ServiceProviderDao;
 import com.techmaster.hunter.dao.types.TaskDao;
-import com.techmaster.hunter.email.HunterBusinessEmailService;
 import com.techmaster.hunter.enums.HunterUserRolesEnums;
 import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.gateway.beans.CMClient;
 import com.techmaster.hunter.gateway.beans.CMClientService;
+import com.techmaster.hunter.gateway.beans.GateWayClientHelper;
 import com.techmaster.hunter.gateway.beans.GateWayClientService;
 import com.techmaster.hunter.gateway.beans.GatewayClient;
 import com.techmaster.hunter.gateway.beans.HunterEmailClient;
+import com.techmaster.hunter.gateway.beans.HunterEmailClientService;
 import com.techmaster.hunter.gateway.beans.OzekiClient;
-import com.techmaster.hunter.gateway.beans.SafaricomClient;
+import com.techmaster.hunter.gateway.beans.OzekiClientService;
 import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.EmailMessage;
 import com.techmaster.hunter.obj.beans.GateWayMessage;
 import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
 import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
-import com.techmaster.hunter.obj.beans.HunterUser;
 import com.techmaster.hunter.obj.beans.Message;
 import com.techmaster.hunter.obj.beans.ReceiverRegion;
 import com.techmaster.hunter.obj.beans.ServiceProvider;
@@ -172,7 +172,8 @@ public class TaskManagerImpl implements TaskManager{
 		Map<Integer, List<Object>> rowListMap = hunterJDBCExecutor.executeQueryRowList(query, null);
 		List<Object> rowList = rowListMap.get(1);
 		String delStatus = rowList != null && !rowList.isEmpty() ? rowList.get(0).toString() : null;
-		if(delStatus != null && (delStatus.equals(HunterConstants.STATUS_PARTIAL) || delStatus.equals(HunterConstants.STATUS_PROCESSED)) ){
+		
+		if(delStatus != null && (delStatus.equals(HunterConstants.STATUS_PARTIAL) || delStatus.equals(HunterConstants.STATUS_PROCESSED) || delStatus.equals(HunterConstants.STATUS_FAILED)) ){
 			errors.add("Task has been processed already!"); 
 		}
 		
@@ -211,6 +212,14 @@ public class TaskManagerImpl implements TaskManager{
 		// make sure that the money is enough!!
 		List<String> errors_ = validateTaskFinance(task);
 		errors.addAll(errors_);
+		
+		Map<String,String> statuses = taskDao.getTaskStatuses(task.getTaskId());
+		
+		
+		if(statuses == null || statuses.isEmpty() || HunterConstants.STATUS_PENDING.equals(statuses.get(HunterConstants.STATUS_TYPE_DELIVERY))){  
+			//"Task has been submitted and is pending processing"
+			errors.add(HunterCacheUtil.getInstance().getUIMsgDescForMsgId(UIMessageConstants.MSG_TASK_012)); 
+		}
 		
 		
 		if(!errors.isEmpty()){
@@ -367,12 +376,19 @@ public class TaskManagerImpl implements TaskManager{
 		}
 		
 		List<String> errors = validateTask(task);
+		boolean isLocked = GateWayClientHelper.getInstance().isTaskLocked(task);
+		
+		if(!isLocked){
+			logger.debug("Task is not locked. Locking the task now..."); 
+			task.setTaskDeliveryStatus(HunterConstants.STATUS_PENDING);
+			GateWayClientHelper.getInstance().lockTask(task.getTaskId(), HunterConstants.STATUS_PENDING);
+		}else{
+			logger.debug("Task is locked. Doing nothing and retuning..."); 
+			errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_012)); 
+		}
 		
 		if(errors.size() == 0){
 			logger.debug("No processing validation errors found. Sending task process notification email..."); 
-			Map<String, Object> cntntParams = getCntntParamsFrTskBsnsEmail(HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION, task.getTaskId());
-			sendTaskBusinessEmail(HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION, cntntParams, HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION);
-			logger.debug("Done sending email!!");
 			task.setProcessedOn(new Date());
 			task.setProcessedBy(auditInfo.getLastUpdatedBy()); // this is set immediately.
 			if(task.getGateWayClient().equals(HunterConstants.CLIENT_CM)){
@@ -381,6 +397,18 @@ public class TaskManagerImpl implements TaskManager{
 				executeParams.put(GateWayClientService.PARAM_AUDIT_INFO, auditInfo);
 				executeParams.put(GateWayClientService.TASK_BEAN, task);
 				client.execute(executeParams);
+			}else if(task.getGateWayClient().equals(HunterConstants.CLIENT_OZEKI)){
+				GateWayClientService client = new OzekiClientService();
+				Map<String, Object> executeParams = new HashMap<>();
+				executeParams.put(GateWayClientService.PARAM_AUDIT_INFO, auditInfo);
+				executeParams.put(GateWayClientService.TASK_BEAN, task);
+				client.execute(executeParams);
+			}else if(task.getGateWayClient().equals(HunterConstants.CLIENT_HUNTER_EMAIL)){ 
+				HunterEmailClientService emailClientService = new HunterEmailClientService();
+				Map<String, Object> executeParams = new HashMap<>();
+				executeParams.put(GateWayClientService.PARAM_AUDIT_INFO, auditInfo);
+				executeParams.put(GateWayClientService.TASK_BEAN, task);
+				emailClientService.execute(executeParams);
 			}else{
 				GatewayClient gatewayClient = getClientForTask(task);
 				Map<String, Object> executeParams = getGateWayClientExecuteMap(task);
@@ -518,8 +546,6 @@ public class TaskManagerImpl implements TaskManager{
 			gatewayClient = new CMClient(task);
 		}else if(client != null && client.equals(HunterConstants.CLIENT_OZEKI)){
 			gatewayClient = new OzekiClient(task);
-		}else if(client != null && client.equals(HunterConstants.CLIENT_SAFARICOM)){
-			gatewayClient = new SafaricomClient(task);
 		}else if(client != null && client.equals(HunterConstants.CLIENT_HUNTER_EMAIL)){
 			gatewayClient = HunterEmailClient.getInstance();
 		}else{
@@ -528,6 +554,14 @@ public class TaskManagerImpl implements TaskManager{
 		}
 		
 		return gatewayClient;
+	}
+	
+	private String getCloneMsgLifeStatus(String currSts){
+		if(!HunterUtility.notNullNotEmpty(currSts)) 
+			return HunterConstants.STATUS_DRAFT; 
+		if(HunterConstants.STATUS_PROCESSED.equals(currSts)) 
+			return HunterConstants.STATUS_APPROVED;
+		return currSts;
 	}
 
 	@Override
@@ -554,7 +588,7 @@ public class TaskManagerImpl implements TaskManager{
 		copyTextMessage.setProvider(textMessage.getProvider());
 		copyTextMessage.setText(textMessage.getText());
 		copyTextMessage.setToPhone(textMessage.getToPhone()); 
-		copyTextMessage.setMsgLifeStatus(HunterConstants.STATUS_DRAFT);
+		copyTextMessage.setMsgLifeStatus(getCloneMsgLifeStatus(textMessage.getMsgLifeStatus()));
 		copyTextMessage.setMsgSendDate(textMessage.getMsgSendDate());
 		
 		return copyTextMessage;
@@ -586,7 +620,7 @@ public class TaskManagerImpl implements TaskManager{
 		copyEmailMessage.setAttchmntBnId(emailMessage.getAttchmntBnId()); 
 		copyEmailMessage.setHasAttachment(emailMessage.isHasAttachment());
 		copyEmailMessage.setMultiPart(emailMessage.isMultiPart()); 
-		copyEmailMessage.setMsgLifeStatus(HunterConstants.STATUS_DRAFT);
+		copyEmailMessage.setMsgLifeStatus(getCloneMsgLifeStatus(emailMessage.getMsgLifeStatus()));
 		copyEmailMessage.setMsgSendDate(emailMessage.getMsgSendDate());
 		
 		copyEmailMessage.setCcList(emailMessage.getCcList());
@@ -800,41 +834,6 @@ public class TaskManagerImpl implements TaskManager{
 	}
 
 	@Override
-	public void sendTaskBusinessEmail(String mailType, Map<String, Object> cntntParams, String templateName) {
-		logger.debug("Sending task business email...");
-		logger.debug("Mail type : " + mailType + ", template name : " + templateName + ", content params : " + HunterUtility.stringifyMap(cntntParams));  
-		HunterBusinessEmailService.getInstance().send(mailType, cntntParams, templateName);	
-		logger.debug("Finished sending task business email!!");
-	}
-
-	@Override
-	public Map<String, Object> getCntntParamsFrTskBsnsEmail(String emailType, Long taskId) {
-		logger.debug("Retrieving email template content params for email type : " + emailType + ", task id : " + taskId);
-		Map<String, Object> params = new HashMap<>();
-		String query = null;
-		if(emailType != null && emailType.equals(HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION)){
-			query = hunterJDBCExecutor.getQueryForSqlId("getClientDetailsForTaskOwnerForTaskId");
-			List<Object> values = new ArrayList<>();
-			values.add(taskId);
-			List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, values);
-			if(rowMapList != null &&  !rowMapList.isEmpty()){
-				Map<String, Object> data = rowMapList.get(0);
-				Map<String, Object> pounded = new HashMap<>();
-				for(Map.Entry<String, Object> entry : data.entrySet()){
-					String key = entry.getKey();
-					key = HunterUtility.doublePoundQuote(key);
-					pounded.put(key, entry.getValue());
-				}
-				logger.debug("Obtained values : " + HunterUtility.stringifyMap(data)); 
-				return pounded;
-			}else{
-				logger.debug("No data found for the params : Mail type : " + emailType + ", task id : " + taskId); 
-			}
-		}
-		return params;
-	}
-
-	@Override
 	public List<String> validateTaskFinance(Task task) {
 		
 		String msgType = task.getTskMsgType();
@@ -917,6 +916,31 @@ public class TaskManagerImpl implements TaskManager{
 	@Override
 	public String deleteTask(Long taskId) {
 		return null;
+	}
+
+	@Override
+	public TextMessage getDefaultTextMessage(Task task, AuditInfo auditInfo) {
+		
+		TextMessage textMessage = new TextMessage();
+		textMessage.setCreatedBy(auditInfo.getCreatedBy());
+		textMessage.setCretDate(new Date());
+		textMessage.setLastUpdate(new Date());
+		textMessage.setMsgDeliveryStatus(HunterConstants.STATUS_CONCEPTUAL);
+		textMessage.setMsgId(task.getTaskId());
+		textMessage.setMsgLifeStatus(HunterConstants.STATUS_DRAFT);
+		textMessage.setMsgTaskType(task.getTaskType());
+		
+		textMessage.setPageable(false);
+		textMessage.setActualReceivers(0);
+		textMessage.setConfirmedReceivers(0); 
+		textMessage.setDesiredReceivers(0); 
+		textMessage.setMsgOwner(null); 
+		textMessage.setMsgSendDate(new Date());
+		textMessage.setPageWordCount(0); 
+		textMessage.setProvider(null); 
+		textMessage.setToPhone(null); 
+		
+		return textMessage;
 	}
 
 

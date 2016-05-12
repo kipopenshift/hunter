@@ -80,7 +80,34 @@
 	            <worker workerDefault="false" workerName="GET_MUL_REQ_PR_MSG"  />
 	            <denomination>EUR</denomination>
             </context>
-            <configs></configs>
+            <connConfigs>
+            	<config>
+					<label>Content-Type</label>
+					<value>application/x-www-form-urlencoded</value>
+				</config>
+				<config>
+					<label>Connection</label>
+					<value>keep-alive</value>
+				</config>
+				<config>
+					<label>Keep-Alive</label>
+					<value>300</value>
+				</config>
+				<config>
+					<label>messagetype</label>
+					<value>SMS:TEXT</value>
+				</config>
+				<config>
+					<label>Accept-Charset</label>
+					<value>ISO-8859-1,utf-8;q=0.7,*;q=0.7</value>
+				</config>
+            </connConfigs>
+            <configs>
+				<config>
+					<label>messagetype</label>
+					<value>SMS:TEXT</value>
+				</config>
+			</configs>
         </configurations>
     </client>
     <client clientName="HUNTER_EMAIL_CONFIGS" clientId="3" >

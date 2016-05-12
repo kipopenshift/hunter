@@ -302,9 +302,6 @@ var receiverGroupVM = kendo.observable({
 		}
 	},
 	fetchImportFilesData : function(data){
-		var groupId = this.get("selGroupId");
-		console.log("Group id ( " + groupId + " )"); 
-		console.log(data.length);
 		var firstHeader = '<div><table style="width:100%">';
 		var header = '<tr id="importFilesTrHeader" ><td></td><td>Created By</td><td>File Name</td><td>Creation Date</td><td>Status</td></tr>';
 		var body = firstHeader + header;

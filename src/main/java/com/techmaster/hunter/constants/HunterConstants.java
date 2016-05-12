@@ -47,6 +47,7 @@ public class HunterConstants {
 	
 	public static final String STATUS_TYPE_CLIENT = "respStatus";
 	public static final String STATUS_TYPE_DELIVERY = "deliveryStatus";
+	public static final String STATUS_TYPE_LIFE = "lifeStatus";
 	
 	// message type audio, message, email, etc.
 	public static final String MESSAGE_TYPE_AUDIO = "Audio";

@@ -10,6 +10,7 @@ import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
 import com.techmaster.hunter.obj.beans.ReceiverGroupReceiver;
 import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TaskClientConfigBean;
+import com.techmaster.hunter.obj.beans.TaskMessageReceiver;
 
 public interface GateWayClientService {
 	
@@ -34,14 +35,13 @@ public interface GateWayClientService {
 	
 	
 	public Map<String, Object> execute(Map<String, Object> executeParams);
-	public void setRequestBody(Task task, Set<GateWayMessage> messages);
 	
 	
 	public List<HunterMessageReceiver> getRegionReceivers(Task task);
 	public List<ReceiverGroupReceiver> getGroupReceivers(Task task);
 	public TaskClientConfigBean readConfigurations(String clientName);
 	public Set<GateWayMessage> createGatewayMsgs(List<? extends Object> receivers, Task task, AuditInfo auditInfo);
-	
+	public Set<TaskMessageReceiver> getTskMsgRcvrsFrTskId(Long taskId);
 	
 
 }

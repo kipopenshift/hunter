@@ -34,7 +34,6 @@ public class HunterUserConverter {
 		hunterUser.setFirstName(hunterUserJson.getFirstName());
 		hunterUser.setLastName(hunterUserJson.getLastName());
 		hunterUser.setMiddleName(hunterUserJson.getMiddleName());
-		hunterUser.setPassword(hunterUserJson.getPassword());
 		hunterUser.setPhoneNumber(hunterUserJson.getPhoneNumber());
 		hunterUser.setUserId(hunterUserJson.getUserId());
 		hunterUser.setUserName(hunterUserJson.getUserName());
@@ -73,7 +72,6 @@ public class HunterUserConverter {
 				json.setLastUpdate(hunterUser.getLastUpdate());
 				json.setLastUpdatedBy(hunterUser.getLastUpdatedBy());
 				json.setMiddleName(hunterUser.getMiddleName());
-				json.setPassword(hunterUser.getPassword());
 				json.setPhoneNumber(hunterUser.getPhoneNumber());
 				json.setUserId(hunterUser.getUserId());
 				json.setUserName(hunterUser.getUserName());

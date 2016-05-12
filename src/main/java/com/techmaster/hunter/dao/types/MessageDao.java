@@ -18,6 +18,7 @@ public interface MessageDao {
 	public abstract void updateTaskMsgLifeStatus(Long taskId, String msgSts);
 	public abstract void updateTaskMsgDelStatus(Long taskId, String msgLifeStatus); 
 	public Map<String, Object> getEmailMsgRefreshData(Long msgId);
+	public Map<String, Object> getPrcssTxtMssgeDtls(Long msgId); 
 
 	
 }

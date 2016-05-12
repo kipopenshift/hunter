@@ -267,6 +267,7 @@ public class MessageReceiverController extends HunterBaseController{
 			int groupNumber = taskManager.getTaskGroupTotalNumber(taskId);
 			result.put("regionCount", regionCount);
 			result.put("groupCount", groupCount);
+			result.put("totalCount", regionCount + groupCount);
 			result.put("regionsNumber", regionsNumber);
 			result.put("groupNumber", groupNumber);
 			logger.debug("Successfully fetched receiver count for task ( " + taskId + " ) : "  + result) ;

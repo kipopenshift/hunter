@@ -3,6 +3,7 @@
 <script src="<c:url value='/static/resources/scripts/plain/kendoHelper.js'/>"></script>
 <script src="<c:url value='/static/resources/scripts/model/hunterAdminClientHuntler.js'/>"></script>
 <script src="<c:url value='/static/resources/scripts/model/taskProcessProgress.js'/>"></script>
+<script src="<c:url value='/static/resources/scripts/plain/createNewTextMessage.js'/>"></script>
 
 <%-- <script src="<c:url value='/static/resources/scripts/model/regionVM.js'/>"></script> --%>
 
@@ -961,7 +962,7 @@
         	</tr>
         	<tr>
         		<td>Task Objective:</td>
-        		<td style="width:400px;overflow: hidden; height: 2.5em;" >
+        		<td style="word-wrap: break-word;" >
         			<div style="width: 400px;overflow: hidden;">
 				    	#= taskObjective #
 				  	</div>
@@ -969,7 +970,7 @@
         	</tr>
         	<tr>
         		<td>Task Description:</td>
-        		<td>#= description #</td>
+        		<td  style="word-wrap: break-word;"  >#= description #</td>
         	</tr>
         	<tr>
         		<td>Task Budget:</td>
@@ -1021,7 +1022,7 @@
         	</tr>
         	<tr>
         		<td >Task Message:</td>
-        		<td>
+        		<td style="word-wrap: break-word;" >
         			#if(data.taskMessage != null){#
         			   #= taskMessage.text #
         			#}else{#
@@ -1087,34 +1088,35 @@
     </div>
 
 <script type="text/x-kendo-template" id="processTaskProgressPopupTemplate">
-<div id="processTaskProgressPopup" style='min-width:500px;min-height:400px;background-color:#F9FFFF;border:1px solid #B6D2E2;border-radius:4px;display:none;' >
+<div id="processTaskProgressPopup" style='min-width:500px;min-height:200px;background-color:#F9FFFF;border:1px solid #B6D2E2;border-radius:4px;display:none;' >
 	<div id="taskProcessValidationContainer">
  		<table style="margin:4px;table-layout:fixed;padding:3px;margin-left:10px;" >
 			<tr>
 				<td id="taskProcessValidationTd" >Validating : </td>
-				<td><span id="validationProgressBarSpinner" ><div id="validationProgressBar"></span></div></td>
+				<td><div id="validationProgressBar"></div></td>
 			</tr>
 			<tr>	
 				<td id="validationResultsLabel" ></td>
 				<td id="validationResultsMessages" style="max-width:50px;" ><div id="taskValidationResults"></div></td>
 			</tr>
 			<tr>
-				<td>Processing : </td>
+				<td  id="taskProcessProcessTd"  >Processing : </td>
 				<td><div id="processTaskProgressBar"></div></td>
 			</tr>
 			<tr>	
-				<td id="preemptionResultsLabel" ></td>
-				<td id="preemptingResultsMessages" style="max-width:50px" ><div id="taskPremptingResults"></div></td>
+				<td id="processTaskProgressResults" ></td>
+				<td id="processTaskProgressResultsMsgs" style="max-width:50px" ><div id="processTaskProgressMessages"></div></td>
 			</tr>
 		</table>
 	</div>
-	<table id="closeTaskProcessingWindowTable" style="width: 0 auto;margin-left:40%;" >
+    <br/>
+	<table id="closeTaskProcessingWindowTable" style="width: 0 auto;margin-left:40%;display:none;" >
 		<tr>
-			<td><button onClick="kendoKipHelperInstance.closeWindowWithOnClose()"  class="k-button" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:100px;" >Close</button></td>
+			<td><button onClick="hunterAdminClientUserVM.closeProcessWindowAndRefresh()"  class="k-button" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:100px;" >Close</button></td>
 		</tr>
 	</table>
-  <div id="taskProcessProgressBar" >
- </div>	
+ <div id="taskProcessProgressSpinner" >
+  </div>	
 </div>
 <div style="width:350px;min-height:150px;background-color:#F9FFFF;border:1px solid #B6D2E2;border-radius:4px;" id="taskProcessPrompPopup"  >
 	<div style="width:80%;margin-left:10%;margin-top:20px;">
@@ -1262,6 +1264,43 @@
 	<div id="taskProcessJobLoadingIcon"  style="font-size:18px;color:black;text-align:center;background-color:#;margin-top:15%;"> Loading Process Results..... </div>
 </script>
 
+<script type="text/x-kendo-template" id="tskRgnCntSummry">
+	<div id="tskRgnCntSummryContainer"  style="font-size:18px;width:530px;height:180px;border-radius:4px;border:1px solid rgb(175,202,210)">
+		<h3 id="loadingCountText" style="width:98%;text-align:center;" >Loading Counts...</h3>
+		<div id="tskRgnCntSummryIconLoader" ></div>
+		<div id="tskRgnCntSummryDataResults" style="display:none;" >
+			<table style="table-layout:fixed;width:92%;margin-left:4%;margin-top:15px;border-radius:5px;" >
+				<tr>
+					<td style="background-color:#254B5B;color:white;text-align:center;" >Receiver Type</td>
+					<td style="background-color:#254B5B;color:white;text-align:center;">Type Number</td>
+					<td style="background-color:#254B5B;color:white;text-align:center;">Receiver Counts</td>
+				</tr>
+				<tr>
+					<td style="border-bottom:1px solid #CAE8F5;" >Task Groups</td>
+					<td style="text-align:center;border-bottom:1px solid #CAE8F5;" id="tskRgnCntGroupNumber">2</td>
+					<td style="text-align:center;border-bottom:1px solid #CAE8F5;" id="tskRgnCntGroupCount" >52123</td>
+				</tr>
+				<tr>
+					<td style="border-bottom:1px solid #CAE8F5;">Task Regions</td>
+					<td style="text-align:center;border-bottom:1px solid #CAE8F5;"  id="tskRgnCntRegionNumber" >5</td>
+					<td style="text-align:center;border-bottom:1px solid #CAE8F5;"  id="tskRgnCntRegionCount" >3656</td>
+				</tr>
+				<tr>
+					<td style="border-bottom:1px solid #CAE8F5;"></td>
+					<td style="text-align:center;border-bottom:1px solid #CAE8F5;"  id="tskTotalRcvrCountName" >Total Receivers : </td>
+					<td style="text-align:center;border-bottom:1px solid #CAE8F5;font-weight:bolder;"  id="tskTotalRcvrCount" >3656</td>
+				</tr>
+			</table>
+			<table style="width:34%;margin-left:33%;" >
+				<tr>
+					<td><button id="taskRegionEditButton"  class="k-button"  onClick="hunterAdminClientUserVM.loadEdiTaskRegionView()" style="margin-bottom:7px;margin-top:10px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-pencil" ></span>Edit</button></td>
+					<td><button class="k-button"  onClick="kendoKipHelperInstance.closeWindowWithOnClose()" style="margin-bottom:7px;margin-top:10px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-cancel" ></span>Close</button></td>
+				</tr>
+			</table>
+	    </div>
+    </div>
+</script>
+
 
 <script type="text/javascript">
 
@@ -1272,10 +1311,6 @@ var processJobData =
 	;
 
 </script>
-
-
-
-
 
 
 

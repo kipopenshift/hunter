@@ -25,6 +25,7 @@ public class TaskClientConfigBean {
 	
 	
 	private Map<String, String> configs = new HashMap<String, String>();
+	private Map<String,String> connConfigs = new HashMap<String,String>();
 
 	public TaskClientConfigBean() {
 		super();
@@ -155,6 +156,13 @@ public class TaskClientConfigBean {
 	}
 	public Map<String, String> getConfigs() {
 		return configs;
+	}
+
+	public Map<String, String> getConnConfigs() {
+		return connConfigs;
+	}
+	public void setConnConfigs(Map<String, String> connConfigs) {
+		this.connConfigs = connConfigs;
 	}
 
 	@Override

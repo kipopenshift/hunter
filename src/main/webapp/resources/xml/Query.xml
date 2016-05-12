@@ -578,6 +578,16 @@
 			from HNTR_USR_RLS ru WHERE ru.USR_ID = ?
 		</statement>
 	</query>
+	<query id="getNextRawReceiverVersion">
+		<description>
+		    This query will retrieve raw receiver version for a given contact.
+		</description>
+		<statement>
+	  		SELECT max(h.RCVR_VRSN) + 1
+	  		FROM HNTR_RW_RCVR h
+	  		WHERE h.RCVR_CNTCT = ?
+		</statement>
+	</query>
 	<query id="getTaskNamesForClientUserName">
 		<description>
 		    Returns comma separated task already existent task names
@@ -659,6 +669,35 @@
 			AND rgc.RCVR_ID = rr.RCVR_ID
 			AND rr.GRP_ID = tg.GRP_ID
 			and tg.TSK_ID = ?
+		</statement>
+	</query>
+	<query id="getPrcssTxtMssgeDtls">
+		<description>
+		    Returns a processed text message details for display on popup
+		</description>
+		<statement>
+		  	SELECT DISTINCT 
+			  TO_CHAR(msg.CRET_DATE, 'yyyy-MM-dd HH:mm:ss') AS create_date,
+			  TO_CHAR(msg.LST_UPDT_DATE, 'yyyy-MM-dd HH:mm:ss') AS last_update_date ,
+			  ( SELECT crt.FRST_NAM || ' ' || crt.LST_NAM || '(' || crt.USR_NAM  || ')' FROM HNTR_USR crt WHERE crt.USR_NAM = msg.CRTD_BY ) AS created_by,
+			  ( SELECT crt2.FRST_NAM || ' ' || crt2.LST_NAM || '(' || crt2.USR_NAM  || ')' FROM HNTR_USR crt2 WHERE crt2.USR_NAM = msg.LST_UPDTD_BY ) AS last_updated_by,
+			  TO_CHAR(msg.MSG_SEND_DATE, 'yyyy-MM-dd HH:mm:ss') AS message_send_date,
+			  msg.MSG_LIF_STS AS message_life_status,
+			  msg.MSG_TSK_TYP AS message_task_type,
+			  prv.PROVIDER_NAM AS provider_name,
+			  ('Ksh : ' || prv.CST_PR_TXT_MSG) AS cost_per_message,
+			  usr.FRST_NAM || ' ' || usr.LST_NAM || '(' || usr.USR_NAM  || ')' AS message_owner,
+			  msg.MSG_LIF_STS AS message_status,
+			  length(nvl(msg.MSG_TXT,0)) AS character_count,
+			  msg.ACTL_RCVRS AS total_receivers,
+			  replace(msg.MSG_TXT,CHR(10),'') AS message_text
+			FROM 
+			  TXT_MSG msg,
+			  SRVC_PRVDR prv,
+			  HNTR_USR usr
+			WHERE prv.PROVIDER_ID = msg.PROVIDER
+			AND usr.USR_NAM = msg.MSG_OWNER 
+			AND MSG_ID = ?
 		</statement>
 	</query>
 </queries>

@@ -25,7 +25,6 @@ import com.techmaster.hunter.obj.beans.HunterUser;
 import com.techmaster.hunter.obj.beans.UserLoginBean;
 import com.techmaster.hunter.obj.converters.HunterUserConverter;
 import com.techmaster.hunter.util.HunterHibernateHelper;
-import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterSessionFactory;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -38,16 +37,11 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	private static Long maxAddressId;
 	private static Long maxCreditCardId;
 	
-	private static HunterJDBCExecutor hunterJDBCExecutor;
+	private static HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
 	
 	static{
 		maxAddressId = hunterAddressDao.getNextAddressId() - 1;
 		maxCreditCardId = hunterCreditCardDao.getNextCreditCardId() - 1;
-	}
-	
-	public static void wireUpExecutor(HunterJDBCExecutor hunterJDBCExecutor){
-		HunterUserDaoImpl.hunterJDBCExecutor = hunterJDBCExecutor;
-		HunterLogFactory.getLog(HunterAddressDaoImpl.class).debug("Successfully wired up jdbc executor for hunter user dao impl!!");  
 	}
 	
 	public void refreshAllMaxIds(){

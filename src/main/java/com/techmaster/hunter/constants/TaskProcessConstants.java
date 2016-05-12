@@ -23,8 +23,10 @@ public interface TaskProcessConstants {
 	public static final String RESPONSE_TEXT = "responseText";
 	public static final String ERROR_TYPE = "errorsType";
 	public static final String ERROR_TEXT = "errorsText";
+	
 	public static final String ERROR_TYPE_EXCEPTION = "exception";
 	public static final String ERROR_TYPE_RESPONSE = "response";
+	public static final String ERROR_TYPE_VALIDATION = "response";
 	
 	
 	/* Hunter Connection Connection */

@@ -35,8 +35,6 @@ public interface TaskManager {
 	public abstract String addGroupToTask(Long groupId, Long taskId);
 	public abstract void removeGroupFromTask(Long groupId, Long taskId);
 	public abstract int getTotalTaskGroupsReceivers(Long taskId); 
-	public abstract void sendTaskBusinessEmail(String mailType, Map<String, Object> cntntParams, String templateName);
-	public Map<String, Object> getCntntParamsFrTskBsnsEmail(String emailType, Long taskId);
 	public List<String> validateTaskFinance(Task task);
 	public abstract List<Object> validateMessageDelete(Long emailId); 
 	public Map<String, Object> getGateWayClientExecuteMap(Task task);
@@ -45,6 +43,7 @@ public interface TaskManager {
 	public void setTaskHistoryStatusAndMessage(TaskHistory taskHistory,String eventStatus, String message);
 	public boolean userHasRole(String roleName, String userName);
 	public String deleteTask(Long taskId);
+	public TextMessage getDefaultTextMessage(Task task, AuditInfo auditInfo);
 	
 	
 	

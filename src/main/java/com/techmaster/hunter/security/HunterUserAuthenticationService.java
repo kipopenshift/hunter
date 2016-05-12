@@ -102,22 +102,20 @@ public class HunterUserAuthenticationService {
 		
 		Object refPassword =  params.get("PSSWRD");
 		
-		
 		if(refPassword == null || !refPassword.toString().equals(password)){
 			int newCount = getIncrementedFailureLoginCount(userName);
 			putParamsForBlockedUnBlocked(params,newCount); 
 		}else{
 			int newCount = getIncrementedFailureLoginCount(userName);
-			if(newCount <= MAX_USER_LOGIN_COUNT){
+			if(!isLocked(newCount)){ 
 				logger.debug("Login successful, resetting failed login count"); 
 				params.put("BLOCKED", false);
 				resetFailedLoginCounts(userName); 
 			}else{
-				logger.debug("Account is locked and cannot reset failed login counts."); 
+				logger.debug("Account is blocked and cannot reset failed login counts."); 
 				putParamsForBlockedUnBlocked(params,newCount); 
 			}
 		}
-		
 		
 		return params;
 	}

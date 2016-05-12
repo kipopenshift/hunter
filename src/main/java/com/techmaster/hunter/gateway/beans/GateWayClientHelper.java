@@ -1,6 +1,7 @@
 package com.techmaster.hunter.gateway.beans;
 
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,9 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMImplementation;
@@ -75,6 +79,31 @@ public class GateWayClientHelper {
 	
 	public static GateWayClientHelper getInstance(){
 		return instance;
+	}
+	
+	/**
+	 * This method locks to pending and unlocks task to any desired status.
+	 * It should only be used while processing task to avoid multiple processing submissions and no where else. 
+	 * @param taskId The id of the task to be locked or unlocked.
+	 * @param status the status to which the task is to be set to. If left null, system shall lock the task by setting it to pending.
+	 */
+	public void lockTask(Long taskId, String status){
+		if(status == null || HunterConstants.STATUS_PENDING.equals(status)){ 
+			status = HunterConstants.STATUS_PENDING;
+			logger.debug("Locking task...: " + taskId);
+		}else{
+			logger.debug("Unlocking task..." + taskId + " and putting status to : " + status);
+		}
+		String lockQ = "UPDATE TASK t SET t.TSK_DEL_STS = ? WHERE t.TSK_ID = ?";
+		List<Object> values = new ArrayList<>();
+		values.add(HunterConstants.STATUS_PENDING);
+		values.add(taskId);
+		HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class).executeUpdate(lockQ, values);
+	}
+	
+	public boolean isTaskLocked(Task task){
+		String status = taskDao.getTaskStatuses(task.getTaskId()).get(HunterConstants.STATUS_TYPE_DELIVERY);
+		return HunterConstants.STATUS_PENDING.equals(status);
 	}
 	
 	public Map<String, Object> getDefaultGetParams(TaskClientConfigBean configBean){
@@ -148,7 +177,6 @@ public class GateWayClientHelper {
 					}
 					i++;
 				}
-				logger.debug(receiver); 
 				receiver.setAuditInfo(auditInfo);
 				groupReceivers.add(receiver);
 			}
@@ -190,6 +218,7 @@ public class GateWayClientHelper {
 	}
 	
 	public boolean validateTaskConfigName(String configName){
+		logger.debug("Validating client : " + configName); 
 		String xPath = "//client/@clientName";
 		NodeList nodeList = HunterCacheUtil.getInstance().getXMLService(HunterConstants.CLIENT_CONFIG_XML_CACHED_SERVICE).getNodeListForPathUsingJavax(xPath); 
 		int length = nodeList.getLength();
@@ -397,6 +426,72 @@ public class GateWayClientHelper {
 		return paramStr;
 	}
 	
+	public String getOzekiGetRequestBody(TaskClientConfigBean configBean, Set<GateWayMessage> gateWayMessages){
+		
+		String baseUrl = configBean.getMethodURL();
+		Map<String, Object> params = new HashMap<>();
+		
+		params.put(HunterConstants.BASE_URL, baseUrl);
+		params.put("action", "sendmessage");
+		params.put("messagecount", Integer.toString(gateWayMessages.size()));
+		params.put("username", configBean.getUserName());
+		params.put("password", configBean.getPassword());
+		
+		int i=0;
+		
+		for(GateWayMessage message : gateWayMessages){
+			params.put("recipient"+i, message.getContact());
+			params.put("messagetyp"+i, configBean.getConfigs().get("messagetype")); 
+			params.put("messagedata"+i, message.getText());
+			i++;
+		}
+		
+		String requestBody = null;
+		try {
+			requestBody = HunterUtility.urlEncodeRequestMap(params, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		logger.debug(requestBody); 
+		return requestBody;
+	}
+	
+	public String getOzekiPostRequestBody(TaskClientConfigBean configBean, Set<GateWayMessage> gateWayMessages){
+		
+		logger.debug("Getting ozeki post request body..."); 
+		String requestBody = null;
+		List<NameValuePair> pairs = new ArrayList<>();
+		
+		NameValuePair action = new BasicNameValuePair("action", "sendmessage");
+		NameValuePair messagecount = new BasicNameValuePair("messagecount", Integer.toString(gateWayMessages.size())); 
+		NameValuePair username = new BasicNameValuePair("username", configBean.getUserName());
+		NameValuePair password = new BasicNameValuePair("password", configBean.getPassword());
+		NameValuePair submit = new BasicNameValuePair("submit", "OK");
+		
+		pairs.add(action);
+		pairs.add(messagecount);
+		pairs.add(username);
+		pairs.add(password);
+		pairs.add(submit);
+		
+		
+		int i=0;
+		
+		for(GateWayMessage message : gateWayMessages){
+			NameValuePair recipient = new BasicNameValuePair("recipient"+i, message.getContact());
+			NameValuePair messagetype = new BasicNameValuePair("messagetyp"+i, configBean.getConfigs().get("messagetype")); 
+			NameValuePair messagedata = new BasicNameValuePair("messagedata"+i, message.getText());
+			pairs.add(recipient);
+			pairs.add(messagetype);
+			pairs.add(messagedata);
+			i++;
+		}
+		
+		requestBody = URLEncodedUtils.format(pairs,"UTF-8");
+		logger.debug("Finished retrieving ozeki post request body : \n" + requestBody); 
+		return requestBody;
+	}
+	
 	public String getCMPostRequestBody(TaskClientConfigBean configBean, Set<GateWayMessage> gateWayMessages) {
 		
 		String requestBody = null;
@@ -469,6 +564,52 @@ public class GateWayClientHelper {
 		
 		return requestBody;
 	}
+	
+	public Map<String, Object> getCntntParamsFrTskBsnsEmail(String emailType, Long taskId) {
+		logger.debug("Retrieving email template content params for email type : " + emailType + ", task id : " + taskId);
+		Map<String, Object> params = new HashMap<>();
+		String query = null;
+		if(emailType != null && emailType.equals(HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION)){
+			query = hunterJDBCExecutor.getQueryForSqlId("getClientDetailsForTaskOwnerForTaskId");
+			List<Object> values = new ArrayList<>();
+			values.add(taskId);
+			List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, values);
+			if(rowMapList != null &&  !rowMapList.isEmpty()){
+				Map<String, Object> data = rowMapList.get(0);
+				Map<String, Object> pounded = new HashMap<>();
+				for(Map.Entry<String, Object> entry : data.entrySet()){
+					String key = entry.getKey();
+					key = HunterUtility.doublePoundQuote(key);
+					pounded.put(key, entry.getValue());
+				}
+				logger.debug("Obtained values : " + HunterUtility.stringifyMap(data)); 
+				return pounded;
+			}else{
+				logger.debug("No data found for the params : Mail type : " + emailType + ", task id : " + taskId); 
+			}
+		}
+		return params;
+	}
+	
+	
+	public String getMessageIds(Set<GateWayMessage> messages){
+		StringBuilder builder = new StringBuilder();
+		if(messages != null && !messages.isEmpty()){
+			for(GateWayMessage message : messages){
+				builder.append(message.getMsgId());
+				builder.append(",");
+			}
+		}
+		String msgIdStr = builder.toString();
+		if(msgIdStr.endsWith(",")){
+			msgIdStr = msgIdStr.substring(0, msgIdStr.length() - 1);
+		}
+		logger.debug("Message Ids : " + msgIdStr); 
+		return msgIdStr;
+	}
+	
+	
+	
 	
 	
 	

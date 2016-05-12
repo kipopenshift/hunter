@@ -32,9 +32,9 @@ HunterConstants.GATE_WAY_CLIENT_ARRAY =
 
 HunterConstants.SERVICE_PROVIDER_DATA = [
 		{"providerId" : "1", "providerName" : "Safaricom"},
-		{"providerId" : "2", "providerName" : "Verizon"},
-		{"providerId" : "3", "providerName" : "AT and T"},
-		{"providerId" : "4", "providerName" : "Celtel"},
+		{"providerId" : "2", "providerName" : "Celtel"},
+		{"providerId" : "3", "providerName" : "Verizon"},
+		{"providerId" : "4", "providerName" : "AT and T"},
 		{"providerId" : "5", "providerName" : "Tech Masters"},
 		{"providerId" : "6", "providerName" : "Hunter Email Provider"},
     ];

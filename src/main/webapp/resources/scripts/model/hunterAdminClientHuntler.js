@@ -763,10 +763,9 @@ var hunterTaskModel = kendo.data.Model.define({
 		}
 	},
 	getTaskDeleteTemplate : function(){
-		var delStatus = this.get("taskLifeStatus");
-		if(delStatus === "Processed"){
+		var lifeStatus = this.get("taskLifeStatus");
+		if(lifeStatus !== "Draft"){
 			return "";
-			//return kendoKipHelperInstance.createDisabledContextEditButton(false);
 		}
 		var id = this.get("taskId");
 		var taskName = this.get("taskName");
@@ -782,8 +781,12 @@ var hunterTaskModel = kendo.data.Model.define({
 	},
 	getTaskProcessTemplate : function(){
 		var lifeSts = this.get("taskLifeStatus");
+		var delStatus = this.get("taskDeliveryStatus");
 		var action = "hunterAdminClientUserVM.showPopupForProcessTask";
 		var iconName = "arrow-e";
+		if(delStatus == 'Pending' ){
+			return "<center><span style='color:rgb(134,17,17);font-weight:bolder;'><span class='k-icon k-i-clock' ></span></span></center>";
+		}
 		if(lifeSts != "Approved" && lifeSts != "Processed" ){
 			return "";
 			//return kendoKipHelperInstance.createDisabledContextEditButton(false);
@@ -800,6 +803,8 @@ var hunterTaskModel = kendo.data.Model.define({
 		var currentStatus = this.get("taskLifeStatus");
 		if(currentStatus === 'Processed'){
 			return "<center><span style='color:#00B655;' >Processed</center></span>";
+		}else if(currentStatus === 'Pending'){
+			return "<center><span style='color:#00B655;' >Pending</center></span>";
 		}
 		var keyStr = this.get("taskId") + ":::" + currentStatus;
 		var html = "<center><span style='color:blue;'><a style='cursor:pointer' onClick='hunterAdminClientUserVM.showPopupToChangeTaskStatus(\""+ keyStr +"\")' >"+ currentStatus +"</a></span></center>";
@@ -880,6 +885,7 @@ var hunterAdminClientUserVM = kendo.observable({
 	tskMsgOwner : null,
 	deleteCurMsgFlag : false,
 	hunterTaskHistoryGrid : null,
+	createTextMessageManager : null,
 	
 	
 	
@@ -967,6 +973,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		return r;
 	},
 	createTaskHistoryGrid : function(){
+		$("#taskHistoryPopupGrid").closest(".k-window").css({"top":"30%","left":"20%"});
 		var ds = hunterAdminClientUserVM.get("taskHistoryDS");
 		var hunterTaskHistoryGrid = $("#taskHistoryPopupGrid").kendoGrid({
 			dataSource : ds,
@@ -1430,32 +1437,30 @@ var hunterAdminClientUserVM = kendo.observable({
 	},
 	afterFetchUniqueCountForTaskId : function(data){
 		var json = $.parseJSON(data);
-		console.log(data);
-		var headers = "<tr><td class='tskDtlHdr' >Label</td><td class='tskDtlHdr'  >Number </td><td class='tskDtlHdr'  >Total Receivers </td></tr>";
-		var groupsLabel = "<td>Task Groups</td>";
-		var groupTotalNumber = "<td>"+ (json == null ? "" : json.groupNumber) +"</td>";
-		var groupReceiverCount = "<td>"+ (json == null ? "" : json.groupCount) +"</td>";
-		var string1 = "<tr>" + (groupsLabel + groupTotalNumber + groupReceiverCount) + "</tr>";
-		var regionsLabel = "<td>Task Regions</td>";
-		var regionsNumber = "<td>"+ (json == null ? "" : json.regionsNumber) +"</td>";
-		var regionReceiverCount = "<td>"+ (json == null ? "" : json.regionCount) +"</td>";
-		var string2 = "<tr>" + (regionsLabel + regionsNumber + regionReceiverCount) + "</tr>";
-		var table = "<table id='taskRegionsDetailsTable'  style='border:1px solid #A9C8D5;border-radius:4px;width:100%;' >"+ headers + string1 + string2 +"</table>";
-		this.showPopupForTaskRegionsDetails(table);
+		setTimeout(function(){
+			kendo.ui.progress($("#tskRgnCntSummryIconLoader"), false);
+			$("#tskRgnCntSummryIconLoader").remove();
+			$("#loadingCountText").remove();
+			$("#tskRgnCntSummryDataResults").toggle();
+			$("#tskRgnCntGroupCount").html(json.groupCount);
+			$("#tskRgnCntGroupNumber").html(json.groupNumber);
+			$("#tskRgnCntRegionCount").html(json.regionCount);
+			$("#tskRgnCntRegionNumber").html(json.regionsNumber);
+			$("#tskTotalRcvrCount").html("<span style='color:red;' >" + json.totalCount + "</span>"); 
+			var lifeStatus = hunterAdminClientUserVM.getSelectedTaskBean().get("taskLifeStatus");
+			if(lifeStatus != 'Draft' ){
+				$("#taskRegionEditButton").attr("disabled","disabled");
+			}
+		 }, 1200);
 	},
-	showPopupForTaskRegionsDetails : function(table){
-		var id = this.get("selTaskId"); 
-		var editButton = "<td>" + kendoKipHelperInstance.createSimpleHunterButton("pencil","Edit", 'hunterAdminClientUserVM.loadEdiTaskRegionView("'+ id +'")') + "</td>";
-		var okButton = "<td>" + kendoKipHelperInstance.createSimpleHunterButton("tick","Close", 'kendoKipHelperInstance.closeHelperKendoWindow()');
-		var buttTable = "<br/><table style='width:60%;margin-left:20%;' ></tr>" + editButton + okButton + "</tr></table>";
-		var totalContent = table + buttTable;
-		kendoKipHelperInstance.showPopupWithNoButtons("Task Regions Details",totalContent);
-		$("#taskRegionsDetailsTable").css({"border-collapse":"collapse","padding" : "5px","webkit-box-shadow": "0 0 5px 2px #E2F3FF","-moz-box-shadow": "0 0 5px 2px #E2F3FF","box-shadow": "0 0 5px 2px #E2F3FF"}); 
-		$("#taskRegionsDetailsTable tr td").css({"text-align" : "center"});
-		$(".tskDtlHdr").css({"background-color" : "#E0F1F9","color" : "black","font-weight" : "bolder","padding" : "5px","height" : "15px"}); 
+	showPopupForTaskRegionsDetails : function(){
+		var html = $("#tskRgnCntSummry").html();
+		kendoKipHelperInstance.showWindowWithOnClose(html,"Task Region and Receiver Data");
+		kendo.ui.progress($("#tskRgnCntSummryIconLoader"), true);
 	},
 	loadTaskRegionView: function(id){
 		this.set("selTaskId",id);
+		this.showPopupForTaskRegionsDetails(null);
 		this.loadGroupDropdown(id);
 		this.fetchUniqueCountForTaskId(id);
 	},
@@ -1468,19 +1473,18 @@ var hunterAdminClientUserVM = kendo.observable({
 		kendoKipHelperInstance.closeHelperKendoWindow();
 		this.set("isTaskRegionOpen", true);
 		$("#taskRegionsButton").css("background-color","rgb(155,255,229)");
-		
 		// update counts of receivers.
-		 hunterAdminClientUserVM.getTaskGroupsTotalReceivers();
+		hunterAdminClientUserVM.getTaskGroupsTotalReceivers();
 		hunterAdminClientUserVM.getAllReceiversForTaskReceivers();
 		
 	},
-	loadEdiTaskRegionView : function(taskId){
-		kendoKipHelperInstance.closeHelperKendoWindow();
+	loadEdiTaskRegionView : function(){
+		var taskId = this.get("selTaskId"); 
+		kendoKipHelperInstance.closeWindowWithOnClose();
 		this.loadNewTaskRegionView(taskId);
 	},
 	loadDetailsTaskRegionView : function(taskId){
 		kendoKipHelperInstance.closeMeasuredWindow();
-		//this.showTabStripNumber(2);
 		$("#taskGridHolder").hide(1000, function(){
 			$("#taskRegionStrip").slideDown(500);
 		});
@@ -1579,8 +1583,65 @@ var hunterAdminClientUserVM = kendo.observable({
 		});
 		hunterAdminClientUserVM.getAllReceiversForTaskReceivers();
 	},
+	showPopupForProcessedTaskTxtMsg : function(id){
+		var r = $.Deferred();
+		var html = $("#processedTaskTxtMessageViewTemplateContainer").html();
+		kendoKipHelperInstance.showWindowWithOnClose(html,"Task Process Progress");
+		kendo.ui.progress($("#processedTaskTxtMsgLoadIcon"), true);
+		setTimeout(function(){ 
+			 var url = HunterConstants.HUNTER_BASE_URL + "/message/action/tskMsg/getPrcssTxtMssgeDtls/" + id;
+			 kendoKipHelperInstance.ajaxPostDataForJsonResponseWthCllbck(null, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterFetchTaskTxtMsgDetails", "kendoKipHelperInstance.closeWindowWithOnClose");
+		 }, 500);
+		return r;
+	},
+	afterFetchTaskTxtMsgDetails : function(data){
+		
+		try {
+			data = $.parseJSON(data);
+			kendo.ui.progress($("#processedTaskTxtMsgLoadIcon"), false);
+			$("#processedTaskTxtMsgLoadDiv").remove();
+			$("#processedTaskTxtMsgLoadIcon").remove();
+			$("#processedTaskTxtMsgDet2").css({"display":""}); 
+			$("#processedTaskTxtMsgDet3").css({"display":""});
+			$("#processedTaskTxtMsgDet1").css({"display":""});
+			var tds = $("#processedTaskTxtMessageViewTemplate table td");
+			for(var i=0; i<tds.length;i++){
+				var tdId = $(tds[i]).prop("id"); 
+				for(key in data){
+					if(key === tdId){
+						var val = data[key];
+						$("#" + tdId).html(val); 
+					}
+				}
+			}
+		}
+		catch(err) {
+			console.log(data);
+		    var message = err.message;
+		    kendo.ui.progress($("#processedTaskTxtMsgLoadIcon"), false);
+		    $("#processedTaskTxtMsgLoadIcon").remove();
+		    $("#processedTaskTxtMsgLoadDiv").html("<span style='color:red;font-size:17px;' > And error occurred while loading data :( </br>Message : "+ message +"</span>" +
+		    	"<br/></br>" + '<button onClick="kendoKipHelperInstance.closeWindowWithOnClose()" style="float:left;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:200px;margin-left:60px;margin-top:90px;" class="k-button" >Close</button>'
+		    );
+		}
+	},
 	loadTaskMessageView: function(id){
-		var msg = this.get("hunterClientTaskGrid").dataSource.get(id).get("taskMessage"); 
+		this.set("selTaskId", id);
+		var taskBean = this.getSelectedTaskBean();
+		var lifeStatus = taskBean.get("taskLifeStatus");
+		var msgType = taskBean.get("tskMsgType");
+		
+		if(lifeStatus != "Draft" && lifeStatus != "Approved" && lifeStatus != "Review" &&  (msgType.toLowerCase() == "text") ){
+			hunterAdminClientUserVM.showPopupForProcessedTaskTxtMsg(id);
+			return;
+		}else if((lifeStatus == "Draft" || lifeStatus == "Approved" || lifeStatus == "Review") &&  (msgType.toLowerCase() == "text") ){
+			this.get("createTextMessageManager").execute(); 
+			return;
+		}
+		
+		hunterAdminClientUserVM.loadNewTaskMessageView(id);
+		
+		/*var msg = this.get("hunterClientTaskGrid").dataSource.get(id).get("taskMessage"); 
 		var msgTxt = msg != null ? msg["msgText"]  : "<span style='color:#F51A1A;' > No message found for this task! <br/> Would you like to create one? </span>";  
 		console.log("Message Text >> " + msgTxt);
 		var okButton = "<td>" + kendoKipHelperInstance.createSimpleHunterButton("tick","OK", 'kendoKipHelperInstance.closeHelperKendoWindow()');
@@ -1590,9 +1651,7 @@ var hunterAdminClientUserVM = kendo.observable({
 			var creatButtTable = div + "<br/><table style='width:50%;margin-left:25%;' ></tr>" + createButton + okButton + "</tr></table>";
 			kendoKipHelperInstance.showPopupWithNoButtons("Task Message", creatButtTable);
 			return;
-		}
-		kendoKipHelperInstance.initKendoWindow();
-		this.loadEdiTaskMessageView(id);
+		}*/
 	},
 	loadEdiTaskMessageView : function(taskId){
 		console.log("loading edit view for message id >> " + taskId);
@@ -1647,7 +1706,6 @@ var hunterAdminClientUserVM = kendo.observable({
 		
 		console.log("loading create New Task Message view for task id >> " + taskId);
 		hunterAdminClientUserVM.set("selTaskId", taskId);
-		kendoKipHelperInstance.closeHelperKendoWindow();
 		var task = this.get("hunterClientTaskGrid").dataSource.get(taskId);
 		
 		if(task.get("tskMsgType") === 'Email' ){
@@ -1663,27 +1721,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		console.log("Deleted message ?  " + delTskMsg );
 		// set it to null to it can load default message.
 		msg = delTskMsg ? msg = null : msg; 
-		console.log("Task : \n" + JSON.stringify(task));
-		if(msg == null){
-			console.log("Task has message null, getting default message..."); 
-			$.ajax({
-				url: "http://localhost:8080/Hunter/task/action/tskMsg/getDefault/" + taskId,
-			    method: "POST",
-			    dataType: "json",
-			    contentType : "application/json"
-			}).done(function(data) {
-				var json = jQuery.parseJSON(data);
-				console.log("Message obtained for task : " + JSON.stringify(json));
-				hunterAdminClientUserVM.updateTaskMsgFields(json);
-			 }).fail(function(data) {
-				 var json = jQuery.parseJSON(data);
-				 kendoKipHelperInstance.popupWarning(data.statusText + " (" + json.status + ")", "Error");
-			 });
-		}else{
-			console.log("Task has message already, updating VM... : " + JSON.stringify(msg) ); 
-			hunterAdminClientUserVM.updateTaskMsgFields(msg);
-		}
-		this.opendEditMessageView();
+		this.get("createTextMessageManager").execute();  
 	},
 	clearCurrentTskMsg : function(){
 		hunterAdminClientUserVM.set("taskMsgSendDate", null); 
@@ -1784,12 +1822,13 @@ var hunterAdminClientUserVM = kendo.observable({
 		if(data != null){
 			data = $.parseJSON(data);
 			if(data.length != 0){
+				$("#taskProcessWorkerContainer").html("");
 				for(var i=0; i<data.length;i++){
 					var job = data[i];
 					var workers = job["workerJsons"]; 
 					var template = kendo.template($("#taskProcessJobWorkerTemplate").html());
 					template = template(workers);
-					$("#taskProcessWorkerContainer").html(template); 
+					$("#taskProcessWorkerContainer").append(template); 
 				}
 			}else{
 				$("#taskProcessJobLoadingIcon").html("No process data found for Task!");
@@ -1840,15 +1879,17 @@ var hunterAdminClientUserVM = kendo.observable({
 		$("#taskProcessPrompPopup").fadeOut(50);
 		$("#processTaskProgressPopup").closest(".k-window").animate({"top": "20%","left": "38%"},200,function(){
 			$("#processTaskProgressPopup").toggle(800,function(){
-				kendo.ui.progress($("#taskProcessProgressBar"), true);
-				 setTimeout(function(){ 
-					 var html = $("#processTaskProgressPopupTemplate").html();
-					 $(".k-window-action k-link").css("visibility", "hidden");
-						var taskProcessManager_ = hunterAdminClientUserVM.get("taskProcessManager");
-						taskProcessManager_.execute();
-				 }, 400);
+				kendo.ui.progress($("#taskProcessProgressSpinner"), true);
+				var html = $("#processTaskProgressPopupTemplate").html();
+				$(".k-window-action k-link").css("visibility", "hidden");
+				var taskProcessManager_ = hunterAdminClientUserVM.get("taskProcessManager");
+				taskProcessManager_.execute();
 			});
 		});
+	},
+	closeProcessWindowAndRefresh : function(){
+		kendoKipHelperInstance.closeWindowWithOnClose();
+		this.get("hunterClientTaskGrid").dataSource.read();
 	},
 	performTaskNumericKendoConversions : function(){
 		$("#taskTaskBudgetNumericInput").kendoNumericTextBox({

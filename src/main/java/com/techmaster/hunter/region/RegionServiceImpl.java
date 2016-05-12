@@ -12,7 +12,9 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.proc.ProcedureHandler;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterMessageReceiverDao;
@@ -1017,12 +1019,94 @@ public class RegionServiceImpl extends AbstractRegionService {
 		return regionIds;
 	}
 
+	@Override
+	public void editReceiverRegion(Map<String, Object> params) {
+		
+		String type = HunterUtility.getNullOrStrimgOfObj(params.get("levelType"));
+		logger.debug("Upadting "+ type +" with params ( " + HunterUtility.stringifyMap(params) + " )");
+		Long beanId = Long.parseLong(params.get("beanId")+""); 
+		int population = Integer.parseInt(params.get("population")+""); 
+		String regionCode = HunterUtility.getNullOrStrimgOfObj(params.get("regionCode")); 
+		String regionName = HunterUtility.getNullOrStrimgOfObj(params.get("regionName")); 
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		List<Object> values = new ArrayList<>();
+		
+		if(HunterConstants.RECEIVER_LEVEL_COUNTRY.equals(type)){ 
+			
+			Country country = receiverRegionDao.getCountryById(beanId);
+			
+			String query = "UPDATE RCVR_RGN SET CNTRY = ? WHERE CNTRY = ?"; 
+			logger.debug("Executing query : " + query);
+			values.add(regionName);
+			values.add(country.getCountryName());
+			hunterJDBCExecutor.executeUpdate(query, values);
+			
+			country.setCountryName(regionName);
+			country.setCountryPopulation(population);
+			country.setCountryCode(regionCode);
+			receiverRegionDao.updateCountry(country);
+			
+		}else if(HunterConstants.RECEIVER_LEVEL_COUNTY.equals(type)){
+			
+			County county = receiverRegionDao.getCountyById(beanId);
+			Country country = receiverRegionDao.getCountryById(county.getCountryId());
+			
+			String query = "UPDATE RCVR_RGN SET CNTY = ? WHERE CNTY = ? AND CNTRY = ?";
+			values.add(regionName);
+			values.add(county.getCountyName());
+			values.add(country.getCountryName());
+			logger.debug("Executing query : " + query);
+			hunterJDBCExecutor.executeUpdate(query, values); 
+			
+			county.setCountyName(regionName);
+			county.setCountyPopulation(population);
+			county.setCountyCode(regionCode);
+			receiverRegionDao.updateCounty(county);
+			
+		}else if(HunterConstants.RECEIVER_LEVEL_CONSITUENCY.equals(type)){
+			
+			Constituency constituency = receiverRegionDao.getConstituencyById(beanId);
+			County county = receiverRegionDao.getCountyById(constituency.getCountyId());
+			Country country = receiverRegionDao.getCountryById(county.getCountryId());
+			
+			String query = "UPDATE RCVR_RGN SET CNSTTNCY = ? WHERE CNSTTNCY = ? AND CNTY = ? AND CNTRY = ?";
+			values.add(regionName);
+			values.add(constituency.getCnsttncyName());
+			values.add(county.getCountyName());
+			values.add(country.getCountryName());
+			logger.debug("Executing query : " + query);
+			hunterJDBCExecutor.executeUpdate(query, values); 
+			
+			constituency.setCnsttncyName(regionName);
+			constituency.setCnsttncyPopulation(population); 
+			constituency.setConstituencyCode(regionCode);
+			receiverRegionDao.updateConstituency(constituency);
+			
+		}else if(HunterConstants.RECEIVER_LEVEL_WARD.equals(type)){
 
-	
-	
-	
-	
-	
-	
+			ConstituencyWard ward = receiverRegionDao.getConstituencyWardById(beanId);
+			Constituency constituency = receiverRegionDao.getConstituencyById(ward.getConstituencyId());
+			County county = receiverRegionDao.getCountyById(constituency.getCountyId());
+			Country country = receiverRegionDao.getCountryById(county.getCountryId());
+
+			String query = "UPDATE RCVR_RGN SET WRD = ? WHERE WRD = ? AND CNSTTNCY = ? AND CNTY = ? AND CNTRY = ?";
+			values.add(regionName);
+			values.add(ward.getWardName());
+			values.add(constituency.getCnsttncyName());
+			values.add(county.getCountyName());
+			values.add(country.getCountryName());
+			
+			logger.debug("Executing query : " + query);
+			hunterJDBCExecutor.executeUpdate(query, values);
+			
+			ward.setWardName(regionName);
+			ward.setWardPopulation(population); 
+			ward.setConstituencyWardCode(regionCode);
+			receiverRegionDao.updateConstituencyWard(ward); 
+			
+		}
+		logger.debug("Completed updating " + type + ". Refreshing cache..."); 
+		HunterCacheUtil.getInstance().loadCountries();
+	}
 	
 }

@@ -22,15 +22,13 @@ public class HunterProcessorConnection {
 	
 
 	private String method;
-	private Map<String, Object> connParams;
 	private TaskClientConfigBean configBean;
 	private String requestBody;
 	
-	public HunterProcessorConnection(String method,TaskClientConfigBean configBean, Map<String, Object> connParams, String requestBody) {
+	public HunterProcessorConnection(String method,TaskClientConfigBean configBean,String requestBody) {
 		super();
 		this.method = method;
 		this.configBean = configBean;
-		this.connParams = connParams;
 		this.requestBody = requestBody;
 	}
 	
@@ -62,7 +60,7 @@ public class HunterProcessorConnection {
             results.put(TaskProcessConstants.RESPONSE_CODE, response); 
             int responseCode = conn.getResponseCode();
             logger.debug("Response code : " + Integer.toString(responseCode));  
-            results.put(TaskProcessConstants.RESPONSE_CODE, responseCode+"");
+            results.put(TaskProcessConstants.RESPONSE_CODE, Integer.toString(responseCode)); 
             results.put(TaskProcessConstants.CONN_STATUS, HunterConstants.STATUS_SUCCESS);
         	results.put(TaskProcessConstants.RESPONSE_ERROR, null);
         	results.put(TaskProcessConstants.RESPONSE_DURATION, (System.currentTimeMillis() - time)+"");
@@ -87,8 +85,9 @@ public class HunterProcessorConnection {
 	}
 	
 	private void setConnRequestProps(URLConnection conn){
+		Map<String,String> connParams = configBean.getConnConfigs();
 		if(connParams != null && !connParams.isEmpty()){
-			for(Map.Entry<String, Object> entry : connParams.entrySet()){
+			for(Map.Entry<String, String> entry : connParams.entrySet()){
 				String key = entry.getKey();
 				String value = entry.getValue()+"";
 				conn.setRequestProperty(key, value);

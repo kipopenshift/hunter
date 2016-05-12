@@ -80,6 +80,8 @@
 				navigate("/hunteruser/action/user/profile/home");
 			}else if(text != null && text === "Hunter Admin"){
 				navigate("/admin/action/home");
+			}else if(text != null && text === "Hunter Field Profile"){
+				navigate("/admin/action/fieldProfile");
 			}else{
 				//kendoKipHelperInstance.showSimplePopup("Kendo", text);
 			}
@@ -194,6 +196,7 @@
 	       <ul class="rightAndLeftBottom" >
 	        	<li><a href="#">My Account</a></li>
 	        	<li><a href="#">Hunter Admin</a></li>
+	        	<li><a href="#">Hunter Field Profile</a></li>
 	            <li><a href="<c:url value="${pageContext.request.contextPath}/j_spring_security_logout" />" >Logout</a></li>
 	        </ul>
 	    </li>

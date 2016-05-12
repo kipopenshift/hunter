@@ -15,8 +15,6 @@ import com.techmaster.hunter.util.HunterUtility;
 public class RegionCache {
 	
 	private static RegionCache instance;
-	private static volatile List<Country> countries = HunterCacheUtil.getInstance().getAllCountries();
-	private static volatile List<HunterMessageReceiver> hunterMessageReceivers = HunterCacheUtil.getInstance().getAllReceivers();
 	
 	static{
 		if(instance == null){
@@ -33,7 +31,7 @@ public class RegionCache {
 	public Set<County> getCountiesForCountryName(String countryName){
 		Set<County> counties_ = new HashSet<>();
 		Set<County> counties = new HashSet<>();;
-		for(Country country : countries){
+		for(Country country : HunterCacheUtil.getInstance().getAllCountries()){
 			if(country.getCountryName().equals(countryName)){
 				counties = country.getCounties();
 				break;
@@ -45,7 +43,7 @@ public class RegionCache {
 	
 	public List<HunterMessageReceiver> getReceiversForWard(String countryName, String stateName,String countyName, String consName, String consWardName){
 		List<HunterMessageReceiver> wardReceivers = new ArrayList<>();
-		for(HunterMessageReceiver hunterMessageReceiver : hunterMessageReceivers){
+		for(HunterMessageReceiver hunterMessageReceiver : HunterCacheUtil.getInstance().getAllReceivers()){
 			boolean isCountryNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getCountryName(), countryName);
 			boolean isCountyNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getCountyName(), countyName);
 			boolean isConsNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getConsName(), consName);
@@ -59,7 +57,7 @@ public class RegionCache {
 	
 	public List<HunterMessageReceiver> getReceiversForConstituency(String countryName, String stateName,String countyName, String consName){
 		List<HunterMessageReceiver> wardReceivers = new ArrayList<>();
-		for(HunterMessageReceiver hunterMessageReceiver : hunterMessageReceivers){
+		for(HunterMessageReceiver hunterMessageReceiver : HunterCacheUtil.getInstance().getAllReceivers()){
 			boolean isCountryNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getCountryName(), countryName);
 			boolean isCountyNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getCountyName(), countyName);
 			boolean isConsNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getConsName(), consName);
@@ -72,7 +70,7 @@ public class RegionCache {
 	
 	public List<HunterMessageReceiver> getReceiversForCounty(String countryName, String stateName,String countyName){
 		List<HunterMessageReceiver> wardReceivers = new ArrayList<>();
-		for(HunterMessageReceiver hunterMessageReceiver : hunterMessageReceivers){
+		for(HunterMessageReceiver hunterMessageReceiver : HunterCacheUtil.getInstance().getAllReceivers()){
 			boolean isCountryNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getCountryName(), countryName);
 			boolean isCountyNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getCountyName(), countyName);
 			if(isCountryNotNullAndEqual && isCountyNotNullAndEqual){
@@ -84,7 +82,7 @@ public class RegionCache {
 	
 	public List<HunterMessageReceiver> getReceiversForCountry(String countryNam){
 		List<HunterMessageReceiver> wardReceivers = new ArrayList<>();
-		for(HunterMessageReceiver hunterMessageReceiver : hunterMessageReceivers){
+		for(HunterMessageReceiver hunterMessageReceiver : HunterCacheUtil.getInstance().getAllReceivers()){
 			boolean isCountryNotNullAndEqual = HunterUtility.notNullNotEmptyAndEquals(hunterMessageReceiver.getCountryName(), countryNam);
 			if(isCountryNotNullAndEqual){
 				wardReceivers.add(hunterMessageReceiver);
@@ -119,7 +117,7 @@ public class RegionCache {
 	public Set<County> getCountiesForCountryId(Long countryId){
 		Set<County> counties_ = new HashSet<>();
 		Set<County> counties = new HashSet<>();;
-		for(Country country : countries){
+		for(Country country : HunterCacheUtil.getInstance().getAllCountries()){
 			if(country.getCountryId().equals(countryId)){
 				counties = country.getCounties();
 				break;
@@ -131,7 +129,7 @@ public class RegionCache {
 
 	public List<Country> getCountries(){
 		List<Country> copy = new ArrayList<>();
-		copy.addAll(countries);
+		copy.addAll(HunterCacheUtil.getInstance().getAllCountries());
 		return copy;
 	}
 	

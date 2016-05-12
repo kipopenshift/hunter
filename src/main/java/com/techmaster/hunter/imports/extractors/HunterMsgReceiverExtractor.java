@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterImportBeanDao;
@@ -37,17 +38,9 @@ public class HunterMsgReceiverExtractor extends AbstractExcelExtractor<HunterMes
 	public static final String[] validHeaders = new String[]{"COUNTRY","STATE","COUNTY","CONSTITUENCY","WARD","CONTACT","RECEIVER TYPE","LEVEL","LEVEL NAME"};
 	private static Logger logger = Logger.getLogger(HunterMsgReceiverExtractor.class);
 
-	// Important!! These four beans are statically injected by spring - please look at file > dispatcher-servlet.xml
 	private static HunterMessageReceiverDao hunterMessageReceiverDao = HunterDaoFactory.getInstance().getDaoObject(HunterMessageReceiverDao.class);
 	private static HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
 	private static HunterImportBeanDao hunterImportBeanDao = HunterDaoFactory.getInstance().getDaoObject(HunterImportBeanDao.class);
-	/*
-	public static void staticInjectDaos(HunterMessageReceiverDao hunterMessageReceiverDao, HunterJDBCExecutor hunterJDBCExecutor, HunterImportBeanDao hunterImportBeanDao) {
-		HunterMsgReceiverExtractor.hunterMessageReceiverDao = hunterMessageReceiverDao;
-		HunterMsgReceiverExtractor.hunterJDBCExecutor = hunterJDBCExecutor;
-		HunterMsgReceiverExtractor.hunterImportBeanDao = hunterImportBeanDao;
-		logger.debug("Successfully statically injected DAOs!!!"); 
-	}*/
 	
 	private static Map<Integer, List<Object>> rowLists;
 	
@@ -603,6 +596,7 @@ public class HunterMsgReceiverExtractor extends AbstractExcelExtractor<HunterMes
 			logger.debug("Saving extracted hunter message receiver beans..."); 
 			hunterMessageReceiverDao.insertHunterMessageReceivers(hntrMsgRcvrs);
 			addFromHunterMsgReceivers(hntrMsgRcvrs);
+			new LoadCacheWorker().start();
 			bundle.put(DATA_BEANS, hntrMsgRcvrs);
 			bundle.put(RETURNED_WORKBOOK, workbook);
 			bundle.put(STATUS_STR, true);
@@ -621,6 +615,15 @@ public class HunterMsgReceiverExtractor extends AbstractExcelExtractor<HunterMes
 		hunterImportBeanDao.insertHunterImportBeanUsngJDBC(hunterImportBean); 
 		
 		return bundle;
+	}
+	
+	class LoadCacheWorker extends Thread{
+		@Override
+		public void run() {
+			logger.debug("Loading receivers..."); 
+			HunterCacheUtil.getInstance().loadReceivers();
+			logger.debug("Done loading receivers!!");
+		}
 	}
 
 }

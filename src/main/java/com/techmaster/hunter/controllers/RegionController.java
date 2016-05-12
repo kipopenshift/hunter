@@ -81,7 +81,7 @@ public class RegionController extends HunterBaseController {
 	
 	@RequestMapping(value="/action/counties/read/{selCountry}", method=RequestMethod.POST) 
 	@ResponseBody public List<CountyJson> getCounties(@PathVariable("selCountry") String selCounty){
-		if(selCounty == null || selCounty.trim().equals("") || selCounty.equals("UNSELECTED")){ 
+		if(selCounty == null || selCounty.trim().equals("") || selCounty.trim().equals("undefined") || selCounty.equals("UNSELECTED")){ 
 			return new ArrayList<>(); 
 		}
 		List<CountyJson> countiesJSON = receiverRegionDao.getCountyJsonsForSelCountry(selCounty);
@@ -103,7 +103,7 @@ public class RegionController extends HunterBaseController {
 
 	@RequestMapping(value="/action/constituencies/read/{selCountyId}", method=RequestMethod.POST) 
 	@ResponseBody public List<ConstituencyJson> getConstituenciesForCounty(@PathVariable("selCountyId") String selCountyId){
-		if(selCountyId == null || selCountyId.trim().equals("") || selCountyId.equals("UNSELECTED")){ 
+		if(selCountyId == null || selCountyId.trim().equals("") || selCountyId.trim().equals("undefined") || selCountyId.equals("UNSELECTED")){ 
 			return new ArrayList<>(); 
 		}
 		List<ConstituencyJson> constituencyJsons = receiverRegionDao.getConstituencyJsonsForSelCounty(selCountyId);
@@ -126,7 +126,7 @@ public class RegionController extends HunterBaseController {
 	@RequestMapping(value="/action/constituencyWards/read/{selConstituencyId}", method=RequestMethod.POST) 
 	@ResponseBody public List<ConstituencyWardJson> getConstituencyWardForConstituency(@PathVariable("selConstituencyId") String selConstituencyId){
 		logger.debug("Selected constituency >> " + selConstituencyId ); 
-		if(selConstituencyId == null || selConstituencyId.trim().equals("") || selConstituencyId.equals("UNSELECTED")){ 
+		if(selConstituencyId == null || selConstituencyId.trim().equals("") || selConstituencyId.trim().equals("undefined") || selConstituencyId.equals("UNSELECTED")){ 
 			return new ArrayList<>();
 		}
 		List<ConstituencyWardJson> constituencyWardsJson = receiverRegionDao.getAllconsConstituencyWardJsonsForSelCons(selConstituencyId);
@@ -263,6 +263,15 @@ public class RegionController extends HunterBaseController {
 	
 	@Produces("application/json")
 	@Consumes("application/json")
+	@RequestMapping(value="/action/hierarchies/edit", method=RequestMethod.POST)
+	@ResponseBody
+	public String updateSelRegion(@RequestBody Map<String,Object> editParams){
+		regionService.editReceiverRegion(editParams); 
+		return "regionHierarchy";
+	}
+	
+	@Produces("application/json")
+	@Consumes("application/json")
 	@RequestMapping(value="/action/regions/hierarchies/action/destroy", method=RequestMethod.POST) 
 	public String destroyHierarchicalRegions(@RequestBody RegionHierarchy regionHierarchy){
 		return "regionHierarchy";
@@ -330,6 +339,7 @@ public class RegionController extends HunterBaseController {
 				return jsonObject.toString();
 			}
 			
+			
 			Long taskId = HunterUtility.getLongFromObject(taskIdStr);
 			taskHistory.setTaskId(taskId);
 			Long regionId = HunterUtility.getLongFromObject(regionIdStr);
@@ -347,7 +357,7 @@ public class RegionController extends HunterBaseController {
 				return jsonObject.toString();
 			}
 			
-			taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_SUCCESS, "Failed to remove region ( "+ regionId +" ) from task");
+			taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_SUCCESS, "Successfully removed region ( "+ regionId +" ) from task");
 			taskHistoryDao.insertTaskHistory(taskHistory);
 			
 			Object count = regionService.getTrueHntrMsgRcvrCntFrTaskRgns(taskId)[0];

@@ -3,7 +3,7 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 	
-	<class name="com.techmaster.hunter.obj.beans.HunterUser"  table="HNTR_USR" lazy="true">
+	<class name="com.techmaster.hunter.obj.beans.HunterUser"  table="HNTR_USR" lazy="true" abstract="false" > 
 		
 		<id name="userId" type="java.lang.Long" column="USR_ID">
 			<generator class="assigned" />
@@ -45,6 +45,23 @@
         </set>
         
         <one-to-one name="userLoginBean" class="com.techmaster.hunter.obj.beans.UserLoginBean" lazy="false" cascade="all"   />
+        
+        
+       <union-subclass name="com.techmaster.hunter.obj.beans.HunterRawReceiverUser" table="HNTR_RW_RCVR_USR">
+			<property name="compensation" column="CMNPSTN"  type="java.lang.Float"  />
+			<property name="allContctNo" column="ALL_CNTCT_NO"  type="java.lang.Integer"  />
+			<property name="vrfdContctNo" column="VRFD_CNTCT_NO"  type="java.lang.Integer"  />
+			<property name="country" column="CNTRY"  type="java.lang.String"  />
+			<property name="county" column="CNTY"  type="java.lang.String"  />
+			<property name="constituency" column="CNSTTNCY"  type="java.lang.String"  />
+			<property name="consWard" column="WRD"  type="java.lang.String"  />
+			<property name="village" column="VLLGE"  type="java.lang.String"  />
+		</union-subclass>
+        
+        
+        
+        
+        
 		
 	</class>
 	

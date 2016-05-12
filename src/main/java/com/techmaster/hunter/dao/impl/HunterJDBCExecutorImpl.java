@@ -177,9 +177,10 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 	}
 	
 	@Override
-	public void executeUpdate(String query,List<Object> values) {
+	public int executeUpdate(String query,List<Object> values) {
 		logger.debug("Executing update query : " + query); 
 		Connection conn = null;
+		int rows = 0;
 		try {
 			conn = this.jdbcTemplate.getDataSource().getConnection();
 			PreparedStatement ps = conn.prepareStatement(query);
@@ -189,12 +190,14 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 					ps.setObject(i+1, obj);
 				}
 			}
-			ps.executeUpdate(); 
+			rows = ps.executeUpdate(); 
 			ps.close();
 			conn.close();
+			return rows;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		return rows;
 	}
 
 	@Override
@@ -206,6 +209,19 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 			}
 		}
 		return values;
+	}
+
+	@Override
+	public Object executeQueryForOnReturn(String query, List<Object> values) {
+		Map<Integer, List<Object>>  rowListMap = executeQueryRowList(query, values);
+		if(!rowListMap.isEmpty() && rowListMap.get(1) != null && !rowListMap.get(1).isEmpty()){
+			if(rowListMap.get(1).size() > 1){
+				logger.warn("Size is greater than one for this query!!!! Returning the first element..."); 
+			}
+			Object obj = rowListMap.get(1).get(0);
+			return obj;
+		}
+		return null;
 	}
 
 	

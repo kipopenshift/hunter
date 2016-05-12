@@ -50,16 +50,19 @@ public class HunterProcessWorker implements TaskProcessWorker{
 	@Override
 	public void run() {
 		
+		// first set requestBodies.
+		setRequestBody(messages, configBean); 
+		
 		Map<String, String> values = new HashMap<>();
 		values.put(TaskProcessConstants.WORKER_NAME, toString());
 		values.put(TaskProcessConstants.MESSAGE_IDS, getMessageIds());
 		values.put(TaskProcessConstants.ERROR_TYPE, "Application Error");
 		values.put(TaskProcessConstants.ERROR_TEXT, "There was an exception while making a connection to the client server");
+		Long duration = System.currentTimeMillis();
 		
 		try {
 			
 			HunterProcessorConnection conn = getConnection();
-			Long duration = System.currentTimeMillis();
 			values.put(TaskProcessConstants.START_POINT, Long.toString(duration)); 
 			Map<String, Object> response = conn.getResponse();
 			Long endPoint = System.currentTimeMillis();
@@ -79,21 +82,30 @@ public class HunterProcessWorker implements TaskProcessWorker{
 			values.put(TaskProcessConstants.ERROR_TYPE_RESPONSE, HunterUtility.getNullOrStrimgOfObj(response.get(TaskProcessConstants.ERROR_TYPE_RESPONSE))); 
 			values.put(TaskProcessConstants.WORKER_STATUS, workerStatus);
 			
-			TaskProcessJobHandler.getInstance().addTaskProcessWorker(toString(), processJobKey, values); 
-			
 		} catch (Exception e) {
+			values.put(TaskProcessConstants.ERROR_TYPE, TaskProcessConstants.ERROR_TYPE_EXCEPTION);
+			values.put(TaskProcessConstants.ERROR_TEXT, e.getMessage());
+			values.put(TaskProcessConstants.WORKER_STATUS, HunterConstants.STATUS_FAILED);
+			values.put(TaskProcessConstants.START_POINT, Long.toString(duration));
+			values.put(TaskProcessConstants.END_POINT, Long.toString(System.currentTimeMillis()));
+			values.put(TaskProcessConstants.DURATION, Long.toString(duration - System.currentTimeMillis()));  
+			values.put(TaskProcessConstants.WORKER_MSG_COUNT, Integer.toString(messages.size()));  
+			values.put(TaskProcessConstants.CONN_STATUS, HunterConstants.STATUS_FAILED);
 			e.printStackTrace();
 		}finally{
-			
+			//This needs to be done irrespective of whether there is or no exception.
+			TaskProcessJobHandler.getInstance().addTaskProcessWorker(toString(), processJobKey, values); 
+			logWorker("Updating messages for statuses..."); 
+			GateWayClientHelper.getInstance().doSaveOrUpdateInHibernate(messages);
 		}
-		
+		logger.debug("Successfully completed process job : " + toString()); 
 	}
 
 	@Override
 	public HunterProcessorConnection getConnection() {
 		logWorker("Getting hunter connection object...");
 		String requestBody = getRequestBody();
-		HunterProcessorConnection conn = new HunterProcessorConnection(configBean.getActiveMethod(),configBean, null,requestBody);
+		HunterProcessorConnection conn = new HunterProcessorConnection(configBean.getActiveMethod(),configBean,requestBody);
 		return conn;
 	}
 
@@ -107,8 +119,6 @@ public class HunterProcessWorker implements TaskProcessWorker{
 		}
 		String status = GateWayResponseHanlder.getInstance().setStatusFromResponseText(responseText, configBean.getClientName(), messages);
 		this.workerStatus = status;
-		logWorker("Updating messages for statuses..."); 
-		GateWayClientHelper.getInstance().doSaveOrUpdateInHibernate(messages);
 	}
 	
 	@Override
@@ -120,6 +130,10 @@ public class HunterProcessWorker implements TaskProcessWorker{
 			contentStr = GateWayClientHelper.getInstance().getCMPostRequestBody(configBean, messages);
 		}else if(HunterConstants.CLIENT_CM.equals(clientName) && HunterConstants.METHOD_GET.equals(configBean.getActiveMethod())){
 			contentStr = GateWayClientHelper.getInstance().getCMGetRequestBody(configBean, messages);
+		}else if(HunterConstants.CLIENT_OZEKI.equals(clientName) && HunterConstants.METHOD_GET.equals(configBean.getActiveMethod())){
+			contentStr = GateWayClientHelper.getInstance().getOzekiGetRequestBody(configBean, messages);
+		}else if(HunterConstants.CLIENT_OZEKI.equals(clientName) && HunterConstants.METHOD_GET.equals(configBean.getActiveMethod())){
+			contentStr = GateWayClientHelper.getInstance().getOzekiPostRequestBody(configBean, messages);
 		}
 		logWorker(contentStr); 
 		return contentStr;
@@ -140,8 +154,12 @@ public class HunterProcessWorker implements TaskProcessWorker{
 		Logger.getLogger(HunterProcessWorker.class).debug(this.toString() + " : " + message);
 	}
 	
-	
-	
+	@Override
+	public void setRequestBody(Set<GateWayMessage> messages, TaskClientConfigBean configBean) {
+			logger.debug(toString() + " : setting request bodies..."); 
+			ClientReqBodyHelper.getInstance().setRequestBody(messages, configBean); 	
+	}
+
 	@Override
 	public String toString() {
 		return Thread.currentThread().getName() + "-" + this.workerId; 

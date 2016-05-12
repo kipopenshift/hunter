@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -139,15 +138,6 @@ public class ImportHelper {
 	         "Error to open workbook!!");
 	      }
 	     return workbook;
-	}
-	
-	public Workbook getCopyOfWorkbook(Workbook workbook, int[] sheetNames){
-		HSSFWorkbook newWorkbook = new HSSFWorkbook();
-		for(int indx : sheetNames){
-			Sheet sheet = workbook.cloneSheet(indx);
-			Sheet newSheet = newWorkbook.createSheet(sheet.getSheetName());
-		}
-		return newWorkbook;
 	}
 	
 	public static void saveWorkbookToTempLocation(Workbook workbook, String fileName){

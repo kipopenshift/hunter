@@ -13,6 +13,9 @@
          <property name="docBlob" >
             <column name="DOC_BLB" />
         </property>
+        <property name="status" >
+            <column name="STS" />
+        </property>
          <component name="auditInfo" class="com.techmaster.hunter.obj.beans.AuditInfo">
          	<property name="cretDate" column="CRET_DATE"  type="java.util.Date"/>
 			<property name="lastUpdate" column="LST_UPDT_DATE"  type="java.util.Date"/>

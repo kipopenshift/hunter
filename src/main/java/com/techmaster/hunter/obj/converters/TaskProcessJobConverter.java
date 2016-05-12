@@ -50,7 +50,6 @@ public class TaskProcessJobConverter {
 				processJobJson.setProcessJobId(processJob.getJobId());  
 				processJobJson.setStartDate(xmlService.getTextValue("//context/startDate"));
 				String msgCnt = xmlService.getTextValue("//context/totalMsgs");
-				logger.debug(msgCnt); 
 				processJobJson.setTotalMsgs(Integer.parseInt(msgCnt)); 
 				List<TaskProcessWorkerJson> workers = getProcessJobWorkerJson(processJob);
 				logger.debug("Number of workers found for this process job : " + workers.size()); 

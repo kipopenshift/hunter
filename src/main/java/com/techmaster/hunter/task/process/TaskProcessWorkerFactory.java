@@ -44,7 +44,12 @@ public class TaskProcessWorkerFactory {
 			}
 			return processWorkers;
 		}else if(GET_MUL_REQ_PR_MSG.equals(workerType)){ 
-			
+			for(Set<GateWayMessage> messageSet : messageSets){
+				Long workerId = getWorkerId();
+				TaskProcessWorker processWorker = new HunterProcessWorker(configBean, messageSet, workerId, processJobKey);
+				processWorkers.add(processWorker);
+			}
+			return processWorkers;
 		}else if(POST_MUL_REQ_PR_MSG.equals(workerType)){
 			
 		}else if(POST_ONE_REQ_PR_MSG.equals(workerType)){ 

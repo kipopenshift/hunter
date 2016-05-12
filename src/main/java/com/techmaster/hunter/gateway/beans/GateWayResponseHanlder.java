@@ -41,10 +41,32 @@ public class GateWayResponseHanlder {
 	}
 	
 	public String setStatusFromResponseText(String responseText, String clientName, Set<GateWayMessage> messages){
+		if(responseText == null){
+			logger.debug("Response text is null and will not process response for client : " + clientName);
+			return null;
+		}
 		String status = null;
 		if(clientName != null && HunterConstants.CLIENT_CM.equals(clientName)){
 			status = HunterUtility.notNullNotEmpty(responseText) ? HunterConstants.STATUS_FAILED : HunterConstants.STATUS_SUCCESS;
 			setAllStatuses(status, messages);
+		}else if(clientName != null && HunterConstants.CLIENT_OZEKI.equals(clientName)){
+			logger.debug("Wiring up status configurations with response data for ozeki client...");
+			XMLService xmlService = HunterUtility.getXMLServiceForStringContent(responseText);
+			if(messages != null && !messages.isEmpty()){
+				for(GateWayMessage gateWayMessage : messages){
+					String key = gateWayMessage.getClientTagKey();
+					String mainPath = "response/data/acceptreport"+ key;
+					String stsCodePath = mainPath +"/statuscode" + key;
+					String stsMsgPath = mainPath +"/statusmessage" + key;
+					//String msgIdPath = mainPath +"/messageid" + key;
+					String stsCode = xmlService.getTextValue(stsCodePath);
+					String stsMsg = xmlService.getTextValue(stsMsgPath); 
+					//String msgId = xmlService.getTextValue(msgIdPath);
+					gateWayMessage.setClntRspCode(stsCode);
+					gateWayMessage.setClntRspText(stsMsg);
+				}
+			}
+			logger.debug("Done wiring up status configurations with response data!!");
 		}
 		return status;
 	}

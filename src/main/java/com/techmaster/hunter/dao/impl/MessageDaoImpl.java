@@ -107,5 +107,18 @@ public class MessageDaoImpl implements MessageDao{
 		logger.debug(HunterUtility.stringifyMap(map)); 
 		return map;
 	}
+	
+	@Override
+	public Map<String, Object> getPrcssTxtMssgeDtls(Long msgId) {
+		logger.debug("Fetching text msg details data..."); 
+		String query = hunterJDBCExecutor.getQueryForSqlId("getPrcssTxtMssgeDtls");
+		List<Map<String, Object>> mapList = hunterJDBCExecutor.executeQueryRowMap(query, hunterJDBCExecutor.getValuesList(new Object[]{msgId}));
+		if(mapList != null && mapList.size() > 1){
+			logger.warn("Message count is greater than one!!! Returning the first row...");
+		}
+		Map<String,Object> map = mapList != null && !mapList.isEmpty() ? mapList.get(0) : new HashMap<String, Object>();
+		logger.debug("Size of the data ( "+ map.size() +" ) : " + HunterUtility.stringifyMap(map));  
+		return map;
+	}
 
 }

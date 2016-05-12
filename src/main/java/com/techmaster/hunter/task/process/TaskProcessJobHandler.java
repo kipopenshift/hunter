@@ -3,9 +3,6 @@ package com.techmaster.hunter.task.process;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -164,7 +161,6 @@ public class TaskProcessJobHandler {
 			}
 			logger.debug("Finished setting context to Task Process Job"); 
 		}
-		logger.debug(xmlService); 
 		processJob.setXmlService(xmlService); 
 	}
 	

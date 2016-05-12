@@ -21,6 +21,7 @@
 	<bean id="taskHistoryDao" class="com.techmaster.hunter.dao.impl.TaskHistoryDaoImpl"/>
 	<bean id="userRoleDao" class="com.techmaster.hunter.dao.impl.UserRoleDaoImpl"/>
 	<bean id="hunterUserDao" class="com.techmaster.hunter.dao.impl.HunterUserDaoImpl"/>
+	<bean id="hunterRawReceiverDao" class="com.techmaster.hunter.dao.impl.HunterRawReceiverDaoImpl"/>
 	
 	<bean name="gateWayClientHelper" class="com.techmaster.hunter.gateway.beans.GateWayClientHelper" factory-method="getInstance" >
 		<property name="regionService" ref="regionService" />
@@ -53,6 +54,7 @@
 				<entry key="regionService" value-ref="regionService" />
 				<entry key="hunterJacksonMapper" value-ref="hunterJacksonMapper" />
 				<entry key="jdbcTemplate" value-ref="jdbcTemplate" />
+				<entry key="hunterRawReceiverDao" value-ref="hunterRawReceiverDao" />
 			</map>
 		</property>
 	</bean>

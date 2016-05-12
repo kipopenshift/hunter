@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 
 import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.constants.TaskProcessConstants;
 import com.techmaster.hunter.obj.beans.EmailMessage;
 import com.techmaster.hunter.obj.beans.HunterEmailTemplateBean;
 import com.techmaster.hunter.obj.beans.Message;
@@ -251,6 +252,9 @@ public class HunterEmailClientSenderBean {
 		if(!errors.isEmpty()){
 			results.put(GatewayClient.TASK_PROCESS_STATUS, HunterConstants.STATUS_FAILED);
 			results.put(GatewayClient.TASK_PROCESS_ERRORS, errors);
+			results.put(TaskProcessConstants.ERROR_TYPE, TaskProcessConstants.ERROR_TYPE_VALIDATION);
+			results.put(TaskProcessConstants.ERROR_TEXT, "Task validation errors encountered.");
+			results.put(TaskProcessConstants.WORKER_STATUS, HunterConstants.STATUS_FAILED);
 			return results;
 		};
 		
@@ -289,17 +293,26 @@ public class HunterEmailClientSenderBean {
 			 logger.debug("Getting transport session and sending email..."); 
 			 Transport transport = getSession().getTransport("smtp");
 			 transport.send(msg);
-			 logger.debug("Successfully finished sending email for properties set : " + name); 
+			 logger.debug("Successfully finished sending email for properties set : " + name);
+			 results.put(TaskProcessConstants.CONN_STATUS, HunterConstants.STATUS_SUCCESS);
+			 results.put(GatewayClient.TASK_PROCESS_ERRORS, errors);
+			 
+			 results.put(TaskProcessConstants.WORKER_STATUS, HunterConstants.STATUS_SUCCESS);
+			 results.put(GatewayClient.TASK_PROCESS_STATUS, HunterConstants.STATUS_SUCCESS);
+			 return results;
 			 
 		} catch (Exception e) {
 			e.printStackTrace();
 			errors.add(e.getMessage());
+			results.put(TaskProcessConstants.CONN_STATUS, HunterConstants.STATUS_FAILED);
 			results.put(GatewayClient.TASK_PROCESS_STATUS, HunterConstants.STATUS_FAILED);
 			results.put(GatewayClient.TASK_PROCESS_ERRORS, errors);
+			results.put(TaskProcessConstants.ERROR_TYPE, TaskProcessConstants.ERROR_TYPE_EXCEPTION);
+			results.put(TaskProcessConstants.ERROR_TEXT, e.getMessage());
+			results.put(TaskProcessConstants.WORKER_STATUS, HunterConstants.STATUS_FAILED);
 			return results;
 		}
 		 
-		return results;
 	}
 	
 

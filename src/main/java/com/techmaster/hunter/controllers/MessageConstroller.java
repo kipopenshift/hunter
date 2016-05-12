@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -36,6 +37,7 @@ import com.techmaster.hunter.obj.beans.Message;
 import com.techmaster.hunter.obj.beans.ServiceProvider;
 import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TaskHistory;
+import com.techmaster.hunter.obj.beans.TextMessage;
 import com.techmaster.hunter.task.TaskManager;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -263,6 +265,71 @@ public class MessageConstroller extends HunterBaseController{
 	public @ResponseBody Map<String,Object> getEmailMsgRefreshVals(HttpServletRequest request, HttpServletResponse response, @PathVariable("msgId") Long msgId){
 		Map<String,Object> data = messageDao.getEmailMsgRefreshData(msgId);
 		return data;
+	}
+	
+	@RequestMapping(value="/action/tskMsg/getPrcssTxtMssgeDtls/{msgId}", method = RequestMethod.POST )
+	@Consumes("application/json") 
+	@Produces("application/json") 
+	public @ResponseBody Map<String,Object> getPrcssTxtMssgeDtls(HttpServletRequest request, HttpServletResponse response, @PathVariable("msgId") Long msgId){
+		Map<String,Object> data = messageDao.getPrcssTxtMssgeDtls(msgId);
+		HunterUtility.threadSleepFor(500);
+		return data;
+	}
+	
+	@RequestMapping(value="/action/tskMsg/updateTxtMsg", method = RequestMethod.POST )
+	@Consumes("application/json") 
+	@Produces("application/json") 
+	@ResponseBody
+	public String updateTextMessage(@RequestBody Map<String,String> params){
+		
+		logger.debug(HunterUtility.stringifyMap(params)); 
+		HunterUtility.threadSleepFor(400); 
+		JSONObject results = new JSONObject();
+		
+		try{
+			
+			String userName = getUserName();
+			Long taskId = HunterUtility.getLongFromObject(params.get("taskId"));
+			String owner = HunterUtility.getNullOrStrimgOfObj(params.get("msgOwner"));
+			Long providerId = HunterUtility.getLongFromObject(params.get("providerId"));
+			String msgSts = HunterUtility.getNullOrStrimgOfObj(params.get("msgSts"));
+			String msgText = HunterUtility.getNullOrStrimgOfObj(params.get("msgText"));
+			Task task = taskDao.getTaskById(taskId);
+			
+			if(task != null && HunterConstants.MESSAGE_TYPE_TEXT.equals(task.getTskMsgType())){
+				ServiceProvider provider = serviceProviderDao.getServiceProviderById(providerId);
+				TextMessage txtMsg = (TextMessage)task.getTaskMessage();
+				boolean insert = false;
+				if(txtMsg == null){
+					txtMsg = taskManager.getDefaultTextMessage(task, getAuditInfo());
+					insert = true;
+				}
+				txtMsg.setMsgOwner(owner);
+				txtMsg.setLastUpdatedBy(userName);
+				txtMsg.setLastUpdate(new Date()); 
+				txtMsg.setMsgDeliveryStatus(HunterConstants.STATUS_CONCEPTUAL);
+				txtMsg.setMsgLifeStatus(msgSts);
+				txtMsg.setProvider(provider); 
+				txtMsg.setMsgText(msgText); 
+				txtMsg.setMsgTaskType(HunterConstants.MESSAGE_TYPE_TEXT);
+				if(insert){
+					messageDao.insertMessage(txtMsg); 
+				}else{
+					messageDao.updateMessage(txtMsg);
+				}
+				taskDao.update(task); 
+				HunterUtility.setJSONObjectForSuccess(results, "Successfully updated text message");
+			}else{
+				HunterUtility.setJSONObjectForFailure(results, "No text task found for task id : " + taskId);
+			}
+			
+			return results.toString();
+			
+		}catch(Exception e){
+			e.printStackTrace(); 
+			HunterUtility.setJSONObjectForFailure(results, e.getMessage());
+		}
+		return results.toString();
 	}
 	
 }

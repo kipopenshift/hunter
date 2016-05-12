@@ -250,6 +250,7 @@ var kendoKipHelper = kendo.Class.extend({
 	 },
 	 closeWindowWithOnClose : function(){
 		 this.kendoWindowWithOnClose.close();
+		 $(".k-overlay").remove();
 	 },
 	 initWindowWithOnClose : function(){
 		 var window = $("#kendoWindowWithOnCloseFunc").kendoWindow({
@@ -519,6 +520,24 @@ var kendoKipHelper = kendo.Class.extend({
 			 kendoKipHelperInstance.popupWarning(data.statusText + " (" + data.status + "). Please contact Production Support.", "Error");
 		 });
 	},
+	ajaxPostDataWithCall : function(data, contentType, dataType, method, url, callAfter, call){
+		$.ajax({
+			url: url,
+		    data : data,
+		    method: method,
+		    dataType : dataType, 
+		    contentType : contentType
+		}).done(function(data) {
+			var code = callAfter + "('"+ data +"')";
+			var func = new Function(code);
+			func();
+		 }).fail(function(data) {
+			 var code = call + "()";   
+			 var func = new Function(code);
+			 func();
+			 kendoKipHelperInstance.popupWarning(data.statusText + " (" + data.status + "). Please contact Production Support.", "Error");
+		 });
+	},
 	/* 
 	 * This method is recommended over the 'ajaxPostData' for json array responses
 	 */
@@ -536,6 +555,45 @@ var kendoKipHelper = kendo.Class.extend({
 		 }).fail(function(data) {
 			 kendoKipHelperInstance.popupWarning(data.statusText + " (" + data.status + "). Please contact Production Support.", "Error");
 		 });
+	},
+	
+	/* 
+	 * This method is recommended over the 'ajaxPostData' for json array responses
+	 */
+	ajaxPostDataForJsonResponseWthCllbck : function(data, contentType, dataType, method, url, callAfter,callException){
+		$.ajax({
+			url: url,
+		    data : data,
+		    method: method,
+		    dataType : dataType, 
+		    contentType : contentType
+		}).done(function(data) {
+			var code = callAfter + "('"+ JSON.stringify(data) +"')"; 
+			var func = new Function(code);
+			func();
+		 }).fail(function(data) {
+			 var code = callException + "()";   
+			 var func = new Function(code);
+			 func();
+			 kendoKipHelperInstance.popupWarning(data.statusText + " (" + data.status + "). Please contact Production Support.", "Error");
+		 });
+	},
+	execTimedFunc : function (time, funct, data){
+		var dataStr = "";
+		if(data != null && data.length > 0){
+			for(var i=0; i<data.length;i++){
+				var datum = data[i];
+				dataStr += "'" + datum + "',"; 
+			}
+			if( dataStr.trim().length > 1 && dataStr.slice(-1) === "," ){
+				dataStr = dataStr.substring(0, dataStr.length - 1);
+			}
+		}
+		setTimeout(function(){ 
+			var code = funct + "("+ dataStr +")";
+			var func = new Function(code);
+			func();
+		}, time);
 	}
 });
 

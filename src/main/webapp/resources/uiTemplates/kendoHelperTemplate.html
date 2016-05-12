@@ -112,10 +112,151 @@
 
 
 
+ <script id=processedTaskTxtMessageViewTemplateContainer type="text/x-kendo-template" style="width:900px;margin:0 auto;padding:4px;background-color:rgb(215,234,240);height:340px;border-radius:4px;border:1px solid rgb(175,202,210);" >
+<div id="processedTaskTxtMessageViewTemplate" class="k-block k-info-colored" style="width:900px;margin:0 auto;padding:4px;background-color:rgb(215,234,240);height:375px;border-radius:4px;border:1px solid rgb(175,202,210);">
+	<div id="processedTaskTxtMsgLoadDiv" style="margin-left:35%;width:40%;max-height:200px;max-width:700px;margin-top:12%;"  >
+		<h2>Loading Message Data...</h2>
+		<span id="processedTaskTxtMsgLoadIcon"></span>
+	</div>
+	<div id="processedTaskTxtMsgDet1"  style="display:none;float:left;width:55%;min-height:298px;color:#0A2C2E;font-size:13px;padding-left:10px;background-color:#E6F7FF;margin-left:2.5%;margin-top:16px;border-radius:4px;border:1px solid rgb(175,202,210);" >
+		<table id="taskTxtMsgViewTable"  style="table-layout:fixed;width:90%;margin-left:5%;margin-top:4%;" >
+			<tr>
+				<td>Send Date</td>
+				<td id="MESSAGE_SEND_DATE" >12/31/1969</td>
+			</tr>
+			<tr>
+				<td>Task Type</td>
+				<td id="MESSAGE_TASK_TYPE" >12/31/1969</td>
+			</tr>
+			<tr>
+				<td>Service Provider</td>
+				<td id="PROVIDER_NAME" >Safaricom</td>
+			</tr>
+			<tr>
+				<td>Message Owner</td>
+				<td id="MESSAGE_OWNER" >Hunter Admin</td>
+			</tr>
+			<tr>
+				<td>Message Status</td>
+				<td id="MESSAGE_LIFE_STATUS" >Processed</td>
+			</tr>
+			<tr>
+				<td>Created On</td>
+				<td id="CREATE_DATE" >12/31/1969</td>
+			</tr>
+			<tr>
+				<td>Created By</td>
+				<td id="CREATED_BY" >Hunter Admin</td>
+			</tr>
+			<tr>
+				<td>Modified On</td>
+				<td id="LAST_UPDATE_DATE" >12/31/1969</td>
+			</tr>
+			<tr>
+				<td>Modified By</td>
+				<td id="LAST_UPDATED_BY" >Hunter Admin</td>
+			</tr>
+		</table>
+	</div>
+	<div  id="processedTaskTxtMsgDet2" style="display:none;float:left;width:35%;min-height:298px;color:#0A2C2E;font-size:13px;padding-left:10px;background-color:#E6F7FF;margin-left:2.5%;margin-top:16px;border-radius:4px;border:1px solid rgb(175,202,210);" >
+		<table id="taskTxtMsgTextTable"  style="table-layout:fixed;width:90%;margin-left:5%;margin-top:4%;" >
+			<tr>
+				<td style="height:170px;border-bottom:2px solid #CFE4EF;font-size:15px;word-wrap: break-word;"  id="MESSAGE_TEXT"  >
+					Hon. Uhuru Kenyatta is coming to Chesoen on
+					Saturday 2nd. Please come welcome him. He has promised to
+					build a dispensary for us.<br/>
+					From: Uhuru Kenyatta
+				</td>
+			</tr>	
+			<tr>
+				<td  style="height:50px;"  >
+					<table id="taskTxtMsgTextTable"  style="table-layout:fixed;width:96%;margin-left:0%;margin-top:4%;">
+						<tr>
+							<td style="height:20px;font-weight:bold;" >Character Count :</td>
+							<td id="CHARACTER_COUNT" >20</td>
+						</tr>
+						<tr>
+							<td style="height:20px;font-weight:bold;">Cost Per Message :</td>
+							<td id="COST_PER_MESSAGE">Ksh : 2.00</td>
+						</tr>
+						<tr>
+							<td style="height:20px;font-weight:bold;">Total Receivers :</td>
+							<td id="TOTAL_RECEIVERS" >100,000</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<br/>
+	<div id="processedTaskTxtMsgDet3" style="display:none;width:94%;min-height:25px;padding-left:10px;margin-top:310px;" >
+		<table>
+			<tr>
+				<td><button onClick="kendoKipHelperInstance.closeWindowWithOnClose()" style="float:left;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:200px;margin-left:320px;" class="k-button" >Close</button></td>
+			</tr>
+		</table>
+	</div>
+</div>
+</script>
 
 
 
-
+<script id=createNewTextMessageTemplate type="text/x-kendo-template" style="width:900px;margin:0 auto;padding:4px;background-color:rgb(215,234,240);height:340px;border-radius:4px;border:1px solid rgb(175,202,210);" >
+<div id="processedTaskTxtMessageViewTemplate" class="k-block k-info-colored" style="width: 550px; margin: 0 auto; padding: 4px; background-color: #d7eaf0; height: 510px; order-radius: 4px; border: 1px solid #afcad2;">
+	<div id="processedTaskTxtMsgDet1"
+		style="width: 90%; min-height: 400px; color: #0a2c2e; font-size: 13px; padding-left: 10px; background-color: #e6f7ff; margin-left: 4%; margin-top: 16px; border-radius: 4px; border: 1px solid #afcad2;">
+		<table id="newTxtMsgViewTable"  style="height: 107px; margin-top: 10px;margin-left:30px;" width="437">
+			<tbody>
+				<tr>
+					<td>Task Message Type</td>
+					<td id="MESSAGE_TASK_TYPE">Text</td>
+				</tr>
+				<tr>
+					<td>Service Provider</td>
+					<td><input id="newTextMsgSProvider" style="width:100%;"  /></td>
+				</tr>
+				<tr>
+					<td>Message Owner</td>	
+					<td> <input id="newTxtMsgOwnerInput" style="width:100%;"  /> </td>
+				</tr>
+				<tr>
+					<td>Message Status</td>
+					<td><input id="newTxtMsgMsgStatus" style="width:100%;" /> </td>
+				</tr>
+				<tr>
+					<td>Character Count</td>
+					<td id="newTxtMsgCharCount"  ></td>
+				</tr>
+			</tbody>
+		</table>
+		<table id="taskTxtMsgTextTable" style="table-layout: fixed; width: 88%; margin-left: 2%; margin-top: 5px;">
+			<tbody>
+				<tr>
+					<td>
+						<textarea id="newTxtMsgTxtArea" style="display:block;background-color:#F6FDFF;font-family : courier new,times new roman, sans serif,serif ;max-height:115px;height:115px;width:97%;font-size: 15px; word-wrap: break-word;border:1px solid #CAE1E8;border-radius:3px;padding:20px;font-size:16px;" ></textarea>								
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span id="newTxtMsgTxtErrMsgs" style="color:red;"></span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<br />
+	<div id="processedTaskTxtMsgDet3" style="width: 80%; min-height: 25px; padding-left: 3%;margin-left:10%;">
+		<table>
+			<tbody>
+				<tr>
+					<td><button onClick="newTxtMsgManagerInstance.validateAndSubmitTxtMsgData()" class="k-button" style="background-color: #d4eff9; border: 1px solid #78bad2; width: 200px;">Save</button></td>
+					<td><button onClick="newTxtMsgManagerInstance.closeTextMsgWindow()" class="k-button" style="background-color: #d4eff9; border: 1px solid #78bad2; width: 200px;">lose</button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+</script>
 
 
 

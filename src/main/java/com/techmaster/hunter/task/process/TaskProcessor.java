@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -18,6 +17,7 @@ import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.TaskProcessConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
+import com.techmaster.hunter.gateway.beans.GateWayClientHelper;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.GateWayMessage;
 import com.techmaster.hunter.obj.beans.Task;
@@ -60,6 +60,12 @@ public class TaskProcessor {
 			}
 		}
 		return batches;
+	}
+	
+	public void sendTaskProcessBusinessEmail(String mailType, Long taskId){
+		Map<String, Object> cntntParams = GateWayClientHelper.getInstance().getCntntParamsFrTskBsnsEmail(HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION, taskId);
+		HunterBusinessEmailWorker worker = new HunterBusinessEmailWorker(mailType, HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION, cntntParams);
+		worker.start();
 	}
 	
 	private int determinePoolSize(Set<GateWayMessage> messages, TaskClientConfigBean configBean) {
@@ -136,43 +142,60 @@ public class TaskProcessor {
 	
 	public Map<String, Object> process(Task task,TaskClientConfigBean configBean, Set<GateWayMessage> messages, AuditInfo auditInfo) {
 		
+		//lock the task before doing anything else.
+		task.setTaskDeliveryStatus(HunterConstants.STATUS_PENDING);
+		GateWayClientHelper.getInstance().lockTask(task.getTaskId(), HunterConstants.STATUS_PENDING);
+		
+		logger.debug("Sending task process notification email..");
+		sendTaskProcessBusinessEmail(HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION, task.getTaskId());
+		
 		Map<String, Object> results = new HashMap<String, Object>();
-		int poolSize = determinePoolSize(messages, configBean);
-		ExecutorService executor = Executors.newFixedThreadPool(poolSize);
-		List<Set<GateWayMessage>> batches = getBatches(messages, configBean.getBatchNo());
-		String processJobKey = getNextProcessJobKey(task.getTaskId()); 
-		List<TaskProcessWorker> workers = createTaskProcessWorkers(batches, configBean, processJobKey);
+		List<String> errors = new ArrayList<>();
 		
-		Map<String, String> jobContextParams = new HashMap<>();
-		String date = HunterUtility.formatDate(new Date(), HunterConstants.DATE_FORMAT_STRING);
-		jobContextParams.put(TaskProcessConstants.GEN_STATUS, HunterConstants.STATUS_SUCCESS);
-		jobContextParams.put(TaskProcessConstants.TOTAL_MSGS, messages.size()+"");
-		jobContextParams.put(TaskProcessConstants.CLIENT_NAME, configBean.getClientName());
-		jobContextParams.put(TaskProcessConstants.GEN_DURATION, 0+"");
-		jobContextParams.put(TaskProcessConstants.START_DATE, date); 
-		jobContextParams.put(TaskProcessConstants.END_DATE, date);
-		jobContextParams.put(TaskProcessConstants.NUMBER_OF_WORKERS, Integer.toString(batches.size())); 
+		try{
 		
-		TaskProcessJobHandler.getInstance().createNewTaskProcessJob(task.getTaskId(), processJobKey, jobContextParams, auditInfo);
-		
-		Long time = System.currentTimeMillis();
-		for(TaskProcessWorker worker : workers){
-			executor.submit(worker);
-		}
-		executor.shutdown();
-		
-		final Timer timer = new Timer();
-		TaskScheduledUpdaterJob scheduledUpdaterJob = new TaskScheduledUpdaterJob(processJobKey, task.getTaskId(), auditInfo, timer);
-		timer.scheduleAtFixedRate(scheduledUpdaterJob, 500, 200); 
-		
-		try {
-			executor.awaitTermination(100, TimeUnit.MILLISECONDS);
-			logger.debug("All process workers executed! Time taken : " + (System.currentTimeMillis() - time) + " Milliseconds");
-		} catch (InterruptedException e) {
+			int poolSize = determinePoolSize(messages, configBean);
+			ExecutorService executor = Executors.newFixedThreadPool(poolSize);
+			List<Set<GateWayMessage>> batches = getBatches(messages, configBean.getBatchNo());
+			String processJobKey = getNextProcessJobKey(task.getTaskId()); 
+			List<TaskProcessWorker> workers = createTaskProcessWorkers(batches, configBean, processJobKey);
+			
+			Map<String, String> jobContextParams = new HashMap<>();
+			String date = HunterUtility.formatDate(new Date(), HunterConstants.DATE_FORMAT_STRING);
+			jobContextParams.put(TaskProcessConstants.GEN_STATUS, HunterConstants.STATUS_SUCCESS);
+			jobContextParams.put(TaskProcessConstants.TOTAL_MSGS, messages.size()+"");
+			jobContextParams.put(TaskProcessConstants.CLIENT_NAME, configBean.getClientName());
+			jobContextParams.put(TaskProcessConstants.GEN_DURATION, 0+"");
+			jobContextParams.put(TaskProcessConstants.START_DATE, date); 
+			jobContextParams.put(TaskProcessConstants.END_DATE, date);
+			jobContextParams.put(TaskProcessConstants.NUMBER_OF_WORKERS, Integer.toString(batches.size())); 
+			
+			TaskProcessJobHandler.getInstance().createNewTaskProcessJob(task.getTaskId(), processJobKey, jobContextParams, auditInfo);
+			
+			// the timer worker will keep running forever if it's submitted without workers in the map.
+			if(workers != null && !workers.isEmpty()){
+				for(TaskProcessWorker worker : workers){
+					executor.submit(worker);
+				}
+				executor.shutdown();
+				final Timer timer = new Timer();
+				TaskScheduledUpdaterJob scheduledUpdaterJob = new TaskScheduledUpdaterJob(processJobKey, task.getTaskId(), auditInfo, timer);
+				timer.scheduleAtFixedRate(scheduledUpdaterJob, 500, 200);
+			}
+			
+			results.put("TASK_PROCESSOR_ERRORS", errors);
+			results.put("TASK_PROCESSOR_STATUS", HunterConstants.STATUS_SUCCESS);
+			return results;
+			
+		}catch(Exception e){
 			e.printStackTrace();
+			errors.add(e.getMessage());
+			errors.add("Error occurred while submitting task for processing");
+			results.put("TASK_PROCESSOR_ERRORS", errors);
+			results.put("TASK_PROCESSOR_STATUS", HunterConstants.STATUS_FAILED);
 			return results;
 		}
-		return results;
+		
 	}
 	
 	

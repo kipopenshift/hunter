@@ -1,5 +1,11 @@
 <%@include file="../common/HeaderFile.jsp"%>
 
+<style>
+ .editTextBoxNumeric : {
+ 	border : 1px solid #A2D3DB;
+ }
+</style>
+
 <script src="<c:url value='/static/resources/scripts/plain/kendoHelper.js'/>"></script>
 <script src="<c:url value='http://localhost:8080/Hunter/static/resources/scripts/model/regionHierarchy.js'/>"></script>
 
@@ -106,6 +112,33 @@
 		events: {
 		change: onChangeCountry,
 	}"
+</script>
+
+<script type="text/x-kendo-template" id="regionHierarchyEditTemplate">
+<div id="regionHierarchyEditContainer" >
+	<table id="regionHierarchyEditData"  style="table-layout:fixed;width:400px;" >
+		<tr>
+			<td style="width:40%;" >Region Name</td>
+			<td style="width:60%;" ><input id="regionName" name="regionName"  value="#=name#"  class="k-textbox"  style="width: 220px;border:1px solid rgb(162,211,219);border-radius:4px;height:30px;" /></td>
+		</tr>
+		<tr>
+			<td style="width:40%;" >Population</td>
+			<td style="width:60%;" ><input id="population" name="population"  type="number" value="#=population#" min="0"  max="10000000" style="width: 217px;border:1px solid rgb(162,211,219);border-radius:4px;height:25px;" /></td>
+		</tr>
+		<tr>
+			<td style="width:40%;" >Code</td>
+			<td style="width:60%;" ><input id="regionCode" name="regionCode"  value="#=regionCode#"  class="k-textbox"  style="width: 220px;border:1px solid rgb(162,211,219);border-radius:4px;height:30px;" /></td>
+		</tr>
+	</table>
+	<br/>
+	<table style="table-layout:fixed;width:40%; margin-left:30%;" >
+		<tr>
+			<td><button onClick="RegionHierarchyVM.editSelEditRegion(#=regionId#)" style="float:left;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" class="k-button" ><span class="k-icon k-i-tick"></span>Update</button></td>
+			<td><button onClick="kendoKipHelperInstance.closeWindowWithOnClose()" style="float:left;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" class="k-button" ><span class="k-icon k-i-cancel"></span>Cancel</button></td>
+		</tr>
+	</table>
+	<div id='editRegionHierIconHolder' style="display:none;width:100%;text-align:center;"><span id="editRegionHierIconHolderSpan" style="color:rgb(10,135,5);text-align:center;width:100%;font-size:18px;font-weight:bold;">Saving changes...</span></div>
+</div>
 </script>
 
 <script type="text/javascript">

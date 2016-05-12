@@ -59,7 +59,9 @@ var RegionHierarchyModel = kendo.data.TreeListModel.define({
 		}
 	},
 	getEditHierarchyTemplate : function(){
-		return kendoKipHelperInstance.createContextEditButton(false);
+		var id = this.get("id"); 
+		var editButton = kendoKipHelperInstance.createSimpleHunterButton('pencil',null, 'RegionHierarchyVM.showPopupToEditRegion("' + id +'")');
+		return editButton;
 	}
 });
 
@@ -137,6 +139,7 @@ var RegionHierarchyVM = kendo.observable({
 	isUploadReceiversEnabled: true,
     isUploadReceiversVisible: true,
     receiverUploadErrors : false,
+    regionTreeList : null,
 	
 	countryDS : new kendo.data.DataSource({
         type: "json",
@@ -154,6 +157,7 @@ var RegionHierarchyVM = kendo.observable({
 	        	console.log("reading countries...");
 	     }
 	}),
+	
 	beforeInit : function(){
 		kendoKipHelperInstance = new kendoKipHelper();
 		kendoKipHelperInstance.init();
@@ -168,6 +172,90 @@ var RegionHierarchyVM = kendo.observable({
 	},
 	afterInit : function(){
 		console.log("RegionHierarchyVM successfully initialized!!");
+	},
+	
+	showPopupToEditRegion : function(id){
+		var model = this.get("regionTreeList").dataSource.get(id);
+		model = $.parseJSON(kendo.stringify(model));
+		console.log(model);
+		model["regionId"] = id;
+		var html = $("#regionHierarchyEditTemplate").html();
+		var template = kendo.template(html);
+		var contents = template(model);
+		var html = $("#regionHierarchyEditTemplate").html();
+		kendoKipHelperInstance.showWindowWithOnClose(contents, "Edit Hunter Region");
+	},
+	validateFields : function(key,val){
+		
+		console.log("key="+key + " , val=" + val);
+		
+		var invalid = key === 'regionName' && ( val == null || val === '' || val.trim().length < 1 || val.trim().length > 50 );
+		if(invalid){
+			RegionHierarchyVM.appendError(key, "Region name cannot be empty and must be between 50 characters");
+			return false;
+		}
+		
+		invalid = key == "population" && ( val === '' || isNaN(val) || val.indexOf(".") != -1 || val < 0 );
+		if(invalid){
+			RegionHierarchyVM.appendError(key,"Population must be a positive integer");
+			return false;
+		}
+		
+		invalid = key == "regionCode" && ( val === '' || isNaN(val) || val.indexOf(".") != -1 || val < 0 || val.trim().length != 3);
+		if(invalid){
+			RegionHierarchyVM.appendError(key,"Region code must be a positive three-digit integer");
+			return false;
+		}
+		
+		return true;
+	},
+	appendError : function(key,message){
+		console.log("Appening for : " + key);
+		$("#"+key).closest("tr").after("<tr><td style='width:40%;' ></td><td style='color:red;' ><span class='hunterRegionErrors'  >"+ message +"</span></td></tr>");
+	},
+	editSelEditRegion : function(regionId){
+		$(".hunterRegionErrors").closest('tr').remove();
+		var inputs = $("#regionHierarchyEditData input");
+		var valid = true;
+		var data = {};
+		for(var i=0; i<inputs.length;i++){
+			var input = inputs[i];
+			var key = $(input).attr("id");
+			var val = $(input).val();
+			var valid_ = RegionHierarchyVM.validateFields(key,val);
+			if(!valid_){
+				valid = false;
+			}
+			data[key] = val;
+		}
+		if(!valid) {
+			return;
+		}
+		
+		var model = this.get("regionTreeList").dataSource.get(regionId);
+		var beanId = model.get("beanId");
+		var levelType = model.get("levelType"); 
+		
+		data["beanId"] = beanId;
+		data["levelType"] = levelType;
+		data["regionId"] = regionId;
+		
+		data = JSON.stringify(data);
+		var url = HunterConstants.HUNTER_BASE_URL + "/region/action/hierarchies/edit";
+		$("#editRegionHierIconHolder").css({"display" : ""}); 
+		kendo.ui.progress($("#editRegionHierIconHolder"), true);
+		kendoKipHelperInstance.ajaxPostDataForJsonResponse(data, "application/json", "json", "POST", url , "RegionHierarchyVM.afterEditSelRegion");
+	},
+	afterEditSelRegion : function(data){
+		data = $.parseJSON(data);
+		kendoKipHelperInstance.closeWindowWithOnClose();
+		$("#editRegionHierIconHolderSpan").text("Refreshing data..."); 
+		this.get("regionTreeList").dataSource.read();
+		setTimeout(function(){
+			kendo.ui.progress($("#editRegionHierIconHolder"), false);
+		},1000);
+		$("#editRegionHierIconHolder").css({"display" : "none"}); 
+		kendoKipHelperInstance.showSuccessNotification("Successfully saved the changes!");
 	},
 	onChangeCountry : function(){
 		console.log("Selected country >> " + selCountry); 
@@ -189,10 +277,10 @@ var RegionHierarchyVM = kendo.observable({
         }).join(", ");
 	},
 	onKendoUploadError : function(e){
-		var message = "Error (" + e.operation + ") :: " + RegionHierarchyVM.getFileInfo(e);
+		var message = "Error while " + e.operation + "ing : " + RegionHierarchyVM.getFileInfo(e);
 		kendoKipHelperInstance.showErrorNotification(message);
-		 var err = e.XMLHttpRequest.responseText;
-	        alert(err);
+		 /*var err = e.XMLHttpRequest.responseText;
+	        alert(err);*/
 	},
 	onSuccessUploadFile : function(e){
 		kendoKipHelperInstance.showSuccessNotification("Successfully uploaded file!");
@@ -236,7 +324,7 @@ var RegionHierarchyVM = kendo.observable({
     },
 	createKendoTreeList : function(){
 		console.log("Creating RegionHierarchyTreeList list...");
-		$("#regionHierarchyTreeList").kendoTreeList({
+		var regionTreeList_ = $("#regionHierarchyTreeList").kendoTreeList({
 			toolbar : kendo.template($("#regionHierarchyToolBarTemplate").html()),
 			dataSource : RegionHierarchyTreeListDS,
 			height: 700,
@@ -247,7 +335,10 @@ var RegionHierarchyVM = kendo.observable({
 			     extra: false
 			 },
 			 pageable :false,
-	        columns: [	
+			 editable: {
+					mode: "popup"
+	         },
+	         columns: [	
 						{ field:'name', title:'Name', filterable: true },
 						{ field:'population', title:'Population', filterable: true,width:140 },
 						{ field:'hunterPopuplation', title:'Hunter Population', width:140, filterable: true },
@@ -256,10 +347,11 @@ var RegionHierarchyVM = kendo.observable({
 						{ field:'regionCode', title:'Code', filterable: true,width:110 },
 						{ field:'hasState', title:'Has State',  filterable: true,width:110},
 						{ field:'receivers', title:'Receivers',  filterable: true,width:110 },
-						{ field: "editTask", title : "Edit", width:60, template : "#=getEditHierarchyTemplate()#"}
+						{ field: "editTask", title : "Edit", width:80, template : "#=getEditHierarchyTemplate()#"}
 	         ],
 	          editable: "inline"
-		});
+		}).data("kendoTreeList");
+		this.set("regionTreeList", regionTreeList_);
 		console.log("Successfully created RegionHierarchyTreeList");
 	}
 });

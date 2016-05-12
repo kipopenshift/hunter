@@ -490,7 +490,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void updateConstituencyWard(ConstituencyWard constituencyWard) {
 		logger.debug("Updating constituencyWard...");
-		HunterHibernateHelper.updateEntity(ConstituencyWard.class);
+		HunterHibernateHelper.updateEntity(constituencyWard);
 		logger.debug("Finished updating constituencyWard..."); 	
 	}
 

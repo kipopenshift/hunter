@@ -18,6 +18,8 @@ public class HunterImportBean {
 	private AuditInfo auditInfo;
 	private byte[] excelBytes;
 	private Blob excelBlob;
+	
+	@SuppressWarnings("unused")
 	private Workbook workbook;
 	
 	public HunterImportBean() { 

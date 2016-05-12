@@ -6,6 +6,18 @@ body{
 	background-color:#F9FEFF;
 }
 
+#taskTxtMsgViewTable td{
+	height:22px;
+	font-size:15px;
+	font-family:Courier New, Courier,Sans Serif,Times New Roman,Serif;
+	border-bottom:1px solid #D7ECF6;
+}
+
+#taskTxtMsgViewTable tr td:first-child {
+	font-weight: bold;
+	width:40%;
+}
+
 
 .button {
 	color: #000;

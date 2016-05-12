@@ -1,6 +1,7 @@
 package com.techmaster.hunter.dao.types;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.techmaster.hunter.json.ReceiverGroupJson;
@@ -21,7 +22,8 @@ public interface TaskDao {
 	public String getUserNameForTaskOwnerId(Long taskId);
 	public Set<ReceiverGroupJson> getTaskReceiverGroups(Long taskId);
 	public String getCmmSprtdTskNamsFrUsrNam(String userName);
-	public void updateTaskDelStatus(Long taskId, String toStatus, String updateBy); 
+	public void updateTaskDelStatus(Long taskId, String toStatus, String updateBy);
+	public Map<String,String> getTaskStatuses(Long taskId);
 	
 	
 

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,16 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
            builder.append(URLEncoder.encode(String.valueOf(param.getValue()), encodeFormat));
        }
 	   return builder.toString();
+   }
+   
+   public static String getFirstUpperCase(String string){
+	   if(!notNullNotEmpty(string)){
+		  return string; 
+	   }else if(string.length() == 1){
+		  return string.toUpperCase(); 
+	   }
+	   string = (string.substring(0,1)).toUpperCase()+ (string.substring(1,string.length()).toLowerCase());
+	   return string;
    }
    
    public byte[] urlEncodeAndGetBytes(Map<String, ?> params, String encodeFormat) throws UnsupportedEncodingException{
@@ -976,9 +987,57 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		return json;
 	}
 	
+	public static String getWhrClsFrRcvrRgnTyp(String type, Map<String,String> regionNames){
+		   logger.debug("Fetching where clause for : " + HunterUtility.stringifyMap(regionNames)); 
+		   String where = 
+		   	" WHERE CNTRY IS NULL "	+
+		      "AND CNTY IS NULL "	+
+		      "AND STATE IS NULL "	+
+		      "AND CNSTTNCY IS NULL "+
+		      "AND WRD IS NULL " 	+ 
+		      "AND VLLG IS NULL ";
+		   
+		   String country = regionNames.get(HunterConstants.RECEIVER_LEVEL_COUNTRY);
+		   String county = regionNames.get(HunterConstants.RECEIVER_LEVEL_COUNTY);
+		   String conscy = regionNames.get(HunterConstants.RECEIVER_LEVEL_CONSITUENCY);
+		   String consWard = regionNames.get(HunterConstants.RECEIVER_LEVEL_WARD);
+		   String village = regionNames.get(HunterConstants.RECEIVER_LEVEL_VILLAGE);
+		   
+		   if(HunterConstants.RECEIVER_LEVEL_COUNTRY.equals(type)){
+			   where = where.replace("CNTRY IS NULL", "CNTRY = " + HunterUtility.singleQuote(country));   
+		   }else if(HunterConstants.RECEIVER_LEVEL_COUNTY.equals(type)){
+			   where = where.replace("CNTRY IS NULL", "CNTRY = " + HunterUtility.singleQuote(country));
+			   where = where.replace("CNTY IS NULL", "CNTY = " + HunterUtility.singleQuote(county));
+		   }else if(HunterConstants.RECEIVER_LEVEL_CONSITUENCY.equals(type)){
+			   where = where.replace("CNTRY IS NULL", "CNTRY = " + HunterUtility.singleQuote(country));
+			   where = where.replace("CNTY IS NULL", "CNTY = " + HunterUtility.singleQuote(county));
+			   where = where.replace("CNSTTNCY IS NULL", "CNSTTNCY = " + HunterUtility.singleQuote(conscy));
+		   }else if(HunterConstants.RECEIVER_LEVEL_WARD.equals(type)){
+			   where = where.replace("CNTRY IS NULL", "CNTRY = " + HunterUtility.singleQuote(country));
+			   where = where.replace("CNTY IS NULL", "CNTY = " + HunterUtility.singleQuote(county));
+			   where = where.replace("CNSTTNCY IS NULL", "CNSTTNCY = " + HunterUtility.singleQuote(conscy));
+			   where = where.replace("WRD IS NULL", "WRD = " + HunterUtility.singleQuote(consWard));
+		   }else if(HunterConstants.RECEIVER_LEVEL_VILLAGE.equals(type)){
+			   where = where.replace("CNTRY IS NULL", "CNTRY = " + HunterUtility.singleQuote(country));
+			   where = where.replace("CNTY IS NULL", "CNTY = " + HunterUtility.singleQuote(county));
+			   where = where.replace("CNSTTNCY IS NULL", "CNSTTNCY = " + HunterUtility.singleQuote(conscy));
+			   where = where.replace("WRD IS NULL", "WRD = " + HunterUtility.singleQuote(consWard));
+			   where = where.replace("VLLG IS NULL", "VLLG = " + HunterUtility.singleQuote(village));
+		   }
+		   logger.debug("Returning : \n" + where); 
+		   return where;	   
+	   }
+	
 	
 	public static void main(String[] args) {
-		testMap();
+		Map<String,String> params = new HashMap<String, String>();
+		params.put(HunterConstants.RECEIVER_LEVEL_COUNTRY, "Kenya");
+		params.put(HunterConstants.RECEIVER_LEVEL_COUNTY, "Bomet");
+		params.put(HunterConstants.RECEIVER_LEVEL_CONSITUENCY, "Bomet Central");
+		params.put(HunterConstants.RECEIVER_LEVEL_WARD, "Ndaraweta");
+		params.put(HunterConstants.RECEIVER_LEVEL_VILLAGE, "Kapkoros");
+		String where = getWhrClsFrRcvrRgnTyp(HunterConstants.RECEIVER_LEVEL_VILLAGE, params);
+		System.out.println(where);  
 	}
 }
 

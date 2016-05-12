@@ -47,6 +47,10 @@
         <desc>No task receivers found while processing</desc>
         <text>No task receivers found while processing</text>
     </message>
+     <message id="MSG_TASK_012" >
+        <desc>Task has been submitted and is pending processing</desc>
+        <text>Task has been submitted and is pending processing</text>
+    </message>
     <message id="MSG_REGION_001" >
         <desc>Error message conversion of consituency converter</desc>
         <text>Exception at conversion! Please contact hunter support!</text>

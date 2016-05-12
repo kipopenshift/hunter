@@ -133,14 +133,6 @@
        </property>
 	</bean> -->
 	
-	<bean name="methodInvokingFactoryBean4" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="com.techmaster.hunter.dao.impl.HunterUserDaoImpl.wireUpExecutor"/>
-        <property name="arguments">
-            <list>
-                <ref bean="hunterJDBCExecutor"/>
-            </list>
-       </property>
-	</bean>
 	
 	<bean name="methodInvokingFactoryBean5" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="com.techmaster.hunter.gateway.beans.HunterEmailClient.wireHunterEmailManager"/>

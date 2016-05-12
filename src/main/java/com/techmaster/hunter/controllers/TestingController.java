@@ -11,5 +11,10 @@ public class TestingController extends HunterBaseController{
 	public String goToNewTaskPage(){
 		return "taskTesting"; 
 	}
+	
+	@RequestMapping(value="/task/action/newTextMsg" )
+	public String getNewTextMsgView(){
+		return "templates/taskTesting"; 
+	}
 
 }

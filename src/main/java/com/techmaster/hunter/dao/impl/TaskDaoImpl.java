@@ -1,6 +1,7 @@
 package com.techmaster.hunter.dao.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -233,6 +234,22 @@ public class TaskDaoImpl implements TaskDao{
 		String taskNames = rowList.isEmpty() ? null : rowList.get(0).toString();
 		logger.debug("Task names : " + taskNames); 
 		return taskNames;
+	}
+
+	@Override
+	public Map<String, String> getTaskStatuses(Long taskId) {
+		logger.debug("Fetching statuses of taskId : " + taskId); 
+		Map<String, String> statuses = new HashMap<String,String>();
+		String query = "select t.TSK_DEL_STS, t.TSK_LF_STS from task t where t.TSK_ID = ?";
+		List<Object> values = new ArrayList<>();
+		values.add(taskId);
+		Map<Integer, List<Object>> rowMapList = hunterJDBCExecutor.executeQueryRowList(query, values);
+		if(rowMapList != null && !rowMapList.isEmpty()){
+			List<Object> stsList = rowMapList.get(1);
+			statuses.put(HunterConstants.STATUS_TYPE_DELIVERY, HunterUtility.getNullOrStrimgOfObj(stsList.get(0))); 
+			statuses.put(HunterConstants.STATUS_TYPE_LIFE, HunterUtility.getNullOrStrimgOfObj(stsList.get(1)));
+		}
+		return statuses;
 	}
 	
 	

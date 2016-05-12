@@ -23,6 +23,7 @@ import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
 import com.techmaster.hunter.obj.beans.ReceiverGroupReceiver;
 import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TaskClientConfigBean;
+import com.techmaster.hunter.obj.beans.TaskMessageReceiver;
 import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterSessionFactory;
 import com.techmaster.hunter.util.HunterUtility;
@@ -31,6 +32,11 @@ import com.techmaster.hunter.xml.XMLService;
 public abstract class AbstractGateWayClientService implements GateWayClientService {
 	
 	private Logger logger = Logger.getLogger(getClass());
+	
+	public void addErrorsAndStatusToResultMap(Map<String, Object> results,List<String> taskProcessErrors, String taskProcessStatus){
+		results.put(TASK_PROCESS_ERRORS, taskProcessErrors);
+		results.put(TASK_PROCESS_STATUS, taskProcessStatus);
+	}
 	
 	public <T> T getObjFromExecParams(Class<T> clzz, String key, Map<String, Object> execParams){
 		if(execParams != null && !execParams.isEmpty() && execParams.containsKey(key)){
@@ -75,7 +81,7 @@ public abstract class AbstractGateWayClientService implements GateWayClientServi
 		return messages;
 	}
 	
-	public Set<GateWayMessage> createGtwayMsgsFrAllTskGtwyMssgs(Task task, AuditInfo auditInfo, boolean store){
+	public Set<GateWayMessage> createGtwayMsgsFrAllTskGtwyMssgs(Task task, AuditInfo auditInfo){
 		logger.debug("Getting gateway message for task : " + task.getTaskId()); 
 		List<HunterMessageReceiver> regionReceivers = getRegionReceivers(task);
 		List<ReceiverGroupReceiver> groupReceivers = getGroupReceivers(task);
@@ -84,11 +90,7 @@ public abstract class AbstractGateWayClientService implements GateWayClientServi
 		Set<GateWayMessage> allMsgs = new HashSet<>();
 		allMsgs.addAll(regionMsgs);
 		allMsgs.addAll(groupMsgs);
-		if(store){
-			allMsgs = doBatchSaveOrUpdate(allMsgs);
-		}else{
-			logger.debug("Store is false. Not storing gate message messages !!!!"); 
-		}
+		allMsgs = doBatchSaveOrUpdate(allMsgs);
 		logger.debug("Totak size of task gateway messages : " + allMsgs.size());
 		return allMsgs;
 	}
@@ -96,6 +98,7 @@ public abstract class AbstractGateWayClientService implements GateWayClientServi
 	@Override
 	public List<HunterMessageReceiver> getRegionReceivers(Task task) {
 		List<HunterMessageReceiver> regionReceivers = GateWayClientHelper.getInstance().getTaskRegionReceivers(task.getTaskId());
+		logger.debug("Region receivers for task ( " + task.getTaskId()+ " ). Sze ( " + ( regionReceivers == null ? 0 : regionReceivers.size()) + " )");
 		return regionReceivers;
 	}
 	
@@ -103,6 +106,7 @@ public abstract class AbstractGateWayClientService implements GateWayClientServi
 	@Override
 	public List<ReceiverGroupReceiver> getGroupReceivers(Task task) {
 		List<ReceiverGroupReceiver> groupReceivers = GateWayClientHelper.getInstance().getAllTaskGroupReceivers(task);
+		logger.debug("Group receivers for task ( " + task.getTaskId()+ " ). Sze ( " + ( groupReceivers == null ? 0 : groupReceivers.size()) + " )");
 		return groupReceivers;
 	}
 
@@ -110,7 +114,6 @@ public abstract class AbstractGateWayClientService implements GateWayClientServi
 	public TaskClientConfigBean readConfigurations(String clientName) {
 		
 		GateWayClientHelper.getInstance().validateTaskConfigName(clientName);
-		XMLService configService = HunterCacheUtil.getInstance().getXMLService(HunterConstants.CLIENT_CONFIG_XML_CACHED_SERVICE);
 		TaskClientConfigBean clientConfigsBean = HunterCacheUtil.getInstance().getTaskClientConfigBean(clientName);
 		
 		if(clientConfigsBean == null){
@@ -120,6 +123,8 @@ public abstract class AbstractGateWayClientService implements GateWayClientServi
 			logger.debug("Client configuration is already created : " + clientConfigsBean.getClientName());  
 			return clientConfigsBean;
 		}
+		
+		XMLService configService = HunterCacheUtil.getInstance().getXMLService(HunterConstants.CLIENT_CONFIG_XML_CACHED_SERVICE);
 		
 		if(configService != null){
 			
@@ -174,8 +179,27 @@ public abstract class AbstractGateWayClientService implements GateWayClientServi
 				clientConfigsBean.setConfigs(configs); 
 			}
 			
+			
+			configsPath_ = configsPath + "/connConfigs/config";
+			configsList = configService.getNodeListForPathUsingJavax(configsPath_);
+			Map<String, String> connConfigs = new HashMap<>();
+			
+			if(configsList != null && configsList.getLength() > 0){
+				for(int i=0; i<configsList.getLength(); i++){
+					Node config = configsList.item(i);
+					String label = config.getChildNodes().item(1).getTextContent();
+					String value = config.getChildNodes().item(3).getTextContent();
+					connConfigs.put(label, value);
+				}
+				logger.debug("Connection configurations for client ("+ clientName +") : " +  HunterUtility.stringifyMap(connConfigs)); 
+				clientConfigsBean.setConnConfigs(connConfigs); 
+			}
+			
+			
+			
+			
 		}
-		logger.debug("Finished wiring up configuration bean. Caching..."); 
+		logger.debug("Finished wiring up configuration bean. Now caching it..."); 
 		HunterCache.getInstance().put(clientName, clientConfigsBean);
 		return clientConfigsBean;
 	}
@@ -237,7 +261,22 @@ public abstract class AbstractGateWayClientService implements GateWayClientServi
 	}
 
 	
-
+	@Override
+	public Set<TaskMessageReceiver> getTskMsgRcvrsFrTskId(Long taskId) {
+		List<HunterMessageReceiver> receivers = GateWayClientHelper.getInstance().getTaskRegionReceivers(taskId);
+		Set<TaskMessageReceiver> taskMsgRcvers = new HashSet<TaskMessageReceiver>();
+		logger.debug("Creating task message receivers from hunterMessage receivers...");
+		int counter = 0;
+		for(HunterMessageReceiver hntrRcvr : receivers){
+			TaskMessageReceiver tskMsgRcvr = GateWayClientHelper.getInstance().convertHunterMsgRcvrToTaskMsgRcvr(hntrRcvr);
+			logger.debug(tskMsgRcvr); 
+			taskMsgRcvers.add(tskMsgRcvr);
+			counter++;
+		}
+		logger.debug("Count = " + counter); 
+		logger.debug("Finished creating task message receivers for task!!"); 
+		return taskMsgRcvers;
+	}
 	
 	
 }

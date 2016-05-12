@@ -20,14 +20,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.constants.UIMessageConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterClientDao;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.ReceiverGroupDao;
+import com.techmaster.hunter.dao.types.ServiceProviderDao;
 import com.techmaster.hunter.dao.types.TaskDao;
 import com.techmaster.hunter.dao.types.TaskHistoryDao;
 import com.techmaster.hunter.email.HunterEmailManager;
+import com.techmaster.hunter.enums.HunterUserRolesEnums;
 import com.techmaster.hunter.enums.TaskHistoryEventEnum;
 import com.techmaster.hunter.gateway.beans.GatewayClient;
 import com.techmaster.hunter.json.ReceiverGroupJson;
@@ -35,6 +39,7 @@ import com.techmaster.hunter.json.TaskProcessJobJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
 import com.techmaster.hunter.obj.beans.Message;
+import com.techmaster.hunter.obj.beans.ServiceProvider;
 import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.obj.beans.TextMessage;
@@ -106,13 +111,13 @@ public class TaskController extends HunterBaseController{
 			}
 			
 			Task task = taskDao.getTaskById(taskId);
-			String userName = getUserName();
-			AuditInfo auditInfo = HunterUtility.getAuditInfoFromRequestForNow(null, userName); 
+			AuditInfo auditInfo = HunterUtility.getAuditInfoFromRequestForNow(null, getUserName()); 
 			Task copy = taskManager.cloneTask(task, newUserName, taskName, taskDescription, auditInfo);
-			taskManager.setTaskHistoryStatusAndMessage(taskHistory,HunterConstants.STATUS_SUCCESS,"Successfully cloned task. New task ( " + copy.getTaskId() + " ) for new user ( " + newUserName + " )");  
-			taskHistoryDao.insertTaskHistory(taskHistory); 
 			logger.debug(copy); 
-			taskDao.insertTask(copy); 
+			taskDao.insertTask(copy);
+			
+			taskManager.setTaskHistoryStatusAndMessage(taskHistory,HunterConstants.STATUS_SUCCESS,"Successfully cloned task. New task ( " + copy.getTaskId() + " ) for new user ( " + newUserName + " )");  
+			taskHistoryDao.insertTaskHistory(taskHistory);
 			
 			logger.debug("Finished cloning task!!"); 
 			return HunterUtility.setJSONObjectForSuccess(messages, "Successfully cloned task!").toString();
@@ -326,6 +331,7 @@ public class TaskController extends HunterBaseController{
 	@ResponseBody
 	public String getDefaultTaskMsg(@PathVariable("taskId") Long taskId, HttpServletRequest request) {
 
+		HunterUtility.threadSleepFor(500); 
 		String tskMsgType = taskDao.getTaskMsgType(taskId);
 		logger.debug("Message type for task : " + tskMsgType);
 		
@@ -336,9 +342,15 @@ public class TaskController extends HunterBaseController{
 		msg.setLastUpdate(auditInfo.getLastUpdate());
 		msg.setLastUpdatedBy(auditInfo.getCreatedBy());
 		msg.setMsgTaskType(tskMsgType);
-		msg.setProvider(null);
 		String taskOwner = taskDao.getUserNameForTaskOwnerId(taskId);
 		msg.setMsgOwner(taskOwner);
+		
+		//Default service provider is safaricom
+		ServiceProvider provider = HunterDaoFactory.getInstance().getDaoObject(ServiceProviderDao.class).getServiceProviderByName("Safaricom");  
+		msg.setProvider(provider); 
+		Task task = taskDao.getTaskById(taskId);
+		task.setTaskMessage(msg); 
+		taskDao.update(task); 
 
 		String msgStr = null;
 
@@ -466,7 +478,7 @@ public class TaskController extends HunterBaseController{
 
 		try {
 			taskManager.removeGroupFromTask(groupId, taskId);
-			taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_FAILED, "Successfully removed group( " + groupId + " ) from task. ");  
+			taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_SUCCESS, "Successfully removed group( " + groupId + " ) from task. ");  
 			taskHistoryDao.insertTaskHistory(taskHistory);
 			logger.debug("Successfully removed group from task");
 		} catch (Exception e) {
@@ -497,6 +509,7 @@ public class TaskController extends HunterBaseController{
 	@RequestMapping(value = "/action/task/process/validate", method = RequestMethod.POST)
 	public @ResponseBody String validateTaskForProcessing(HttpServletRequest request) {
 		
+		HunterUtility.threadSleepFor(1000);
 		JSONObject messages = new JSONObject();
 		List<String> results;
 		
@@ -505,8 +518,13 @@ public class TaskController extends HunterBaseController{
 			jsonObject = new JSONObject(HunterUtility.getRequestBodyAsString(request));
 			Long selTaskId = jsonObject.getLong("selTaskId");
 			Task task = taskDao.getTaskById(selTaskId); 
-			taskManager.processTask(task, getAuditInfo());
 			results = taskManager.validateTask(task);
+			if(!taskManager.userHasRole(HunterUserRolesEnums.ROLE_TASK_PROCESSOR.getName(), getUserName())){ 
+				String message = HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_010 );
+				results = results == null ? new ArrayList<String>() : results;
+				results.add(message);
+				logger.debug(message); 
+			}
 			String resulString = results != null && !results.isEmpty() ? HunterUtility.getCommaDelimitedStrings(results) : null;
 			logger.debug("Finished validating task : " + resulString);
 			if(resulString != null){
@@ -516,6 +534,50 @@ public class TaskController extends HunterBaseController{
 				messages = HunterUtility.setJSONObjectForFailure(messages, resulString);
 			}else{
 				messages = HunterUtility.setJSONObjectForSuccess(messages, resulString);
+			}
+			return messages.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+			messages = HunterUtility.setJSONObjectForFailure(messages, "Application error please contact production support!");
+			return messages.toString();
+		}
+		
+	}
+	
+	@Produces("application/json")
+	@Consumes("application/json")
+	@RequestMapping(value = "/action/task/process/process", method = RequestMethod.POST)
+	public @ResponseBody String processTask(HttpServletRequest request) {
+		
+		HunterUtility.threadSleepFor(1000);
+		JSONObject messages = new JSONObject();
+		List<String> results;
+		
+		try {
+			JSONObject jsonObject = null;
+			jsonObject = new JSONObject(HunterUtility.getRequestBodyAsString(request));
+			Long selTaskId = jsonObject.getLong("selTaskId");
+			Task task = taskDao.getTaskById(selTaskId); 
+			results = taskManager.validateTask(task);
+			if(!taskManager.userHasRole(HunterUserRolesEnums.ROLE_TASK_PROCESSOR.getName(), getUserName())){ 
+				String message = HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_010 );
+				results = results == null ? new ArrayList<String>() : results;
+				results.add(message);
+				logger.debug(message); 
+			}
+			String resulString = results != null && !results.isEmpty() ? HunterUtility.getCommaDelimitedStrings(results) : null;
+			logger.debug("Finished validating task : " + resulString);
+			TaskHistory taskHistory = taskManager.getNewTaskHistoryForEventName(selTaskId, TaskHistoryEventEnum.PROCESS.getEventName(), getUserName());
+			if(resulString != null){
+				taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_FAILED, "Failed to process task. " + resulString);  
+				taskHistoryDao.insertTaskHistory(taskHistory);
+				messages = HunterUtility.setJSONObjectForFailure(messages, resulString);
+			}else{
+				logger.debug("Submitting task for processing..."); 
+				taskManager.processTask(task, HunterUtility.getAuditInfoFromRequestForNow(request, getUserName()));
+				taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_SUCCESS, "Successfully processed task!");  
+				taskHistoryDao.insertTaskHistory(taskHistory);
+				messages = HunterUtility.setJSONObjectForSuccess(messages, "Successfully processed Task ( " + task.getTaskName() + " )"  ); 
 			}
 			return messages.toString();
 		} catch (Exception e) {

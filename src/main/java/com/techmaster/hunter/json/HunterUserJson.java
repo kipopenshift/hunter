@@ -10,7 +10,6 @@ public class HunterUserJson {
 	private String phoneNumber;
 	private String userType;
 	private String userName;
-	private String password;
 	private boolean active;
 	private boolean blocked;
 	
@@ -88,14 +87,6 @@ public class HunterUserJson {
 		this.userName = userName;
 	}
 
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
 	public boolean isActive() {
 		return active;
 	}
@@ -147,32 +138,10 @@ public class HunterUserJson {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (active ? 1231 : 1237);
-		result = prime * result + (blocked ? 1231 : 1237);
-		result = prime * result
-				+ ((createdBy == null) ? 0 : createdBy.hashCode());
-		result = prime * result
-				+ ((cretDate == null) ? 0 : cretDate.hashCode());
 		result = prime * result + ((email == null) ? 0 : email.hashCode());
-		result = prime * result
-				+ ((firstName == null) ? 0 : firstName.hashCode());
-		result = prime * result
-				+ ((lastName == null) ? 0 : lastName.hashCode());
-		result = prime * result
-				+ ((lastUpdate == null) ? 0 : lastUpdate.hashCode());
-		result = prime * result
-				+ ((lastUpdatedBy == null) ? 0 : lastUpdatedBy.hashCode());
-		result = prime * result
-				+ ((middleName == null) ? 0 : middleName.hashCode());
-		result = prime * result
-				+ ((password == null) ? 0 : password.hashCode());
-		result = prime * result
-				+ ((phoneNumber == null) ? 0 : phoneNumber.hashCode());
 		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
 		result = prime * result
 				+ ((userName == null) ? 0 : userName.hashCode());
-		result = prime * result
-				+ ((userType == null) ? 0 : userType.hashCode());
 		return result;
 	}
 
@@ -186,59 +155,10 @@ public class HunterUserJson {
 		if (getClass() != obj.getClass())
 			return false;
 		HunterUserJson other = (HunterUserJson) obj;
-		if (active != other.active)
-			return false;
-		if (blocked != other.blocked)
-			return false;
-		if (createdBy == null) {
-			if (other.createdBy != null)
-				return false;
-		} else if (!createdBy.equals(other.createdBy))
-			return false;
-		if (cretDate == null) {
-			if (other.cretDate != null)
-				return false;
-		} else if (!cretDate.equals(other.cretDate))
-			return false;
 		if (email == null) {
 			if (other.email != null)
 				return false;
 		} else if (!email.equals(other.email))
-			return false;
-		if (firstName == null) {
-			if (other.firstName != null)
-				return false;
-		} else if (!firstName.equals(other.firstName))
-			return false;
-		if (lastName == null) {
-			if (other.lastName != null)
-				return false;
-		} else if (!lastName.equals(other.lastName))
-			return false;
-		if (lastUpdate == null) {
-			if (other.lastUpdate != null)
-				return false;
-		} else if (!lastUpdate.equals(other.lastUpdate))
-			return false;
-		if (lastUpdatedBy == null) {
-			if (other.lastUpdatedBy != null)
-				return false;
-		} else if (!lastUpdatedBy.equals(other.lastUpdatedBy))
-			return false;
-		if (middleName == null) {
-			if (other.middleName != null)
-				return false;
-		} else if (!middleName.equals(other.middleName))
-			return false;
-		if (password == null) {
-			if (other.password != null)
-				return false;
-		} else if (!password.equals(other.password))
-			return false;
-		if (phoneNumber == null) {
-			if (other.phoneNumber != null)
-				return false;
-		} else if (!phoneNumber.equals(other.phoneNumber))
 			return false;
 		if (userId == null) {
 			if (other.userId != null)
@@ -250,11 +170,6 @@ public class HunterUserJson {
 				return false;
 		} else if (!userName.equals(other.userName))
 			return false;
-		if (userType == null) {
-			if (other.userType != null)
-				return false;
-		} else if (!userType.equals(other.userType))
-			return false;
 		return true;
 	}
 
@@ -265,11 +180,12 @@ public class HunterUserJson {
 				+ ", lastName=" + lastName + ", middleName=" + middleName
 				+ ", email=" + email + ", phoneNumber=" + phoneNumber
 				+ ", userType=" + userType + ", userName=" + userName
-				+ ", password=" + password + ", active=" + active
-				+ ", blocked=" + blocked + ", cretDate=" + cretDate
-				+ ", lastUpdate=" + lastUpdate + ", createdBy=" + createdBy
-				+ ", lastUpdatedBy=" + lastUpdatedBy + "]";
+				+ ", active=" + active + ", blocked=" + blocked + ", cretDate="
+				+ cretDate + ", lastUpdate=" + lastUpdate + ", createdBy="
+				+ createdBy + ", lastUpdatedBy=" + lastUpdatedBy + "]";
 	}
+
+
 
 
 	

@@ -4,8 +4,10 @@ $("document").ready(function(){
 		selTaskId : null,
 		validateProcessWidget : null,
 		processTaskProgBar : null,
+		endPointActionName : "process",
 		urlMapping : {
-			"validate" : "/task/action/task/process/validate"
+			"validate" : "/task/action/task/process/validate",
+			"process" : "/task/action/task/process/process"
 		},
 		defaultRequestParam : {
 			url: null,
@@ -57,29 +59,52 @@ $("document").ready(function(){
 			data = $.parseJSON(data);
 			if(type == 'validate'){
 				if(data.status != null && data.status == 'Success'){
-					var msg = "Task passed validations<span class='k-icon k-i-tick' ></span>";
+					var task = hunterAdminClientUserVM.getSelectedTaskBean();
+					task.set("taskDeliveryStatus", "Pending"); 
+					var msg = 'Task passed validations <img src="http://localhost:8080/Hunter/static/resources/images/tick.png" width="15px" height="15px"   />';
 					this.styleForSuccess("taskValidationResults", msg);
 					this.validateProcessWidget.value(100);
-					$("#taskProcessValidationTd").html("Validating <span class='k-icon k-i-tick' ></span>");
+					$("#taskProcessValidationTd").html('Validating &nbsp;&nbsp;<img src="http://localhost:8080/Hunter/static/resources/images/tick.png" width="15px" height="15px"  />');
+					this.processTask();
 				}else{
+					$("#taskProcessValidationTd").html('Validating &nbsp;&nbsp;<img src="http://localhost:8080/Hunter/static/resources/images/x-button.png" width="15px" height="15px"  />');
 					var msg = this.replaceCommasInMsg(data.message);
 					this.styleForError("taskValidationResults", msg);
 					this.validateProcessWidget.value(100);
 					this.processTaskProgBar.value(0);
+					this.endPointActionName = type;
 				}
+			}else if(type == "process"){
+				this.processTaskProgBar.value(100);
+				if(data.status != null && data.status == 'Success'){
+					var msg = 'Task successfully submitted for processing <img src="http://localhost:8080/Hunter/static/resources/images/tick.png" width="15px" height="15px"   />';
+					this.styleForSuccess("processTaskProgressMessages", msg);
+					$("#taskProcessProcessTd").html('Processing <img src="http://localhost:8080/Hunter/static/resources/images/tick.png" width="15px" height="15px"  />');
+				}else{
+					$("#taskProcessProcessTd").html('Processing <img src="http://localhost:8080/Hunter/static/resources/images/x-button.png" width="15px" height="15px"  />');
+					var msg = this.replaceCommasInMsg(data.message);
+					this.styleForError("taskValidationResults", msg);
+				}
+			}
+			// if it is the last process, remove spinner and show close button.
+			if(this.endPointActionName === type){
+				$("#closeTaskProcessingWindowTable").fadeIn(500);
+				this.removeKendoSpinner();
 			}
 		},
 		ajaxProcessTask : function(params){
+			var r = $.Deferred();
 			var type = params["type"];
 			var ajaxParams = $.parseJSON(JSON.stringify(this.defaultRequestParam));
 			ajaxParams["data"] = JSON.stringify({"selTaskId":hunterAdminClientUserVM.get("selTaskId")});
-			ajaxParams["url"] = HunterConstants.HUNTER_BASE_URL+this.urlMapping["validate"];
+			ajaxParams["url"] = HunterConstants.HUNTER_BASE_URL+this.urlMapping[type];
 			var this_ = this;
 			$.ajax(ajaxParams).done(function(data) {
 				this_.afterAjaxFunction(type, data);
 			 }).fail(function(data) {
 				 kendoKipHelperInstance.popupWarning(data.statusText + " (" + data.status + "). Please contact Production Support.", "Error");
 			 });
+			return r;
 		},
 		validateTaskProcess : function(){
 			var r = $.Deferred();
@@ -88,18 +113,22 @@ $("document").ready(function(){
 			 valProgBar.value(0);
              this.validateProcessWidget = valProgBar;
              valProgBar.value(10);
-             kendo.ui.progress($("#validationProgressBarSpinner"), false);
              var params = {"type" : "validate", "selTaskId" : this.selTaskId, "progBar" : valProgBar};
              this.ajaxProcessTask(params);
 			return r;
 		},
 		processTask : function(){
 			var r = $.Deferred();
+			var processTaskProgBar = this.processTaskProgBar;
+            var params = {"type" : "process", "selTaskId" : this.selTaskId, "progBar" :  processTaskProgBar};
+            this.ajaxProcessTask(params);
+			return r;
+		},
+		createWidgets : function(){
 			var processTaskProgBar = this.createProcessBar("processTaskProgressBar") ;
 			processTaskProgBar.value(0);
             this.processTaskProgBar = processTaskProgBar;
             processTaskProgBar.value(30);
-			return r;
 		},
 		killTaskProcessManager : function(){
 			var r = $.Deferred();
@@ -109,15 +138,13 @@ $("document").ready(function(){
 		removeKendoSpinner : function(){
 			var r = $.Deferred();
 			 setTimeout(function(){ 
-				 kendo.ui.progress($("#taskProcessProgressBar"), false);
+				 kendo.ui.progress($("#taskProcessProgressSpinner"), false);
 			 }, 400);
 			return r;
 		},
 		execute : function(){
-			this.validateTaskProcess().done(
-			this.processTask()).done(
-			this.removeKendoSpinner()
-		  );
+			this.createWidgets();
+			this.validateTaskProcess();
 		}
 	});
 	hunterAdminClientUserVM.set("taskProcessManager", new TaskProcessManager());

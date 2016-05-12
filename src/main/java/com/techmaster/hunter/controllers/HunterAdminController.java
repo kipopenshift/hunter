@@ -210,6 +210,16 @@ public class HunterAdminController extends HunterBaseController{
 		return userRoles;
 	}
 	
+	@RequestMapping(value="/action/fieldProfile", method=RequestMethod.GET)
+	public String goToFieldProfile(){
+		return "views/fieldProfile";
+	}
+	
+	@RequestMapping(value="/action/fieldSample", method=RequestMethod.GET)
+	public String goToSample(){
+		return "views/fieldSample";
+	}
+	
 	
 	
 }
