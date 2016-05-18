@@ -142,7 +142,9 @@ function populatePopupForParams(param){
 	$("#affirmPopupAction").empty();
 	
 	if(func == 'DeleteContact'){
-		var html = "<h4 id='hunterNotificationMsg'  style='color:red;text-align:center;' >Are you sure you want to delete this record?</h4>";
+		var receiver = getDataTableJson(params[0]);
+		var contact = receiver["receiverContact"],firstName = receiver["firstName"];
+		var html = "<h4 id='hunterNotificationMsg'  style='color:red;text-align:center;' >Are you sure you want to delete : "+ contact + " ( " + firstName +" )</h4>";
 		$("#hunterFieldPopupContainer").append(html);
 		jClass="ui-btn ui-icon-delete ui-btn-icon-left";
 		defineAffirmButt("Delete","deleteContactAndRefresh('"+ params[0] +"')", jClass );
@@ -506,7 +508,7 @@ function putProgressSpinnerOn(ele,message){
 
 function deleteContactAndRefresh(conId){
 	
-	$("#affirmPopupAction").attr("disabled","disabled"); 
+	$("#affirmPopupAction").attr("disabled","disabled");
 	
 	putProgressSpinnerOn($("#hunterNotificationMsg"),"Deleting...");
 	var userId = {"rawReceiverId" : conId};
