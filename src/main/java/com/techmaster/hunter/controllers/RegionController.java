@@ -16,6 +16,7 @@ import javax.ws.rs.Produces;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.proc.ProcedureHandler;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
@@ -88,6 +90,21 @@ public class RegionController extends HunterBaseController {
 		return countiesJSON;
 	}
 	
+	@RequestMapping(value="/action/new/counties/read/{selCountry}", method=RequestMethod.POST) 
+	@Produces("application/json") 
+	@ResponseBody public String newGetCounties(@PathVariable("selCountry") String selCounty){
+		if(selCounty == null || selCounty.trim().equals("") || selCounty.trim().equals("undefined") || selCounty.equals("UNSELECTED")){ 
+			return "[]";  
+		}
+		Map<String,Long> regionIds = new HashMap<>();
+		Long countryId = HunterUtility.getLongFromObject(selCounty);
+		regionIds.put(HunterConstants.RECEIVER_LEVEL_COUNTRY, countryId); 
+		Map<Long,String> country = HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_COUNTRY, regionIds);
+		String countryName = country.get(countryId);
+		JSONArray array = regionService.getCountiesNameAndIds(countryName);
+		return array.toString();
+	}
+	
 	@RequestMapping(value="/action/counties/all/read", method=RequestMethod.POST) 
 	@ResponseBody public List<CountyJson> getAllCounties(){
 		List<CountyJson> countiesJSON = new ArrayList<>();
@@ -109,6 +126,30 @@ public class RegionController extends HunterBaseController {
 		List<ConstituencyJson> constituencyJsons = receiverRegionDao.getConstituencyJsonsForSelCounty(selCountyId);
 		logger.debug("Returning constituencies >> " + HunterUtility.stringifyList(constituencyJsons)); 
 		return constituencyJsons;
+	}
+	
+	@RequestMapping(value="/action/new/constituencies/read/{selCountyId}", method=RequestMethod.POST) 
+	@Produces("application/json") 
+	@ResponseBody public String getNewConstituenciesForCounty(@PathVariable("selCountyId") String selCountyId){
+		
+		if(selCountyId == null || selCountyId.trim().equals("") || selCountyId.trim().equals("undefined") || selCountyId.equals("UNSELECTED")){ 
+			return "[]";  
+		}
+		
+		String query = hunterJDBCExecutor.getQueryForSqlId("getCountryNameIdAndCodeForCountyId");
+		List<Object> values = new ArrayList<>();
+		values.add(selCountyId);
+		
+		Map<String,Object> firstRow = hunterJDBCExecutor.executeQueryFirstRowMap(query, values);
+		JSONArray array = new JSONArray();
+		
+		if(firstRow != null && !firstRow.isEmpty()){
+			String countryName = HunterUtility.getStringOrNullOfObj(firstRow.get("COUNTRY_NAME"));
+			String countyName = HunterUtility.getStringOrNullOfObj(firstRow.get("CNTY_NAM"));
+			array = regionService.getConsNameAndIds(countryName, countyName);
+		}
+		
+		return array.toString();
 	}
 	
 	@RequestMapping(value="/action/constituencies/all/read", method=RequestMethod.POST) 
@@ -133,6 +174,31 @@ public class RegionController extends HunterBaseController {
 		logger.debug(constituencyWardsJson); 
 		return constituencyWardsJson;
 		
+	}
+	
+	@RequestMapping(value="/action/new/constituencyWards/read/{selConstituencyId}", method=RequestMethod.POST)
+	@Produces("application/json") 
+	@ResponseBody public String getNewConstituencyWardForConstituency(@PathVariable("selConstituencyId") String selConstituencyId){
+		logger.debug("Selected constituency >> " + selConstituencyId ); 
+		if(selConstituencyId == null || selConstituencyId.trim().equals("") || selConstituencyId.trim().equals("undefined") || selConstituencyId.equals("UNSELECTED")){ 
+			return "[]"; 
+		}
+		
+		String query = hunterJDBCExecutor.getQueryForSqlId("getCountryCountyConsNameIdAndForConsId");
+		List<Object> values  = new ArrayList<>();
+		values.add(selConstituencyId);
+		Map<String, Object> firstRow = hunterJDBCExecutor.executeQueryFirstRowMap(query, values);
+		
+		JSONArray array = new JSONArray();
+		
+		if(firstRow != null && !firstRow.isEmpty()){
+			String countryName = HunterUtility.getStringOrNullOfObj(firstRow.get("COUNTRY_NAME"));
+			String countyName = HunterUtility.getStringOrNullOfObj(firstRow.get("CNTY_NAM"));
+			String consName = HunterUtility.getStringOrNullOfObj(firstRow.get("CNSTTNCY_NAM"));
+			array = regionService.getConsWardNameAndIds(countryName, countyName, consName);
+		}
+		
+		return array.toString();		
 	}
 	
 

@@ -39,6 +39,8 @@
 <mapping resource="hibernate/hbm/TaskHistory.hbm.xml" />
 <mapping resource="hibernate/hbm/UserLoginBean.hbm.xml" />
 <mapping resource="hibernate/hbm/TaskProcessJob.hbm.xml" />
+<mapping resource="hibernate/hbm/HunterRawReceiver.hbm.xml" />
+<mapping resource="hibernate/hbm/HunterRawReceiverUser.hbm.xml" />
 
  
 </session-factory>

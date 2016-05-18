@@ -176,7 +176,20 @@ body{
 	padding-left:15px;
 }
 
+#createNewContactButt:hover{
+	color:white;
+	border:4px solid white;
+}
 
+#popup-close-button:hover{
+	color:white;
+	border:4px solid white;
+}
+
+#defineAffirmButt:hover{
+	color:white;
+	border:4px solid white;
+}
 
 #fieldProfileDataTable_filter{
 	margin-top:15px;

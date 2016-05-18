@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.techmaster.hunter.cache.HunterCacheUtil;
@@ -29,6 +31,7 @@ import com.techmaster.hunter.obj.beans.Country;
 import com.techmaster.hunter.obj.beans.County;
 import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
 import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
+import com.techmaster.hunter.obj.beans.HunterRawReceiver;
 import com.techmaster.hunter.obj.beans.ReceiverRegion;
 import com.techmaster.hunter.obj.beans.State;
 import com.techmaster.hunter.obj.beans.Task;
@@ -1022,12 +1025,12 @@ public class RegionServiceImpl extends AbstractRegionService {
 	@Override
 	public void editReceiverRegion(Map<String, Object> params) {
 		
-		String type = HunterUtility.getNullOrStrimgOfObj(params.get("levelType"));
+		String type = HunterUtility.getStringOrNullOfObj(params.get("levelType"));
 		logger.debug("Upadting "+ type +" with params ( " + HunterUtility.stringifyMap(params) + " )");
 		Long beanId = Long.parseLong(params.get("beanId")+""); 
 		int population = Integer.parseInt(params.get("population")+""); 
-		String regionCode = HunterUtility.getNullOrStrimgOfObj(params.get("regionCode")); 
-		String regionName = HunterUtility.getNullOrStrimgOfObj(params.get("regionName")); 
+		String regionCode = HunterUtility.getStringOrNullOfObj(params.get("regionCode")); 
+		String regionName = HunterUtility.getStringOrNullOfObj(params.get("regionName")); 
 		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
 		List<Object> values = new ArrayList<>();
 		
@@ -1108,5 +1111,62 @@ public class RegionServiceImpl extends AbstractRegionService {
 		logger.debug("Completed updating " + type + ". Refreshing cache..."); 
 		HunterCacheUtil.getInstance().loadCountries();
 	}
+
+	@Override
+	public JSONArray getCountriesNameAndIds(String countryName) {
+		JSONArray ja = new JSONArray();
+		List<Country> countries = HunterCacheUtil.getInstance().getAllCountries();
+		for(Country country : countries){
+			JSONObject jo = new JSONObject();
+			jo.put("countryId", country.getCountryId());
+			jo.put("countryName", country.getCountryName());
+			ja.put(jo);
+		}
+		System.out.println(ja); 
+		return ja;
+		
+	}
+
+	@Override
+	public JSONArray getCountiesNameAndIds(String countryName) {
+		JSONArray ja = new JSONArray();
+		Map<Long,String> counties = HunterCacheUtil.getInstance().getCountiesMapForCountry(countryName);
+		for(Map.Entry<Long, String> entry : counties.entrySet()){
+			JSONObject jo = new JSONObject();
+			jo.put("countyId", entry.getKey());
+			jo.put("countyName", entry.getValue());
+			ja.put(jo);
+		}
+		return ja;
+	}
+
+	@Override
+	public JSONArray getConsNameAndIds(String countryName, String countyName) {
+		JSONArray ja = new JSONArray();
+		Map<Long,String> counties = HunterCacheUtil.getInstance().getConstituenciesMapForCounty(countryName, countyName);
+		for(Map.Entry<Long, String> entry : counties.entrySet()){
+			JSONObject jo = new JSONObject();
+			jo.put("consId", entry.getKey());
+			jo.put("consName", entry.getValue());
+			ja.put(jo);
+		}
+		return ja;
+	}
+
+	@Override
+	public JSONArray getConsWardNameAndIds(String countryName,String countyName, String consName) {
+		JSONArray ja = new JSONArray();
+		Map<Long,String> counties = HunterCacheUtil.getInstance().getConsWardsMapForCounty(countryName, countyName, consName);
+		for(Map.Entry<Long, String> entry : counties.entrySet()){
+			JSONObject jo = new JSONObject();
+			jo.put("consWardId", entry.getKey());
+			jo.put("consWardame", entry.getValue());
+			ja.put(jo);
+		}
+		return ja;
+	}
+	
+	
+	
 	
 }

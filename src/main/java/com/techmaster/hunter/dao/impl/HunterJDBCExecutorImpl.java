@@ -224,6 +224,18 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 		return null;
 	}
 
+	@Override
+	public Map<String, Object> executeQueryFirstRowMap(String query, List<Object> values) {
+		Map<String, Object> firstMap = new HashMap<>();
+		List<Map<String, Object>> list = executeQueryRowMap(query, values);
+		if(list != null && !list.isEmpty() && list.get(0) != null && !list.get(0).isEmpty() ){
+			firstMap.putAll(list.get(0));  
+		}else{
+			logger.debug("No data found for query : " + query); 
+		}
+		return firstMap;
+	}
+
 	
 	
 	

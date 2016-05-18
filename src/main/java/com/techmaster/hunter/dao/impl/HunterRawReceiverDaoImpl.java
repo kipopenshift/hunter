@@ -69,8 +69,8 @@ public class HunterRawReceiverDaoImpl implements HunterRawReceiverDao{
 
 	@Override
 	public List<HunterRawReceiver> getAllHunterRawReceiversByRawUser(HunterRawReceiverUser hunterRawReceiverUser) {
-		logger.debug("Getting all rawreceivers for user : " + hunterRawReceiverUser.getUserName()); 
-		List<HunterRawReceiver>  receivers = HunterHibernateHelper.executeQueryForObjList(HunterRawReceiver.class, "FROM HunterRawReceiver r WHERE r.givenByUserName ='" +hunterRawReceiverUser.getUserName()+"'");
+		logger.debug("Getting all rawreceivers for user : " + hunterRawReceiverUser.getRawUserName()); 
+		List<HunterRawReceiver>  receivers = HunterHibernateHelper.executeQueryForObjList(HunterRawReceiver.class, "FROM HunterRawReceiver r WHERE r.givenByUserName ='" +hunterRawReceiverUser.getRawUserName()+"'");
 		return receivers;
 	}
 

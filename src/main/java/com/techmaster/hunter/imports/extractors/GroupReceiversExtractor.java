@@ -135,7 +135,7 @@ public class GroupReceiversExtractor extends AbstractExcelExtractor<ReceiverGrou
 				String objStr = obj == null ? null : obj.toString();
 				String receiverType = null;  
 				if(i<rowData.size()-1){
-					receiverType = HunterUtility.getNullOrStrimgOfObj(objStr);
+					receiverType = HunterUtility.getStringOrNullOfObj(objStr);
 				}
 				// Receiver contact
 				if(i==0){

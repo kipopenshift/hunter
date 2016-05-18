@@ -128,7 +128,7 @@ public class TaskManagerImpl implements TaskManager{
 		if(rowListsMap != null && !rowListsMap.isEmpty()){
 			List<Object> rowList = rowListsMap.get(1);
 			if(rowList != null && !rowList.isEmpty()){
-				String obj = HunterUtility.getNullOrStrimgOfObj(rowList.get(0));
+				String obj = HunterUtility.getStringOrNullOfObj(rowList.get(0));
 				if(obj != null)
 					groupCount = Integer.parseInt(obj); 
 				logger.debug("Total receiver for task group : " + groupCount);

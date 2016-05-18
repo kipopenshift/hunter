@@ -30,6 +30,7 @@ public class HunterConstants {
 	public static final String HUNTER_TECH_ADMIN_USER = "1002";
 	public static final String RECEIVER_USER = "2000";
 	public static final String HUNTER_CLIENT_USER = "2001";
+	public static final String HUNTER_RAW_RECEIVER_USER = "2002";
 	
 	// Message delivery status
 	public static final String STATUS_STRING = "status";

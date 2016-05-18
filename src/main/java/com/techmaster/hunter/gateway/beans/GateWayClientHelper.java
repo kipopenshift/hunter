@@ -140,7 +140,7 @@ public class GateWayClientHelper {
 				List<Object> rowList = entry.getValue();
 				int i=0;
 				for(Object obj : rowList){
-					String strVal = HunterUtility.getNullOrStrimgOfObj(obj);
+					String strVal = HunterUtility.getStringOrNullOfObj(obj);
 					switch (i) {
 					case 0:
 						receiver.setReceiverId(HunterUtility.getLongFromObject(obj));

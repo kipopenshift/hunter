@@ -71,7 +71,7 @@ public class ReceiverGroupConverter {
 			logger.debug(HunterUtility.stringifyMap(map));  
 			ReceiverGroupJson group = new ReceiverGroupJson();
 			for(Map.Entry<String, Object> entry : map.entrySet()){
-				String stringVal = HunterUtility.getNullOrStrimgOfObj(entry.getValue());
+				String stringVal = HunterUtility.getStringOrNullOfObj(entry.getValue());
 				switch (entry.getKey()) {
 				case "GRP_ID":
 					group.setGroupId(HunterUtility.getLongFromObject(entry.getValue()));   
@@ -106,13 +106,13 @@ public class ReceiverGroupConverter {
 					group.setCretDate(HunterUtility.parseDate(entry.getValue().toString(), HunterConstants.DATE_FORMAT_STRING));       
 					break;
 				case "CRTD_BY":
-					group.setCreatedBy(HunterUtility.getNullOrStrimgOfObj(entry.getValue()));      
+					group.setCreatedBy(HunterUtility.getStringOrNullOfObj(entry.getValue()));      
 					break;
 				case "LST_UPDT_DATE":
 					group.setLastUpdate(HunterUtility.parseDate(entry.getValue().toString(), HunterConstants.DATE_FORMAT_STRING));        
 					break;
 				case "LST_UPDTD_BY":
-					group.setLastUpdatedBy(HunterUtility.getNullOrStrimgOfObj(entry.getValue()));      
+					group.setLastUpdatedBy(HunterUtility.getStringOrNullOfObj(entry.getValue()));      
 					break;
 				default:
 					break;

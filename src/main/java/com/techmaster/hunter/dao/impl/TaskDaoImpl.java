@@ -246,8 +246,8 @@ public class TaskDaoImpl implements TaskDao{
 		Map<Integer, List<Object>> rowMapList = hunterJDBCExecutor.executeQueryRowList(query, values);
 		if(rowMapList != null && !rowMapList.isEmpty()){
 			List<Object> stsList = rowMapList.get(1);
-			statuses.put(HunterConstants.STATUS_TYPE_DELIVERY, HunterUtility.getNullOrStrimgOfObj(stsList.get(0))); 
-			statuses.put(HunterConstants.STATUS_TYPE_LIFE, HunterUtility.getNullOrStrimgOfObj(stsList.get(1)));
+			statuses.put(HunterConstants.STATUS_TYPE_DELIVERY, HunterUtility.getStringOrNullOfObj(stsList.get(0))); 
+			statuses.put(HunterConstants.STATUS_TYPE_LIFE, HunterUtility.getStringOrNullOfObj(stsList.get(1)));
 		}
 		return statuses;
 	}

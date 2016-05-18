@@ -22,6 +22,7 @@
 		<property name="verifiedBy" column="VRYFD_BY"  type="java.lang.String"  />
 		<property name="verified" column="VRYFD"  type="org.hibernate.type.YesNoType" />
 		<property name="errorMessage" column="ERR_MSG"  type="java.lang.String"  />
+		<property name="givenByUserName" column="GVN_BY_USR_NAM"  type="java.lang.String"  />
 		
 		 <component name="auditInfo" class="com.techmaster.hunter.obj.beans.AuditInfo">
          	<property name="cretDate" column="CRET_DATE"  type="java.util.Date"/>

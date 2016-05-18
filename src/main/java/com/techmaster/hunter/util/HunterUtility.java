@@ -113,7 +113,7 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		} 
 	}
 	
-	public static String getNullOrStrimgOfObj(Object obj){
+	public static String getStringOrNullOfObj(Object obj){
 		if(obj == null) return null;
 		else return obj.toString();
 	}

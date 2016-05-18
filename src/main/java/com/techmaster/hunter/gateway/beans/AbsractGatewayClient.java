@@ -100,7 +100,7 @@ public abstract class AbsractGatewayClient implements GatewayClient {
 		if(!rowListsMap.isEmpty()){
 			for(Map.Entry<Integer, List<Object>> entry : rowListsMap.entrySet()){
 				List<Object> contactList = entry.getValue();
-				String contact = HunterUtility.getNullOrStrimgOfObj(contactList.get(0));
+				String contact = HunterUtility.getStringOrNullOfObj(contactList.get(0));
 				rowSet.add(contact);
 			}
 		}

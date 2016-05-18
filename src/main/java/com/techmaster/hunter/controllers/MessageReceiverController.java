@@ -143,7 +143,7 @@ public class MessageReceiverController extends HunterBaseController{
 			values.add(receiverGroupJson.getGroupId());
 			Map<Integer, List<Object>> rowListsMap = hunterJDBCExecutor.executeQueryRowList(query, values);
 			List<Object> rowList = rowListsMap.isEmpty() ? null : rowListsMap.get(1);
-			String oldType = rowList != null && !rowList.isEmpty() ? HunterUtility.getNullOrStrimgOfObj(rowList.get(0)) : null; 
+			String oldType = rowList != null && !rowList.isEmpty() ? HunterUtility.getStringOrNullOfObj(rowList.get(0)) : null; 
 			String newType = receiverGroupJson.getReceiverType();
 			if(!oldType.equalsIgnoreCase(newType)){
 				logger.debug("Cannot update the receiver type since it already has receivers in it"); 

@@ -22,6 +22,8 @@
 	<bean id="userRoleDao" class="com.techmaster.hunter.dao.impl.UserRoleDaoImpl"/>
 	<bean id="hunterUserDao" class="com.techmaster.hunter.dao.impl.HunterUserDaoImpl"/>
 	<bean id="hunterRawReceiverDao" class="com.techmaster.hunter.dao.impl.HunterRawReceiverDaoImpl"/>
+	<bean id="hunterRawReceiverUserDao" class="com.techmaster.hunter.dao.impl.HunterRawReceiverUserDaoImpl"/>
+	<bean id="rawReceiverService" class="com.techmaster.hunter.rawreceivers.RawReceiverServiceImpl"/>
 	
 	<bean name="gateWayClientHelper" class="com.techmaster.hunter.gateway.beans.GateWayClientHelper" factory-method="getInstance" >
 		<property name="regionService" ref="regionService" />

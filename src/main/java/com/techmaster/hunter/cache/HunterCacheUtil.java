@@ -2,8 +2,10 @@ package com.techmaster.hunter.cache;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Attr;
@@ -15,7 +17,10 @@ import com.techmaster.hunter.constants.HunterURLConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterMessageReceiverDao;
 import com.techmaster.hunter.dao.types.ReceiverRegionDao;
+import com.techmaster.hunter.obj.beans.Constituency;
+import com.techmaster.hunter.obj.beans.ConstituencyWard;
 import com.techmaster.hunter.obj.beans.Country;
+import com.techmaster.hunter.obj.beans.County;
 import com.techmaster.hunter.obj.beans.HunterEmailTemplateBean;
 import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
 import com.techmaster.hunter.obj.beans.TaskClientConfigBean;
@@ -274,6 +279,205 @@ public class HunterCacheUtil {
 		}
 		return configBean;
 	}
+	
+	public  Set<County> getCountiesBeans(String countryName){
+		 List<Country> cList = getAllCountries();
+		 for(Country c : cList){
+			 if(c.getCountryName().equals(countryName)){
+				 Set<County> counties = c.getCounties();
+				 return counties;
+			 }
+		 }
+		return new HashSet<>();
+	}
+	
+	public  Set<Constituency> getConsBeans(String countryName, String countyName){
+		 List<Country> cList = getAllCountries();
+		 for(Country c : cList){
+			 if(c.getCountryName().equals(countryName)){
+				 Set<County> counties = c.getCounties();
+				 if(counties != null && !counties.isEmpty()){
+					 for(County county : counties){
+						if(county.getCountyName().equals(countyName)){
+							return county.getConstituencies();
+						}
+					 }
+				 }
+			 }
+		 }
+		return new HashSet<>();
+	}
+	
+	public  Set<ConstituencyWard> getConsWardBeans(String countryName, String countyName, String consName){
+		 List<Country> cList = getAllCountries();
+		 for(Country c : cList){
+			 if(c.getCountryName().equals(countryName)){
+				 Set<County> counties = c.getCounties();
+				 if(counties != null && !counties.isEmpty()){
+					 for(County county : counties){
+						if(county.getCountyName().equals(countyName)){
+							Set<Constituency> constituencies = county.getConstituencies();
+							if(constituencies != null && !constituencies.isEmpty()){
+								for(Constituency cons : constituencies){
+									if(cons.getCnsttncyName().equals(consName)){
+										return cons.getConstituencyWards();
+									}
+								}
+							}
+						}
+					 }
+				 }
+			 }
+		 }
+		return new HashSet<>();
+	}
+	
+	public Map<Long,String> getCountiesMapForCountry(String countryName){
+		Map<Long,String> country = new HashMap<>();
+		 List<Country> cList = getAllCountries();
+		 for(Country c : cList){
+			 if(c.getCountryName().equals(countryName)){
+				 Set<County> counties = c.getCounties();
+				 if(counties != null && !counties.isEmpty()){
+					 for(County county : counties){
+						 country.put(county.getCountyId(), county.getCountyName());
+					 }
+				 }
+				 break;
+			 }
+		 }
+		return country;
+	}
+	
+	public Map<Long,String> getConstituenciesMapForCounty(String countryName, String countyName){
+		Set<County> counties = getCountiesBeans(countryName);
+		Map<Long,String> cons = new HashMap<>();
+		if(counties != null && !counties.isEmpty()){
+			for(County county : counties){
+				if(county.getCountyName().equals(countyName)){
+					for(Constituency constituency : county.getConstituencies()){
+						cons.put(constituency.getCnsttncyId(), constituency.getCnsttncyName());
+					}
+					return cons;
+				}
+			}
+		}
+		return new HashMap<>();
+	}
+	
+	public Map<Long,String> getConsWardsMapForCounty(String countryName, String countyName, String consName){
+		Set<Constituency> constituencies = getConsBeans(countryName, countyName);
+		Map<Long,String> wards = new HashMap<>();
+		if(constituencies != null && !constituencies.isEmpty()){
+			for(Constituency constituency : constituencies){
+				if(constituency.getCnsttncyName().equals(consName)){
+					for(ConstituencyWard ward : constituency.getConstituencyWards()){
+						wards.put(ward.getWardId(), ward.getWardName());
+					}
+					return wards;
+				}
+			}
+		}
+		return wards;
+	}
+	
+	public Map<Long,String> getNameIdForId(String type, Map<String, Long> regionIds){
+		
+		Map<Long,String> nameIds = new HashMap<>();
+		Map<String,Long> values = new HashMap<>();
+		
+		if(HunterConstants.RECEIVER_LEVEL_COUNTRY.equals(type)){
+			List<Country> countries = getAllCountries();
+			for(Country country : countries){
+				if(country.getCountryId().equals(regionIds.get(HunterConstants.RECEIVER_LEVEL_COUNTRY))){
+					nameIds.put(country.getCountryId(), country.getCountryName());
+					logger.debug(HunterUtility.stringifyMap(nameIds)); 
+					return nameIds;
+				}
+			}
+			
+		}else if(HunterConstants.RECEIVER_LEVEL_COUNTY.equals(type)){
+			
+			values.clear();
+			values.put(HunterConstants.RECEIVER_LEVEL_COUNTRY, regionIds.get(HunterConstants.RECEIVER_LEVEL_COUNTRY) ); 
+			Map<Long,String> country = getNameIdForId(HunterConstants.RECEIVER_LEVEL_COUNTRY, values);
+			logger.debug(HunterUtility.stringifyMap(country)); 
+			
+			String countryName = country.get(Long.parseLong(regionIds.get(HunterConstants.RECEIVER_LEVEL_COUNTRY)+""));
+			Map<Long,String> counties = getCountiesMapForCountry(countryName);  
+			nameIds.clear();
+			
+			for(Map.Entry<Long, String> entry : counties.entrySet()){
+				if(entry.getKey().equals(regionIds.get(HunterConstants.RECEIVER_LEVEL_COUNTY))){
+					nameIds.put(entry.getKey(), entry.getValue());
+					logger.debug(HunterUtility.stringifyMap(nameIds)); 
+					return nameIds;
+				}
+			}
+			  
+		}else if(HunterConstants.RECEIVER_LEVEL_CONSITUENCY.equals(type)){
+			
+			values.clear();
+			values.put(HunterConstants.RECEIVER_LEVEL_COUNTRY, regionIds.get(HunterConstants.RECEIVER_LEVEL_COUNTRY)); 
+			Map<Long,String> country = getNameIdForId(HunterConstants.RECEIVER_LEVEL_COUNTRY, values);
+			logger.debug(HunterUtility.stringifyMap(country)); 
+			
+			values.put(HunterConstants.RECEIVER_LEVEL_COUNTY, regionIds.get(HunterConstants.RECEIVER_LEVEL_COUNTY)); 
+			Map<Long,String> county = getNameIdForId(HunterConstants.RECEIVER_LEVEL_COUNTY, values);
+			logger.debug(HunterUtility.stringifyMap(county));
+			
+			String countryName = country.get(Long.parseLong(regionIds.get(HunterConstants.RECEIVER_LEVEL_COUNTRY)+""));
+			String countyName = county.get(Long.parseLong(regionIds.get(HunterConstants.RECEIVER_LEVEL_COUNTY)+""));
+			
+			Map<Long,String> consituencies = getConstituenciesMapForCounty(countryName, countyName);  
+			nameIds.clear();
+			
+			for(Map.Entry<Long, String> entry : consituencies.entrySet()){
+				if(entry.getKey().equals(regionIds.get(HunterConstants.RECEIVER_LEVEL_CONSITUENCY))){
+					nameIds.put(entry.getKey(), entry.getValue());
+					logger.debug(HunterUtility.stringifyMap(nameIds)); 
+					return nameIds;
+				}
+			}
+			  
+		}else if(HunterConstants.RECEIVER_LEVEL_WARD.equals(type)){
+			
+			values.clear();
+			values.put(HunterConstants.RECEIVER_LEVEL_COUNTRY, regionIds.get(HunterConstants.RECEIVER_LEVEL_COUNTRY)); 
+			Map<Long,String> country = getNameIdForId(HunterConstants.RECEIVER_LEVEL_COUNTRY, values);
+			logger.debug(HunterUtility.stringifyMap(country)); 
+			
+			values.put(HunterConstants.RECEIVER_LEVEL_COUNTY, regionIds.get(HunterConstants.RECEIVER_LEVEL_COUNTY)); 
+			Map<Long,String> county = getNameIdForId(HunterConstants.RECEIVER_LEVEL_COUNTY, values);
+			logger.debug(HunterUtility.stringifyMap(county));
+			
+			values.put(HunterConstants.RECEIVER_LEVEL_CONSITUENCY, regionIds.get(HunterConstants.RECEIVER_LEVEL_CONSITUENCY)); 
+			Map<Long,String> constituency = getNameIdForId(HunterConstants.RECEIVER_LEVEL_CONSITUENCY, values);
+			logger.debug(HunterUtility.stringifyMap(constituency));
+			
+
+			String countryName = country.get(Long.parseLong(regionIds.get(HunterConstants.RECEIVER_LEVEL_COUNTRY)+""));
+			String countyName = county.get(Long.parseLong(regionIds.get(HunterConstants.RECEIVER_LEVEL_COUNTY)+""));
+			String consName = constituency.get(Long.parseLong(regionIds.get(HunterConstants.RECEIVER_LEVEL_CONSITUENCY)+""));  
+			
+			Map<Long,String> wards = getConsWardsMapForCounty(countryName,countyName,consName);  
+			nameIds.clear();
+			
+			for(Map.Entry<Long, String> entry : wards.entrySet()){
+				if(entry.getKey().equals(regionIds.get(HunterConstants.RECEIVER_LEVEL_WARD))){
+					nameIds.put(entry.getKey(), entry.getValue());
+					logger.debug(HunterUtility.stringifyMap(nameIds)); 
+					return nameIds;
+				}
+			}
+			  
+		}
+		
+		return nameIds;
+	}
+	
+	
+	
 	
 	
 }

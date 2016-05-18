@@ -93,10 +93,36 @@
 		   Gets country name, code and id for countyId.
 		</description>
 		<statement>
-			SELECT cn.CNTRY_ID as countryId, ct.CNTRY_NAM as countryName, ct.CNTRY_CODE as countryCode,
+			SELECT 
+			  cn.CNTRY_ID as country_id, 
+			  ct.CNTRY_NAM as country_name, 
+			  ct.CNTRY_CODE as country_code,
+			  cn.CNTY_ID as county_id,
+			  cn.CNTY_NAM
 			FROM cnty cn, Cntry ct
 			where ct.CNTRY_ID = cn.CNTRY_ID
 			and cn.CNTY_ID = ?
+		</statement>
+	</query>
+	<query id="getCountryCountyConsNameIdAndForConsId">
+		<description>
+		   Gets country name, code and id for countyId.
+		</description>
+		<statement>
+			SELECT
+				cn.CNTRY_ID as country_id, 
+				ct.CNTRY_NAM as country_name, 
+				cn.CNTY_ID as county_id,
+				cn.CNTY_NAM,
+		        cns.CNSTTNCY_ID,
+		        cns.CNSTTNCY_NAM
+		    FROM 
+		        cnty cn, 
+		        Cntry ct,
+		        CNSTTNCY cns
+			WHERE ct.CNTRY_ID = cn.CNTRY_ID
+		    AND cn.CNTY_ID = cns.CNTY_ID
+		    AND cns.CNSTTNCY_ID = ?
 		</statement>
 	</query>
 	<query id="getCntryCntyCodeNameId">
@@ -443,6 +469,36 @@
 		<statement>
 			SELECT clnt.HNTR_CLNT_ID, usr.FRST_NAM, usr.LST_NAM,usr.USR_NAM FROM HNTR_CLINT clnt, HNTR_USR usr
 			WHERE clnt.HNTR_CLNT_ID = usr.USR_ID
+		</statement>
+	</query>
+	<query id="getRawReceiverUserData">
+		<description>
+		    Gets the details of a raw receiver user of the given user name.
+		</description>
+		<statement>
+			SELECT r.ALL_CNTCT_NO "all",
+			  r.CMNPSTN "compensation",
+			  r.CNSTTNCY "cons",
+			  r.CNTRY "country",
+			  r.CNTY "county",
+			  r.RW_USR_NAM "name",
+			  r.USR_ID "id",
+			  CASE
+			    WHEN r.VLLGE IS NULL
+			    THEN ' '
+			    ELSE r.VLLGE
+			  END AS "village",
+			  r.VRFD_CNTCT_NO "verified",
+			  r.WRD "ward",
+			  u.PHN_NUMBR "phone",
+			  u.FRST_NAM "firstname",
+			  u.LST_NAM "lastname",
+        	  u.FRST_NAM || ' ' ||  u.LST_NAM "fullname",
+			  u.EMAIL "email"
+			FROM HNTR_RW_RCVR_USR r
+			LEFT JOIN HNTR_USR u
+			ON r.RW_USR_NAM    = u.USR_NAM
+			WHERE r.RW_USR_NAM = ?
 		</statement>
 	</query>
 	<query id="getGroupImportBeanDetails">

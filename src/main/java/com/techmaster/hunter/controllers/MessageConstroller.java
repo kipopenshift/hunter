@@ -290,10 +290,10 @@ public class MessageConstroller extends HunterBaseController{
 			
 			String userName = getUserName();
 			Long taskId = HunterUtility.getLongFromObject(params.get("taskId"));
-			String owner = HunterUtility.getNullOrStrimgOfObj(params.get("msgOwner"));
+			String owner = HunterUtility.getStringOrNullOfObj(params.get("msgOwner"));
 			Long providerId = HunterUtility.getLongFromObject(params.get("providerId"));
-			String msgSts = HunterUtility.getNullOrStrimgOfObj(params.get("msgSts"));
-			String msgText = HunterUtility.getNullOrStrimgOfObj(params.get("msgText"));
+			String msgSts = HunterUtility.getStringOrNullOfObj(params.get("msgSts"));
+			String msgText = HunterUtility.getStringOrNullOfObj(params.get("msgText"));
 			Task task = taskDao.getTaskById(taskId);
 			
 			if(task != null && HunterConstants.MESSAGE_TYPE_TEXT.equals(task.getTskMsgType())){

@@ -113,11 +113,11 @@ public class ReceiverGroupDaoImpl implements ReceiverGroupDao{
 		int indx = 0;
 		for(Map.Entry<Integer, List<Object>> entry : rowMapLists.entrySet()){
 			List<Object> rowList = entry.getValue(); 
-			String fullName = HunterUtility.getNullOrStrimgOfObj( rowList.get(0));
-			String originalFileName = HunterUtility.getNullOrStrimgOfObj( rowList.get(1));
-			String creationDate = HunterUtility.getNullOrStrimgOfObj( rowList.get(2));
-			String importId = HunterUtility.getNullOrStrimgOfObj( rowList.get(3));
-			String status = HunterUtility.getNullOrStrimgOfObj( rowList.get(4));
+			String fullName = HunterUtility.getStringOrNullOfObj( rowList.get(0));
+			String originalFileName = HunterUtility.getStringOrNullOfObj( rowList.get(1));
+			String creationDate = HunterUtility.getStringOrNullOfObj( rowList.get(2));
+			String importId = HunterUtility.getStringOrNullOfObj( rowList.get(3));
+			String status = HunterUtility.getStringOrNullOfObj( rowList.get(4));
 			JSONObject json = new JSONObject();
 			json.put("fullName", fullName);
 			json.put("originalFileName", originalFileName);

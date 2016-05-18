@@ -9,6 +9,8 @@ var progressSpinner = "<span id='progressSpinnerHolderSpan' style='width:100%;fo
 
 $("document").ready(function(){
 	
+	getRawReceiverUsers();
+	
 	dataTable = $('#fieldProfileDataTable').DataTable( {
 		 "ajax": {
 	        "dataType": 'json',
@@ -72,11 +74,14 @@ $("document").ready(function(){
 	
 	$("#fieldProfileDataTable_filter input").attr("placeholder","Search Contact");
 	$("#fieldProfileDataTable_filter").css({"width":"100%", "margin-bottom":"1px"});  
-	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:3.5%;margin-top:-8px;" ><button class="ui-btn ui-icon-plus ui-btn-icon-left" onClick="populatePopupForParams(\'0_NewContact\')"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>New</span></button></span>');
+	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:3.5%;margin-top:-8px;" ><button class="ui-btn ui-icon-plus ui-btn-icon-left" onClick="populatePopupForParams(\'0_NewContact\')" id="createNewContactButt"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>New</span></button></span>');
 	bindDataTableActionButtons();
 	$('#fieldProfileDataTable').on( 'draw.dt', function () {
 		bindDataTableActionButtons();
 	} );
+	
+	validateBasicProfile();
+	loadLogout();
 });
 
 function getBaseURL(loc) {
@@ -90,7 +95,7 @@ function getQuotedParam(param){
 }
 
 function defineAffirmButt(text, onClick, jClass){
-	var affirm = '<center><a href="#" onClick="'+ onClick +'" class="'+ jClass +'" style="margin:10px;border:1px solid #216365;border-radius:5px;color:#0E4244;" >'+ text +'</a></center>';
+	var affirm = '<center><a href="#" id="defineAffirmButt" onClick="'+ onClick +'" class="'+ jClass +'" style="margin:10px;border:1px solid #216365;border-radius:5px;color:#0E4244;" >'+ text +'</a></center>';
 	$("#affirmPopupAction").html(affirm);
 }
 
@@ -107,19 +112,6 @@ function getDataTableJson(pId){
 	}
 }
 
-function validateUploadedPhoto(){
-	var fileInput = $("#editProfilePhotoInput").files;
-	var msg = "Profile picture must be one of formats : jpeg,png,gif or bmp";
-	if(fileInput && fileInput.files[0]){
-		var reader = new FileReader();
-        reader.onload = function (e) {
-            alert(e.target.result);
-        };
-	}else{
-		msg = "Please upload photo first!";
-	}
-	$("#hunterFieldPopupContainer td[data-name='filePhotoErrMsg']").text(msg);
-}
 
 
 
@@ -142,9 +134,7 @@ function populatePopupForParams(param){
 	$("#affirmPopupAction").empty();
 	
 	if(func == 'DeleteContact'){
-		var receiver = getDataTableJson(params[0]);
-		var contact = receiver["receiverContact"],firstName = receiver["firstName"];
-		var html = "<h4 id='hunterNotificationMsg'  style='color:red;text-align:center;' >Are you sure you want to delete : "+ contact + " ( " + firstName +" )</h4>";
+		var html = "<h4 id='hunterNotificationMsg'  style='color:red;text-align:center;' >Are you sure you want to delete this record?</h4>";
 		$("#hunterFieldPopupContainer").append(html);
 		jClass="ui-btn ui-icon-delete ui-btn-icon-left";
 		defineAffirmButt("Delete","deleteContactAndRefresh('"+ params[0] +"')", jClass );
@@ -275,12 +265,12 @@ function getRegionDataAndUpdate(selector, url, isEdit, contact){
 		valName = "countyId";
 		isCounties = true;
 	}else if( url.indexOf("constituencies") != -1 ){
-		txtName = "constituencyName";
-		valName = "constituencyId";
+		txtName = "consName";
+		valName = "consId";
 		isConstituencies = true;
 	}else if( url.indexOf("constituencyWards") != -1 ){
-		txtName = "constituencyWardName";
-		valName = "constituencyWardId";
+		txtName = "consWardame";
+		valName = "consWardId";
 		isWards = true;
 	}
 	
@@ -292,11 +282,13 @@ function getRegionDataAndUpdate(selector, url, isEdit, contact){
 	    contentType : "application/json"
 	}).done(function(data) {
 		
+		data = $.parseJSON(data);
+		
 		if(data != null){
 			$(selector).empty();
 			for(var i=0; i<data.length;i++){
 				var region = data[i];
-				var value = region[valName], text = region[txtName];
+				var value = region[valName], text = region[txtName]; 
 				$(selector).append('<option value="'+ value +'">'+ text +'</option>');
 			}
 			
@@ -324,7 +316,7 @@ function getRegionDataAndUpdate(selector, url, isEdit, contact){
 		
 		
 	 }).fail(function(data) {
-		 alert(data.statusText + " (" + data.status + "). Please contact Production Support.");
+		 notifyError(data.statusText + " (" + data.status + "). Please contact Production Support.");
 	 });
 	
 	return r;
@@ -389,7 +381,7 @@ function getSelWard(){
 
 
 
-function onChangeCountry(selCountry_, selCounty){
+function onChangeCountry(selCountry_, contactData){
 	
 	var r = $.Deferred();
 	var isEdit = selCountry_ != null;
@@ -407,8 +399,8 @@ function onChangeCountry(selCountry_, selCounty){
 		selCountry = 1; /* Load Kenya by default */
 	}
 	
-	var url = getBaseURL("Hunter/region/action/counties/read/" + selCountry);
-	getRegionDataAndUpdate("#hunterFieldPopupContainer select[data-name='countyInput']", url, isEdit, selCounty);
+	var url = getBaseURL("Hunter/region/action/new/counties/read/" + selCountry);
+	getRegionDataAndUpdate("#hunterFieldPopupContainer select[data-name='countyInput']", url, isEdit, contactData);
 	
 	return r;
 }
@@ -421,7 +413,7 @@ function onChangeCounty(value, selCons){
 	if(value != null && value !== 'undefined'){
 		selCon = value;
 	}
-	var url = getBaseURL("Hunter/region/action/constituencies/read/" + selCon);
+	var url = getBaseURL("Hunter/region/action/new/constituencies/read/" + selCon);
 	getRegionDataAndUpdate("#hunterFieldPopupContainer select[data-name='consInput']", url, isEdit, null);
 	return r;
 }
@@ -433,7 +425,7 @@ function onChangeConstituency(value, selWard){
 	if(value != null && value !== 'undefined'){
 		selCons = value;
 	}
-	var url = getBaseURL("Hunter/region/action/constituencyWards/read/" + selCons);
+	var url = getBaseURL("Hunter/region/action/new/constituencyWards/read/" + selCons);
 	getRegionDataAndUpdate("#hunterFieldPopupContainer select[data-name='wardInput']", url, isEdit, null);
 	return r;
 }
@@ -452,7 +444,7 @@ function onChangeConstituency(value, selWard){
 function loadValuesForContactId(contactId){
 	
 	//called for new contact
-	if(loadValuesForContactId == null){
+	if(contactId == null){
 		onChangeCountry(null, null);
 		return;
 	}
@@ -508,7 +500,7 @@ function putProgressSpinnerOn(ele,message){
 
 function deleteContactAndRefresh(conId){
 	
-	$("#affirmPopupAction").attr("disabled","disabled");
+	$("#affirmPopupAction").attr("disabled","disabled"); 
 	
 	putProgressSpinnerOn($("#hunterNotificationMsg"),"Deleting...");
 	var userId = {"rawReceiverId" : conId};
@@ -521,24 +513,31 @@ function deleteContactAndRefresh(conId){
 	    dataType : "json", 
 	    contentType : "application/json"
 	}).done(function(data) {
+		closeHunterPopup1();
 		data = $.parseJSON(data);
-		if(data != null && data["status"] === 'success'){
-			execTimedFunc(500, "removeSpinnerAndCloseWithMesssage", [data["message"]]); 
-		}else if( data != null && data["status"] === 'Failed' ) {
-			execTimedFunc(500, "removeSpinnerAndCloseWithMesssage", [data["message"]]); 
+		var message='',status='';
+		for(key in data){
+			if(key == 'message'){
+				message = data[key];
+			}else{
+				status = data[key];
+			}
 		}
+		if(status == 'Failed')
+			status = 'error';
+		notifyAndRefresh(message, status);
 	 }).fail(function(data) {
 		 var message = data.statusText + " (" + data.status + "). Please contact Production Support.";
-		 execTimedFunc(500, "removeSpinnerAndCloseWithMesssage", [message]);
+		 notifyError(message);
 	 });
 }
-
 
 function disableActionButtonsInPopup(exception){
 
 }
 
 function removeSpinnerAndCloseWithMesssage(message){
+	alert(message);
 	$("#hunterNotificationMsg").html(message);
 }
 
@@ -578,7 +577,7 @@ function hasSpecialCharacters(value){
 }
 
 function getEditedProfileValuesAndSave(){
-	validateUploadedPhoto();
+	$("#editProfilePhotoForm").validate();
 }
 
 function getEditedValuesAndSave(id){
@@ -633,10 +632,13 @@ function getEditedValuesAndSave(id){
 		nextNumb++;
 		
 		
-		var table = $('#fieldProfileDataTable').dataTable();
-		console.log(table.fnGetData());
+		//var table = $('#fieldProfileDataTable').dataTable();
+		//console.log(table.fnGetData());
 		
-		if(!valid) return;
+		if(!valid){
+			notifyError("You entered incorrect data. Please correct it.");
+			return;
+		}
 		
 		
 		json["id"] 			= id;
@@ -649,8 +651,86 @@ function getEditedValuesAndSave(id){
 		json["cons"] 		= cons;
 		json["ward"] 		= ward;
 		
+		json = JSON.stringify(json);
+		
 		closeHunterPopup1();
-	
+		
+		$.ajax({
+			url: getBaseURL("Hunter/rawReceiver/action/create/rawReceiver"), 
+		    data : json,
+		    method: "POST",
+		    dataType : "json", 
+		    contentType : "application/json"
+		}).done(function(data) {
+			data = $.parseJSON(data);
+			var message='',status='';
+			for(key in data){
+				if(key == 'message'){
+					message = data[key];
+				}else{
+					status = data[key];
+				}
+			}
+			if(status == 'Failed')
+				status = 'error';
+			notifyAndRefresh(message, status);
+		 }).fail(function(data) {
+			 var message = data.statusText + " (" + data.status + "). Please contact Production Support.";
+			 notifyError(message);
+		 });
+				
+}
+
+function refreshDataTable(){
+	setTimeout( function () {
+		dataTable.ajax.reload();
+	},1000);
+}
+
+function notifyAndRefresh(message, type){
+	if(type === 'success' ){
+		notifySuccess(message);
+	}else if(type === 'error'){
+		notifyError(message);
+	}else if(type === 'warn'){
+		notifyWarn(message);
+	}else{
+		$.notify(message, type);
+	}
+	setTimeout( function () {
+		dataTable.ajax.reload();
+	},1500);
+}
+
+function ajaxPostDataForJsonResponseWthCllbck(data, contentType, dataType, method, url, callAfter,callException){
+	$.ajax({
+		url: url,
+	    data : data,
+	    method: method,
+	    dataType : dataType, 
+	    contentType : contentType
+	}).done(function(data) {
+		var code = callAfter + "('"+ JSON.stringify(data) +"')"; 
+		var func = new Function(code);
+		func();
+	 }).fail(function(data) {
+		 var code = callException + "()";   
+		 var func = new Function(code);
+		 func();
+		 notifyError(message, type)(data.statusText + " (" + data.status + "). Please contact Production Support.", "Error");
+	 });
+}
+
+function notifySuccess(message){
+	$.notify(message, "success");
+}
+
+function notifyError(message){
+	$.notify(message, "error");
+}
+
+function notifyWarn(message){
+	$.notify(message, "warn");
 }
 
 function loadPopup(param){
@@ -683,7 +763,70 @@ function bindDataTableActionButtons(){
     });
 }
 
+function getRawReceiverUsers(){
+	notifySuccess("Fetching your profile data...");
+	var url = getBaseURL("Hunter/rawReceiver/action/read/rawReceiverUser");
+	$.ajax({
+		url: url,
+	    data : null,
+	    method: "POST",
+	    dataType : "json", 
+	    contentType : "application/json"
+	}).done(function(data) {
+		
+		if(data != null){
+			
+			data = JSON.stringify(data);
+			data = $.parseJSON(data);
+			
+			$("#fieldUserTotalContacts").	text( data["all"] 		=== 'undefined' ? "" : data["all"] 		);
+			$("#fieldUserCountry").			text( data["country"] 	=== 'undefined' ? "" : data["country"] 	);
+			$("#fieldUserCounty").			text( data["county"] 	=== 'undefined' ? "" : data["county"] 	);
+			$("#fieldUserVerifiedContacts").text( data["verified"] 	=== 'undefined' ? "" : data["verified"] );
+			$("#fieldUserWard").			text( data["ward"] 		=== 'undefined' ? "" : data["ward"] 	);
+			$("#fieldUserPhones").			text( data["phone"] 	=== 'undefined' ? "" : data["phone"] 	);
+			$("#fieldUserEmail").			text( data["email"] 	=== 'undefined' ? "" : data["email"] 	);
+			$("#fieldUserConstituency").	text( data["cons"] 		=== 'undefined' ? "" : data["cons"] 	);
+			$("#fieldUserFullName").		text( data["fullname"] 	=== 'undefined' ? "" : data["fullName"] );
+			$("#fieldUserTotalPayout").		text( data["compensation"] === 'undefined' ? "" : data["compensation"] );
+			
+			notifySuccess("Successfully obtained your profile data");
+			
+		}else{
+			notifyError("Failed to obtain your profile data");
+		}
+		
+	 }).fail(function(data) {
+		 notifyError(data.statusText + " (" + data.status + "). Please contact Production Support.", "Error");
+	 });
+}
 
 
+function validateBasicProfile(){
+	$("#editProfilePhotoForm").validate({
+        rules: {
+        	editProfilePhotoInput: {
+                required: true,
+                accept: "gif|png|jpg|jpeg|pjpeg"                
+            }
+        },
+        
+        messages: {
+        	editProfilePhotoInput: {
+                required: "Empty file",
+                accept: "Wrong format!!"
+            }                  
+        },
+        
+        errorPlacement: function(error, element) {
+           notifyError(error);
+        }
+        
+    });
+}
 
+function loadLogout(){
+	var local = getBaseURL("Hunter/hunter/login/logout");
+	$("#logoutId").attr("href", local);
+}
 

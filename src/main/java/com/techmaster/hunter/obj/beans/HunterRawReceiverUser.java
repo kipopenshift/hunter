@@ -1,11 +1,12 @@
 package com.techmaster.hunter.obj.beans;
 
+import java.io.Serializable;
 
+public class HunterRawReceiverUser implements Serializable{
 
-public class HunterRawReceiverUser extends HunterUser{
-
-	private static final long serialVersionUID = -1035397971180469615L;
+	private static final long serialVersionUID = -5456753821824904218L;
 	
+	private Long userId;
 	private String rawUserName;
 	private float compensation;
 	private int allContctNo;
@@ -15,6 +16,7 @@ public class HunterRawReceiverUser extends HunterUser{
 	private String constituency;
 	private String consWard;
 	private String village;
+	private AuditInfo auditInfo;
 	
 	public float getCompensation() {
 		return compensation;
@@ -70,73 +72,45 @@ public class HunterRawReceiverUser extends HunterUser{
 	public void setRawUserName(String rawUserName) {
 		this.rawUserName = rawUserName;
 	}
-	
-	
+	public Long getUserId() {
+		return userId;
+	}
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+	public AuditInfo getAuditInfo() {
+		return auditInfo;
+	}
+	public void setAuditInfo(AuditInfo auditInfo) {
+		this.auditInfo = auditInfo;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + allContctNo;
-		result = prime * result + Float.floatToIntBits(compensation);
-		result = prime * result
-				+ ((consWard == null) ? 0 : consWard.hashCode());
-		result = prime * result
-				+ ((constituency == null) ? 0 : constituency.hashCode());
-		result = prime * result + ((country == null) ? 0 : country.hashCode());
-		result = prime * result + ((county == null) ? 0 : county.hashCode());
+		int result = 1;
 		result = prime * result
 				+ ((rawUserName == null) ? 0 : rawUserName.hashCode());
-		result = prime * result + ((village == null) ? 0 : village.hashCode());
-		result = prime * result + vrfdContctNo;
+		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
 		return result;
 	}
-	
-	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		HunterRawReceiverUser other = (HunterRawReceiverUser) obj;
-		if (allContctNo != other.allContctNo)
-			return false;
-		if (Float.floatToIntBits(compensation) != Float
-				.floatToIntBits(other.compensation))
-			return false;
-		if (consWard == null) {
-			if (other.consWard != null)
-				return false;
-		} else if (!consWard.equals(other.consWard))
-			return false;
-		if (constituency == null) {
-			if (other.constituency != null)
-				return false;
-		} else if (!constituency.equals(other.constituency))
-			return false;
-		if (country == null) {
-			if (other.country != null)
-				return false;
-		} else if (!country.equals(other.country))
-			return false;
-		if (county == null) {
-			if (other.county != null)
-				return false;
-		} else if (!county.equals(other.county))
-			return false;
 		if (rawUserName == null) {
 			if (other.rawUserName != null)
 				return false;
 		} else if (!rawUserName.equals(other.rawUserName))
 			return false;
-		if (village == null) {
-			if (other.village != null)
+		if (userId == null) {
+			if (other.userId != null)
 				return false;
-		} else if (!village.equals(other.village))
-			return false;
-		if (vrfdContctNo != other.vrfdContctNo)
+		} else if (!userId.equals(other.userId))
 			return false;
 		return true;
 	}
@@ -144,13 +118,15 @@ public class HunterRawReceiverUser extends HunterUser{
 	
 	@Override
 	public String toString() {
-		return "HunterRawReceiverUser [rawUserName=" + rawUserName
-				+ ", compensation=" + compensation + ", allContctNo="
-				+ allContctNo + ", vrfdContctNo=" + vrfdContctNo + ", country="
-				+ country + ", county=" + county + ", constituency="
-				+ constituency + ", consWard=" + consWard + ", village="
-				+ village + "]";
+		return "HunterRawReceiverUser [userId=" + userId + ", rawUserName="
+				+ rawUserName + ", compensation=" + compensation
+				+ ", allContctNo=" + allContctNo + ", vrfdContctNo="
+				+ vrfdContctNo + ", country=" + country + ", county=" + county
+				+ ", constituency=" + constituency + ", consWard=" + consWard
+				+ ", village=" + village + ", auditInfo=" + auditInfo + "]";
 	}
+	
+	
 	
 	
 	

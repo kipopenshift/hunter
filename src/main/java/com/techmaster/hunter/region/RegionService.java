@@ -3,6 +3,8 @@ package com.techmaster.hunter.region;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
+
 import com.techmaster.hunter.json.ReceiverRegionJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.Constituency;
@@ -60,6 +62,11 @@ public interface RegionService {
 	public Object[] getTrueHntrMsgRcvrCntFrTaskRgns(Long taskId);
 	
 	public void editReceiverRegion(Map<String,Object> params);
+	
+	public JSONArray getCountriesNameAndIds(String countryName);
+	public JSONArray getCountiesNameAndIds(String countryName);
+	public JSONArray getConsNameAndIds(String countryName,String countyName);
+	public JSONArray getConsWardNameAndIds(String countryName,String countyName, String consName);
 	
 }
 

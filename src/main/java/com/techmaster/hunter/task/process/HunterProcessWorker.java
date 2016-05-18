@@ -70,16 +70,16 @@ public class HunterProcessWorker implements TaskProcessWorker{
 			duration = endPoint - duration;
 			setDuration(duration, messages);
 			values.put(TaskProcessConstants.WORKER_MSG_COUNT, Long.toString(messages.size())); 
-			String responseCode = HunterUtility.getNullOrStrimgOfObj(response.get(TaskProcessConstants.RESPONSE_CODE)); 
+			String responseCode = HunterUtility.getStringOrNullOfObj(response.get(TaskProcessConstants.RESPONSE_CODE)); 
 			values.put(TaskProcessConstants.RESPONSE_CODE, responseCode); 
-			values.put(TaskProcessConstants.DURATION, HunterUtility.getNullOrStrimgOfObj(response.get(TaskProcessConstants.RESPONSE_DURATION)));  
-			String responseText = HunterUtility.getNullOrStrimgOfObj(response.get(TaskProcessConstants.RESPONSE_TEXT));
+			values.put(TaskProcessConstants.DURATION, HunterUtility.getStringOrNullOfObj(response.get(TaskProcessConstants.RESPONSE_DURATION)));  
+			String responseText = HunterUtility.getStringOrNullOfObj(response.get(TaskProcessConstants.RESPONSE_TEXT));
 			values.put(TaskProcessConstants.RESPONSE_TEXT, responseText);
-			values.put(TaskProcessConstants.CONN_STATUS, HunterUtility.getNullOrStrimgOfObj(response.get(TaskProcessConstants.CONN_STATUS)));
+			values.put(TaskProcessConstants.CONN_STATUS, HunterUtility.getStringOrNullOfObj(response.get(TaskProcessConstants.CONN_STATUS)));
 			processResponse(responseCode, responseText); 
 			logWorker(HunterUtility.stringifyMap(response));
-			values.put(TaskProcessConstants.ERROR_TYPE, HunterUtility.getNullOrStrimgOfObj(response.get(TaskProcessConstants.ERROR_TYPE))); 
-			values.put(TaskProcessConstants.ERROR_TYPE_RESPONSE, HunterUtility.getNullOrStrimgOfObj(response.get(TaskProcessConstants.ERROR_TYPE_RESPONSE))); 
+			values.put(TaskProcessConstants.ERROR_TYPE, HunterUtility.getStringOrNullOfObj(response.get(TaskProcessConstants.ERROR_TYPE))); 
+			values.put(TaskProcessConstants.ERROR_TYPE_RESPONSE, HunterUtility.getStringOrNullOfObj(response.get(TaskProcessConstants.ERROR_TYPE_RESPONSE))); 
 			values.put(TaskProcessConstants.WORKER_STATUS, workerStatus);
 			
 		} catch (Exception e) {

@@ -3,10 +3,11 @@ package com.techmaster.hunter.rawreceivers;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
+
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.HunterRawReceiver;
 import com.techmaster.hunter.obj.beans.HunterRawReceiverUser;
-import com.techmaster.hunter.obj.beans.HunterUser;
 
 public interface RawReceiverService {
 	
@@ -19,5 +20,7 @@ public interface RawReceiverService {
 	public Map<String,String> payRawReceiverUser(HunterRawReceiverUser rawReceiverUser);
 	public HunterRawReceiver createRawReceiver(Map<String,String> params, AuditInfo auditInfo);
 	public HunterRawReceiver updateRawReceiver(Map<String,String> params, AuditInfo auditInfo);
-
+	public void setRegionIdsForReceiver(HunterRawReceiver hunterRawReceiver);
+	public JSONObject createOrUpdateRawReceiver(Map<String,String> inParams, AuditInfo auditInfo);
+	
 }

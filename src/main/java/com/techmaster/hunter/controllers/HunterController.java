@@ -11,6 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.techmaster.hunter.util.HunterUtility;
+
 @Controller
 @RequestMapping("/hunter")
 public class HunterController {
@@ -51,6 +53,7 @@ public class HunterController {
 			logger.debug("User was NOT authenticated before. Returning...");
 		}
 		SecurityContextHolder.getContext().setAuthentication(null);
+		HunterUtility.getSessionForRequest(request).invalidate();
 	     return "access/logout";
 	}
 	

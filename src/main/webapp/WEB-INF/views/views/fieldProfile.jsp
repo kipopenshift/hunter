@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 <script src="<c:url value='/static/resources/scripts/plain/fieldProfile.js'/>"></script>
+<script src="<c:url value='/static/resources/scripts/plain/notify.js'/>"></script>
 <link rel="stylesheet" href="<c:url value='/static/resources/css/fieldProfile.css'/>" >
 <script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
@@ -14,6 +15,8 @@
 <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 
+<script src="<c:url value='/static/resources/scripts/plain/jqueryForm.js'/>"></script>
+<script src="<c:url value='/static/resources/scripts/plain/jQueryValidate.js'/>"></script>
 
 <title>Hunter Officer Profile</title>
 </head>
@@ -21,35 +24,36 @@
 <div id="fieldProfileContainer" style="margin-top:1%;"  > 
 
 <div style="height:20%;width:100%;text-align: center;" >
+<span style="margin-right:-1050px;margin-top:-10%;" ><a style="color:white;" id="logoutId" href="//hunter/login/logout" >Logout</a></span>
 <table style="table-layout: fixed;width:98%;margin-left:1%;" >
 	<tr>
-		<td  style="width:28%;">
+		<td  style="width:34%;">
 			<div class="profileDetDivs" >
 				<table style="font-size:16px;" class="profileDetTables"  >
 					<tr>
 						<td>Total Contacts  </td>
-						<td>1423</td>
+						<td id="fieldUserTotalContacts" ></td>
 					</tr>
 					<tr>
 						<td>Verified Contacts  </td>
-						<td>625</td>
+						<td id="fieldUserVerifiedContacts" ></td>
 					</tr>
 					<tr>
 						<td>Total Payout  </td>
-						<td>Ksh 1423.00</td>
+						<td>Ksh <span id="fieldUserTotalPayout" ></span></td>
 					</tr>
 					<tr>
 						<td>Available Payout  </td>
-						<td> Ksh 656.00</td>
+						<td> Ksh <span id="fieldUserAvailablePayout" ></span></td>
 					</tr>
 					<tr>
-						<td></td>
-						<td></td>
+						<td>Email </td>
+						<td  id="fieldUserEmail"  ></td>
 					</tr>
 				</table>
 			</div>
 		</td>
-		<td  style="width:34%;" >
+		<td  style="width:28%;" >
 			<div class="profileDetDivs" style="padding-bottom:10px;" >
 				<table style="table-layout: fixed; margin: 0 auto;" >
 					<tr>
@@ -70,7 +74,7 @@
 								<tr>
 									<td>
 										<div>
-											<span href="#" style="font-size: 18px;text-shadow: 2px 2px #009AB2;" > Kip Langat </span>
+											<span href="#" style="font-size: 18px;text-shadow: 2px 2px #009AB2;" id="fieldUserFullName"> Kip Langat </span>
 										</div>
 									</td>
 									<td><center><img width="30px" onclick="populatePopupForParams('0_EditUserProfile')" height="30px" style="border-radis:50%;cursor:pointer" src="http://cdn.mysitemyway.com/etc-mysitemyway/icons/legacy-previews/icons/black-white-pearls-icons-business/078108-black-white-pearl-icon-business-pencil7-sc49.png"  /></center></td>
@@ -86,23 +90,23 @@
 				<table style="font-size:16px;height: 100%;" class="profileDetTables"  >
 					<tr>
 						<td>Phone </td>
-						<td>7324704894</td>
+						<td  id="fieldUserPhone"  ></td>
 					</tr>
 					<tr>
-						<td>Email </td>
-						<td>hillangat@gmail.com</td>
+						<td>Country </td>
+						<td  id="fieldUserCountry"  ></td>
 					</tr>
 					<tr>
 						<td>County </td>
-						<td>Bomet</td>
+						<td  id="fieldUserCounty"  ></td>
 					</tr>
 					<tr>
 						<td>Constituency </td>
-						<td>Bomet Central</td>
+						<td  id="fieldUserConstituency"  ></td>
 					</tr>
 					<tr>
 						<td>Ward </td>
-						<td>Chesoen</td>
+						<td  id="fieldUserWard"  ></td>
 					</tr>
 				</table>
 			</div>
@@ -231,7 +235,7 @@
 
 <div class="popup" data-popup="popup-1">
     <div class="popup-inner">
-        <a class="popup-close" data-popup-close="popup-1" href="#">x</a>
+        <a id="popup-close-button" class="popup-close" data-popup-close="popup-1" href="#">x</a>
     </div>
 </div>
 
@@ -263,6 +267,15 @@
 		</table>
 	</div>
 </div>
+
+
+<div id="hunterMessageTemplateContainer" >
+	<div id="hunterMessageTemplate" >
+		
+	</div>
+</div>
+
+
 
 </body>
 </html>

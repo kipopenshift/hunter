@@ -13,6 +13,7 @@ public interface HunterJDBCExecutor {
 	public int executeUpdate(String query,List<Object> values);
 	public List<Object> getValuesList(Object[] array);
 	public Object executeQueryForOnReturn(String query, List<Object> values);
+	public Map<String, Object> executeQueryFirstRowMap(String query, List<Object> values);
 	
 	
 
