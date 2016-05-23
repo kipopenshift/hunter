@@ -65,6 +65,17 @@ body{
 	text-align: left;
 }
 
+.newContactConfirmButton{
+	height: 25px;
+	width: 40px;
+	border:1px solid gray;
+	background-color: yellow;	
+}
+
+.newContactConfirmButton:hover{
+	background-color: red;	
+}
+
  .hunterInputText{
  	border-radius:3px;
  	padding : 3px;
@@ -112,7 +123,7 @@ body{
 #hunterFieldPopupContainer tr td select{
 	margin-bottom:5px;
 	width:100%;
-	color:#009BF5;
+	color:#004065;
 }
 
 #fieldProfileDataTable thead{
@@ -176,8 +187,31 @@ body{
 	padding-left:15px;
 }
 
+#importNewContainerSubButt:hover{
+	border:4px solid white;
+	background-color: red;
+}
+
+#importNewContainerCloseButt:hover{
+	border:4px solid white;
+	background-color: red;
+}
+
 #createNewContactButt:hover{
 	color:white;
+	background-color:#5291B0;
+	border:4px solid white;
+}
+
+#downloadImportTempButt:hover{
+	color:white;
+	background-color:#5291B0;
+	border:4px solid white;
+}
+
+#importNewContactButt:hover{
+	color:white;
+	background-color:#5291B0;
 	border:4px solid white;
 }
 
@@ -257,7 +291,6 @@ body{
     /* box-shadow:0px 2px 6px rgba(0,0,0,1); */
     border-radius:5px;
     background-color: #9BF3FF;
-    font-size: 13px;
     border:1px solid #3D9CAB;
     
     -webkit-box-shadow: 0 0 5px 2px #389DAC;

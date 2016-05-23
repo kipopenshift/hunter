@@ -5,17 +5,23 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.proc.ProcedureHandler;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterRawReceiverDao;
 import com.techmaster.hunter.dao.types.HunterRawReceiverUserDao;
 import com.techmaster.hunter.obj.beans.AuditInfo;
+import com.techmaster.hunter.obj.beans.Constituency;
+import com.techmaster.hunter.obj.beans.ConstituencyWard;
+import com.techmaster.hunter.obj.beans.Country;
+import com.techmaster.hunter.obj.beans.County;
 import com.techmaster.hunter.obj.beans.HunterRawReceiver;
 import com.techmaster.hunter.obj.beans.HunterRawReceiverUser;
 import com.techmaster.hunter.region.RegionService;
@@ -185,21 +191,42 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 		String consName = hunterRawReceiver.getConsName();
 		String wardName = hunterRawReceiver.getConsWardName();
 		
-		String query = hunterJDBCExecutor.getQueryForSqlId("getRegionIdsForNamesToWard");
-		List<Object> values = new ArrayList<>();
-		values.add(countryName);
-		values.add(countyName);
-		values.add(consName);
-		values.add(wardName);
+		Long 
+		countryId 	= 0L,
+		countyId 	= 0L,
+		consId 		= 0L,
+		wardId 		= 0L;
 		
-		Map<String,Object> firstRow = hunterJDBCExecutor.executeQueryFirstRowMap(query, values);
-		
-		if(!firstRow.isEmpty()){
-			hunterRawReceiver.setCountryId(HunterUtility.getLongFromObject(firstRow.get("CNTRY_ID")));
-			hunterRawReceiver.setCountyId(HunterUtility.getLongFromObject(firstRow.get("CNTY_ID")));
-			hunterRawReceiver.setConsId(HunterUtility.getLongFromObject(firstRow.get("CNSTTNCY_ID")));
-			hunterRawReceiver.setConsWardId(HunterUtility.getLongFromObject(firstRow.get("WRD_ID"))); 
+		List<Country> countries = HunterCacheUtil.getInstance().getAllCountries();
+		country:for(Country country : countries){
+			if(country.getCountryName().equals(countryName)){
+				countryId = country.getCountryId();
+				Set<County> counties = country.getCounties();
+				for(County county : counties){
+					if(county.getCountyName().equals(countyName)){
+						countyId = county.getCountryId();
+						Set<Constituency> constituencies = county.getConstituencies();
+						for(Constituency constituency : constituencies) {
+							if(constituency.getCnsttncyName().equals(consName)){
+								consId = constituency.getCnsttncyId();
+								Set<ConstituencyWard> wards = constituency.getConstituencyWards();
+								for(ConstituencyWard ward : wards){
+									if(ward.getWardName().equals(wardName)){
+										wardId = ward.getWardId();
+										break country;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
+		
+		hunterRawReceiver.setCountryId(countryId);
+		hunterRawReceiver.setCountyId(countyId);
+		hunterRawReceiver.setConsId(consId);
+		hunterRawReceiver.setConsWardId(wardId); 
 		
 	}
 
@@ -215,19 +242,16 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 		regionsIds.put(HunterConstants.RECEIVER_LEVEL_CONSITUENCY, Long.parseLong(rawReceiverData.get("cons")+""));
 		regionsIds.put(HunterConstants.RECEIVER_LEVEL_WARD, Long.parseLong(rawReceiverData.get("ward")+""));
 		
-		Map<String, Object> inParams = new HashMap<>();
-		inParams.put("country_id", rawReceiverData.get("country"));
-		inParams.put("county_id", rawReceiverData.get("county"));
-		inParams.put("constituency_id", rawReceiverData.get("cons"));
-		inParams.put("constituency_ward_id", rawReceiverData.get("ward"));
+		Map<Long,String> country = HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_COUNTRY, regionsIds);
+		Map<Long,String> county = HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_COUNTY, regionsIds);
+		Map<Long,String> constituency = HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_CONSITUENCY, regionsIds);
+		Map<Long,String> ward = HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_WARD, regionsIds);
 		
-		Map<String, Object> countryNames = get_region_names_for_ids.execute_(inParams);
-		logger.debug(HunterUtility.stringifyMap(countryNames));  
+		String countryName = country.get(regionsIds.get(HunterConstants.RECEIVER_LEVEL_COUNTRY)); 
+		String countyName = county.get(regionsIds.get(HunterConstants.RECEIVER_LEVEL_COUNTY));
+		String constituencyName = constituency.get(regionsIds.get(HunterConstants.RECEIVER_LEVEL_CONSITUENCY));
+		String wardName = ward.get(regionsIds.get(HunterConstants.RECEIVER_LEVEL_WARD));
 		
-		String country = HunterUtility.getStringOrNullOfObj(countryNames.get("country_name")); 
-		String county = HunterUtility.getStringOrNullOfObj(countryNames.get("county_name")); 
-		String constituency = HunterUtility.getStringOrNullOfObj(countryNames.get("constituency_name"));
-		String consWard = HunterUtility.getStringOrNullOfObj(countryNames.get("constituency_ward_name"));
 		
 		Long rawReceiverId = HunterUtility.getLongFromObject(rawReceiverData.get("id"));
 		int version = 1;
@@ -246,10 +270,10 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 			receiver.setFirstName(rawReceiverData.get("firstName"));
 			receiver.setLastName(rawReceiverData.get("lastName"));
 			receiver.setGivenByUserName(auditInfo.getLastUpdatedBy());
-			receiver.setCountryName(country);
-			receiver.setCountyName(county);
-			receiver.setConsName(constituency);
-			receiver.setConsWardName(consWard);
+			receiver.setCountryName(countryName);
+			receiver.setCountyName(countyName);
+			receiver.setConsName(constituencyName);
+			receiver.setConsWardName(wardName);
 			receiver.setReceiverVersion(version); 
 			receiver.setAuditInfo(HunterUtility.getAuditInfoFromRequestForNow(null, auditInfo.getLastUpdatedBy())); 
 			

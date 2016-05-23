@@ -57,6 +57,7 @@
 				<entry key="hunterJacksonMapper" value-ref="hunterJacksonMapper" />
 				<entry key="jdbcTemplate" value-ref="jdbcTemplate" />
 				<entry key="hunterRawReceiverDao" value-ref="hunterRawReceiverDao" />
+				<entry key="hunterRawReceiverUserDao" value-ref="hunterRawReceiverUserDao" />
 			</map>
 		</property>
 	</bean>

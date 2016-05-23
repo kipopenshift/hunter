@@ -14,8 +14,14 @@ public class HunterBaseController{
 		return userName;
 	}
 	
-	public AuditInfo getAuditInfo(){
+	protected AuditInfo getAuditInfo(){
 		return HunterUtility.getAuditInfoFromRequestForNow(null, getUserName());
+	}
+	
+	protected Authentication getAuthentication(){
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		auth.getDetails();
+		return auth;
 	}
 
 }

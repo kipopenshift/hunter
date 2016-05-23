@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -198,8 +199,12 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		else if(phoneNumber.matches("^[0-9]{1,3}[-\\.\\s]\\d{3}[-\\.\\s]\\d{3}[-\\.\\s]\\d{4}")) return true;
 		//validate phone numbers of format "2541234567890"
 		else if (phoneNumber.matches("\\d{13}")) return true;
+		//validate phone numbers of format "2541234567890"
+		else if (phoneNumber.matches("\\d{12}")) return true;
 		//validate phone numbers of format "1234567890"
 		else if (phoneNumber.matches("\\d{10}")) return true;
+		//validate phone numbers of format "726149750"
+		else if (phoneNumber.matches("\\d{9}")) return true;
         //validating phone number with -, . or spaces
         else if(phoneNumber.matches("\\d{3}[-\\.\\s]\\d{3}[-\\.\\s]\\d{4}")) return true;
         //validating phone number with extension length from 3 to 5
@@ -1028,6 +1033,13 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		   return where;	   
 	   }
 	
+	public static String getFlatNumFromExponetNumber(String exponent){
+		if(!HunterUtility.notNullNotEmpty(exponent)) 
+			return exponent;
+		BigDecimal bd = new BigDecimal(exponent);
+	    exponent = bd.longValue() + "";
+	    return exponent;
+	}
 	
 	public static void main(String[] args) {
 		Map<String,String> params = new HashMap<String, String>();
@@ -1039,5 +1051,7 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		String where = getWhrClsFrRcvrRgnTyp(HunterConstants.RECEIVER_LEVEL_VILLAGE, params);
 		System.out.println(where);  
 	}
+	
+	
 }
 

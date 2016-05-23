@@ -1,21 +1,31 @@
 package com.techmaster.hunter.controllers;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.techmaster.hunter.cache.HunterCacheUtil;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
+import com.techmaster.hunter.dao.types.HunterRawReceiverUserDao;
+import com.techmaster.hunter.enums.HunterUserRolesEnums;
+import com.techmaster.hunter.obj.beans.HunterRawReceiverUser;
 import com.techmaster.hunter.util.HunterUtility;
 
 @Controller
 @RequestMapping("/hunter")
-public class HunterController {
+public class HunterController extends HunterBaseController{
 	
 	private Logger logger = Logger.getLogger(getClass());
 	
@@ -38,8 +48,39 @@ public class HunterController {
 	
 	@RequestMapping(value="/login/after", method=RequestMethod.GET)
 	public String postLogin(){
-		//HunterBusinessEmailService.getInstance().send(HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION, null, HunterConstants.MAIL_TYPE_TASK_PROCESS_NOTIFICATION);
-		return "access/postLogin";
+		
+		Collection<GrantedAuthority> grantedAuthorities = getAuthentication().getAuthorities();
+		List<GrantedAuthority> authList = new ArrayList<>();
+		authList.addAll(grantedAuthorities);
+		
+		String homePage = "access/postLogin";
+		
+		for( GrantedAuthority grantedAuthority : grantedAuthorities ){
+			String userRole = grantedAuthority.getAuthority();
+			if(userRole.equals(HunterUserRolesEnums.HNTR_RW_MSG_RCVR_USR.getName())){
+				for(GrantedAuthority authority : grantedAuthorities){
+					if(HunterUserRolesEnums.ROLE_ADMIN.getName().equals(authority.getAuthority())){
+						return homePage;
+					}
+				}
+				
+				//if the user has not been registered as row user and is raw user, turn them away
+				HunterRawReceiverUserDao rawReceiverUserDao = HunterDaoFactory.getInstance().getDaoObject(HunterRawReceiverUserDao.class);
+				HunterRawReceiverUser rawReceiver = rawReceiverUserDao.getRawUserByUserName(getUserName()); 
+				if(rawReceiver == null){
+					return "views/fieldProfileNotFound";
+				}
+				
+				// refresh regions so it the page is fast enough for users.
+				if(!HunterCacheUtil.getInstance().isCountriesLoaded()){
+					HunterCacheUtil.getInstance().loadCountries();
+				}
+				return "views/fieldProfile";
+			}
+		}
+		
+		
+		return homePage;
 	}
 	
 	@RequestMapping(value="/login/logout", method=RequestMethod.GET)

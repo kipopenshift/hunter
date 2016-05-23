@@ -59,6 +59,7 @@ public class HunterConstants {
 	
 	// Contact type 
 	public static final String CONTACT_TYPE_TEXT = "TEXT";
+	public static final String CONTACT_TYPE_PHONE = "PHONE";
 	public static final String CONTACT_TYPE_EMAIL = "EMAIL";
 	public static final String CONTACT_TYPE_VOICE_MAIL = "VOICE_MAIL";
 	

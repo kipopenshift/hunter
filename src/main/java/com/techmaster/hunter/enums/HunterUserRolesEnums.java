@@ -7,7 +7,7 @@ public enum HunterUserRolesEnums {
 	ROLE_EXT_APP("ROLE_EXT_APP","External Application", 3),
 	ROLE_TASK_APPROVER("ROLE_TASK_APPROVER","Task Approver", 4),
 	ROLE_TASK_PROCESSOR("ROLE_TASK_PROCESSOR","Task Processor", 5),
-	HNTR_RW_MSG_RCVR_USR("FIELD_USER","Hunter Raw Message Receiver User", 6);
+	HNTR_RW_MSG_RCVR_USR("ROLE_RAW_USER","Hunter Raw Message Receiver User", 6);
 	
 	private final String name;
 	private final String label;

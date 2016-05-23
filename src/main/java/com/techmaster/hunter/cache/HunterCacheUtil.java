@@ -254,6 +254,12 @@ public class HunterCacheUtil {
 		HunterCache.getInstance().put(HunterConstants.COUNTRIES, countries);
 	}
 	
+	public boolean isCountriesLoaded(){
+		@SuppressWarnings("unchecked")
+		List<Country> countries = (List<Country>)HunterCache.getInstance().get(HunterConstants.COUNTRIES);
+		return countries != null && !countries.isEmpty();
+	}
+	
 	public List<Country> getAllCountries(){
 		@SuppressWarnings("unchecked")
 		List<Country> countries = (List<Country> )HunterCache.getInstance().get(HunterConstants.COUNTRIES); 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 
@@ -18,12 +19,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterAddressDao;
+import com.techmaster.hunter.dao.types.HunterRawReceiverUserDao;
 import com.techmaster.hunter.dao.types.HunterUserDao;
 import com.techmaster.hunter.dao.types.UserRoleDao;
 import com.techmaster.hunter.json.HunterUserJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.HunterAddress;
+import com.techmaster.hunter.obj.beans.HunterRawReceiverUser;
 import com.techmaster.hunter.obj.beans.HunterUser;
 import com.techmaster.hunter.obj.beans.UserRole;
 import com.techmaster.hunter.obj.converters.HunterUserConverter;
@@ -211,7 +215,12 @@ public class HunterAdminController extends HunterBaseController{
 	}
 	
 	@RequestMapping(value="/action/fieldProfile", method=RequestMethod.GET)
-	public String goToFieldProfile(){
+	public String goToFieldProfile(HttpServletResponse response){
+		HunterRawReceiverUserDao userDao = HunterDaoFactory.getInstance().getDaoObject(HunterRawReceiverUserDao.class);
+		HunterRawReceiverUser rawReceiverUser = userDao.getRawUserByUserName(getUserName());
+		if(rawReceiverUser == null){
+			return "views/fieldProfileNotFound";
+		}
 		return "views/fieldProfile";
 	}
 	

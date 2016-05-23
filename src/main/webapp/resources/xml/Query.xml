@@ -482,7 +482,7 @@
 			  r.CNTRY "country",
 			  r.CNTY "county",
 			  r.RW_USR_NAM "name",
-			  r.USR_ID "id",
+			  r.USR_ID "id",        
 			  CASE
 			    WHEN r.VLLGE IS NULL
 			    THEN ' '
@@ -494,7 +494,11 @@
 			  u.FRST_NAM "firstname",
 			  u.LST_NAM "lastname",
         	  u.FRST_NAM || ' ' ||  u.LST_NAM "fullname",
-			  u.EMAIL "email"
+			  u.EMAIL "email",
+        	  NVL( (SELECT c.CNTRY_ID || '' FROM CNTRY c WHERE c.CNTRY_NAM = r.CNTRY), ' ' )"countryid",
+        	  NVL( (SELECT t.CNTY_ID || '' FROM CNTRY c, CNTY t WHERE c.CNTRY_ID = t.CNTRY_ID and  t.CNTY_NAM = r.CNTY ), ' ' )"countyid",
+        	  NVL( (SELECT n.CNSTTNCY_ID || '' FROM CNTRY c, CNTY t, CNSTTNCY n WHERE n.CNTY_ID = t.CNTY_ID and t.CNTRY_ID = c.CNTRY_ID and n.CNSTTNCY_NAM = r.CNSTTNCY  ), ' ' )"consid",
+        	  NVL( (SELECT w.WRD_ID || '' FROM CNTRY c, CNTY t, CNSTTNCY n, CNSTTNCY_WRD w WHERE n.CNTY_ID = t.CNTY_ID and t.CNTRY_ID = c.CNTRY_ID and w.CNSTTNCY_ID = n.CNSTTNCY_ID and w.WRD_NAM = r.WRD  ), ' ' )"wardid"
 			FROM HNTR_RW_RCVR_USR r
 			LEFT JOIN HNTR_USR u
 			ON r.RW_USR_NAM    = u.USR_NAM

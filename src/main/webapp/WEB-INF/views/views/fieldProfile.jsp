@@ -73,9 +73,7 @@
 							<table>
 								<tr>
 									<td>
-										<div>
-											<span href="#" style="font-size: 18px;text-shadow: 2px 2px #009AB2;" id="fieldUserFullName"> Kip Langat </span>
-										</div>
+										<span href="#" style="font-size: 18px;text-shadow: 2px 2px #009AB2;" id="fieldUserFullName">Kip Langat</span>
 									</td>
 									<td><center><img width="30px" onclick="populatePopupForParams('0_EditUserProfile')" height="30px" style="border-radis:50%;cursor:pointer" src="http://cdn.mysitemyway.com/etc-mysitemyway/icons/legacy-previews/icons/black-white-pearls-icons-business/078108-black-white-pearl-icon-business-pencil7-sc49.png"  /></center></td>
 								</tr>
@@ -171,7 +169,7 @@
 		</table>
 	</div>
 	<div id="hunterFieldEditTemplateContainer" >
-		<table style="width:80%;margin-top:30px;margin-bottom:30px;margin-left:10%;table-layout: fixed;font-size: 16px;color:#11484E;font-weight: bold;" >
+		<table style="width:80%;margin-top:30px;margin-bottom:30px;margin-left:10%;table-layout: fixed;font-size: 13px;color:#11484E;font-weight: bold;" >
 			<tr data-tr='contactType' >
 				<td>Contact Type</td>
 				<td>
@@ -228,6 +226,22 @@
 	<div id="notificationContainer" >
 		<div id="hunterFieldNotification" >
 			
+		</div>
+	</div>
+	
+	<div id="importNewContainerTmplt" >
+		<div id="importNewContainer"  style="width:80%;margin-left:10%;" >
+			<form id="importNewContactForm" action="${pageContext.request.contextPath}/rawReceiver/action/rawReceiver/import/rawReceiver" method="POST" style="width:98%;margin-left:1%;"  enctype="multipart/form-data"  >
+				<h3 style="width:80%;margin-left:10%;" >Please upload your file below.</h3>
+				<h5 style="width:80%;margin-left:10%;color:brown;margin-bottom:30px;" >Note : Only .xlsx and .xls files are allowed.</h5> 
+				<input style="width:80%;margin-left:10%;margin-bottom:30px;border:1px solid #84BDC6;padding:15px;border-radius:5px;" onChange="updateFileSelected" id="importNewContactFile"  name="importNewContactFile" type="file" >
+				<table style="table-layout: fixed;width:100%;margin-bottom:30px;" >
+					<tr>
+						<td><button id="importNewContainerSubButt" type="submit" class="ui-btn ui-icon-carat-u ui-btn-icon-left" style="width:90%;margin-left:5%;border-radius:5px;color:#0089FF;background-color: #9BF3FF;border:1px solid #93CADB;" >Submit</button></td>
+						<td><a  id="importNewContainerCloseButt" style="width:90%;margin-left:5%;border-radius:5px;background-color: #9BF3FF;border:1px solid #93CADB;color:#0089FF;" href="#" onClick="closeHunterPopup1()" class="ui-btn ui-icon-forbidden ui-btn-icon-left">Close</a></td>
+					</tr>
+				</table>
+			</form>
 		</div>
 	</div>
 	

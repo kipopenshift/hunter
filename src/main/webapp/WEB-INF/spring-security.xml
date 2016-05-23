@@ -10,7 +10,10 @@
 		<intercept-url pattern="/hunter/login/page" filters="none" />
 		<intercept-url pattern="/hunter/login/logout" filters="none" />
 		<intercept-url pattern="/static/resources/**" filters="none" />
+		
 		<intercept-url pattern="/**" access="ROLE_USER,ROLE_ADMIN,ROLE_TASK_APPROVER,ROLE_TASK_PROCESSOR" />
+		<intercept-url pattern="/rawReceiver/**" access="ROLE_RAW_USER,ROLE_ADMIN" />
+		<intercept-url pattern="/admin/**" access="ROLE_ADMIN" />
 		
 		<form-login login-page='/hunter/login/page' default-target-url="/hunter/login/after" authentication-failure-url="/hunter/login/page"  />
 		<logout logout-success-url="/hunter/login/logout" />

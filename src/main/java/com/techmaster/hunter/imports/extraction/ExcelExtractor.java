@@ -29,6 +29,7 @@ public interface ExcelExtractor  {
 	public static final String REGION_SHEET_NAME = "REGIONS";
 	public static final String HUNTER_MSG_EXTRACTOR = "RECEIVERS";
 	public static final String RECEIVER_GROUP_RECEIVERS = "RECEIVERS";
+	public static final String RAW_RECEIVERS_SHEET_NAME = "RAW RECEIVERS";
 	
 	
 	/**

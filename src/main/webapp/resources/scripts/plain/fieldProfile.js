@@ -1,10 +1,13 @@
 
-var userData = null;
-var rotateEvent = null;
-var regionContainer = {"country":null,"county":null,"constituency":null,"ward":null, "level":null};
-var loadUserEditData = false;
-var selUserData = null;
-var dataTable = null;
+var userData = null,
+	rotateEvent = null,
+	regionContainer = {"country":null,"county":null,"constituency":null,"ward":null, "level":null},
+	loadUserEditData = false,
+	selUserData = null,
+	dataTable = null,
+	isFileSelected = false,
+	profileData = {};
+
 var progressSpinner = "<span id='progressSpinnerHolderSpan' style='width:100%;font-size:30px;color:#004B0A;' ><img src='http://localhost:8080/Hunter/static/resources/images/refreshing_spinner_new.gif' style='border-radius:50%' width='50' height='50'  /></span>";
 
 $("document").ready(function(){
@@ -67,13 +70,14 @@ $("document").ready(function(){
             	}
             }
               
-              
          ]
         
     });
 	
 	$("#fieldProfileDataTable_filter input").attr("placeholder","Search Contact");
-	$("#fieldProfileDataTable_filter").css({"width":"100%", "margin-bottom":"1px"});  
+	$("#fieldProfileDataTable_filter").css({"width":"100%", "margin-bottom":"1px"});
+	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:-3.5%;margin-top:-8px;" ><button class="ui-btn ui-icon-arrow-d ui-btn-icon-left" onClick="downloadImportTemplate()" id="downloadImportTempButt" classs="highlightborder"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>Template</span></button></span>');
+	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:-3.5%;margin-top:-8px;" ><button class="ui-btn ui-icon-arrow-u ui-btn-icon-left" onClick="launchImportStage()" id="importNewContactButt" classs="highlightborder"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>Import</span></button></span>');
 	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:3.5%;margin-top:-8px;" ><button class="ui-btn ui-icon-plus ui-btn-icon-left" onClick="populatePopupForParams(\'0_NewContact\')" id="createNewContactButt"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>New</span></button></span>');
 	bindDataTableActionButtons();
 	$('#fieldProfileDataTable').on( 'draw.dt', function () {
@@ -112,7 +116,21 @@ function getDataTableJson(pId){
 	}
 }
 
+function launchImportStage(){
+	$(".popup-inner").empty();
+	$(".popup-inner").html("<span style='width:10%;margin-left:45%;'>"+ progressSpinner +"&nbsp;&nbsp;&nbsp <span style='font-size:17px;' >Loading data...</span>");
+	$('[data-popup="popup-1"]').fadeIn(200, function(){
+		$(".popup-inner").empty();
+		$(".popup-inner").append("<div id='hunterFieldPopupContainer' ></div>"); 
+		var html = $("#importNewContainerTmplt").html();
+		$("#hunterFieldPopupContainer").append(html);
+	});
+}
 
+function downloadImportTemplate(){
+	var url = getBaseURL("Hunter/rawReceiver/action/download/template");
+	window.open(url);
+}
 
 
 function readURL(input) {
@@ -133,8 +151,11 @@ function populatePopupForParams(param){
 	
 	$("#affirmPopupAction").empty();
 	
-	if(func == 'DeleteContact'){
-		var html = "<h4 id='hunterNotificationMsg'  style='color:red;text-align:center;' >Are you sure you want to delete this record?</h4>";
+	if(func === 'ImportContact'){
+		alert("returning..."); 
+		return;
+	}else if(func == 'DeleteContact'){
+		var html = "<h4 id='hunterNotificationMsg'  style='color:#C91414;text-align:center;' >Are you sure you want to delete this record?</h4>";
 		$("#hunterFieldPopupContainer").append(html);
 		jClass="ui-btn ui-icon-delete ui-btn-icon-left";
 		defineAffirmButt("Delete","deleteContactAndRefresh('"+ params[0] +"')", jClass );
@@ -149,7 +170,7 @@ function populatePopupForParams(param){
 		$(".popup-inner").empty();
 		$(".popup-inner").html("<span style='width:10%;margin-left:45%;'>"+ progressSpinner +"&nbsp;&nbsp;&nbsp Loading data...</span>");
 		var html = $("#hunterFieldEditTemplateContainer").html();
-		$('[data-popup="popup-1"]').fadeIn(500, function(){
+		$('[data-popup="popup-1"]').fadeIn(200, function(){
 			$(".popup-inner").empty();
 			$(".popup-inner").append("<div id='hunterFieldPopupContainer' ></div>"); 
 			$("#hunterFieldPopupContainer").append(html);
@@ -165,7 +186,7 @@ function populatePopupForParams(param){
 		$(".popup-inner").empty();
 		$(".popup-inner").html("<span style='width:10%;margin-left:45%;'>"+ progressSpinner +"&nbsp;&nbsp;&nbsp Loading data...</span>");
 		var html = $("#hunterFieldEditTemplateContainer").html();
-		$('[data-popup="popup-1"]').fadeIn(500, function(){
+		$('[data-popup="popup-1"]').fadeIn(200, function(){
 			$(".popup-inner").empty();
 			$(".popup-inner").append("<div id='hunterFieldPopupContainer' ></div>"); 
 			$("#hunterFieldPopupContainer").append(html);
@@ -187,11 +208,15 @@ function populatePopupForParams(param){
 			var userProfile = $("#hunterEditUserProfileCont").html();
 			$("#hunterFieldPopupContainer").prepend(userProfile);
 			
+			$("#hunterFieldPopupContainer input[data-name='firstName']").attr("value", profileData["firstname"]);
+			$("#hunterFieldPopupContainer input[data-name='lastName']").attr("value", profileData["lastname"]);
+			$("#hunterFieldPopupContainer input[data-name='phoneNumber']").attr("value", profileData["phone"]);
+			$("#hunterFieldPopupContainer input[data-name='email']").attr("value", profileData["email"]); 
 			
 			selUserData 				= {"countyId":null,"constituencyId":null,"consWardId":null};
-			selUserData["countyId"] 		= 4;
-			selUserData["constituencyId"]	= 8;
-			selUserData["consWardId"]		= 32;
+			selUserData["countyId"] 		= profileData["countyid"];
+			selUserData["constituencyId"]	= profileData["consid"];
+			selUserData["consWardId"]		= profileData["wardid"];
 			
 			onChangeCountry(1, selUserData);
 			
@@ -362,6 +387,20 @@ function bindRegionsDrops(){
 	$("#hunterFieldPopupContainer select[data-name='countryInput']").bind("change", function(){ onChangeCountry(null, null); });
 	$("#hunterFieldPopupContainer select[data-name='countyInput']").bind("change", function(){ onChangeCounty(null, null); });
 	$("#hunterFieldPopupContainer select[data-name='consInput']").bind("change", function(){ onChangeConstituency(null, null); });
+}
+
+function updateFileSelected(){
+	isFileSelected = true;
+}
+
+function submitImportNewContactForm(){
+	if(isFileSelected){
+		$("#importNewContactForm").submit();
+		notifySuccess("Your file is getting uploaded..."); 
+		isFileSelected = false;
+	}else{
+		notifyError("Please select file to upload first."); 
+	}
 }
 
 /*----------------------------------------------------------------------------------*/
@@ -576,8 +615,127 @@ function hasSpecialCharacters(value){
    return true;
 }
 
+function hasSpeclCharacters(field, name){
+	if(!hasSpecialCharacters(field)){
+		return name + " cannot contain special  characters!"; 
+	}
+	return null;
+}
+
+function validateFirstOrLastName(name, alias){
+	if( name != null && name.trim().length > 0 ){
+		if(!hasSpecialCharacters(name)){
+			return alias + " can only container numbers and letters.";
+		}else if( name != null && name.trim().length > 0 && hasSpecialCharacters(name) && name.trim().length > 50){
+			return alias + " cannot exceed 50 characters";
+		}
+	}else if( name == null || ( name != null && name.trim().length == 0 ) ){
+		return alias + " is required!";
+	}
+	return null;
+}
+
+function setValidAndNotify(valid,namMsg){
+	if( namMsg != null ){
+		notifyError(namMsg);
+		return false;
+	}
+	return valid  == true;
+}
+
+function validateEmail(email){
+	var re = /\S+@\S+\.\S+/;
+	var validEmail =  re.test(email);
+	if(!validEmail){
+		return "Email is invalid.";
+	}
+	return null;
+}
+
 function getEditedProfileValuesAndSave(){
-	$("#editProfilePhotoForm").validate();
+	
+	var firstName 	= $("#hunterFieldPopupContainer input[data-name='firstName']").val(), 
+		lastName 	= $("#hunterFieldPopupContainer input[data-name='lastName']").val(),
+		phoneNum 	= $("#hunterFieldPopupContainer input[data-name='phoneNumber']").val(),
+		emailAdd 	= $("#hunterFieldPopupContainer input[data-name='email']").val(),
+		country 	= $("#hunterFieldPopupContainer select[data-name='countryInput']").val(),
+		county 		= $("#hunterFieldPopupContainer select[data-name='countyInput']").val(),
+		cons 		= $("#hunterFieldPopupContainer select[data-name='consInput']").val(),
+		ward 		= $("#hunterFieldPopupContainer select[data-name='wardInput']").val(),
+		valid 		= true,
+		profileData = {};
+
+	
+	var namMsg = validateFirstOrLastName(firstName, "First name");
+	valid = setValidAndNotify(valid,namMsg);
+	
+	namMsg = validateFirstOrLastName(lastName, "Last name");
+	valid = setValidAndNotify(valid,namMsg);
+	
+	namMsg = validateFirstOrLastName(phoneNum, "Phone number");
+	valid = setValidAndNotify(valid,namMsg);
+		
+	namMsg = validateEmail(emailAdd);
+	valid = setValidAndNotify(valid,namMsg);
+	
+	namMsg = isNaN(country) ? "Invalid country Id" : null;
+	valid = setValidAndNotify(valid,namMsg);
+	
+	namMsg = isNaN(county) ? "Invalid county Id" : null;
+	valid = setValidAndNotify(valid,namMsg);
+	
+	namMsg = isNaN(cons) ? "Invalid cons Id" : null;
+	valid = setValidAndNotify(valid,namMsg);
+	
+	namMsg = isNaN(ward) ? "Invalid ward Id" : null;
+	valid = setValidAndNotify(valid,namMsg);
+	
+	
+	if(!valid) return;
+	
+	
+	profileData["firstName"] = firstName;
+	profileData["lastName"]  = lastName;
+	profileData["phoneNum"]  = phoneNum;
+	profileData["emailAdd"]  = emailAdd;
+	profileData["country"] 	 = country;
+	profileData["county"] 	 = county;
+	profileData["cons"] 	 = cons;
+	profileData["ward"] 	 = ward;
+	
+	profileData = JSON.stringify(profileData);
+	
+	notifySuccess("Saving profile data...");
+	
+	$.ajax({
+		url: getBaseURL("Hunter/rawReceiver/action/read/rawProfData"), 
+	    data : profileData,
+	    method: "POST",
+	    dataType : "json", 
+	    contentType : "application/json"
+	}).done(function(data) {
+		data = $.parseJSON(data);
+		var message='',status='';
+		for(key in data){
+			if(key == 'message'){
+				message = data[key];
+			}else{
+				status = data[key];
+			}
+		}
+		if(status == 'Success'){
+			notifySuccess(message);
+		}else{
+			notifyError(message);
+		}
+		getRawReceiverUsers();
+		closeHunterPopup1();
+	 }).fail(function(data) {
+		 var message = data.statusText + " (" + data.status + "). Please contact Production Support.";
+		 notifyError(message);
+		 closeHunterPopup1();
+	 });
+	
 }
 
 function getEditedValuesAndSave(id){
@@ -734,6 +892,7 @@ function notifyWarn(message){
 }
 
 function loadPopup(param){
+	$("#hunterFieldPopupContainer").remove();
 	$(".popup-inner").append("<div id='hunterFieldPopupContainer' ></div>"); 
 	$("#hunterFieldPopupContainer").empty();
 	populatePopupForParams(param);
@@ -764,7 +923,7 @@ function bindDataTableActionButtons(){
 }
 
 function getRawReceiverUsers(){
-	notifySuccess("Fetching your profile data...");
+
 	var url = getBaseURL("Hunter/rawReceiver/action/read/rawReceiverUser");
 	$.ajax({
 		url: url,
@@ -779,18 +938,20 @@ function getRawReceiverUsers(){
 			data = JSON.stringify(data);
 			data = $.parseJSON(data);
 			
+			var fullName = data["fullname"];
+			
 			$("#fieldUserTotalContacts").	text( data["all"] 		=== 'undefined' ? "" : data["all"] 		);
 			$("#fieldUserCountry").			text( data["country"] 	=== 'undefined' ? "" : data["country"] 	);
 			$("#fieldUserCounty").			text( data["county"] 	=== 'undefined' ? "" : data["county"] 	);
 			$("#fieldUserVerifiedContacts").text( data["verified"] 	=== 'undefined' ? "" : data["verified"] );
 			$("#fieldUserWard").			text( data["ward"] 		=== 'undefined' ? "" : data["ward"] 	);
-			$("#fieldUserPhones").			text( data["phone"] 	=== 'undefined' ? "" : data["phone"] 	);
+			$("#fieldUserPhone").			text( data["phone"] 	=== 'undefined' ? "" : data["phone"] 	);
 			$("#fieldUserEmail").			text( data["email"] 	=== 'undefined' ? "" : data["email"] 	);
 			$("#fieldUserConstituency").	text( data["cons"] 		=== 'undefined' ? "" : data["cons"] 	);
-			$("#fieldUserFullName").		text( data["fullname"] 	=== 'undefined' ? "" : data["fullName"] );
+			$("#fieldUserFullName").		html( fullName );
 			$("#fieldUserTotalPayout").		text( data["compensation"] === 'undefined' ? "" : data["compensation"] );
 			
-			notifySuccess("Successfully obtained your profile data");
+			profileData = data;
 			
 		}else{
 			notifyError("Failed to obtain your profile data");
