@@ -12,8 +12,67 @@
 				<div style="width:100%;height:450px;border-radius:5px">
 					<textarea style="height:100%;width:100%;position:relative" 
 						data-role='editor' 
-						data-bind="value : html, visible : isVisible" 
-					></textarea>
+						data-bind="value : html, visible : isVisible"
+						data-tools=
+								"[
+								    'bold',
+									'italic',
+									'underline',
+									'strikethrough',
+									'superscript',
+									'subscript',
+									'justifyCenter',
+									'justifyLeft',
+									'justifyRight',
+									'justifyFull',
+									'insertUnorderedList',
+									'insertOrderedList',
+									'indent',
+									'outdent',
+									'createLink',
+									'unlink',
+									'insertImage',
+									'insertFile',
+									'insertHtml',
+									'fontName',
+									'fontNameInherit',
+									'fontSize',
+									'fontSizeInherit',
+									'formatBlock',
+									'formatting',
+									'style',
+									'viewHtml',
+									'emptyFolder',
+									'uploadFile',
+									'orderBy',
+									'orderBySize',
+									'orderByName',
+									'invalidFileType',
+									'deleteFile',
+									'overwriteFile',
+									'directoryNotFound',
+									'imageWebAddress',
+									'imageAltText',
+									'fileWebAddress',
+									'fileTitle',
+									'linkWebAddress',
+									'linkText',
+									'linkToolTip',
+									'linkOpenInNewWindow',
+									'dialogInsert',
+									'dialogUpdate',
+									'dialogCancel',
+									'dialogCancel',
+									'createTable',
+									'addColumnLeft',
+									'addColumnRight',
+									'addRowAbove',
+									'addRowBelow',
+									'deleteRow',
+									'deleteColumn'
+                                   
+                                   ]"
+					>asdfasdf</textarea>
 				</div>
 			</td>
 			<td style="width:50%;height:450px">

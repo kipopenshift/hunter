@@ -142,11 +142,9 @@ public class TaskScheduledUpdaterJob extends TimerTask {
 
 	public void updateProcessJobGeneralDuration() {
 		logger.debug("updating process job general duration");
-		TaskProcessJob processJob = TaskProcessJobHandler.getInstance()
-				.getTaskProcessJobForKey(processJobKey);
+		TaskProcessJob processJob = TaskProcessJobHandler.getInstance().getTaskProcessJobForKey(processJobKey);
 		if (processJob != null) {
-			NodeList workers = processJob.getXmlService().getElementsByTagName(
-					"worker");
+			NodeList workers = processJob.getXmlService().getElementsByTagName("worker");
 			Long lowestStartPoint = 0L;
 			Long highestEndPoint = 0L;
 			if (workers != null && workers.getLength() != 0) {
@@ -222,7 +220,7 @@ public class TaskScheduledUpdaterJob extends TimerTask {
 				}
 			}
 		}
-		logger.debug("List of worker statuses : "+ HunterUtility.stringifyList(statuses));
+		logger.debug("List of worker statuses : "+ HunterUtility.getCommaDelimitedStrings(statuses)); 
 		return statuses;
 	}
 

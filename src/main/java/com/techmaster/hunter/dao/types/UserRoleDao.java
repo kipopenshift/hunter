@@ -10,7 +10,10 @@ public interface UserRoleDao {
 	public UserRole getUserRoleById(Long roleId);
 	public List<UserRole> getAllUserRole(); 
 	public String addRoleToUser(Long userId, Long userRoleId);
-	public String removeRoleToUser(Long userId, Long userRoleId);
+	public String removeRoleFromUser(Long userId, Long userRoleId);
 	public List<UserRole> getUserRolesForUserId(Long userId);
+	public void editUserRole(UserRole userRole);
+	public String deleteUserRole(UserRole userRole);
+	public void createUserRole(UserRole userRole);  
 
 }

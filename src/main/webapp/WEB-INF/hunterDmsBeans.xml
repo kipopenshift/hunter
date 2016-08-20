@@ -67,5 +67,37 @@
 		</constructor-arg> 
 	</bean>
 	
+	<bean id="get_generated_cid" class="com.techmaster.hunter.dao.proc.ProcedureHandler">
+		<constructor-arg name="jdbcTemplate" ref="jdbcTemplate" index="0" />
+		<constructor-arg name="procName" value="get_generated_cid" index="1" />
+		<constructor-arg name="isFunction" value="false" index="2" />
+		<constructor-arg name="inParams" index="3">
+			<map>   
+				<entry key="bean_id"  value="#{hunterProcTypes.NUMERIC}"></entry>  
+			</map>  
+		</constructor-arg>
+		<constructor-arg name="outParams" index="4">  
+			<map> 
+				<entry key="p_bean_cid"  value="#{hunterProcTypes.VARCHAR}"></entry>   
+			</map>  
+		</constructor-arg> 
+	</bean>
+	
+	<bean id="get_msg_ids_usng_attchmnt_id" class="com.techmaster.hunter.dao.proc.ProcedureHandler">
+		<constructor-arg name="jdbcTemplate" ref="jdbcTemplate" index="0" />
+		<constructor-arg name="procName" value="get_msg_ids_usng_attchmnt_id" index="1" />
+		<constructor-arg name="isFunction" value="false" index="2" />
+		<constructor-arg name="inParams" index="3">
+			<map>   
+				<entry key="p_attachment_id"  value="#{hunterProcTypes.NUMERIC}"></entry>  
+			</map>  
+		</constructor-arg>
+		<constructor-arg name="outParams" index="4">  
+			<map> 
+				<entry key="msg_ids"  value="#{hunterProcTypes.VARCHAR}"></entry>   
+			</map>  
+		</constructor-arg> 
+	</bean>
+	
 
 </beans>

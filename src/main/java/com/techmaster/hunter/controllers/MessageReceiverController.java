@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.HunterURLConstants;
@@ -68,11 +69,11 @@ public class MessageReceiverController extends HunterBaseController{
 	@Autowired private TaskDao taskDao;
 
 	@RequestMapping(value = "/action/import/receivers/post/save", method = RequestMethod.POST)
-	public @ResponseBody String  importMessageReceivers(HttpServletRequest request, HttpServletResponse response){
+	public @ResponseBody String  importMessageReceivers(MultipartHttpServletRequest request, HttpServletResponse response){
 		
 		logger.debug("Extracting workbook and creating message receiver extractor.."); 
 		
-		Object[] wbkExtracts = HunterUtility.getWorkbookFromRequest(request);
+		Object[] wbkExtracts = HunterUtility.getWorkbookFromMultiPartRequest(request);
 		Workbook workbook = (Workbook)wbkExtracts[0];
 		String fileName = (String)wbkExtracts[1];
 		
@@ -234,10 +235,10 @@ public class MessageReceiverController extends HunterBaseController{
 	
 	
 	@RequestMapping(value="/action/group/import/receiverGroupReceivers/{groupId}", method=RequestMethod.POST) 
-	@ResponseBody public String importReceiverRegions(HttpServletRequest request, HttpServletResponse response, @PathVariable("groupId")Long groupId){
+	@ResponseBody public String importReceiverRegions(MultipartHttpServletRequest request, HttpServletResponse response, @PathVariable("groupId")Long groupId){
 		
 		logger.debug("Beginning receiver group receivers import process..."); 
-		Object[] wbkExtracts = HunterUtility.getWorkbookFromRequest(request);
+		Object[] wbkExtracts = HunterUtility.getWorkbookFromMultiPartRequest(request);
 		Workbook workbook = (Workbook)wbkExtracts[0];
 		String fileName = (String)wbkExtracts[1];
 		String userName = getUserName();

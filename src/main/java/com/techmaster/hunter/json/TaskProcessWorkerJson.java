@@ -1,7 +1,11 @@
 package com.techmaster.hunter.json;
 
-public class TaskProcessWorkerJson {
+import java.io.Serializable;
 
+public class TaskProcessWorkerJson implements Serializable {
+
+	private static final long serialVersionUID = 2929053635252295679L;
+	
 	private Long processJobId;
 	private int workerNo;
 	private String workerName;

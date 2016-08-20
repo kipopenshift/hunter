@@ -40,7 +40,12 @@ $("document").ready(function(){
 			message = $.parseJSON(message);
 			var provider = (message["provider"]["providerId"]) + "";
 			$("#newTextMsgSProvider").data("kendoDropDownList").value(provider);
-			$("#newTxtMsgTxtArea").val(message["msgText"]);
+			var txtStr = message["msgText"];
+			 if( txtStr != null ){
+				txtStr = txtStr.replace(/&apos;/g,"'"),
+				txtStr = txtStr.replace(/&quot;/g,'"');
+			 }
+			$("#newTxtMsgTxtArea").val( txtStr );
 			var owner = this.getOwnerValueForUserName(message["msgOwner"]);
 			$("#newTxtMsgOwnerInput").data("kendoDropDownList").value(owner);
 			$("#newTxtMsgMsgStatus").data("kendoDropDownList").value(message["msgLifeStatus"]);
@@ -178,12 +183,18 @@ $("document").ready(function(){
 			kendo.ui.progress($("#newTxtMsgTxtErrMsgs"), boolean);
 		},
 		validateAndSubmitTxtMsgData : function(){
+			
 			var errorMsg = this.validateTxtMsg();
+			
 			if(errorMsg == null){
+				var msgText = $("#newTxtMsgTxtArea").val();
+				if( msgText != null ){
+					msgText = msgText.replace(/\'/g,'&apos;');
+					msgText = msgText.replace(/\"/g,'&quot;');
+				}
 				this.bindProgressIcon(true);
 				var 
 				providerId 	= $("#newTextMsgSProvider").data("kendoDropDownList").value(),
-				msgText 	= $("#newTxtMsgTxtArea").val(),
 				msgOwner 	= $("#newTxtMsgOwnerInput").data("kendoDropDownList").value(),
 				msgSts 		= $("#newTxtMsgMsgStatus").data("kendoDropDownList").value(),
 				taskBean 	= hunterAdminClientUserVM.getSelectedTaskBean(),

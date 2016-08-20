@@ -1,13 +1,26 @@
 package com.techmaster.hunter.obj.converters;
 
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.NodeList;
 
+import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
+import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
+import com.techmaster.hunter.dao.types.TaskDao;
+import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.json.TaskProcessJobJson;
 import com.techmaster.hunter.json.TaskProcessWorkerJson;
+import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TaskProcessJob;
 import com.techmaster.hunter.task.process.TaskProcessJobHandler;
 import com.techmaster.hunter.util.HunterUtility;
@@ -30,11 +43,97 @@ public class TaskProcessJobConverter {
 		return instance;
 	}
 	
+	public void serializeTaskProcessJsons(List<TaskProcessJobJson> processJobJsons, Long taskId) throws IOException {
+		
+		logger.debug("Serializing task process job results for task id : " + taskId + "...");
+		
+		File file = File.createTempFile(HunterConstants.HUNTER_PRCESS_SERIAL_PREF_KEY + taskId, ".datum");
+		if( !file.exists() )
+			file.mkdir();
+		
+		String srlzdTskPrcssJbObjsFilLoc = file.getAbsolutePath();
+		logger.debug("Location where serialized data is stored for this task ("+ taskId +") > " + srlzdTskPrcssJbObjsFilLoc); 
+		String query = "UPDATE TASK t SET t.SRLZD_PRCSS_RSLTS_FL_LOC = ? WHERE t.TSK_ID = ?";
+		List<Object> values = new ArrayList<>();
+		values.add(srlzdTskPrcssJbObjsFilLoc);
+		values.add(taskId);
+		
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject( HunterJDBCExecutor.class );
+		int rowsAffected  = hunterJDBCExecutor.executeUpdate(query, values);
+		logger.debug("Updating task file location. Row affected = " + rowsAffected); 
+		
+        FileOutputStream fos = new FileOutputStream( file );
+        ObjectOutputStream objOutputStream = new ObjectOutputStream(fos);
+        for (Object processJobJson : processJobJsons) {
+            objOutputStream.writeObject(processJobJson);
+            objOutputStream.reset();
+        }
+        logger.debug("Successfully serialized the objects. Number of objects = " + processJobJsons.size()); 
+        objOutputStream.close();
+    }
+	
+	public List<TaskProcessJobJson> deSerializeTaskProcessJsons( Long taskId ) throws ClassNotFoundException, IOException {
+		
+		List<TaskProcessJobJson> taskProcessJobJsons = new ArrayList<TaskProcessJobJson> ();
+        
+		String query = "SELECT t.SRLZD_PRCSS_RSLTS_FL_LOC FROM TASK t WHERE t.TSK_ID = ?";
+		List<Object> values = new ArrayList<>();
+		values.add(taskId);
+		
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject( HunterJDBCExecutor.class );
+		String srlzdTskPrcssJbObjsFilLoc = HunterUtility.getStringOrNullOfObj( hunterJDBCExecutor.executeQueryForOneReturn(query, values) );
+		
+		if( srlzdTskPrcssJbObjsFilLoc == null ){
+			logger.debug("No task process file location set for task. Returning an empty arraylist..."); 
+			return taskProcessJobJsons;
+		}
+		
+        FileInputStream fis = new FileInputStream( srlzdTskPrcssJbObjsFilLoc );
+        ObjectInputStream obj = new ObjectInputStream(fis);
+        
+        try {
+            while (fis.available() != -1) {
+            	TaskProcessJobJson processJobJson = (TaskProcessJobJson) obj.readObject();
+            	taskProcessJobJsons.add(processJobJson);
+            }
+            logger.debug("Successfully deserialized the file. Number of objects = " + taskProcessJobJsons.size()); 
+            obj.close();
+        } catch (EOFException ex) {
+            //ex.printStackTrace();
+        }
+        return taskProcessJobJsons;
+    }
+	
+	
 	public List<TaskProcessJobJson> getProcessJobJsonsForTask(Long taskId){
+		
 		logger.debug("Starting to extract proces job jsons for task id : " + taskId); 
-		List<TaskProcessJob> processJobs = TaskProcessJobHandler.getInstance().getAllTaskProcessJobsForTaskId(taskId);
-		List<TaskProcessJobJson> taskProcessJobJsons = getTaskProcessJobJsons(processJobs);
+		
+		List<TaskProcessJob> processJobs = null;
+		List<TaskProcessJobJson> taskProcessJobJsons = null;
+		
+		try {
+			List<TaskProcessJobJson> serializedProcessJobJsons = deSerializeTaskProcessJsons(taskId);
+			
+			if( !HunterUtility.isCollectionNullOrEmpty( serializedProcessJobJsons ) ){
+				return serializedProcessJobJsons;
+			}
+			
+			processJobs = TaskProcessJobHandler.getInstance().getAllTaskProcessJobsForTaskId(taskId);
+			taskProcessJobJsons = getTaskProcessJobJsons(processJobs);
+			
+			logger.debug("Submitting proces job jsons for serialization..."); 
+			serializeTaskProcessJsons(taskProcessJobJsons, taskId);
+			
+		} catch (ClassNotFoundException | IOException e) {
+			logger.debug("Exception while submitting process job jsons for serialization. Message = " + e.getMessage());
+			e.printStackTrace();
+			processJobs = TaskProcessJobHandler.getInstance().getAllTaskProcessJobsForTaskId(taskId);
+			taskProcessJobJsons = getTaskProcessJobJsons(processJobs);
+		}
+		
 		return taskProcessJobJsons;
+		
 	}
 	
 	public List<TaskProcessJobJson> getTaskProcessJobJsons(List<TaskProcessJob> processJobs){

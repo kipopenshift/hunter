@@ -1,11 +1,14 @@
 package com.techmaster.hunter.json;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.techmaster.hunter.util.HunterUtility;
 
-public class TaskProcessJobJson {
+public class TaskProcessJobJson implements Serializable{
+	
+	private static final long serialVersionUID = -3297849356400591162L;
 	
 	private Long processJobId;
 	private String genStatus;

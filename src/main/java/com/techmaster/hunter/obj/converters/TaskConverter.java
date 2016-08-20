@@ -125,6 +125,7 @@ public class TaskConverter {
 		Boolean recurrentTask = taskJson.getBoolean("recurrentTask");
 		Long clientId = taskJson.getLong("clientId");
 		
+		String srlzdTskPrcssJbObjsFilLoc = taskJson.has("srlzdTskPrcssJbObjsFilLoc") ? taskJson.get("srlzdTskPrcssJbObjsFilLoc") != null ? taskJson.get("srlzdTskPrcssJbObjsFilLoc").toString() : null : null;
 		String taskDeliveryStatus = taskJson.has("taskDeliveryStatus") ? taskJson.get("taskDeliveryStatus") != null ? taskJson.get("taskDeliveryStatus").toString() : null : null;
 		String taskLifeStatus = taskJson.has("taskLifeStatus") ? taskJson.get("taskLifeStatus") != null ? taskJson.get("taskLifeStatus").toString() : null : null;
 		String taskDateline = taskJson.has("taskDateline") ? taskJson.get("taskDateline") != null ? taskJson.get("taskDateline").toString() : null : null;
@@ -142,6 +143,7 @@ public class TaskConverter {
 		Date cretDate = HunterUtility.parseDate(cretDate_, HunterConstants.HUNTER_DATE_FORMAT_MIN);
 		String createdBy =  taskJson.has("createdBy") ? taskJson.get("createdBy") != null ? taskJson.get("createdBy").toString() : null : null;
 		
+		task.setSrlzdTskPrcssJbObjsFilLoc(srlzdTskPrcssJbObjsFilLoc); 
 		task.setTaskId(taskId); 
 		task.setTaskType(taskType);
 		task.setTaskName(taskName);
@@ -274,7 +276,9 @@ public class TaskConverter {
 		String eSubject = HunterUtility.getStringOrNullFromJSONObj(json, "eSubject");
 		int desiredReceivers = HunterUtility.getIntOrZeroFromJsonStr(json, "desiredReceivers");
 		String emailTemplateName = HunterUtility.getStringOrNullFromJSONObj(json, "emailTemplateName");
+		String msgAttachment = HunterUtility.getStringOrNullFromJSONObj(json, "messageAttachments");
 		
+		emailMsg.setMessageAttachments(msgAttachment); 
 		emailMsg.setMultiPart(multiPart);
 		emailMsg.setMsgDeliveryStatus(msgDeliveryStatus);
 		emailMsg.setActualReceivers(actualReceivers);

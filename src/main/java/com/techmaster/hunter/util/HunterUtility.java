@@ -13,10 +13,13 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -28,6 +31,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.sql.rowset.serial.SerialBlob;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -55,6 +59,8 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -74,6 +80,17 @@ import com.techmaster.hunter.xml.XMLTree;
 public class HunterUtility {
 
 public static  Logger logger = Logger.getLogger(HunterUtility.class);
+
+  public static String getRequestBaseURL(HttpServletRequest request){
+	  try {
+		URL requestURL = new URL(request.getRequestURL().toString());
+		String port = requestURL.getPort() == -1 ? "" : ":" + requestURL.getPort();
+		return requestURL.getProtocol() + "://" + requestURL.getHost() + port;
+	} catch (MalformedURLException e) {
+		e.printStackTrace();
+		throw new HunterRunTimeException(e.getMessage());
+	} 
+  }
 	
    public static String urlEncodeRequestMap(Map<String, ?> params, String encodeFormat) throws UnsupportedEncodingException{ 
 	   StringBuilder builder = new StringBuilder();
@@ -86,6 +103,41 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
            builder.append(URLEncoder.encode(String.valueOf(param.getValue()), encodeFormat));
        }
 	   return builder.toString();
+   }
+   
+   public static boolean isCollectionNullOrEmpty(Collection<?> collection){
+	   return collection == null || collection.isEmpty();
+   }
+   
+   public static String getBlobStr(Blob blob){
+	   
+	   if( blob == null )
+		   return null;
+	   
+	   try {
+		byte[] bdata = blob.getBytes(1, (int) blob.length());
+		   String s = new String(bdata);
+		   return s;
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+	   return null;
+   }
+   
+   public static Blob getStringBlob(String string){
+	   if( string == null )
+		   return null;
+	   try {
+		Blob blob = new SerialBlob(string.getBytes());
+		return blob;
+	} catch (SQLException e) {
+		e.printStackTrace();
+		throw new HunterRunTimeException("Exception while converting string to blob. String = " + string);
+	}
+   }
+   
+   public static boolean isMapNllOrEmpty(Map<?,?> map){
+	   return map == null || map.isEmpty();
    }
    
    public static String getFirstUpperCase(String string){
@@ -105,8 +157,6 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 
 	public static void threadSleepFor(long milliSec) {
 		try {
-			if(!isNumeric(milliSec))
-				throw new IllegalArgumentException("The argument provide must be numeric : " + milliSec);
 			logger.info("Thread with the name " + Thread.currentThread().getName() + " is going to sleep for " + milliSec + " milliseconds.");
 			Thread.sleep(milliSec);
 		} catch (InterruptedException e) {
@@ -414,6 +464,7 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	
 	public static boolean isNumeric(Object obj){
 		
+		
 		String input = String.valueOf(obj);
 		if(!notNullNotEmpty(obj))
 			return false;
@@ -465,7 +516,6 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 			formatStr = HunterConstants.DATE_FORMAT_STRING;
 		SimpleDateFormat format = new SimpleDateFormat(formatStr);
 		String dateStr = format.format(date);
-		System.out.println(date);
 		return dateStr;
 	}
 	
@@ -810,7 +860,7 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		try {
 			XMLTree tree = new XMLTree(location, false);
 			XMLService service = new XMLServiceImpl(tree);
-			HunterLogFactory.getLog(HunterUtility.class).info("Successfully obtained xml for location");  
+			HunterLogFactory.getLog(HunterUtility.class).info("Successfully obtained xml for location : " + location);  
 			return service;
 		} catch (HunterRunTimeException e) {
 			e.printStackTrace();
@@ -855,6 +905,27 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		return builder.toString(); 
 	}
 	
+	public static Object[] getWorkbookFromMultiPartRequest(MultipartHttpServletRequest request){
+		
+		 Workbook workbook = null;
+		 Iterator<String> itr =  request.getFileNames();
+		 MultipartFile mpf = request.getFile(itr.next());
+		 String fileName = mpf.getOriginalFilename();
+		 
+		 try {
+			InputStream is = mpf.getInputStream();
+			workbook = WorkbookFactory.create(is);
+			return new Object[]{workbook, fileName};
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InvalidFormatException e) {
+			e.printStackTrace();
+		}
+		 
+		 return new Object[]{};
+		 
+	}
+	
 	public static Object[] getWorkbookFromRequest(HttpServletRequest request){
 		
 		logger.debug("Extracting workbook from request...."); 
@@ -889,7 +960,9 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 					logger.info("workbook file name >>>" + originalFileName); 
 				}
 			}
-			workBook = WorkbookFactory.create(inputStream);
+			if(inputStream != null){
+				workBook = WorkbookFactory.create(inputStream);
+			}
 			logger.info("Successful workbook extraction!!"); 
 			logger.debug("Finished extracting workbook from request!"); 
 			return new Object[]{workBook, originalFileName};
@@ -981,12 +1054,14 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	}
 	
 	public static JSONObject setJSONObjectForSuccess(JSONObject json, String message){
+		json = json == null ? new JSONObject() : json;
 		json.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_SUCCESS);
 		json.put(HunterConstants.MESSAGE_STRING, message);
 		return json;
 	}
 	
 	public static JSONObject setJSONObjectForFailure(JSONObject json, String message){
+		json = json == null ? new JSONObject() : json;
 		json.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_FAILED);
 		json.put(HunterConstants.MESSAGE_STRING, message);
 		return json;
@@ -1046,8 +1121,6 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		params.put(HunterConstants.RECEIVER_LEVEL_COUNTRY, "Kenya");
 		params.put(HunterConstants.RECEIVER_LEVEL_COUNTY, "Bomet");
 		params.put(HunterConstants.RECEIVER_LEVEL_CONSITUENCY, "Bomet Central");
-		params.put(HunterConstants.RECEIVER_LEVEL_WARD, "Ndaraweta");
-		params.put(HunterConstants.RECEIVER_LEVEL_VILLAGE, "Kapkoros");
 		String where = getWhrClsFrRcvrRgnTyp(HunterConstants.RECEIVER_LEVEL_VILLAGE, params);
 		System.out.println(where);  
 	}

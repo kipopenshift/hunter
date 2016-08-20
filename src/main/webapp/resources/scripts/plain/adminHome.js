@@ -1,6 +1,4 @@
  
-var kendoKipHelperInstance = null; 
-
 var hunterUserAddressesModel = kendo.data.Model.define({
 	id:"id",
 	fields : {
@@ -406,7 +404,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		      url: function(){
 		    	  var userId = hunterAdminClientUserVM.get("selUserId"); 
 		    	  if(userId == null) userId = "0";
-		    	  var url = "../action/user/addresses/read/" + userId;
+		    	  var url = HunterConstants.getHunterBaseURL("admin/action/user/addresses/read/") + userId;
 		    	  return url;
 		      },
 		      dataType: "json",
@@ -417,7 +415,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		    	 url: function(){
 			    	  var userId = hunterAdminClientUserVM.get("selUserId"); 
 			    	  if(userId == null) userId = "0";
-			    	  var url = "../action/user/addresses/create/" + userId;
+			    	  var url = HunterConstants.getHunterBaseURL("admin/action/user/addresses/create/") + userId;
 			    	  return url;
 			      },
 		        dataType: "json", 
@@ -428,7 +426,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		    	 url: function(){
 			    	  var userId = hunterAdminClientUserVM.get("selUserId"); 
 			    	  if(userId == null) userId = "0";
-			    	  var url = "../action/user/addresses/update/" + userId;
+			    	  var url = HunterConstants.getHunterBaseURL("admin/action/user/addresses/update/") + userId;
 			    	  return url;
 			      },
 		        dataType: "json", 
@@ -439,7 +437,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		    	 url: function(){
 			    	  var userId = hunterAdminClientUserVM.get("selUserId"); 
 			    	  if(userId == null) userId = "0";
-			    	  var url = "../action/user/addresses/destroy/" + userId;
+			    	  var url = HunterConstants.getHunterBaseURL("admin/action/user/addresses/destroy/") + userId;
 			    	  return url;
 			      },
 		        dataType: "json", 

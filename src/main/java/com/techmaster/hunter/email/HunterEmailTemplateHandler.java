@@ -43,6 +43,7 @@ public class HunterEmailTemplateHandler {
 		return html;
 	}
 	
+	
 	public List<String> getAllExistingTemplatesNames(){
 		List<String> existentTemplates = HunterCacheUtil.getInstance().getExistentEmailTemplateNames();
 		logger.debug("Returning existing templates \n " + HunterUtility.stringifyList(existentTemplates)); 

@@ -29,6 +29,7 @@ public class Task {
 	private int desiredReceiverCount;
 	private int availableReceiverCount;
 	private int confirmedReceiverCount;
+	private String srlzdTskPrcssJbObjsFilLoc;
 	
 	private String processedBy;
 	private Date processedOn;
@@ -239,6 +240,12 @@ public class Task {
 
 	public void setProcessedOn(Date processedOn) {
 		this.processedOn = processedOn;
+	}
+	public String getSrlzdTskPrcssJbObjsFilLoc() {
+		return srlzdTskPrcssJbObjsFilLoc;
+	}
+	public void setSrlzdTskPrcssJbObjsFilLoc(String srlzdTskPrcssJbObjsFilLoc) {
+		this.srlzdTskPrcssJbObjsFilLoc = srlzdTskPrcssJbObjsFilLoc;
 	}
 
 	@Override
@@ -455,7 +462,8 @@ public class Task {
 				+ lastUpdate + ", updatedBy=" + updatedBy + ", createdBy="
 				+ createdBy + ", clientId=" + clientId + ", taskMessage="
 				+ taskMessage + ", taskRegions=" + taskRegions
-				+ ", taskGroups=" + taskGroups + "]";
+				+ ", taskGroups=" + taskGroups 
+				+ ", srlzdTskPrcssJbObjsFilLoc=" + srlzdTskPrcssJbObjsFilLoc + "]";
 	}
 
 	

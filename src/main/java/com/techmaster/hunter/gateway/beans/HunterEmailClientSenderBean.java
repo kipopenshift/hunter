@@ -1,5 +1,6 @@
 package com.techmaster.hunter.gateway.beans;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,17 +32,20 @@ import com.techmaster.hunter.constants.TaskProcessConstants;
 import com.techmaster.hunter.obj.beans.EmailMessage;
 import com.techmaster.hunter.obj.beans.HunterEmailTemplateBean;
 import com.techmaster.hunter.obj.beans.Message;
+import com.techmaster.hunter.obj.beans.MessageAttachmentMetadata;
 import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.util.HunterUtility;
 import com.techmaster.hunter.xml.XMLService;
 
 public class HunterEmailClientSenderBean {
 	
+	private static final String CID_KEY = "cid:HUNTER_CID_REF=";
 	private String name;
 	private Properties props;
 	private Task task;
 	private String[] receivers;
 	private Logger logger = Logger.getLogger(HunterEmailClientSenderBean.class);
+	private HunterEmailTemplateBean emailTemplateBean = null;
 	
 	public HunterEmailClientSenderBean(String name, Task task, String[] receivers) {
 		super();
@@ -54,6 +58,11 @@ public class HunterEmailClientSenderBean {
 		this.name = name;
 		this.receivers = receivers;
 		this.props = GateWayClientHelper.getInstance().getEmailConfigsByName(name);
+		
+		String templateName = ((EmailMessage)task.getTaskMessage()).getEmailTemplateName();
+		logger.debug("Template name : " + templateName);
+		this.emailTemplateBean = HunterCacheUtil.getInstance().getEmailTemplateBean(templateName);
+		
 	}
 	
 	private boolean validatePropsName(String propsName){
@@ -123,41 +132,51 @@ public class HunterEmailClientSenderBean {
 		return addresses;
 	}
 	
-	private void setRecipients(MimeMessage  msg,RecipientType type, InternetAddress[] recients){
+	private void setRecipients(MimeMessage  msg,RecipientType type, InternetAddress[] receipients){
+
+		boolean isExclusive = Boolean.valueOf(emailTemplateBean.getMiscelaneous().get("exclusive"));
+		boolean isAllBcc = Boolean.valueOf(emailTemplateBean.getMiscelaneous().get("isAllBcc"));
 		
-		if(recients == null || recients.length < 1){
-			logger.debug("Receivers passed in for ( " + type.toString() + " ) is : " + recients); 
+		// For exclusive, just pick task receivers.
+		receipients = isExclusive ? getAllTaskAddresses() : receipients;
+		
+		if(receipients == null || receipients.length < 1){
+			logger.debug("Receivers passed in for ( " + type.toString() + " ) is : " + receipients); 
 			return;
 		}
 		
 		logger.debug("Setting recipients for type : " + type);
-		boolean isAllBcc = Boolean.valueOf(props.getProperty("isAllBcc") == null ? "true" : props.getProperty("isAllBcc"));
+		
 		if(isAllBcc && !type.equals(RecipientType.BCC) && !type.equals(RecipientType.TO)){
 			logger.debug("All email configured must be sent as bcc."); 
 			type = RecipientType.BCC;
-		}else if(isAllBcc && type.equals(RecipientType.TO)){
+		}
+		
+		if(isAllBcc && type.equals(RecipientType.TO)){
 			InternetAddress[] allAddresses = getAllTaskAddresses();
 			InternetAddress[] combinedAddresses = null;
 			if(allAddresses != null && allAddresses.length > 0){
-				combinedAddresses = new InternetAddress[recients.length + allAddresses.length];
+				combinedAddresses = new InternetAddress[receipients.length + allAddresses.length];
 				int j = 0;
 				for(int i=0; i<allAddresses.length;i++){
 					InternetAddress allAddress = allAddresses[i];
 					combinedAddresses[i] = allAddress;
 					j = i;
 				}
-				for(int i=0; i<recients.length;i++){
-					InternetAddress recipient = recients[i];
+				for(int i=0; i<receipients.length;i++){
+					InternetAddress recipient = receipients[i];
 					combinedAddresses[j] = recipient;
 				}
 			}
 			logger.debug("Combined receivers obtained : " + HunterUtility.getCommaDelimitedStrings(combinedAddresses) );
-			recients = combinedAddresses;
+			receipients = combinedAddresses;
 		}
+		
+		
 		try {
-			recients = removeNulls(recients);
-			if(recients != null && recients.length > 0){
-				msg.setRecipients(type, recients);
+			receipients = removeNulls(receipients);
+			if(receipients != null && receipients.length > 0){
+				msg.setRecipients(type, receipients);
 			}
 			logger.debug("Successfully set recipients for type : " + type); 
 		} catch (MessagingException e) {
@@ -209,39 +228,6 @@ public class HunterEmailClientSenderBean {
 		return errors;
 	}
 	
-	public BodyPart prepareBodyPart(Task task) throws MessagingException{
-		BodyPart messageBodyPart = new MimeBodyPart();
-		String templateName = ((EmailMessage)task.getTaskMessage()).getEmailTemplateName();
-		logger.debug("Template name : " + templateName); 
-		HunterEmailTemplateBean bean = HunterCacheUtil.getInstance().getEmailTemplateBean(templateName);
-		String contentType = props.get(HunterConstants.CONFIG_TEXT_HTML_UTF8_KEY).toString();
-		String emailContent = bean.getTemplate().replaceAll("#TEMPLATE_EMAIL_CONTENTS#", task.getTaskMessage().getMsgText());
-		messageBodyPart.setContent(emailContent, contentType);
-		return messageBodyPart;
-	}
-	
-	public Multipart getBodyMultiPart(Task task, BodyPart bodyPart) throws MessagingException{
-		logger.debug("Preparing message body..."); 
-		Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(bodyPart); 
-        return multipart; 
-	}
-	
-	public BodyPart getAttachmentMultiPart(Task task, BodyPart bodyPart, Multipart multiPart, String[] fileLocations) throws MessagingException{
-		logger.debug("Preparing message attachment..."); 
-		BodyPart attachmentBodyPart = new MimeBodyPart();
-		if(fileLocations != null && fileLocations.length > 0){
-			for(String fileLocation : fileLocations){
-			     logger.debug("Preparing attachment for file location : " + fileLocation); 
-		         DataSource source = new FileDataSource(fileLocation);
-		         attachmentBodyPart.setDataHandler(new DataHandler(source));
-		         attachmentBodyPart.setFileName(fileLocation);
-		         multiPart.addBodyPart(attachmentBodyPart);
-			}
-		}
-		return attachmentBodyPart;
-	}
-	
 	@SuppressWarnings("static-access")
 	public Map<String,Object> sendEmail() throws MessagingException{
 		
@@ -260,39 +246,103 @@ public class HunterEmailClientSenderBean {
 		
 		try {
 			
-			MimeMessage msg = new MimeMessage(getSession());
+			MimeMessage mimeMessage = new MimeMessage(getSession());
 			
-			InternetAddress[] toList = getAddressesForType("to");
-			InternetAddress[] ccList = getAddressesForType("cc");
-			InternetAddress[] bccList = getAddressesForType("bcc");
+			boolean isExclusive = Boolean.valueOf(emailTemplateBean.getMiscelaneous().get("exclusive"));
+			boolean isAllBcc = Boolean.valueOf(props.getProperty("isAllBcc") == null ? "true" : props.getProperty("isAllBcc"));
 			
-			setRecipients(msg, RecipientType.TO, toList); 
-			setRecipients(msg, RecipientType.BCC, ccList);
-			setRecipients(msg, RecipientType.CC, bccList);
+			if( !isExclusive ){
+				
+				InternetAddress[] toList = getAddressesForType("to");
+				InternetAddress[] ccList = getAddressesForType("cc");
+				InternetAddress[] bccList = getAddressesForType("bcc");
+				
+				if(isAllBcc){
+					setRecipients(mimeMessage, RecipientType.BCC, toList); 
+					setRecipients(mimeMessage, RecipientType.BCC, ccList);
+					setRecipients(mimeMessage, RecipientType.BCC, bccList);
+				}else{
+					setRecipients(mimeMessage, RecipientType.TO, toList); 
+					setRecipients(mimeMessage, RecipientType.BCC, ccList);
+					setRecipients(mimeMessage, RecipientType.CC, bccList);
+				}
+			}else{
+				/* receivers = null because it automatically picks up for task. */
+				setRecipients(mimeMessage, isAllBcc ? RecipientType.CC : RecipientType.TO , null);
+			}
 			
 			String subject = ((EmailMessage)task.getTaskMessage()).geteSubject();
 			subject = subject == null ? task.getTaskObjective() : subject;
-			msg.setSubject(subject);
+			mimeMessage.setSubject(subject);
 			InternetAddress from = getInternetAddressFor(props.getProperty("from")); 
-			msg.setFrom(from);
+			mimeMessage.setFrom(from);
+			
 			logger.debug("Email subject : " + subject); 
 			
-			 BodyPart bodyPart = prepareBodyPart(task);// creates mimebodypart and sets text
-			 Multipart multiPart = getBodyMultiPart(task, bodyPart); // creates mimeMultiPart and add above mimebodypart to it.
-			 
-			 //getAttachmentMultiPart(task, bodyPart, multiPart, new String[]{HunterURLConstants.TESTING_ATTCHMENT_PATH}); // create another body part and add multipart above
+			
+			Multipart multiPart = new MimeMultipart();
+			
+			
+			/* Create Body of the Email */
+			
+			BodyPart bodyPart = new MimeBodyPart();
+			String contentType = props.get(HunterConstants.CONFIG_TEXT_HTML_UTF8_KEY).toString();
+			String emailContent = emailTemplateBean.getTemplate().replaceAll("#TEMPLATE_EMAIL_CONTENTS#", task.getTaskMessage().getMsgText());
+			logger.debug("Creating attachments for email message..."); 
+			List<MessageAttachmentMetadata> messageAttachmentMetadata = GateWayClientHelper.getInstance().createMessageAttachmentMetadata(task);
+			for(MessageAttachmentMetadata attachmentMetadata : messageAttachmentMetadata){
+				String cidKey = CID_KEY + attachmentMetadata.getKey();
+				if( emailContent.contains(cidKey) ){ 
+					logger.debug( attachmentMetadata.getKey() + " is an embedded attachment : cid = " + attachmentMetadata.getMsgCid() );
+					emailContent = emailContent.replaceAll(cidKey, "cid:" + attachmentMetadata.getMsgCid());
+				}
+			}
+			bodyPart.setContent(emailContent, contentType);
+			
+			multiPart.addBodyPart(bodyPart);
+			
+			
+			/* Create Email Attachments */
+			
+			for(MessageAttachmentMetadata attachmentMetadata : messageAttachmentMetadata ){
+				
+				MimeBodyPart attachment = new MimeBodyPart();
+				
+				/* Create Embedded Attachments */
+				if( attachmentMetadata.isEmbedded() ){
+					attachment.setContentID("<" + attachmentMetadata.getMsgCid() + ">");
+					attachment.setDisposition(MimeBodyPart.INLINE);
+				}
+				
+				DataSource source = new FileDataSource(attachmentMetadata.getUrl());
+				attachment.setDataHandler(new DataHandler(source));
+				attachment.setFileName(attachmentMetadata.getOriginalFileName());
+				
+				multiPart.addBodyPart(attachment);	
+				mimeMessage.setContent(multiPart); 
+				
+			}
 			 
 			 if(props.get(HunterConstants.CONFIG_TEXT_HTML_UTF8_KEY) != null){ 
-				 String contentType = props.get(HunterConstants.CONFIG_TEXT_HTML_UTF8_KEY).toString();
 				 logger.debug("Setting content type as : " + contentType); 
-				 msg.setContent(multiPart, contentType);
+				 mimeMessage.setContent(multiPart, contentType);
 			 }else{
-				 msg.setContent(multiPart);
+				 mimeMessage.setContent(multiPart);
 			 }
 			 
 			 logger.debug("Getting transport session and sending email..."); 
 			 Transport transport = getSession().getTransport("smtp");
-			 transport.send(msg);
+			 transport.send(mimeMessage);
+			 
+			 /* Once you are done sending email, delete temporary files */
+			 logger.debug("Deleting temporary files... "); 
+			 for(MessageAttachmentMetadata attachmentMetadata : messageAttachmentMetadata ){
+				 String url = attachmentMetadata.getUrl();
+				 logger.debug( url );
+				 File tempFile = new File(url);
+				 tempFile.delete();
+			 }
+			 
 			 logger.debug("Successfully finished sending email for properties set : " + name);
 			 results.put(TaskProcessConstants.CONN_STATUS, HunterConstants.STATUS_SUCCESS);
 			 results.put(GatewayClient.TASK_PROCESS_ERRORS, errors);

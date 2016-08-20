@@ -212,7 +212,7 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 	}
 
 	@Override
-	public Object executeQueryForOnReturn(String query, List<Object> values) {
+	public Object executeQueryForOneReturn(String query, List<Object> values) {
 		Map<Integer, List<Object>>  rowListMap = executeQueryRowList(query, values);
 		if(!rowListMap.isEmpty() && rowListMap.get(1) != null && !rowListMap.get(1).isEmpty()){
 			if(rowListMap.get(1).size() > 1){
@@ -234,6 +234,29 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 			logger.debug("No data found for query : " + query); 
 		}
 		return firstMap;
+	}
+
+	@Override
+	public String replaceAllColonedParams(String query, Map<String, Object> params) {
+		logger.debug("Replacing parameters : " + HunterUtility.stringifyMap(params)); 
+		if( query == null || HunterUtility.isMapNllOrEmpty(params) ){ 
+			String message = "Either the query is null or no parameters to replace. Returning the as is query...";
+			logger.debug( message );
+			throw new IllegalArgumentException( message   );
+		}
+		for(Map.Entry<String, Object> entry : params.entrySet()){
+			String key = entry.getKey();
+			String value = HunterUtility.getStringOrNullOfObj( entry.getValue() );
+			if( query.contains(key) ){
+				value = value == null ? " IS NULL " : value;
+				query = query.replaceAll(key, value);
+			}else{
+				logger.debug("Exception while processing query for params : " + HunterUtility.stringifyMap(params)); 
+				throw new IllegalArgumentException( "Key : "+ key +" cannot be found in Query : \n "+ query + "\n"   );
+			}
+		}
+		logger.debug("Replaced query : \n " + query); 
+		return query;
 	}
 
 	

@@ -18,5 +18,6 @@ public interface HunterClientDao {
 	public HunterClient getHunterClientForUserId(Long longFromObject);
 	public HunterClient editReceiverAndBudget(Long clientId, float budget, boolean isReceiver);
 	public List<HunterClientsDetailsJson> getAllHunterClientDetailsJson();
+	public String validateClientDelete(Long clientId);
 
 }

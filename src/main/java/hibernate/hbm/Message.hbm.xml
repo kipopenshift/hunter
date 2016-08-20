@@ -23,7 +23,7 @@
 		<property name="createdBy" column="CRTD_BY" type="java.lang.String"  />
 		<property name="lastUpdatedBy" column="LST_UPDTD_BY" type="java.lang.String"  />
 		
-		<many-to-one name="provider" class="com.techmaster.hunter.obj.beans.ServiceProvider" cascade="none" lazy="no-proxy"/> 
+		<many-to-one name="provider" class="com.techmaster.hunter.obj.beans.ServiceProvider" cascade="none" fetch="select" lazy="false" />  
 		
 		<!-- <set name="receivers" table="ADDRESS" cascade="none"  inverse="false" lazy="false"  fetch="select"> 
             <key>
@@ -56,6 +56,13 @@
 			<property name="replyTo" column="RPLY_TO" type="java.lang.String" />
 			<property name="priority" column="PRRTY" type="java.lang.Integer" />
 			<property name="emailTemplateName" column="EML_TMPLT_NAM" type="java.lang.String" />
+			<property name="messageAttachments" column="MSG_ATTCHMENTS" type="java.lang.String" length="4000" />
+			
+			<set name="messageAttachmentMetadata" cascade="save-update,delete" table="MSG_MSG_ATTCHMNT_MT_DATA">
+        		<key column="MSG_ID"/>
+         		<many-to-many column="M_DATA_ID" class="com.techmaster.hunter.obj.beans.MessageAttachmentMetadata"/>
+      		</set>
+      		
 		</union-subclass>
 		
 		<union-subclass name="com.techmaster.hunter.obj.beans.MediaMessage" table="MEDIA_MSG">

@@ -23,19 +23,17 @@ import com.techmaster.hunter.dao.types.HunterMessageReceiverDao;
 import com.techmaster.hunter.dao.types.ReceiverRegionDao;
 import com.techmaster.hunter.dao.types.TaskDao;
 import com.techmaster.hunter.dao.types.TaskMessageReceiverDao;
+import com.techmaster.hunter.json.PagedHunterMessageReceiverJson;
 import com.techmaster.hunter.json.ReceiverRegionJson;
-import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.Constituency;
 import com.techmaster.hunter.obj.beans.ConstituencyWard;
 import com.techmaster.hunter.obj.beans.Country;
 import com.techmaster.hunter.obj.beans.County;
 import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
 import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
-import com.techmaster.hunter.obj.beans.HunterRawReceiver;
+import com.techmaster.hunter.obj.beans.ReceiverGroupReceiver;
 import com.techmaster.hunter.obj.beans.ReceiverRegion;
 import com.techmaster.hunter.obj.beans.State;
-import com.techmaster.hunter.obj.beans.Task;
-import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -50,226 +48,6 @@ public class RegionServiceImpl extends AbstractRegionService {
 	@Autowired private ProcedureHandler get_region_codes;
 	
 	private static final Logger logger = HunterLogFactory.getLog(RegionServiceImpl.class);
-
-	@Override
-	public boolean validateEqualityForCountry(Country country, Country newCountry) {
-		
-		String countryName = country.getCountryName();
-		String newCountryName = newCountry.getCountryName();
-		
-		if(countryName == null || newCountryName == null ){
-			return false;
-		}
-		
-		if(countryName.equals(newCountryName)){ 
-			return false;
-		}
-		
-		return true;
-	}
-
-	@Override
-	public boolean validateEqualityForCounty(County county, County newCounty) {
-		
-		// check countries.
-		Long countryId = county.getCountryId();
-		Long newCountyId = newCounty.getCountryId();
-		
-		if(countryId == null || newCounty == null)
-			return false;
-		
-		// if they belong to different countries, it's valid
-		if(!countryId.equals(newCountyId)){
-			return true;
-		}
-		
-		// check county names
-		String countryName = county.getCountyName();
-		String newCountyName = newCounty.getCountyName();
-		
-		if(countryName == null || newCountyName == null)
-			return false;
-		
-		if(countryName.equals(newCountyName)){
-			return false;
-		}
-		
-		return true;
-		
-	}
-
-	@Override
-	public boolean validateEqualityForConstituency(Constituency constituency, Constituency newConstituency) {
-		
-		County county = HunterHibernateHelper.getEntityById(constituency.getCountyId(), County.class);
-		County newCounty = HunterHibernateHelper.getEntityById(newConstituency.getCountyId(), County.class);
-		boolean validateCounties = validateEqualityForCounty(county, newCounty);
-
-		// if they belong to different counties, it's valid.
-		if(!validateCounties){
-			return true;
-		}
-		
-		// check county names
-		String constituencyName = constituency.getCnsttncyName();
-		String newConstituencyName = newConstituency.getCnsttncyName();
-			
-		if(constituencyName == null || newConstituencyName == null)
-			return false;
-		
-		if(constituencyName.equals(newConstituencyName)){
-			return false;
-		}
-		
-		return true;
-	}
-
-	@Override
-	public boolean validateEqualityForConstituencyWard( ConstituencyWard constituencyWard, ConstituencyWard newConstituencyWard) {
-		
-		Constituency constituencyWardConsituency = HunterHibernateHelper.getEntityById(constituencyWard.getConstituencyId(), Constituency.class);
-		Constituency newConstituencyWardConsituency = HunterHibernateHelper.getEntityById(newConstituencyWard.getConstituencyId(), Constituency.class);
-		
-		boolean validateConsituencies = validateEqualityForConstituency(constituencyWardConsituency, newConstituencyWardConsituency);
-
-		// if they belong to different constituencies, it's valid.
-		if(!validateConsituencies){
-			return true;
-		}
-		
-		// check constituency wards names
-		String constituencyWardName = constituencyWard.getWardName();
-		String newConstituencyWardName = newConstituencyWard.getWardName();
-			
-		if(constituencyWardName == null || newConstituencyWardName == null)
-			return false;
-		
-		if(constituencyWardName.equals(newConstituencyWardName)){
-			return false;
-		}
-		
-		return true;
-	}
-
-	@Override
-	public boolean validateEqualityForState(State state, State newState) {
-		
-		Country country = HunterHibernateHelper.getEntityById(state.getCountryId(), Country.class);
-		Country newCountry = HunterHibernateHelper.getEntityById(newState.getCountryId(), Country.class);
-		
-		boolean validateCountries = validateEqualityForCountry(country, newCountry);
-		
-		// if they belong to different countries, it's valid.
-		if(!validateCountries){
-			return true;
-		}
-		
-		// check constituency wards names
-		String stateName = state.getStateName();
-		String newStateName = newState.getStateName();
-			
-		if(stateName == null || newStateName == null)
-			return false;
-		
-		if(stateName.equals(newStateName)){
-			return false;
-		}
-		
-		return true;
-	}
-
-	@Override
-	public void addCountiesToCountry(Country country, List<County> counties) {
-		logger.debug("Adding county to country");
-		for(County county : counties){
-			county.setCountryId(country.getCountryId()); 
-		}
-		HunterHibernateHelper.saveOrUpdateEntities(counties);
-		logger.debug("Done adding counties to country");
-	}
-
-	@Override
-	public void addConsituenciesToCounty(County county, List<Constituency> constituencies) {
-		logger.debug("Adding constituency to county");
-		for(Constituency constituency : constituencies){
-			constituency.setCountyId(county.getCountyId());
-		}
-		HunterHibernateHelper.saveOrUpdateEntities(constituencies); 
-		logger.debug("Done adding consituencies to county");	
-	}
-
-	@Override
-	public void addConstituencyWardsToConsituency(Constituency constituency, List<ConstituencyWard> constituencyWards) {
-		logger.debug("Adding wards to constituency");
-		for(ConstituencyWard constituencyWard : constituencyWards){
-			constituency.setCountyId(constituencyWard.getConstituencyId());
-		}
-		HunterHibernateHelper.saveOrUpdateEntities(constituencyWards); 
-		logger.debug("Done adding constituency to county");			
-	}
-
-	@Override
-	public void addCountiesToCountry(Long countryId, List<County> counties) {
-		logger.debug("Adding ward to constituency");
-		Country country = HunterHibernateHelper.getEntityById(countryId, Country.class);
-		if(country != null){
-			for(County county : counties){
-				county.setCountryId(country.getCountryId()); 
-			}
-		}else{
-			throw new IllegalArgumentException("Country of id provided is null!!");
-		}
-		HunterHibernateHelper.saveOrUpdateEntities(counties); 
-		logger.debug("Done adding county to country");		
-	}
-
-	@Override
-	public void addConsituenciesToCounty(Long countyId, List<Constituency> constituencies) {
-		logger.debug("Adding consituencies to county...");
-		County county = HunterHibernateHelper.getEntityById(countyId, County.class);
-		if(county != null){
-			for(Constituency constituency : constituencies){
-				constituency.setCountyId(county.getCountyId());  
-			}
-		}else{
-			throw new IllegalArgumentException("county of id provided is null!!");
-		}
-		HunterHibernateHelper.saveOrUpdateEntities(constituencies); 
-		logger.debug("Done adding county to country");			
-	}
-
-	@Override
-	public void addConstituencyWardsToConsituency(Long constituencyId, List<ConstituencyWard> constituencyWards) {
-		logger.debug("Adding consituencyward to to consituency...");
-		Constituency constituency = HunterHibernateHelper.getEntityById(constituencyId, Constituency.class);
-		if(constituency != null){
-			for(ConstituencyWard constituencyWard : constituencyWards){
-				constituencyWard.setConstituencyId(constituency.getCnsttncyId());  
-			}
-		}else{
-			throw new IllegalArgumentException("constituency of id provided is null!!");
-		}
-		HunterHibernateHelper.saveOrUpdateEntities(constituencyWards); 
-		logger.debug("Done adding consituencywards to consituency");			
-	}
-
-	@Override
-	public ReceiverRegion createReceiverRegion(String regionLevel, Long countryId, Long stateId, Long countyId, Long consituencyId, Long constituencyWardId) {
-		ReceiverRegion receiverRegion = new ReceiverRegion();
-		return receiverRegion;
-	}
-
-	@Override
-	public Task deleteTaskReceiversForRegion(ReceiverRegion taskRegion) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Task addRandomReceiversToTask(List<HunterMessageReceiver> hunterMessageReceiver) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public void populateRandomReceiversToCountry(Long countryId, int countryCount) {
@@ -596,16 +374,6 @@ public class RegionServiceImpl extends AbstractRegionService {
 		
 		List<Map<String, Object>> rowMaps = hunterJDBCExecutor.replaceAndExecuteQuery(query, params);
 		return rowMaps;
-	}
-
-	@Override
-	public void addHunterMessageReceiversToRegion(String country, String reginLevel, String regionLevelName, String contactInfo, AuditInfo auditInfo) {
-		
-	}
-
-	@Override
-	public void addHunterMessageRecersToRegion(List<Map<String, String>> params) {
-				
 	}
 
 	@Override
@@ -1164,6 +932,82 @@ public class RegionServiceImpl extends AbstractRegionService {
 			ja.put(jo);
 		}
 		return ja;
+	}
+
+	@Override
+	public List<ReceiverGroupReceiver> getReceiversForGroup(Long groupId,String taskMsgType) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<PagedHunterMessageReceiverJson> getMessageReceiversForRegion(String cntryNam, String cntyNam, String consName, String wardName, int pageNumber, int pageCount,String rcvrTyp) {
+		
+		pageCount = pageCount == 0 ? 100 : pageCount;
+		
+		List<PagedHunterMessageReceiverJson> pageHunterMessageReceiverJsons = new ArrayList<>();
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		String query = hunterJDBCExecutor.getQueryForSqlId("getPagedHunterMsgReceiversForRegions");
+		
+		int index1 = query.indexOf("|:");
+	    int index2 = query.indexOf(":|");
+	    String key = query.substring( index1+2, index2  );
+	    String replaced = "|:" + key + ":|";
+	    
+	    Map<String,Object> params = new HashMap<>();
+		params.put(":page_num", pageNumber);
+		params.put(":page_count", pageCount);
+		params.put(":rcvrTyp", HunterUtility.singleQuote( rcvrTyp )); 
+		String whrCls = "";
+	    
+	    if( wardName != null && consName != null && cntyNam != null && cntryNam != null ){
+	    	whrCls = key + "." + "CNTRY_NAM =:CNTRY_NAM AND " + key + "." + "CNTY_NAM =:CNTY_NAM AND " + key + "." + "CONS_NAM =:CONS_NAM AND " + key + "." + "WRD_NAM =:WRD_NAM";
+	    	query = query.replace( replaced, whrCls );
+	    	params.put(":CNTRY_NAM", HunterUtility.singleQuote(cntryNam));
+			params.put(":CNTY_NAM", HunterUtility.singleQuote(cntyNam));
+			params.put(":CONS_NAM", HunterUtility.singleQuote(consName));
+			params.put(":WRD_NAM", HunterUtility.singleQuote(wardName));
+	    }else if( wardName == null && consName != null && cntyNam != null && cntryNam != null ){
+	    	whrCls = key + "." + "CNTRY_NAM =:CNTRY_NAM AND " + key + "." + "CNTY_NAM =:CNTY_NAM AND " + key + "." + "CONS_NAM =:CONS_NAM";
+	    	query = query.replace( replaced, whrCls );
+	    	params.put(":CNTRY_NAM", HunterUtility.singleQuote(cntryNam));
+			params.put(":CNTY_NAM", HunterUtility.singleQuote(cntyNam));
+			params.put(":CONS_NAM", HunterUtility.singleQuote(consName));
+	    }else if( wardName == null && consName == null && cntyNam != null && cntryNam != null ){
+	    	whrCls = key + "." + "CNTRY_NAM =:CNTRY_NAM AND " + key + "." + "CNTY_NAM =:CNTY_NAM";
+	    	query = query.replace( replaced, whrCls );
+	    	params.put(":CNTRY_NAM", HunterUtility.singleQuote(cntryNam));
+			params.put(":CNTY_NAM", HunterUtility.singleQuote(cntyNam));
+	    }else if( wardName == null && consName == null && cntyNam == null && cntryNam != null ){
+	    	whrCls = key + "." + "CNTRY_NAM =:CNTRY_NAM";
+	    	query = query.replace( replaced, whrCls );
+	    	params.put(":CNTRY_NAM", HunterUtility.singleQuote(cntryNam));
+	    }
+	    
+	    logger.debug( whrCls );
+	    
+	    whrCls = whrCls.replaceAll(key, "r2");
+	    logger.debug( whrCls ); 
+	    
+	    replaced = "|:r2:|";
+	    query = query.replace( replaced, whrCls );
+	    
+	    logger.debug("Processed query : " + query); 
+		
+		query = hunterJDBCExecutor.replaceAllColonedParams(query, params);
+		List<Map<String, Object>>  rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, null);
+		
+		for( Map<String, Object> rowMap: rowMapList ){
+			PagedHunterMessageReceiverJson receiverJson = new PagedHunterMessageReceiverJson();
+			receiverJson.setContact( HunterUtility.getStringOrNullOfObj( rowMap.get("RCVR_CNTCT") ) ); 
+			receiverJson.setIndex( Integer.valueOf( HunterUtility.getStringOrNullOfObj( rowMap.get("ROW_NUM") ) ) );
+			receiverJson.setCount( Integer.valueOf( HunterUtility.getStringOrNullOfObj( rowMap.get("CNT") ) ) );
+			pageHunterMessageReceiverJsons.add(receiverJson); 
+		}
+		
+		logger.debug( HunterUtility.stringifyList( pageHunterMessageReceiverJsons ) );  
+		
+		return pageHunterMessageReceiverJsons;
 	}
 	
 	

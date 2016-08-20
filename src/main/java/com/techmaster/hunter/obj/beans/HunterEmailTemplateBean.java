@@ -1,7 +1,11 @@
 package com.techmaster.hunter.obj.beans;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import com.techmaster.hunter.util.HunterUtility;
 
 public class HunterEmailTemplateBean {
 	
@@ -15,7 +19,9 @@ public class HunterEmailTemplateBean {
 	private String contentType;
 	private String template;
 	
+	List<String> embeddedAttachments  = new ArrayList<>();
 	Map<String, String> miscelaneous = new HashMap<String, String>();
+	Map<String, String> attachments = new HashMap<String, String>();
 	
 	public HunterEmailTemplateBean() {
 		super();
@@ -81,6 +87,18 @@ public class HunterEmailTemplateBean {
 	}
 	public void setTemplate(String template) {
 		this.template = template;
+	}
+	public Map<String, String> getAttachments() {
+		return attachments;
+	}
+	public void setAttachments(Map<String, String> attachments) {
+		this.attachments = attachments;
+	}
+	public List<String> getEmbeddedAttachments() {
+		return embeddedAttachments;
+	}
+	public void setEmbeddedAttachments(List<String> embeddedAttachments) {
+		this.embeddedAttachments = embeddedAttachments;
 	}
 
 	@Override
@@ -176,7 +194,9 @@ public class HunterEmailTemplateBean {
 				+ templateContent + ", subject=" + subject + ", fromList="
 				+ fromList + ", toList=" + toList + ", ccList=" + ccList
 				+ ", contentType=" + contentType + ", template=" + template
-				+ ", miscelaneous=" + miscelaneous + "]";
+				+ ", miscelaneous=" + HunterUtility.stringifyMap(miscelaneous) 
+				+ ", attachments=" + HunterUtility.stringifyMap(attachments) 
+				+ ", embeddedAttachments=" + HunterUtility.stringifyList(embeddedAttachments) + "]";   
 	}
 
 	

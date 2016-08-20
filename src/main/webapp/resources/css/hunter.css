@@ -18,6 +18,9 @@ body{
 	width:40%;
 }
 
+#menuUlId li{
+	font-size:15px;
+}
 
 .button {
 	color: #000;
@@ -116,6 +119,7 @@ body{
 	opacity:2;
 	border-radius : 4px;
 	background-size: 100% 100%;
+	margin-top:-5px;
 }
 
 .homeCurrentTab{
@@ -123,13 +127,13 @@ body{
 }
 
 .underLined{
-	border-bottom : 1px solid #93B1B7;
+	border-bottom : 3px solid #93B1B7;
 }
 
 .rightAndLeftBottom{
-	border-right : 1px solid #93B1B7;
-	border-left : 1px solid #93B1B7;
-	border-bottom:1px solid #93B1B7;
+	border-right : 3px solid #93B1B7;
+	border-left : 3px solid #93B1B7;
+	border-bottom:3px solid #93B1B7;
 }
 
 .hunter-k-button{
@@ -162,8 +166,29 @@ body{
 	color:black;
 }
 
+.k-invalid-msg{
+	color:red;
+}
 
+.messageAttachmentsRecord{
+	paddign-left:20px;
+	width:100%;
+	height:25px;
+	border:1px solid rgb(163,216,216);
+	background-color:rgb(217,247,247);
+	margin:5px;
+	padding:3px;
+	font-size:14px;
+	font-weight:bold;
+	border-radius:4px;
+}
 
+.messageAttachmentsRecord:hover{
+	background-color:#BBE0E8;
+	border:1px solid #92BCC4;
+}
 
-
+#selRegionMessgReceiverGrid tr[role="row"]{
+	height:10px;
+}
 

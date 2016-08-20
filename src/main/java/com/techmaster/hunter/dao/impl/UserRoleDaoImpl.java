@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.UserRoleDao;
+import com.techmaster.hunter.enums.HunterUserRolesEnums;
 import com.techmaster.hunter.obj.beans.UserRole;
 import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterSessionFactory;
@@ -53,7 +54,7 @@ public class UserRoleDaoImpl implements UserRoleDao{
 		Map<Integer, List<Object>> counts = hunterJDBCExecutor.executeQueryRowList(queryCheck, values);
 		if(!counts.isEmpty()){
 			List<Object> rowList = counts.get(1);
-			String name = rowList.get(0)+"";
+			String name = rowList.get(2)+"";
 			String message = "User already has this role ( " + name + " )"; logger.debug(message); 
 			return message;
 		}
@@ -64,7 +65,7 @@ public class UserRoleDaoImpl implements UserRoleDao{
 	}
 
 	@Override
-	public String removeRoleToUser(Long userId, Long userRoleId) {
+	public String removeRoleFromUser(Long userId, Long userRoleId) {
 		logger.debug("Removing role ( " + userRoleId + " ) from user ( " + userId + " )");
 		List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{userId, userRoleId});
 		String updateQuery = "DELETE FROM HNTR_USR_RLS where USR_ID = ? and ROLE_ID = ?";
@@ -105,8 +106,76 @@ public class UserRoleDaoImpl implements UserRoleDao{
 		}finally{
 			HunterHibernateHelper.closeSession(session);
 		}
-		logger.debug("Finished fetching rolew for the user : " + userRoles); 
+		logger.debug("Finished fetching role for the user : " + userRoles); 
 		return userRoles;
 	}
 
+	@Override
+	public void editUserRole(UserRole userRole) {
+		logger.debug("Updating userRole : " + userRole);
+		HunterHibernateHelper.updateEntity(userRole);
+		logger.debug("Successfully finished updating userRole : " + userRole);
+	}
+
+	@Override
+	public String deleteUserRole(UserRole userRole) {
+		StringBuilder message = new StringBuilder();
+		logger.debug("Validating deletion of the userRole : " + userRole);
+		// No user should be using this role.
+		// No role should be deleted if it's used to validate task events.
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		String query = hunterJDBCExecutor.getQueryForSqlId("getAllUsersWithRoleId");
+		List<Object> values = new ArrayList<>();
+		values.add(userRole.getRoleId());
+		Map<Integer, List<Object>> rowListMap = hunterJDBCExecutor.executeQueryRowList(query, values);
+		
+		if(rowListMap != null && !rowListMap.isEmpty()){
+			message.append("User role is being used by users");
+		}
+		
+		if(HunterUserRolesEnums.ROLE_ADMIN.getName().equals(userRole.getRoleName())){
+			if(message.toString().trim().length() != 0)
+				message.append(",");
+			message.append("Admin role cannot be deleted");
+		}
+		
+		if(HunterUserRolesEnums.ROLE_TASK_APPROVER.getName().equals(userRole.getRoleName())){
+			if(message.toString().trim().length() != 0)
+				message.append(",");
+			message.append("Task approver role cannot  be deleted");
+		}
+		
+		if(HunterUserRolesEnums.ROLE_TASK_PROCESSOR.getName().equals(userRole.getRoleName())){
+			if(message.toString().trim().length() != 0)
+				message.append(",");
+			message.append("Task processor role cannot  be deleted");
+		}
+		
+		if(HunterUserRolesEnums.ROLE_USER.getName().equals(userRole.getRoleName())){
+			if(message.toString().trim().length() != 0)
+				message.append(",");
+			message.append("Role user cannot  be deleted");
+		}
+		
+		if(message.toString().trim().length() == 0){
+			HunterHibernateHelper.deleteEntity(userRole);
+		}
+		
+		logger.debug("Finished deleting userRole : " + userRole);
+		logger.debug(message);
+		return message == null ? null : message.toString();
+	}
+
+	@Override
+	public void createUserRole(UserRole userRole) {
+		logger.debug("Creating userRole : " + userRole);
+		if(!userRole.getRoleName().startsWith("ROLE_")){
+			userRole.setRoleName("ROLE_" + userRole.getRoleName()); 
+		}
+		HunterHibernateHelper.saveEntity(userRole);
+		logger.debug("Finished creating userRole : " + userRole);		
+	}
+
+	
+	
 }

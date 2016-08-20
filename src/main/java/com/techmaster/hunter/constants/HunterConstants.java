@@ -16,6 +16,12 @@ public class HunterConstants {
 	public static final String METHOD_POST = "POST";
 	public static final String METHOD_GET = "GET";
 	
+	// Photo Categories
+	public static final String PHOTO_CAT_USER_PROFILE = "USER_PROFILE";
+	
+	// Photo Size Formats
+	public static final String FORMAT_BYTES = "byte";
+	
 	// Credentials
 	public static final String SECURITY_USER_NAME_STR = "userName";
 	public static final String SECURITY_USER_PSWRD_STR = "password";
@@ -239,7 +245,9 @@ public class HunterConstants {
 	public static final String EMAIL_TEMPLATE_BEANS = "EMAIL_TEMPLATE_BEANS";
 	public static final String COUNTRIES = "COUNTRIES";
 	public static final String RECEIVERS = "RECEIVERS";
+	public static final String DEFAULT_EMAIL_TEMPLATE = "DEFAULT_EMAIL_TEMPLATE";
 	
+	//HUNTER PROCESS JSON SERIALIZED FILE NAME
+	public static final String HUNTER_PRCESS_SERIAL_PREF_KEY = "hntr_proc_srl_ref_key_";
 	
-
 }

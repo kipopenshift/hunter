@@ -45,6 +45,7 @@ import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.obj.beans.TextMessage;
 import com.techmaster.hunter.obj.converters.TaskConverter;
 import com.techmaster.hunter.obj.converters.TaskProcessJobConverter;
+import com.techmaster.hunter.region.RegionService;
 import com.techmaster.hunter.task.TaskManager;
 import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
@@ -61,6 +62,7 @@ public class TaskController extends HunterBaseController{
 	@Autowired private TaskHistoryDao taskHistoryDao;
 	@Autowired private HunterClientDao hunterClientDao;
 	@Autowired private ReceiverGroupDao receiverGroupDao;
+	@Autowired private RegionService regionService;
 	
 	private static final Logger logger = HunterLogFactory.getLog(TaskController.class);
 
@@ -69,6 +71,7 @@ public class TaskController extends HunterBaseController{
 	@Consumes("application/json")
 	@ResponseBody
 	public List<Task> getTaskForClientId(@PathVariable Long clientId) {
+		
 		List<Task> tasks = taskDao.getTaskForClientId(clientId);
 		logger.debug("Returning Tasks for client >> " + tasks);
 		return tasks;

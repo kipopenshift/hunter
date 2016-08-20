@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.object.StoredProcedure;
 
+import com.techmaster.hunter.util.HunterUtility;
+
 public class ProcedureHandler extends StoredProcedure{
 	
 	private JdbcTemplate jdbcTemplate;
@@ -81,7 +83,8 @@ public class ProcedureHandler extends StoredProcedure{
     	
     }
     
-	public Map<String, Object> execute_(Map<String, Object> inParams){ 
+	public Map<String, Object> execute_(Map<String, Object> inParams){
+		logger.debug("Invoking stored procedure with params : " + HunterUtility.stringifyMap(inParams)); 
         Map<String, Object> out = super.execute(inParams);
         for(Map.Entry<String, Object> entry : out.entrySet()){
         	logger.debug(entry.getKey() + " > " + entry.getValue()); 

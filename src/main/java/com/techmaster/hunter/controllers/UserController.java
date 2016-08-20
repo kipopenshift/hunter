@@ -64,7 +64,7 @@ public class UserController {
 	@RequestMapping(value="/action/read/post", method=RequestMethod.POST )
 	@Produces("application/json")
 	public @ResponseBody List<HunterUser> readUsersPost(HttpServletResponse response){
-		List<HunterUser> users = userDao.getAllUsers();
+		List<HunterUser> users = userDao.getAllUsersWhoAreClients();
 		return users;
 	}
 	

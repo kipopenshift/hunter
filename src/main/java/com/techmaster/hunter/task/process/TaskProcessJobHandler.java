@@ -44,6 +44,8 @@ public class TaskProcessJobHandler {
 	private static Logger logger = Logger.getLogger(TaskProcessJobHandler.class);
 	private static volatile Map<String, TaskProcessJob> synchProcessJobs = Collections.synchronizedMap(new HashMap<String, TaskProcessJob>());
 	
+	private TaskProcessJobHandler(){}
+	
 	static{
 		if(instance == null){
 			synchronized (TaskProcessJobHandler.class) {

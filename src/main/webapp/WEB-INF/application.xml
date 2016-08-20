@@ -24,6 +24,8 @@
 	<bean id="hunterRawReceiverDao" class="com.techmaster.hunter.dao.impl.HunterRawReceiverDaoImpl"/>
 	<bean id="hunterRawReceiverUserDao" class="com.techmaster.hunter.dao.impl.HunterRawReceiverUserDaoImpl"/>
 	<bean id="rawReceiverService" class="com.techmaster.hunter.rawreceivers.RawReceiverServiceImpl"/>
+	<bean id="messageAttachmentBeanDao" class="com.techmaster.hunter.dao.impl.MessageAttachmentBeanDaoImpl"/>
+	<bean id="emailTemplateObjDao" class="com.techmaster.hunter.dao.impl.EmailTemplateObjDaoImpl"/>
 	
 	<bean name="gateWayClientHelper" class="com.techmaster.hunter.gateway.beans.GateWayClientHelper" factory-method="getInstance" >
 		<property name="regionService" ref="regionService" />
@@ -58,6 +60,9 @@
 				<entry key="jdbcTemplate" value-ref="jdbcTemplate" />
 				<entry key="hunterRawReceiverDao" value-ref="hunterRawReceiverDao" />
 				<entry key="hunterRawReceiverUserDao" value-ref="hunterRawReceiverUserDao" />
+				<entry key="rawReceiverService" value-ref="rawReceiverService" />
+				<entry key="messageAttachmentBeanDao" value-ref="messageAttachmentBeanDao" />
+				<entry key="emailTemplateObjDao" value-ref="emailTemplateObjDao" />
 			</map>
 		</property>
 	</bean>

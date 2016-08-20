@@ -31,6 +31,7 @@ public class HunterUser implements Serializable{
 	private Set<HunterAddress> addresses;
 	private Set<HunterCreditCard> creditCards;
 	private UserLoginBean userLoginBean;
+	private UserProfPhoto userProfPhoto;
 
 	public HunterUser() {
 		super();
@@ -161,44 +162,24 @@ public class HunterUser implements Serializable{
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
+	public UserProfPhoto getUserProfPhoto() {
+		return userProfPhoto;
+	}
+	public void setUserProfPhoto(UserProfPhoto userProfPhoto) {
+		this.userProfPhoto = userProfPhoto;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (active ? 1231 : 1237);
-		result = prime * result
-				+ ((addresses == null) ? 0 : addresses.hashCode());
-		result = prime * result
-				+ ((createdBy == null) ? 0 : createdBy.hashCode());
-		result = prime * result
-				+ ((creditCards == null) ? 0 : creditCards.hashCode());
-		result = prime * result
-				+ ((cretDate == null) ? 0 : cretDate.hashCode());
 		result = prime * result + ((email == null) ? 0 : email.hashCode());
 		result = prime * result
 				+ ((firstName == null) ? 0 : firstName.hashCode());
 		result = prime * result
 				+ ((lastName == null) ? 0 : lastName.hashCode());
-		result = prime * result
-				+ ((lastUpdate == null) ? 0 : lastUpdate.hashCode());
-		result = prime * result
-				+ ((lastUpdatedBy == null) ? 0 : lastUpdatedBy.hashCode());
-		result = prime * result
-				+ ((middleName == null) ? 0 : middleName.hashCode());
-		result = prime * result
-				+ ((password == null) ? 0 : password.hashCode());
-		result = prime * result
-				+ ((phoneNumber == null) ? 0 : phoneNumber.hashCode());
-		result = prime * result + Arrays.hashCode(profilePhoto);
 		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
 		result = prime * result
-				+ ((userLoginBean == null) ? 0 : userLoginBean.hashCode());
-		result = prime * result
 				+ ((userName == null) ? 0 : userName.hashCode());
-		result = prime * result
-				+ ((userRoles == null) ? 0 : userRoles.hashCode());
-		result = prime * result
-				+ ((userType == null) ? 0 : userType.hashCode());
 		return result;
 	}
 	@Override
@@ -210,28 +191,6 @@ public class HunterUser implements Serializable{
 		if (getClass() != obj.getClass())
 			return false;
 		HunterUser other = (HunterUser) obj;
-		if (active != other.active)
-			return false;
-		if (addresses == null) {
-			if (other.addresses != null)
-				return false;
-		} else if (!addresses.equals(other.addresses))
-			return false;
-		if (createdBy == null) {
-			if (other.createdBy != null)
-				return false;
-		} else if (!createdBy.equals(other.createdBy))
-			return false;
-		if (creditCards == null) {
-			if (other.creditCards != null)
-				return false;
-		} else if (!creditCards.equals(other.creditCards))
-			return false;
-		if (cretDate == null) {
-			if (other.cretDate != null)
-				return false;
-		} else if (!cretDate.equals(other.cretDate))
-			return false;
 		if (email == null) {
 			if (other.email != null)
 				return false;
@@ -247,57 +206,15 @@ public class HunterUser implements Serializable{
 				return false;
 		} else if (!lastName.equals(other.lastName))
 			return false;
-		if (lastUpdate == null) {
-			if (other.lastUpdate != null)
-				return false;
-		} else if (!lastUpdate.equals(other.lastUpdate))
-			return false;
-		if (lastUpdatedBy == null) {
-			if (other.lastUpdatedBy != null)
-				return false;
-		} else if (!lastUpdatedBy.equals(other.lastUpdatedBy))
-			return false;
-		if (middleName == null) {
-			if (other.middleName != null)
-				return false;
-		} else if (!middleName.equals(other.middleName))
-			return false;
-		if (password == null) {
-			if (other.password != null)
-				return false;
-		} else if (!password.equals(other.password))
-			return false;
-		if (phoneNumber == null) {
-			if (other.phoneNumber != null)
-				return false;
-		} else if (!phoneNumber.equals(other.phoneNumber))
-			return false;
-		if (!Arrays.equals(profilePhoto, other.profilePhoto))
-			return false;
 		if (userId == null) {
 			if (other.userId != null)
 				return false;
 		} else if (!userId.equals(other.userId))
 			return false;
-		if (userLoginBean == null) {
-			if (other.userLoginBean != null)
-				return false;
-		} else if (!userLoginBean.equals(other.userLoginBean))
-			return false;
 		if (userName == null) {
 			if (other.userName != null)
 				return false;
 		} else if (!userName.equals(other.userName))
-			return false;
-		if (userRoles == null) {
-			if (other.userRoles != null)
-				return false;
-		} else if (!userRoles.equals(other.userRoles))
-			return false;
-		if (userType == null) {
-			if (other.userType != null)
-				return false;
-		} else if (!userType.equals(other.userType))
 			return false;
 		return true;
 	}
@@ -313,18 +230,10 @@ public class HunterUser implements Serializable{
 				+ ", createdBy=" + createdBy + ", lastUpdatedBy="
 				+ lastUpdatedBy + ", userRoles=" + userRoles + ", addresses="
 				+ addresses + ", creditCards=" + creditCards
-				+ ", userLoginBean=" + userLoginBean + "]";
+				+ ", userLoginBean=" + userLoginBean + ", userProfPhoto="
+				+ userProfPhoto + "]";
 	}
 
-	
-	
-	
-
-	
-	
-	
-	
-	
 	
 	
 	

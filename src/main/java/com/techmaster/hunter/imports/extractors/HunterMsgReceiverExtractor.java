@@ -331,39 +331,52 @@ public class HunterMsgReceiverExtractor extends AbstractExcelExtractor<HunterMes
 						
 						String objStrHold = objStr;
 						
-						if(objStr.startsWith("\\+")){
-							objStrHold = objStrHold.substring(1,objStrHold.length());
-						}
-						if(objStrHold.contains("\\-")){
-							objStrHold = objStrHold.replaceAll("\\-", "");
-						}
-						if(objStrHold.contains("\\")){
-							objStrHold = objStrHold.replaceAll("\\", "");
-						}
-						if(objStrHold.contains("/")){
-							objStrHold = objStrHold.replaceAll("/", "");
-						}
-						if(objStrHold.contains(".")){
-							objStrHold = objStrHold.replaceAll(".", "");
-						}
-						if(objStrHold.contains("\n")){
-							objStrHold = objStrHold.replaceAll("\n", "");
-						}
-						if(objStrHold.contains(" ")){
-							objStrHold = objStrHold.replaceAll(" ", "");
-						}
-						if(objStrHold.contains("x") && receiverType.equalsIgnoreCase(HunterConstants.RECEIVER_TYPE_TEXT)){
-							objStrHold = objStrHold.replaceAll("x", "");
-						}
-						if(objStrHold.contains("X") && receiverType.equalsIgnoreCase(HunterConstants.RECEIVER_TYPE_TEXT)){
-							objStrHold = objStrHold.replaceAll("X", "");
+						if( HunterUtility.notNullNotEmpty( receiverType ) && HunterConstants.RECEIVER_TYPE_TEXT.equals( receiverType ) ){
+							
+							if(objStr.startsWith("\\+")){
+								objStrHold = objStrHold.substring(1,objStrHold.length());
+							}
+							if(objStrHold.contains("\\-")){
+								objStrHold = objStrHold.replaceAll("\\-", "");
+							}
+							if(objStrHold.contains("\\")){
+								objStrHold = objStrHold.replaceAll("\\", "");
+							}
+							if(objStrHold.contains("/")){
+								objStrHold = objStrHold.replaceAll("/", "");
+							}
+							if(objStrHold.contains(".")){
+								objStrHold = objStrHold.replaceAll(".", "");
+							}
+							if(objStrHold.contains("\n")){
+								objStrHold = objStrHold.replaceAll("\n", "");
+							}
+							if(objStrHold.contains(" ")){
+								objStrHold = objStrHold.replaceAll(" ", "");
+							}
+							if(objStrHold.contains("x") && receiverType.equalsIgnoreCase(HunterConstants.RECEIVER_TYPE_TEXT)){
+								objStrHold = objStrHold.replaceAll("x", "");
+							}
+							if(objStrHold.contains("X") && receiverType.equalsIgnoreCase(HunterConstants.RECEIVER_TYPE_TEXT)){
+								objStrHold = objStrHold.replaceAll("X", "");
+							}
+							
+							int conLen = objStrHold.length();
+							
+							if(conLen < 4 || conLen > 15){
+								rowErrors.add("Invalid phone number");
+							}
+							
+							
+						}else if( HunterUtility.notNullNotEmpty( receiverType ) && HunterConstants.RECEIVER_TYPE_EMAIL.equals( receiverType ) ){
+							
+							boolean isValidEmail = HunterUtility.validateEmail( objStrHold );
+							if( !isValidEmail ){
+								rowErrors.add("Invalid email!");
+							}
+							
 						}
 						
-						int conLen = objStrHold.length();
-						
-						if(conLen < 4 || conLen > 15){
-							rowErrors.add("Invalid phone number");
-						}
 						
 						if(localDuplicateCheck.contains(objStrHold)){
 							rowErrors.add("Contact duplicated in the sheet");

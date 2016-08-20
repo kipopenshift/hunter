@@ -92,7 +92,7 @@ public class HunterClientDaoImpl implements HunterClientDao{
 
 	@Override
 	public HunterClient getHunterClientForUserId(Long userId) {
-		String query = "FROM HunterClient c WHERE c.clientId = '" + userId + "'";
+		String query = "FROM HunterClient c WHERE c.clientId = " + userId;
 		List<HunterClient> clients = HunterHibernateHelper.executeQueryForObjList(HunterClient.class, query);
 		HunterClient client = null;
 		if(clients.size() > 1){
@@ -147,6 +147,11 @@ public class HunterClientDaoImpl implements HunterClientDao{
 		}
 		logger.debug("Successfully fetched all client details. Size ( " + detailsJson.size() + " )"); 
 		return detailsJson;
+	}
+
+	@Override
+	public String validateClientDelete(Long clientId) {
+		return null;
 	}
 	
 	

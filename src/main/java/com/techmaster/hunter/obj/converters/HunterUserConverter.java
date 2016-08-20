@@ -46,6 +46,7 @@ public class HunterUserConverter {
 		hunterUser.setLastUpdatedBy(auditInfo.getLastUpdatedBy());
 		hunterUser.setLastUpdate(auditInfo.getLastUpdate()); 
 		hunterUser.setUserType(HunterConstants.HUNTER_CLIENT_USER); 
+		hunterUser.setPassword(hunterUserJson.getPassword()); 
 		updateWithHunterUserJson(hunterUserJson, hunterUser);
 		return hunterUser;
 	}
@@ -76,6 +77,7 @@ public class HunterUserConverter {
 				json.setUserId(hunterUser.getUserId());
 				json.setUserName(hunterUser.getUserName());
 				json.setUserType(hunterUser.getUserType()); 
+				json.setPassword(hunterUser.getPassword()); 
 				jsons.add(json);
 			}
 		}

@@ -48,11 +48,11 @@ public class HunterAuthenticationProvider implements AuthenticationProvider {
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
         
         if(blocked){
-        	String message = error + "</br>" + "Account BLOCKED!! Login failed attempts ( " + results.get("COUNT")  +" ) exeeded limit ( 5 )<br/> Please contact Hunter administrator.";
+        	String message = error + "</br>" + "Account BLOCKED!! Login failed attempts ( " + results.get("COUNT")  +" ) exeeded limit ( 5 )<br/>Please contact Hunter administrator.";
         	logger.debug(message);
         	throw new LockedException(message); 
         }else if(!blocked && results.get("REM_COUNT") != null && !refRoles.isEmpty()) {
-        	String message = error + "<br/>. Remaining failed attempts ( <span style='font-size:16px;color:red;'  > " + results.get("REM_COUNT") + "</span> )";
+        	String message = error + "<br/>Remaining failed attempts ( <span style='font-size:16px;color:red;'  > " + results.get("REM_COUNT") + "</span> )";
         	logger.debug(message);
         	throw new BadCredentialsException(message);
         }

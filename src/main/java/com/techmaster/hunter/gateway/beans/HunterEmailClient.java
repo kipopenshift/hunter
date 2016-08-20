@@ -113,7 +113,7 @@ public class HunterEmailClient extends AbstractHunterEmailClient{
 				GateWayMessage gateWayMessage = new GateWayMessage();
 				gateWayMessage.setClientTagKey(task.getTaskId() + "_" + msgId); 
 				gateWayMessage.setContact(contct);
-				gateWayMessage.setText(emailMessage.getMsgText()); 
+				gateWayMessage.setText(HunterUtility.getStringBlob(emailMessage.getMsgText()));  
 				gateWayMessage.setMsgId(emailMessage.getMsgId());
 				setOtherGateWayMsgValues(gateWayMessage, task);
 				gateWayMessages.add(gateWayMessage);
@@ -133,7 +133,7 @@ public class HunterEmailClient extends AbstractHunterEmailClient{
 					GateWayMessage gateWayMessage = new GateWayMessage();
 					gateWayMessage.setClientTagKey(task.getTaskId() + "_" + emailMessage.getMsgId()); 
 					gateWayMessage.setContact(receiver.getReceiverContact());
-					gateWayMessage.setText(emailMessage.getMsgText()); 
+					gateWayMessage.setText(HunterUtility.getStringBlob(emailMessage.getMsgText()));  
 					gateWayMessage.setMsgId(emailMessage.getMsgId());
 					setOtherGateWayMsgValues(gateWayMessage, task);
 					gateWayMessages.add(gateWayMessage);

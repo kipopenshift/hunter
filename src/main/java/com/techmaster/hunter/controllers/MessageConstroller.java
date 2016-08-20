@@ -1,5 +1,6 @@
 package com.techmaster.hunter.controllers;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -7,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -21,9 +23,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.ServletContextAware;
 
+import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
+import com.techmaster.hunter.dao.types.MessageAttachmentBeanDao;
 import com.techmaster.hunter.dao.types.MessageDao;
 import com.techmaster.hunter.dao.types.ServiceProviderDao;
 import com.techmaster.hunter.dao.types.TaskDao;
@@ -31,7 +37,10 @@ import com.techmaster.hunter.dao.types.TaskHistoryDao;
 import com.techmaster.hunter.email.HunterEmailTemplateHandler;
 import com.techmaster.hunter.enums.TaskHistoryEventEnum;
 import com.techmaster.hunter.exception.HunterRunTimeException;
+import com.techmaster.hunter.gateway.beans.GateWayClientHelper;
+import com.techmaster.hunter.json.MessageAttachmentBeanJson;
 import com.techmaster.hunter.obj.beans.EmailMessage;
+import com.techmaster.hunter.obj.beans.HunterEmailTemplateBean;
 import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
 import com.techmaster.hunter.obj.beans.Message;
 import com.techmaster.hunter.obj.beans.ServiceProvider;
@@ -43,7 +52,7 @@ import com.techmaster.hunter.util.HunterUtility;
 
 @Controller
 @RequestMapping(value="/message")
-public class MessageConstroller extends HunterBaseController{
+public class MessageConstroller extends HunterBaseController implements ServletContextAware{
 	
 	@Autowired private ServiceProviderDao serviceProviderDao;
 	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
@@ -53,7 +62,13 @@ public class MessageConstroller extends HunterBaseController{
 	@Autowired private MessageDao messageDao;
 	@Autowired private TaskHistoryDao taskHistoryDao;
 	
+	private ServletContext servletContext;
 	private Logger logger = Logger.getLogger(MessageConstroller.class);
+	
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
 	
 	@RequestMapping(value="/action/mainPage", method = RequestMethod.GET )
 	public String mainPage(HttpServletRequest request, HttpServletResponse response){
@@ -153,6 +168,8 @@ public class MessageConstroller extends HunterBaseController{
 	}
 	
 	@RequestMapping(value="/action/tskMsg/email/createOrUpdate", method = RequestMethod.POST )
+	@Produces("application/json")
+	@Consumes("application/json")
 	public @ResponseBody String createOrUpdateEmailMsg(HttpServletRequest request, HttpServletResponse response){
 		
 		JSONObject results = new JSONObject();
@@ -192,6 +209,15 @@ public class MessageConstroller extends HunterBaseController{
 		EmailMessage message = (EmailMessage)task.getTaskMessage();
 		String userName = getUserName();
 		TaskHistory taskHistory = taskManager.getNewTaskHistoryForEventName(taskId, TaskHistoryEventEnum.ADD_MESSAGE.getEventName(), userName);
+		
+		/* If attachment template name changes, 
+		 * then wipe out the existing one attachment configuration
+		 */
+		String originalTemplateName = message == null ? null : message.getEmailTemplateName();
+		if( message != null && !emailTemplateName.equalsIgnoreCase(originalTemplateName) ){
+			message.setEmailTemplateName(emailTemplateName);
+			message.setMessageAttachments(null); 
+		}
 		
 		if(message == null){
 			logger.debug("No email message configured for task. Creating email message...");  
@@ -294,6 +320,10 @@ public class MessageConstroller extends HunterBaseController{
 			Long providerId = HunterUtility.getLongFromObject(params.get("providerId"));
 			String msgSts = HunterUtility.getStringOrNullOfObj(params.get("msgSts"));
 			String msgText = HunterUtility.getStringOrNullOfObj(params.get("msgText"));
+			
+			msgText = msgText.replaceAll("&apos;", "'");
+			msgText = msgText.replaceAll("&quot;", "\"");
+			
 			Task task = taskDao.getTaskById(taskId);
 			
 			if(task != null && HunterConstants.MESSAGE_TYPE_TEXT.equals(task.getTskMsgType())){
@@ -331,5 +361,86 @@ public class MessageConstroller extends HunterBaseController{
 		}
 		return results.toString();
 	}
+	
+	
+	@RequestMapping(value="/action/tskMsg/getReadyEmailBody/{taskId}", method = RequestMethod.GET )
+	public void getReadyEmailBody(@PathVariable("taskId") Long taskId, HttpServletResponse response, HttpServletRequest request){
+		
+		
+		String prevLoc = servletContext.getRealPath(File.separator) + "resources"+ File.separator + "tempPrevs";;
+		String staticPrevLoc = HunterUtility.getRequestBaseURL(request) + "/Hunter/static/resources/tempPrevs";
+		
+		Task task = taskDao.getTaskById(taskId);
+		String body = "";
+		if( task != null && HunterConstants.MESSAGE_TYPE_EMAIL.equals(task.getTskMsgType()) ){ 
+			body = HunterCacheUtil.getInstance().getReadyEmailBodyForEmailTask(task, prevLoc, staticPrevLoc);
+		}else{
+			if(task == null)
+				body = "<h2 style='color:red;'> Task with of task id : "+ taskId +", is cannot be found!  </h2>";
+			else 
+				body = "<h2 style='color:red;'>Task is not of email type</h2>";
+			logger.debug(body);
+		}
+		response.setContentType("text/html"); 
+		try {
+			response.getWriter().println(body);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}
+	
+	@RequestMapping(value="/action/tskMsg/attachments/{templateName}", method = RequestMethod.POST )
+	@Consumes("application/json") 
+	@Produces("application/json") 
+	@ResponseBody
+	public Map<String,String> getAttachmentsForMessageTemplate(@PathVariable("templateName") String templateName){
+		HunterEmailTemplateBean templateBean = HunterCacheUtil.getInstance().getEmailTemplateBean(templateName);
+		return templateBean.getAttachments();
+	}
+	
+	@RequestMapping(value="/action/tskMsg/attachmentsRecords", method = RequestMethod.POST )
+	@Consumes("application/json") 
+	@Produces("application/json") 
+	@ResponseBody
+	public List<MessageAttachmentBeanJson> getMessageAttachmentsRecords(){
+		HunterUtility.threadSleepFor(1000); 
+		MessageAttachmentBeanDao messageAttachmentBeanDao = HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class);
+		return messageAttachmentBeanDao.getAllAttachmentBeansJson();
+	}
+	
+	@RequestMapping(value="/action/tskMsg/getMessageAttachmentsNamesString", method = RequestMethod.POST )
+	@Consumes("application/json") 
+	@Produces("application/json") 
+	@ResponseBody
+	public String getMessageAttachmentsNamesString(@RequestBody Map<String,String> params){
+		String data = null;
+		Long msdId = HunterUtility.getLongFromObject(params.get("msgId"));
+		if( HunterUtility.notNullNotEmpty(msdId) ){  
+			EmailMessage emailMessage = (EmailMessage)messageDao.getMessageById(msdId);
+			data = GateWayClientHelper.getInstance().rplcMsgAttchmntKysWthNms(emailMessage);
+		}
+		data = data == null ? "NO DATA" : data;
+		return data;
+	}
+	
+	@RequestMapping(value="/action/tskMsg/setAttachmentToMsgAttchment", method = RequestMethod.POST )
+	@Consumes("application/json") 
+	@Produces("application/json") 
+	@ResponseBody
+	public String setAttachmentToMsgAttchment(@RequestBody Map<String,Object> params){
+		Long msgId = HunterUtility.getLongFromObject(params.get("taskId"));
+		Long attchmentId = HunterUtility.getLongFromObject(params.get("attchmentId")); 
+		String templateAttachmentName = HunterUtility.getStringOrNullOfObj(params.get("templateAttachmentName"));
+		EmailMessage message = (EmailMessage)messageDao.getMessageById(msgId);
+		GateWayClientHelper clientHelper = GateWayClientHelper.getInstance();
+		Map<String,String> results = clientHelper.setAndGetMessageAttachmentsStringForMsg(message, attchmentId, templateAttachmentName );
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("uiMessage", results.get("UI_NAME"));
+		jsonObject.put("msgAttachmentStr", results.get("MSG_ATTCHMNT_STR"));
+		jsonObject = HunterUtility.setJSONObjectForSuccess(new JSONObject(), "Successfully updated message attachment!");
+		logger.debug("Returning : " + jsonObject); 
+		return jsonObject.toString();
+	}
+
 	
 }

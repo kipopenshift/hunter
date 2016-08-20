@@ -30,6 +30,7 @@
  		color:red;
  		width:28.5%;
  		margin-left:34%;
+ 		font-size:17px;
  		border:1px solid #769E8B;
  		border-radius:4px;
  		margin-top:-7%;
@@ -46,7 +47,7 @@
  
  <c:if test="${SPRING_SECURITY_LAST_EXCEPTION != null}">
 		<div class="errorBlock" >
-			Failed login! Either user name or password is invalid.Please try again <br/>Cause : 
+			Failed To Login!<br/>
 			${sessionScope["SPRING_SECURITY_LAST_EXCEPTION"].message}
 		</div>
 	</c:if>

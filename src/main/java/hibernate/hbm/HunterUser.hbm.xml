@@ -45,6 +45,7 @@
         </set>
         
         <one-to-one name="userLoginBean" class="com.techmaster.hunter.obj.beans.UserLoginBean" lazy="false" cascade="all"   />
+        <one-to-one name="userProfPhoto" property-ref="userId" class="com.techmaster.hunter.obj.beans.UserProfPhoto" lazy="false" cascade="all"   />
         
 	</class>
 	

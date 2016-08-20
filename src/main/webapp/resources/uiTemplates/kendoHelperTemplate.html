@@ -113,12 +113,12 @@
 
 
  <script id=processedTaskTxtMessageViewTemplateContainer type="text/x-kendo-template" style="width:900px;margin:0 auto;padding:4px;background-color:rgb(215,234,240);height:340px;border-radius:4px;border:1px solid rgb(175,202,210);" >
-<div id="processedTaskTxtMessageViewTemplate" class="k-block k-info-colored" style="width:900px;margin:0 auto;padding:4px;background-color:rgb(215,234,240);height:375px;border-radius:4px;border:1px solid rgb(175,202,210);">
+<div id="processedTaskTxtMessageViewTemplate" class="k-block k-info-colored" style="width:900px;margin:5 auto;padding:4px;background-color:rgb(215,234,240);height:450px;border-radius:4px;border:1px solid rgb(175,202,210);">
 	<div id="processedTaskTxtMsgLoadDiv" style="margin-left:35%;width:40%;max-height:200px;max-width:700px;margin-top:12%;"  >
 		<h2>Loading Message Data...</h2>
 		<span id="processedTaskTxtMsgLoadIcon"></span>
 	</div>
-	<div id="processedTaskTxtMsgDet1"  style="display:none;float:left;width:55%;min-height:298px;color:#0A2C2E;font-size:13px;padding-left:10px;background-color:#E6F7FF;margin-left:2.5%;margin-top:16px;border-radius:4px;border:1px solid rgb(175,202,210);" >
+	<div id="processedTaskTxtMsgDet1"  style="display:none;float:left;width:55%;min-height:370px;color:#0A2C2E;font-size:13px;padding-left:10px;background-color:#E6F7FF;margin-left:2.5%;margin-top:16px;border-radius:4px;border:1px solid rgb(175,202,210);" >
 		<table id="taskTxtMsgViewTable"  style="table-layout:fixed;width:90%;margin-left:5%;margin-top:4%;" >
 			<tr>
 				<td>Send Date</td>
@@ -158,10 +158,10 @@
 			</tr>
 		</table>
 	</div>
-	<div  id="processedTaskTxtMsgDet2" style="display:none;float:left;width:35%;min-height:298px;color:#0A2C2E;font-size:13px;padding-left:10px;background-color:#E6F7FF;margin-left:2.5%;margin-top:16px;border-radius:4px;border:1px solid rgb(175,202,210);" >
+	<div  id="processedTaskTxtMsgDet2" style="display:none;float:left;width:35%;min-height:370px;color:#0A2C2E;font-size:13px;padding-left:10px;background-color:#E6F7FF;margin-left:2.5%;margin-top:16px;border-radius:4px;border:1px solid rgb(175,202,210);" >
 		<table id="taskTxtMsgTextTable"  style="table-layout:fixed;width:90%;margin-left:5%;margin-top:4%;" >
 			<tr>
-				<td style="height:170px;border-bottom:2px solid #CFE4EF;font-size:15px;word-wrap: break-word;"  id="MESSAGE_TEXT"  >
+				<td style="height:170px;border-bottom:1px dotted rgb(27,81,117);font-size:15px;word-wrap: break-word;padding-bottom:6px;"  id="MESSAGE_TEXT"  >
 					Hon. Uhuru Kenyatta is coming to Chesoen on
 					Saturday 2nd. Please come welcome him. He has promised to
 					build a dispensary for us.<br/>
@@ -189,10 +189,10 @@
 		</table>
 	</div>
 	<br/>
-	<div id="processedTaskTxtMsgDet3" style="display:none;width:94%;min-height:25px;padding-left:10px;margin-top:310px;" >
+	<div id="processedTaskTxtMsgDet3" style="display:none;width:94%;min-height:25px;padding-left:10px;margin-top:330px;" >
 		<table>
 			<tr>
-				<td><button onClick="kendoKipHelperInstance.closeWindowWithOnClose()" style="float:left;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:200px;margin-left:320px;" class="k-button" >Close</button></td>
+				<td><button onClick="kendoKipHelperInstance.closeWindowWithOnClose()" style="float:left;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:300px;margin-left:270px;margin-top:10px;" class="k-button" ><span class="k-icon k-i-cancel"></span>Close</button></td>
 			</tr>
 		</table>
 	</div>
@@ -256,6 +256,47 @@
 		</table>
 	</div>
 </div>
+</script>
+
+
+<script type="text/x-kendo-template" id="taskEmailPreviewWindowTemplate">
+<div id='taskEmailPreviewWindow' style='width:800px;text-align:center;' >
+	<table style='width:798px;text-align:center;' >
+		<tr>
+			<td>
+				<div style="width:790px;margin-left:5px;max-height:800px;height:800px;overflow-y : scroll;" id='taskEmailPreviewContent'  >
+					 <table style='margin-top:40%;width:40%;margin-left:30%;' >
+						<tr>
+							<td><span style='font-size:20px;'>Loading Email Preview...</span></td>
+						</tr>
+						<tr>
+							<td><br/><br/><img src="http://localhost:8080/Hunter/static/resources/images/refreshing_spinner_new.gif" style='margin-left:10%;' width="100px" height="100px"   /></td>
+						</tr>
+					</table>
+				<div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<table style="width:20%;margin-left:35%;" >
+					<tr>
+						<td style='text-align:center;'>
+							<button class="k-button"  onClick="kendoKipHelperInstance.closeWindowWithOnClose();" style="width:250px;margin-bottom:7px;margin-top:10px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-cancel" ></span>Close</button>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</div>
+</script>
+
+<script type="text/x-kendo-template" id="selRegionMessgReceiverGridTemplate">
+	<div style='height:390px;width:800px;' >
+		<div id='selRegionMessgReceiverGrid' >
+			<span id='contactsSpinner' ></span>
+		<div>
+	</div>
 </script>
 
 

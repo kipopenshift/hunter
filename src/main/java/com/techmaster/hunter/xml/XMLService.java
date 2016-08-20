@@ -34,6 +34,8 @@ public interface XMLService {
 	public NodeList getNodeListForCompiledXpath(String xPath);
 	public NodeList getNodeListForXPath(String xPath);
 	public NodeList getNodeListForPathUsingJavax(String xPath);
+	public XMLTree getXmlTree();
+	public Node importNode(Node node, Node appendTo, boolean bolean);
 	
 	
 

@@ -1,5 +1,7 @@
 package com.techmaster.hunter.cache;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -17,13 +20,19 @@ import com.techmaster.hunter.constants.HunterURLConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterMessageReceiverDao;
 import com.techmaster.hunter.dao.types.ReceiverRegionDao;
+import com.techmaster.hunter.gateway.beans.GateWayClientHelper;
 import com.techmaster.hunter.obj.beans.Constituency;
 import com.techmaster.hunter.obj.beans.ConstituencyWard;
 import com.techmaster.hunter.obj.beans.Country;
 import com.techmaster.hunter.obj.beans.County;
+import com.techmaster.hunter.obj.beans.EmailMessage;
 import com.techmaster.hunter.obj.beans.HunterEmailTemplateBean;
 import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
+import com.techmaster.hunter.obj.beans.Message;
+import com.techmaster.hunter.obj.beans.MessageAttachmentMetadata;
+import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TaskClientConfigBean;
+import com.techmaster.hunter.util.EmailTemplateUtil;
 import com.techmaster.hunter.util.HunterUtility;
 import com.techmaster.hunter.xml.XMLService;
 
@@ -64,8 +73,10 @@ public class HunterCacheUtil {
 		HunterCache.getInstance().put(HunterConstants.RESPONSE_CONFIG_CACHED_SERVICE, responseConfigXml);
 		logger.debug("Done caching responseConfigXml xml...");
 		logger.debug("Caching emailTemplates xml...");
-		XMLService emailTemplates = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.EMAIL_TEMPLATES_LOCL_PATH);
+		XMLService emailTemplates = EmailTemplateUtil.getInstance().getAllTemplateXMLService(); 
+		//HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.EMAIL_TEMPLATES_LOCL_PATH);
 		HunterCache.getInstance().put(HunterConstants.EMAIL_TEMPLATES_CACHED_SERVICE, emailTemplates);
+		logger.debug("Done cachingg emailTemplates xml...");
 		logger.debug("Cachingg emailConfigs xml...");
 		XMLService emailConfigs = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.EMAIL_CONFIGS__LOCL_PATH);
 		HunterCache.getInstance().put(HunterConstants.EMAIL_CONFIG_CACHED_SERVICE, emailConfigs);
@@ -74,6 +85,63 @@ public class HunterCacheUtil {
 		XMLService taskProcessJobsTemplate = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.TASK_PROCESS_JOBS_TEMPLATE);
 		HunterCache.getInstance().put(HunterConstants.TASK_PROCESS_JOBS_TEMPLATE, taskProcessJobsTemplate);
 		logger.debug("Done caching taskProcessJobsTemplate xml!!");
+	}
+	
+	public void refreshCacheService(String xmlName){
+		switch (xmlName) {
+		case "allXMLService":
+			refreshAllXMLServices();
+			break;
+		case "queryXML":
+			logger.debug("Caching xmlQuery..."); 
+			XMLService queryService = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.QRY_XML_FL_LOC_PATH);
+			HunterCache.getInstance().put(HunterConstants.QUERY_XML_CACHED_SERVICE, queryService);
+			logger.debug("Done caching xmlQuery!!");
+			break;
+		case "uiMsgXML":
+			logger.debug("Caching ui message xml..."); 
+			XMLService uiMsgService = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.UI_MSG_XML_FL_LOC_PATH);
+			HunterCache.getInstance().put(HunterConstants.UI_MSG_CACHED_SERVICE, uiMsgService);
+			logger.debug("Done caching ui message xml!!");
+			break;
+		case "clientConfigs":
+			logger.debug("Caching ui clieConfigService xml..."); 
+			XMLService clieConfigService = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.CLIENT_CONFIG_LOC_PATH); 
+			HunterCache.getInstance().put(HunterConstants.CLIENT_CONFIG_XML_CACHED_SERVICE, clieConfigService);
+			logger.debug("Done caching clieConfigService xml!!");
+			break;
+		case "responseConfigs":
+			logger.debug("Caching ui responseConfigXml xml..."); 
+			XMLService responseConfigXml = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.RESPONSE_CONFIG_LOC_PATH);
+			HunterCache.getInstance().put(HunterConstants.RESPONSE_CONFIG_CACHED_SERVICE, responseConfigXml);
+			logger.debug("Done caching responseConfigXml xml...");
+			break;
+		case "emailTemplates":
+			logger.debug("Caching emailTemplates xml...");
+			XMLService emailTemplates = EmailTemplateUtil.getInstance().getAllTemplateXMLService(); 
+		    //HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.EMAIL_TEMPLATES_LOCL_PATH);
+			HunterCache.getInstance().put(HunterConstants.EMAIL_TEMPLATES_CACHED_SERVICE, emailTemplates);
+			logger.debug("Done caching emailTemplates xml...");
+			break;
+		case "emailConfigs":
+			logger.debug("Cachingg emailConfigs xml...");
+			XMLService emailConfigs = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.EMAIL_CONFIGS__LOCL_PATH);
+			HunterCache.getInstance().put(HunterConstants.EMAIL_CONFIG_CACHED_SERVICE, emailConfigs);
+			logger.debug("Done caching emailConfigs xml!!");
+			break;
+		case "taskProcessTemplates":
+			logger.debug("Cachingg Task process templates...");
+			loadEmailTemplateBeans();
+			logger.debug("Done caching Task process templates!!");
+			break;
+		case "existingTemplateNames" :
+			logger.debug("Caching existing email template names..."); 
+			HunterCacheUtil.getInstance().loadExistentEmailTemplatesNames();
+			logger.debug("Done caching existing email template names!!"); 
+			break;
+		default:
+			break;
+		}
 	}
 	
 	public XMLService getXMLService(String xmlName) {
@@ -138,10 +206,65 @@ public class HunterCacheUtil {
 		return emailTemplateBean;
 	}
 	
+	public String getReadyEmailBodyForEmailTask(Task task,String prevLoc, String staticPrevLoc){
+		
+		File prevFolder = new File(prevLoc);
+		
+		if( !prevFolder.exists() )
+			prevFolder.mkdir();
+		
+		File[] previews = prevFolder.listFiles();
+		
+		//clear existing previews first.
+		if( previews.length > 0 ){
+			for( File preview : previews ){
+				preview.delete();
+			}
+		}
+		
+		Message message = task.getTaskMessage();
+		if(message == null || !HunterUtility.notNullNotEmpty(message.getMsgText())){ 
+			return "<h2 style='color:red;margin-top:40%;text-align:center;' >Task Message text doesn't exist. Please create message first.</h2>";
+		}
+		
+		String templateName = ((EmailMessage)task.getTaskMessage()).getEmailTemplateName();
+		logger.debug("Getting template for template name : " + templateName); 
+		HunterEmailTemplateBean bean = HunterCacheUtil.getInstance().getEmailTemplateBean(templateName);
+		if(bean == null || !HunterUtility.notNullNotEmpty(bean.getTemplate())){ 
+			return "<h3 style='color:red;margin-top:40%;text-align:center;' >Template ( "+ templateName +" ) does not exist. Please Create template first.</h3>";
+		}
+		String emailContent = bean.getTemplate().replaceAll("#TEMPLATE_EMAIL_CONTENTS#", task.getTaskMessage().getMsgText());
+		
+		if(!HunterUtility.notNullNotEmpty(((EmailMessage)task.getTaskMessage()).getMessageAttachments())){
+			logger.debug("Template has no message attachments.Returning just the contents!"); 
+			return emailContent;
+		}
+		
+		logger.debug("Creating attachments for email message..."); 
+		List<MessageAttachmentMetadata> messageAttachmentMetadata = GateWayClientHelper.getInstance().createMessageAttachmentMetadata(task);
+		for(MessageAttachmentMetadata attachmentMetadata : messageAttachmentMetadata){
+			String cidKey = "cid:HUNTER_CID_REF=" + attachmentMetadata.getKey();
+			if( emailContent.contains(cidKey) ){ 
+				logger.debug( attachmentMetadata.getKey() + " is an embedded attachment : cid = " + attachmentMetadata.getMsgCid() );
+				String url = attachmentMetadata.getUrl();
+				try {
+					File sourceFile = new File(url);
+					FileUtils.copyFile(sourceFile, new File(prevLoc + File.separator + attachmentMetadata.getOriginalFileName()));
+					sourceFile.delete();
+				} catch (IOException e) {
+					e.printStackTrace();
+				} 
+				emailContent = emailContent.replaceAll(cidKey, staticPrevLoc + "/" + attachmentMetadata.getOriginalFileName());
+			}
+		}
+		
+		return emailContent;
+	}
+	
 	public HunterEmailTemplateBean createEmailTemplateBean(String templateName){
 		
 		StringBuilder templateCheckPath = new StringBuilder().append("templates/template[@name=\"").append(templateName).append("\"]");
-		XMLService xmlService = getInstance().getXMLService(HunterConstants.EMAIL_TEMPLATES_CACHED_SERVICE);
+		XMLService xmlService = getXMLService(HunterConstants.EMAIL_TEMPLATES_CACHED_SERVICE);
 		
 		try {
 			NodeList check  = xmlService.getAllElementsUnderTag(templateCheckPath.toString()); 
@@ -177,19 +300,37 @@ public class HunterCacheUtil {
 		
 		NodeList nodeList = xmlService.getNodeListForPathUsingJavax("//template[@name='"+ templateName +"']/context/miscelaneous/*");
 		if(nodeList != null && nodeList.getLength() >= 1){
-			if(nodeList != null && nodeList.getLength() >= 1){
-				for(int i=0; i<nodeList.getLength(); i++){
-					Node node = nodeList.item(i);
-					if(node.getNodeName().equals("config")){
-						NodeList configs = node.getChildNodes();
-						String key = configs.item(1).getTextContent();
-						String value = configs.item(3).getTextContent();
-						miscelaneousMap.put(key, value);
-					}
+			for(int i=0; i<nodeList.getLength(); i++){
+				Node node = nodeList.item(i);
+				if(node.getNodeName().equals("config")){
+					NodeList configs = node.getChildNodes();
+					String key = configs.item(1).getTextContent();
+					String value = configs.item(3).getTextContent();
+					miscelaneousMap.put(key, value);
 				}
 			}
 		}
 		logger.debug("Miscelaneous values for template bean : \n" + HunterUtility.stringifyMap(miscelaneousMap));  
+
+		NodeList attachments = xmlService.getNodeListForPathUsingJavax("//template[@name='"+ templateName +"']/attachments/attachment");
+		Map<String, String> attachmentsMap = new HashMap<String, String>();
+		List<String> embeddedAttachments  = new ArrayList<>();
+		
+		if(attachments != null && attachments.getLength() >= 1){
+			for(int i=0; i<attachments.getLength(); i++){
+				Node attachment = attachments.item(i);
+				String key = attachment.getAttributes().getNamedItem("key").getTextContent();
+				String type = attachment.getAttributes().getNamedItem("type").getTextContent();
+				if( type != null && "embedded".equalsIgnoreCase(type) ){
+					embeddedAttachments.add(key);
+				}
+				String text = attachment.getTextContent();
+				attachmentsMap.put(key, text);
+			}
+		}
+		
+		logger.debug("Embedded attachments : " + HunterUtility.stringifyList(embeddedAttachments));  
+		logger.debug("Attachment values for template bean : \n" + HunterUtility.stringifyMap(attachmentsMap));  
 		
 		HunterEmailTemplateBean templateBean = new HunterEmailTemplateBean();
 		templateBean.setCcList(contextCCList); 
@@ -202,6 +343,8 @@ public class HunterCacheUtil {
 		templateBean.setToList(contextToList);
 		templateBean.setContentType(contextContentType);
 		templateBean.setTemplate(template); 
+		templateBean.setAttachments(attachmentsMap);
+		templateBean.setEmbeddedAttachments(embeddedAttachments);
 		
 		logger.debug("Successfully created email template bean for template name ( " + templateName + " )");
 		
@@ -480,6 +623,24 @@ public class HunterCacheUtil {
 		}
 		
 		return nameIds;
+	}
+	
+	public String getDefaultEmailTemplate(){
+		
+		logger.debug("Fetching default XML..."); 
+		
+		if( HunterCache.getInstance().containsKey(HunterConstants.DEFAULT_EMAIL_TEMPLATE) ){ 
+			return HunterUtility.getStringOrNullOfObj( HunterCache.getInstance().get(HunterConstants.DEFAULT_EMAIL_TEMPLATE) ); 
+		}
+		
+		String defTempLoc = HunterURLConstants.RESOURCE_BASE_XML_PATH + "emailTemplateMetadataSample.xml";
+		XMLService clieConfigService = HunterUtility.getXMLServiceForFileLocation( defTempLoc );
+		String xmlStr = clieConfigService == null ? null : clieConfigService.toString();
+		
+		logger.debug( xmlStr ); 
+		
+		return xmlStr;
+		
 	}
 	
 	

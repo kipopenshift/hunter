@@ -37,7 +37,10 @@ var kendoKipHelper = kendo.Class.extend({
 		this.initNewNotification();
 		this.initWindowWithOnClose();
 		console.log("KendoHelper helper initialized successfully!!");
-	}, 
+	},
+	setValueToWithOnCloseTitle : function(value){
+		$("#kendoWindowWithOnCloseFunc_wnd_title").html(value);
+	},
 	initNewNotification : function(){
 		var notif_ = $("#newNotification").data("kendoNotification");
 		if(notif_ == null){
@@ -491,6 +494,21 @@ var kendoKipHelper = kendo.Class.extend({
 		var contains = index == -1 ? false : true;
 		return contains;
 	},
+	showErrorOrSuccessFromData : function(data_){
+			var json = JSON.parse(JSON.stringify(data_));
+			alert(json["status"]); 
+		  var data = jQuery.parseJSON(JSON.stringify(data_));
+		  var status = JSON.stringify(data[0]), 
+			  message = JSON.stringify(data[0]);
+		
+		alert(status + " : " + message);
+		
+		if(status != null && status === HunterConstants.STATUS_SUCCESS){
+			this.showSuccessNotification(message != null ? message : "Successfully peformed operation!");
+		}else{
+			this.showErrorNotification(message != null ? message : "Failed! Application error occurred!");
+		}
+	},
 	ajaxLoadEleWithContents : function(elementId, url){
 		console.log("loading content from URL(" + url +")"); 
 		$.get(url, function(contents) {
@@ -528,7 +546,7 @@ var kendoKipHelper = kendo.Class.extend({
 		    dataType : dataType, 
 		    contentType : contentType
 		}).done(function(data) {
-			var code = callAfter + "('"+ data +"')";
+			var code = callAfter + "("+ JSON.stringify(data) +")";
 			var func = new Function(code);
 			func();
 		 }).fail(function(data) {
@@ -549,7 +567,7 @@ var kendoKipHelper = kendo.Class.extend({
 		    dataType : dataType, 
 		    contentType : contentType
 		}).done(function(data) {
-			var code = callAfter + "('"+ JSON.stringify(data) +"')"; 
+			var code = callAfter + "('"+ JSON.stringify(data) +"')";
 			var func = new Function(code);
 			func();
 		 }).fail(function(data) {
@@ -568,11 +586,11 @@ var kendoKipHelper = kendo.Class.extend({
 		    dataType : dataType, 
 		    contentType : contentType
 		}).done(function(data) {
-			var code = callAfter + "('"+ JSON.stringify(data) +"')"; 
+			var code = callAfter + "('"+ JSON.stringify(data) +"')";
 			var func = new Function(code);
 			func();
 		 }).fail(function(data) {
-			 var code = callException + "()";   
+			 var code = callException + "()";
 			 var func = new Function(code);
 			 func();
 			 kendoKipHelperInstance.popupWarning(data.statusText + " (" + data.status + "). Please contact Production Support.", "Error");

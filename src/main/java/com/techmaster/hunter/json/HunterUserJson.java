@@ -10,6 +10,7 @@ public class HunterUserJson {
 	private String phoneNumber;
 	private String userType;
 	private String userName;
+	private String password;
 	private boolean active;
 	private boolean blocked;
 	
@@ -132,6 +133,12 @@ public class HunterUserJson {
 	public void setBlocked(boolean blocked) {
 		this.blocked = blocked;
 	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
 
 	@Override
@@ -180,10 +187,14 @@ public class HunterUserJson {
 				+ ", lastName=" + lastName + ", middleName=" + middleName
 				+ ", email=" + email + ", phoneNumber=" + phoneNumber
 				+ ", userType=" + userType + ", userName=" + userName
-				+ ", active=" + active + ", blocked=" + blocked + ", cretDate="
-				+ cretDate + ", lastUpdate=" + lastUpdate + ", createdBy="
-				+ createdBy + ", lastUpdatedBy=" + lastUpdatedBy + "]";
+				+ ", password=" + password + ", active=" + active
+				+ ", blocked=" + blocked + ", cretDate=" + cretDate
+				+ ", lastUpdate=" + lastUpdate + ", createdBy=" + createdBy
+				+ ", lastUpdatedBy=" + lastUpdatedBy + "]";
 	}
+
+
+	
 
 
 

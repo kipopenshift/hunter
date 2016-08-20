@@ -10,7 +10,7 @@
         <property name="taskId" type="java.lang.Long">
             <column name="TSK_ID" />
         </property>
-        <property name="text" type="java.lang.String" length="4000">
+        <property name="text" type="blob" >
             <column name="TXT" />
         </property>
         <property name="messageType" type="java.lang.String">

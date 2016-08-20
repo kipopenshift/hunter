@@ -59,7 +59,7 @@ public class ReceiverGroupDaoImpl implements ReceiverGroupDao{
 
 	@Override
 	public String deleteGroup(ReceiverGroup receiverGroup) {
-		String isUsedQuery = "select ts.TSK_ID from TSK_GRPS ts where ts.GRP_ID = ?";
+		String isUsedQuery = "SELECT ts.TSK_ID FROM TSK_GRPS ts WHERE ts.GRP_ID = ?";
 		Map<Integer, List<Object>> rowMapList = hunterJDBCExecutor.executeQueryRowList(isUsedQuery, hunterJDBCExecutor.getValuesList(new Object[]{receiverGroup.getGroupId()}));
 		List<Object> rowList = new ArrayList<>();
 		for(Entry<Integer, List<Object>> entry : rowMapList.entrySet()){

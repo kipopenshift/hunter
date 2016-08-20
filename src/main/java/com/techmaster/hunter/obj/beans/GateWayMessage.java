@@ -1,13 +1,16 @@
 package com.techmaster.hunter.obj.beans;
 
+import java.sql.Blob;
 import java.util.Arrays;
 import java.util.Date;
+
+import com.techmaster.hunter.util.HunterUtility;
 
 public class GateWayMessage {
 	
 	private Long msgId;
 	private Long taskId;
-	private String text;
+	private Blob text;
 	private String messageType;
 	private String clntRspCode;
 	private String clntRspText;
@@ -41,10 +44,10 @@ public class GateWayMessage {
 	public void setTaskId(Long taskId) {
 		this.taskId = taskId;
 	}
-	public String getText() {
+	public Blob getText() {
 		return text;
 	}
-	public void setText(String text) {
+	public void setText(Blob text) {
 		this.text = text;
 	}
 	public String getMessageType() {
@@ -279,7 +282,7 @@ public class GateWayMessage {
 	@Override
 	public String toString() {
 		return "GateWayMessage [msgId=" + msgId + ", taskId=" + taskId
-				+ ", text=" + text + ", messageType=" + messageType
+				+ ", text=" + HunterUtility.getBlobStr(text) + ", messageType=" + messageType 
 				+ ", clntRspCode=" + clntRspCode + ", clntRspText="
 				+ clntRspText + ", subsRspnsCode=" + subsRspnsCode
 				+ ", subsRspnsText=" + subsRspnsText + ", contact=" + contact

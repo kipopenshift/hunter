@@ -29,6 +29,14 @@
 <!-- This is for jQuery icons -->
 <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
 
+<!-- This is for Code Mirror -->
+<script src="<c:url value='/static/resources/scripts/codeMirror/lib/codemirror.js'/>"></script>
+<script src="<c:url value='/static/resources/scripts/codeMirror/mode/javascript/javascript.js'/>"></script>
+<script src="<c:url value='/static/resources/scripts/codeMirror/mode/xml/xml.js'/>"></script>
+<link rel="stylesheet" href="<c:url value='/static/resources/scripts/codeMirror/lib/codemirror.css'/>">
+<script src="<c:url value='/static/resources/scripts/codeMirror/mode/htmlmixed/htmlmixed.js'/>"></script>
+<script src="<c:url value='/static/resources/scripts/codeMirror/mode/xmlpure/xmlpure.js'/>"></script>
+<script src="<c:url value='/static/resources/scripts/codeMirror/lib/formatting.js'/>"></script>
 
 
 <title>Hunter</title> 
@@ -52,8 +60,6 @@
 			console.log(text);
 			if(text != null && text === "Client Tasks"){
 				navigate("/login/postlogin");  
-			}else if(text != null && text === "Messages"){
-				navigate("/message/action/mainPage");
 			}else if(text != null && text === "Addresses"){
 				navigate("/address/action/view");
 			}else if(text != null && text === "Weather"){
@@ -70,20 +76,16 @@
 				navigate("/region/action/regions/hierarchies/action/home");
 			}else if(text != null && text === "Receiver Groups"){
 				navigate("/messageReceiver/action/group/home");
-			}else if(text != null && text === "Email"){
-				navigate("/message/action/mainPage");
-			}else if(text != null && text === "Text"){
-				navigate("/message/action/mainPage");
-			}else if(text != null && text === "Email Templates"){
-				navigate("/email/template/action/home");
 			}else if(text != null && text === "My Account"){
 				navigate("/hunteruser/action/user/profile/home");
 			}else if(text != null && text === "Hunter Admin"){
-				navigate("/admin/action/home");
+				navigate("/admin/action/admin/main");
 			}else if(text != null && text === "Hunter Field Profile"){
 				navigate("/admin/action/fieldProfile");
-			}else{
-				//kendoKipHelperInstance.showSimplePopup("Kendo", text);
+			}else if(text != null && text === "Contacts Pagination") {
+				navigate("/admin/action/raw/pagination");
+			}else if(text != null && text === "Validate Raw Receivers") {
+				navigate("/admin/action/raw/validateReceivers");
 			}
 		}
 
@@ -123,7 +125,7 @@
 	}
 	
 	.myMenu li a:hover {
-		background-color:#E4F3F6;
+		background-color:#CDE7EE;
 		color:black;
 		font-weight: bolder;
 	}
@@ -147,7 +149,9 @@
 	}		
 	
 	.myMenu li ul li a:hover {
-		background-color:#E4F3F6;	
+		background-color:#D4EDF3;
+		border-top:1px solid #C8E3E9;
+		border-bottom:1px solid #C8E3E9;	
 	}
 	
 	#closeButtonDiv:hover{
@@ -166,37 +170,21 @@
 
 <div id="hunterTopDiv" >
 
-	<ul class="myMenu" id="menuUlId" style="z-index:1;margin-left:35%;color:white;">
-		<li class="underLined" ><a href="#" id="homeTabHome" class="homeNavTabClass"  class="homeCurrentTab"   >Home</a></li>
-	    <li class="underLined" ><a href="#"  id="homeTabClients"  class="homeNavTabClass" >Tasks</a>
-	    	<ul class="rightAndLeftBottom" >
-	        	<li><a href="#" >Client Tasks</a></li>
-	        </ul>
-	    </li>
+	<ul class="myMenu" id="menuUlId" style="z-index:10000;margin-left:39%;color:white;">
+		<li style="border-left : 3px solid #93B1B7;" class="underLined" ><a href="#" id="homeTabHome" class="homeNavTabClass"  class="homeCurrentTab"   >Home</a></li>
 	    <li class="underLined" ><a href="#"  id="homeTabTasks"  class="homeNavTabClass" >Regions</a>
 	       <ul class="rightAndLeftBottom" >
 	       		<li><a href="#">Receiver Groups</a></li>
 	        	<li><a href="#">Regions Hierarchies</a></li>
+	        	<li><a href="#">Validate Raw Receivers</a></li>
 	        </ul>
 	    </li>
-	    <li class="underLined" ><a href="#"  id="homeTabMessages" class="homeNavTabClass" >Messages</a>
-	       <ul class="rightAndLeftBottom" >
-	        	<li><a href="#">Email</a></li>
-	            <li><a href="#">Texts</a></li>
-	            <li><a href="#">Email Templates</a></li>
-	        </ul>
-	    </li>
-	     <li class="underLined" ><a href="#"  id="entiriesTableMessage" class="homeNavTabClass" >Entities</a>
-	       <ul class="rightAndLeftBottom" >
-	        	<li><a href="#">Clients</a></li>
-	            <li><a href="#">Users</a></li>
-	        </ul>
-	    </li>
-	    <li class="underLined" ><a href="#"  id="homeTabTasks"  class="homeNavTabClass" >My Hunter</a>
+	    <li  style="border-right : 3px solid #93B1B7;"  class="underLined" ><a href="#"  id="homeTabTasks"  class="homeNavTabClass" >My Hunter</a>
 	       <ul class="rightAndLeftBottom" >
 	        	<li><a href="#">My Account</a></li>
 	        	<li><a href="#">Hunter Admin</a></li>
 	        	<li><a href="#">Hunter Field Profile</a></li>
+	        	<li><a href="#">Contacts Pagination</a></li>
 	            <li><a href="<c:url value="${pageContext.request.contextPath}/j_spring_security_logout" />" >Logout</a></li>
 	        </ul>
 	    </li>

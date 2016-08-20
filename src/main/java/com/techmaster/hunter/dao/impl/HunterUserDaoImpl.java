@@ -139,8 +139,10 @@ public class HunterUserDaoImpl implements HunterUserDao{
 			session = sessionFactory.openSession();
 			trans = session.beginTransaction();
 			HunterUser user = (HunterUser)session.get(HunterUser.class, userId);
-			session.delete(user);
-			trans.commit();
+			if(user != null){
+				session.delete(user);
+				trans.commit();
+			}
 			logger.debug("Successfull deleted user >> " + user.toString());
 			HunterHibernateHelper.closeSession(session);
 		} catch (HibernateException e) {
@@ -311,6 +313,10 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	@Override
 	public String validateAndDeleteById(Long userId) {
 		StringBuilder taskErrors = null; 
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		if(hunterJDBCExecutor == null){
+			logger.debug("HunterJDBCExecutor is null!!"); 
+		}
 		String query = hunterJDBCExecutor.getQueryForSqlId("validateHunterUserDelete");
 		List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{userId});
 		Map<Integer, List<Object>> rowListMap = hunterJDBCExecutor.executeQueryRowList(query, values);
@@ -337,8 +343,11 @@ public class HunterUserDaoImpl implements HunterUserDao{
 			deleteHunterUserById(userId); 
 		}
 		
-		logger.debug("Validation finished : " + taskErrors.toString()); 
-		return taskErrors.toString();
+		if( taskErrors != null ){
+			logger.debug("Validation finished : " + taskErrors.toString()); 
+			return taskErrors.toString();
+		}
+		return null;
 	}
 
 	@Override
@@ -355,6 +364,17 @@ public class HunterUserDaoImpl implements HunterUserDao{
 		logger.debug("Updating user login bean : " + userLoginBean); 
 		HunterHibernateHelper.updateEntity(userLoginBean);
 		logger.debug("Successfully updated user login bean!"); 
+	}
+
+	@Override
+	public List<HunterUser> getAllUsersWhoAreClients() {
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		String 
+			query = hunterJDBCExecutor.getQueryForSqlId("getAllCommSprtdClientIDs"),
+			clientIds = hunterJDBCExecutor.executeQueryFirstRowMap(query, null).get("CLIENT_IDS").toString(),
+			hibernateQ = "FROM HunterUser h WHERE h.userId IN ( "+ clientIds +" )";
+		List<HunterUser> clients = HunterHibernateHelper.executeQueryForObjList(HunterUser.class, hibernateQ);
+		return clients;
 	}
 	
 	

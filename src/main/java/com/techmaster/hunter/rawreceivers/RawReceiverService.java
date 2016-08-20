@@ -22,5 +22,9 @@ public interface RawReceiverService {
 	public HunterRawReceiver updateRawReceiver(Map<String,String> params, AuditInfo auditInfo);
 	public void setRegionIdsForReceiver(HunterRawReceiver hunterRawReceiver);
 	public JSONObject createOrUpdateRawReceiver(Map<String,String> inParams, AuditInfo auditInfo);
+	public void updateRawReceiverCountsForUser(String userName);
+	public String getBase64PhotoForUser(String userName);
+	public List<String> getDistinctContactsForUser(String userName);
+	
 	
 }

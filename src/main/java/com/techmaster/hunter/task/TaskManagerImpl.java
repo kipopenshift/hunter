@@ -27,14 +27,11 @@ import com.techmaster.hunter.dao.types.ServiceProviderDao;
 import com.techmaster.hunter.dao.types.TaskDao;
 import com.techmaster.hunter.enums.HunterUserRolesEnums;
 import com.techmaster.hunter.exception.HunterRunTimeException;
-import com.techmaster.hunter.gateway.beans.CMClient;
 import com.techmaster.hunter.gateway.beans.CMClientService;
 import com.techmaster.hunter.gateway.beans.GateWayClientHelper;
 import com.techmaster.hunter.gateway.beans.GateWayClientService;
 import com.techmaster.hunter.gateway.beans.GatewayClient;
-import com.techmaster.hunter.gateway.beans.HunterEmailClient;
 import com.techmaster.hunter.gateway.beans.HunterEmailClientService;
-import com.techmaster.hunter.gateway.beans.OzekiClient;
 import com.techmaster.hunter.gateway.beans.OzekiClientService;
 import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
@@ -50,6 +47,7 @@ import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.obj.beans.TaskMessageReceiver;
 import com.techmaster.hunter.obj.beans.TextMessage;
 import com.techmaster.hunter.region.RegionService;
+import com.techmaster.hunter.task.process.TaskSubmitter;
 import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -391,29 +389,8 @@ public class TaskManagerImpl implements TaskManager{
 			logger.debug("No processing validation errors found. Sending task process notification email..."); 
 			task.setProcessedOn(new Date());
 			task.setProcessedBy(auditInfo.getLastUpdatedBy()); // this is set immediately.
-			if(task.getGateWayClient().equals(HunterConstants.CLIENT_CM)){
-				GateWayClientService client = new CMClientService();
-				Map<String, Object> executeParams = new HashMap<>();
-				executeParams.put(GateWayClientService.PARAM_AUDIT_INFO, auditInfo);
-				executeParams.put(GateWayClientService.TASK_BEAN, task);
-				client.execute(executeParams);
-			}else if(task.getGateWayClient().equals(HunterConstants.CLIENT_OZEKI)){
-				GateWayClientService client = new OzekiClientService();
-				Map<String, Object> executeParams = new HashMap<>();
-				executeParams.put(GateWayClientService.PARAM_AUDIT_INFO, auditInfo);
-				executeParams.put(GateWayClientService.TASK_BEAN, task);
-				client.execute(executeParams);
-			}else if(task.getGateWayClient().equals(HunterConstants.CLIENT_HUNTER_EMAIL)){ 
-				HunterEmailClientService emailClientService = new HunterEmailClientService();
-				Map<String, Object> executeParams = new HashMap<>();
-				executeParams.put(GateWayClientService.PARAM_AUDIT_INFO, auditInfo);
-				executeParams.put(GateWayClientService.TASK_BEAN, task);
-				emailClientService.execute(executeParams);
-			}else{
-				GatewayClient gatewayClient = getClientForTask(task);
-				Map<String, Object> executeParams = getGateWayClientExecuteMap(task);
-				gatewayClient.execute(executeParams);
-			}
+			GateWayClientService clientService = getClientForTask(task); 
+			new TaskSubmitter(task, auditInfo, clientService).start();
 		}else{
 			results.put(GatewayClient.TASK_VALIDATION_ERRORS, errors);
 			results.put(GatewayClient.TASK_VALIDATION_STATUS, HunterConstants.STATUS_FAILED);
@@ -510,7 +487,8 @@ public class TaskManagerImpl implements TaskManager{
 			copyEmailMessage.setCreatedBy(auditInfo.getCreatedBy());
 			copyEmailMessage.setLastUpdate(auditInfo.getLastUpdate());
 			copyEmailMessage.setLastUpdatedBy(auditInfo.getLastUpdatedBy());
-			copyEmailMessage.setCretDate(auditInfo.getCretDate()); 
+			copyEmailMessage.setCretDate(auditInfo.getCretDate());
+			
 			
 			copy.setTaskMessage(copyEmailMessage);
 			
@@ -537,23 +515,16 @@ public class TaskManagerImpl implements TaskManager{
 	}
 
 	@Override
-	public GatewayClient getClientForTask(Task task) {
-
-		GatewayClient gatewayClient = null;
-		String client = task.getGateWayClient();
-		
-		if(client != null && client.equals(HunterConstants.CLIENT_CM)){
-			gatewayClient = new CMClient(task);
-		}else if(client != null && client.equals(HunterConstants.CLIENT_OZEKI)){
-			gatewayClient = new OzekiClient(task);
-		}else if(client != null && client.equals(HunterConstants.CLIENT_HUNTER_EMAIL)){
-			gatewayClient = HunterEmailClient.getInstance();
-		}else{
-			logger.warn("Gateway client configured does not exist or it's not implemented yet!"); 
-			throw new IllegalArgumentException("No service for the requested parameter : " + client);
+	public GateWayClientService getClientForTask(Task task) {
+		GateWayClientService clientService = null;
+		if(task.getGateWayClient().equals(HunterConstants.CLIENT_CM)){
+			clientService = new CMClientService();
+		}else if(task.getGateWayClient().equals(HunterConstants.CLIENT_OZEKI)){
+			clientService = new OzekiClientService();
+		}else if(task.getGateWayClient().equals(HunterConstants.CLIENT_HUNTER_EMAIL)){ 
+			clientService = new HunterEmailClientService();
 		}
-		
-		return gatewayClient;
+		return clientService;
 	}
 	
 	private String getCloneMsgLifeStatus(String currSts){
@@ -629,6 +600,9 @@ public class TaskManagerImpl implements TaskManager{
 		copyEmailMessage.seteFooter(emailMessage.geteFooter());
 		copyEmailMessage.seteFrom(emailMessage.geteFrom()); 
 		copyEmailMessage.seteSubject(emailMessage.geteSubject());
+		
+		copyEmailMessage.setMessageAttachmentMetadata(emailMessage.getMessageAttachmentMetadata());
+		copyEmailMessage.setMessageAttachments(emailMessage.getMessageAttachments()); 
 		
 		return copyEmailMessage;
 		

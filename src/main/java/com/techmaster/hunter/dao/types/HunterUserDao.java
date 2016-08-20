@@ -22,6 +22,7 @@ public interface HunterUserDao {
 	public HunterUser getUserByUserName(String userName);
 	public Map<String, List<String>> getFullNamesForUserNames(List<String> userNames);
 	
+	public List<HunterUser>getAllUsersWhoAreClients();
 	public List<HunterUserJson> getAllUserJson();
 	
 	public List<UserLoginBean> getUserLoginBeanByUserName(String userName);

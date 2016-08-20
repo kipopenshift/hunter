@@ -25,6 +25,7 @@
 		<property name="clientId" column="HNTR_CLNT_ID"  type="java.lang.Long" />
 		<property name="gateWayClient" column="GT_WY_CLNT"  type="java.lang.String" />
 		<property name="tskMsgType" column="TSK_MSG_TYP"  type="java.lang.String" />
+		<property name="srlzdTskPrcssJbObjsFilLoc" column="SRLZD_PRCSS_RSLTS_FL_LOC"  type="java.lang.String"  length="4000"/> 
 		
 		<property name="desiredReceiverCount" column="DSRD_RCVRS_CNT"  type="java.lang.Integer"  not-null="false" />
 		<property name="availableReceiverCount" column="AVLBL_RCVRS_CNT"  type="java.lang.Integer"  not-null="false" />

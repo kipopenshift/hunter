@@ -35,7 +35,7 @@ public class HunterProcessWorker implements TaskProcessWorker{
 		StringBuilder builder = new StringBuilder();
 		if(messages != null && !messages.isEmpty()){
 			for(GateWayMessage message : messages){
-				builder.append(message.getMsgId());
+				builder.append(message.getContact());
 				builder.append(",");
 			}
 		}

@@ -3,7 +3,7 @@ package com.techmaster.hunter.task;
 import java.util.List;
 import java.util.Map;
 
-import com.techmaster.hunter.gateway.beans.GatewayClient;
+import com.techmaster.hunter.gateway.beans.GateWayClientService;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.EmailMessage;
 import com.techmaster.hunter.obj.beans.GateWayMessage;
@@ -24,7 +24,7 @@ public interface TaskManager {
 	public abstract List<String> validateTask(Task task);
 	public abstract Message getTaskMessage(Task task);
 	public abstract Message getTaskIdMessage(Long taskId);
-	public abstract GatewayClient getClientForTask(Task task);
+	public abstract GateWayClientService getClientForTask(Task task);
 	public abstract Map<String, Object>  processTask(Task task, AuditInfo auditInfo);
 	public abstract List<GateWayMessage> getUnSuccessfulMessagesForTask(Task task);
 	public abstract Task cloneTask(Task task, String newOwner,String taskName, String taskDescription, AuditInfo auditInfo);

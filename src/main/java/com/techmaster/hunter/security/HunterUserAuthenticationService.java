@@ -190,7 +190,7 @@ public class HunterUserAuthenticationService {
 	}
 	
 	public void resetFailedLoginCounts(String userName){
-		String rQuery = "UPDATE USR_LGN_BN bn SET bn.FLD_LGN_CNT = ?, bn.BLCKD = ? WHERE bn.USR_ID = (select hu.USR_ID from HNTR_USR hu where hu.USR_NAM = ?)";
+		String rQuery = "UPDATE USR_LGN_BN bn SET bn.FLD_LGN_CNT = ?, bn.BLCKD = ?, bn.LST_LGN_TM = sysdate  WHERE bn.USR_ID = (select hu.USR_ID from HNTR_USR hu where hu.USR_NAM = ?)";
 		List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{0,"N", userName});
 		logger.debug("Executing query : " + rQuery);
 		hunterJDBCExecutor.executeUpdate(rQuery, values);

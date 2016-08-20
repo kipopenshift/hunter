@@ -110,7 +110,7 @@ public class OzekiClient extends AbsractGatewayClient{
 			gateWayMsg.setSendDate(null);
 			gateWayMsg.setStatus(HunterConstants.STATUS_DRAFT);
 			gateWayMsg.setTaskId(task.getTaskId()); 
-			gateWayMsg.setText(message);
+			gateWayMsg.setText(HunterUtility.getStringBlob(message));
 			gateWayMsg.setMessageType(messageType); 
 			gateWayMessages.add(gateWayMsg); 
 		}
@@ -233,7 +233,7 @@ public class OzekiClient extends AbsractGatewayClient{
 			GateWayMessage gateWayMessage = gateWayMessages_.get(i);
 			msgParams.put("recipient" + i, gateWayMessage.getContact());
 			msgParams.put("messagetype"+i, "SMS:TEXT");
-			msgParams.put("messagedata"+i, gateWayMessage.getText());
+			msgParams.put("messagedata"+i, HunterUtility.getBlobStr(gateWayMessage.getText())); 
 			try {
 				String encoded = HunterUtility.urlEncodeRequestMap(msgParams, "UTF-8");
 				if(i != 0){

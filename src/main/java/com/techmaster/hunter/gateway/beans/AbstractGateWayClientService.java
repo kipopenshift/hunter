@@ -248,7 +248,7 @@ public abstract class AbstractGateWayClientService implements GateWayClientServi
 		gateWayMessage.setSendDate(new Date()); 
 		gateWayMessage.setStatus(HunterConstants.STATUS_DRAFT);
 		gateWayMessage.setTaskId(task.getTaskId());
-		gateWayMessage.setText(task.getTaskMessage().getMsgText());
+		gateWayMessage.setText(HunterUtility.getStringBlob(task.getTaskMessage().getMsgText())); 
 		gateWayMessage.setMsgId(null);
 		
 		gateWayMessage.setDuration(null);

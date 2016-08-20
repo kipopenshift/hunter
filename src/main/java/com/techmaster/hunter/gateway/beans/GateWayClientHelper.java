@@ -1,7 +1,12 @@
 package com.techmaster.hunter.gateway.beans;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,15 +42,22 @@ import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
+import com.techmaster.hunter.dao.types.MessageAttachmentBeanDao;
 import com.techmaster.hunter.dao.types.MessageDao;
 import com.techmaster.hunter.dao.types.TaskDao;
 import com.techmaster.hunter.exception.HunterRunTimeException;
+import com.techmaster.hunter.json.MessageAttachmentBeanJson;
 import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.json.ReceiverRegionJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
+import com.techmaster.hunter.obj.beans.EmailMessage;
 import com.techmaster.hunter.obj.beans.GateWayMessage;
+import com.techmaster.hunter.obj.beans.HunterEmailTemplateBean;
 import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
 import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
+import com.techmaster.hunter.obj.beans.Message;
+import com.techmaster.hunter.obj.beans.MessageAttachmentBean;
+import com.techmaster.hunter.obj.beans.MessageAttachmentMetadata;
 import com.techmaster.hunter.obj.beans.ReceiverGroupReceiver;
 import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TaskClientConfigBean;
@@ -68,6 +80,9 @@ public class GateWayClientHelper {
 	private Logger logger = Logger.getLogger(GateWayClientHelper.class);
 	
 	private GateWayClientHelper(){}
+	
+	public final static String NO_ATTACHMENT_CONFIGURED = "No Attachment Configured";
+	public final static String SYSTEM_ATTCHMNT_ID = "SYSTEM_ATTCHMNT_ID_";
 	
 	static{
 		if(instance == null){
@@ -401,7 +416,6 @@ public class GateWayClientHelper {
 		String baseUrl = params.get(HunterConstants.BASE_URL).toString(); 
 		getStr = baseUrl +  "?" + getStr; 
 		getStr = getStr.trim().replaceAll(" ", "%20");
-		logger.debug("Returning get string >> " + getStr );
 		return getStr;
 	}
 	
@@ -480,7 +494,7 @@ public class GateWayClientHelper {
 		for(GateWayMessage message : gateWayMessages){
 			NameValuePair recipient = new BasicNameValuePair("recipient"+i, message.getContact());
 			NameValuePair messagetype = new BasicNameValuePair("messagetyp"+i, configBean.getConfigs().get("messagetype")); 
-			NameValuePair messagedata = new BasicNameValuePair("messagedata"+i, message.getText());
+			NameValuePair messagedata = new BasicNameValuePair("messagedata"+i, HunterUtility.getBlobStr(message.getText())); 
 			pairs.add(recipient);
 			pairs.add(messagetype);
 			pairs.add(messagedata);
@@ -529,7 +543,7 @@ public class GateWayClientHelper {
                 msgElement.appendChild(fromElement);
 
                 Element bodyElement = doc.createElement("BODY");
-                Text bodyValue = doc.createTextNode(message.getText());
+                Text bodyValue = doc.createTextNode(HunterUtility.getBlobStr(message.getText())); 
                 bodyElement.appendChild(bodyValue);
                 msgElement.appendChild(bodyElement);
 
@@ -592,11 +606,11 @@ public class GateWayClientHelper {
 	}
 	
 	
-	public String getMessageIds(Set<GateWayMessage> messages){
+	public String getMessageContacts(Set<GateWayMessage> messages){
 		StringBuilder builder = new StringBuilder();
 		if(messages != null && !messages.isEmpty()){
 			for(GateWayMessage message : messages){
-				builder.append(message.getMsgId());
+				builder.append(message.getContact());
 				builder.append(",");
 			}
 		}
@@ -608,10 +622,311 @@ public class GateWayClientHelper {
 		return msgIdStr;
 	}
 	
+	public List<Long> getMessageAttachmentIds(Task task){
+		Map<String,String> messageAttachmentMap = getAttachmentLocsMap(task);
+		logger.debug("Message Attachments Map : " + HunterUtility.stringifyMap(messageAttachmentMap)); 
+		List<Long> attachmentIds = new ArrayList<>();
+		if( !HunterUtility.isMapNllOrEmpty(messageAttachmentMap) ){
+			for(Map.Entry<String, String> entry : messageAttachmentMap.entrySet()){
+				String path = entry.getValue();
+				if( path != null && !NO_ATTACHMENT_CONFIGURED.equals(path) && path.startsWith( SYSTEM_ATTCHMNT_ID ) ){
+					int index = path.lastIndexOf("_");
+					path = path.substring(index+1, path.length());
+					attachmentIds.add( HunterUtility.getLongFromObject(path) ); 
+				}
+			}
+		}
+		logger.debug("Attachment Ids found : " + HunterUtility.stringifyList(attachmentIds)); 
+		return attachmentIds;
+	}
+	
+	public Map<String,String> createImgFilesForAttachmentId(List<Long> attachmentIds){
+		Map<String,String> filesMap = new HashMap<>();
+		MessageAttachmentBeanDao attachmentBeanDao = HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class);
+		List<MessageAttachmentBean> attachmentBeans = attachmentBeanDao.getAttachmentBeanByIds(attachmentIds);
+		try {
+			for(MessageAttachmentBean attachmentBean : attachmentBeans){
+				Blob imgBlob = attachmentBean.getFileBlob();
+				byte [] array = imgBlob.getBytes( 1, ( int ) imgBlob.length() );
+				String fileName = attachmentBean.getOriginalFileName();
+				File image = File.createTempFile(fileName, "." + attachmentBean.getFileFormat());
+			    if( !image.exists() ){
+			    	image.mkdir();
+			    }
+			    FileOutputStream out = new FileOutputStream( image );
+			    out.write( array );
+			    out.close();
+			    filesMap.put(fileName.concat("_").concat(attachmentBean.getBeanId().toString()), image.getAbsolutePath()); 
+			}
+		} catch (SQLException | IOException e) {
+			e.printStackTrace();
+		}
+		return filesMap;
+	}
+	
+	public List<MessageAttachmentMetadata> createMessageAttachmentMetadata(Task task){
+		
+		EmailMessage emailMessage = (EmailMessage)task.getTaskMessage();
+		
+		/* Clear the message attachment metadata first. So no duplicates are created. */
+		HunterJDBCExecutor jdbcExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		String msgMsgQuery = "SELECT count(d.M_DATA_ID) FROM MSG_MSG_ATTCHMNT_MT_DATA d WHERE  d.MSG_ID = ?";
+		String deleteMsgMsgSql = "DELETE FROM MSG_MSG_ATTCHMNT_MT_DATA WHERE MSG_ID = ?";
+		String deleteMsgSql = "DELETE FROM MSG_ATTCHMNT_MT_DATA WHERE MSG_ID = ?";
+		List<Object> values = new ArrayList<>();
+		values.add(emailMessage.getMsgId());
+		Object countObj = jdbcExecutor.executeQueryForOneReturn(msgMsgQuery, values);
+		int count = countObj == null ? 0 : Integer.valueOf(countObj.toString());
+		
+		if( count != 0 ){
+			
+			/* Delete temporary images created previously to save memory. */
+			for(MessageAttachmentMetadata metadata : emailMessage.getMessageAttachmentMetadata()){
+				String url = metadata.getUrl();
+				if( url != null ){
+					File img = new File(url);
+					if(img != null && img.exists()){
+						img.delete();
+					}
+				}
+			}
+			
+			emailMessage.getMessageAttachmentMetadata().clear();
+			jdbcExecutor.executeUpdate(deleteMsgMsgSql, values);
+			jdbcExecutor.executeUpdate(deleteMsgSql, values);
+			
+		}
+		
+		
+		List<MessageAttachmentMetadata> attachmentMetadatas = new ArrayList<>();
+		String templateName = emailMessage.getEmailTemplateName();
+		HunterEmailTemplateBean templateBean = HunterCacheUtil.getInstance().getEmailTemplateBean(templateName);
+		List<Long> messageAttachmentIds = getMessageAttachmentIds(task);
+		Map<String,String> filesMap = createImgFilesForAttachmentId(messageAttachmentIds);
+		MessageAttachmentBeanDao attachmentBeanDao = HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class);
+		List<MessageAttachmentBean> attachmentBeans = attachmentBeanDao.getAttachmentBeanByIds(messageAttachmentIds); 
+		Map<String,String> attachments = templateBean.getAttachments();
+		Map<String,String> attachmentLocsMap = getAttachmentLocsMap(task);
+		
+		for(Map.Entry<String, String> entry : attachments.entrySet()){
+			
+			String key = entry.getKey();
+			MessageAttachmentMetadata attachmentMetadata = new MessageAttachmentMetadata();
+			
+			attachmentMetadata.setKey(key);
+			attachmentMetadata.setDesc(entry.getValue());
+			attachmentMetadata.setTemplateName(templateName);
+			attachmentMetadata.setMsgId(emailMessage.getMsgId());
+			
+			for(String attachment : templateBean.getEmbeddedAttachments() ){
+				if( attachment.equals(key) ){
+					attachmentMetadata.setEmbedded(true);
+					break;
+				}
+			}
+			
+			for(Map.Entry<String, String> locEntry : attachmentLocsMap.entrySet()){
+				String locKey = locEntry.getKey();
+				String locValue = locEntry.getValue();
+				if( key.equals(locKey) ){ 
+					int indx = locValue.lastIndexOf("_");
+					Long beanId = Long.valueOf(locValue.substring(indx+1, locValue.length()));
+					ab:for(MessageAttachmentBean attachmentBean : attachmentBeans){
+						if( attachmentBean.getBeanId().equals(beanId) ){
+							attachmentMetadata.setFileFormat(attachmentBean.getFileFormat());
+							attachmentMetadata.setMsgCid(attachmentBean.getCid());
+							attachmentMetadata.setOriginalFileName(attachmentBean.getOriginalFileName());
+							attachmentMetadata.setMsgAttchmentBnId(attachmentBean.getBeanId());
+							files:for(Map.Entry<String, String> fileEntry : filesMap.entrySet()){
+								String name = fileEntry.getKey();
+								String url = fileEntry.getValue();
+								int fIndx = name.lastIndexOf("_");
+								Long msgId = HunterUtility.getLongFromObject(name.substring(fIndx+1, name.length())); 
+								if( msgId.equals(attachmentBean.getBeanId()) ){
+									attachmentMetadata.setUrl(url);
+									break files;
+								}
+							}
+							break ab;
+						}
+					}
+				}
+			}
+			
+			emailMessage.getMessageAttachmentMetadata().add(attachmentMetadata);
+		}
+		
+		if( !emailMessage.getMessageAttachmentMetadata().isEmpty() ){
+			attachmentMetadatas.addAll(emailMessage.getMessageAttachmentMetadata());
+			task.setTaskMessage(emailMessage);
+			TaskDao taskDao = HunterDaoFactory.getInstance().getDaoObject(TaskDao.class);
+			taskDao.update(task);
+		}
+		
+		logger.debug("Created message attachment metadata : " + HunterUtility.stringifyList(attachmentMetadatas));  
+		return attachmentMetadatas;
+	}
 	
 	
+	/**
+	 * 
+	 * @param task Task parameter of which message attachment locations is to be retrieved. <br/>
+	 * The task message of the task must be an email message. <br/> This method Will need to be modified when the system supports 
+	 * message attachment for other kinds of task messages.
+	 * @return
+	 */
+	public Map<String,String> getAttachmentLocsMap(Task task){
+		logger.debug("Retrieving message attachment locations for task : " + task.getTaskName()); 
+		Map<String,String> locationMaps = new HashMap<>();
+		/* format key||path,key||path */
+		String attachmentsStr = ((EmailMessage)task.getTaskMessage()).getMessageAttachments();
+		if( HunterUtility.notNullNotEmpty( attachmentsStr ) ){
+			String[] splitLocs = attachmentsStr.split(",");
+			for(String loc : splitLocs){
+				int index = loc.indexOf("||");
+				String key = loc.substring(0,index);
+				String path = loc.substring(index+2,loc.length());
+				locationMaps.put(key, path);
+			}
+		}
+		logger.debug("Locations found ( " + locationMaps +" )"); 
+		return locationMaps;
+	}
 	
+	public Map<String,String> getAttachmentsLocsMapForEmailMessage(EmailMessage emailMessage){
+		String attachmentsStr = emailMessage.getMessageAttachments();
+		Map<String,String> locationMaps = new HashMap<>();
+		if( HunterUtility.notNullNotEmpty( attachmentsStr ) ){
+			String[] splitLocs = attachmentsStr.split(",");
+			for(String loc : splitLocs){
+				int index = loc.indexOf("||");
+				String key = loc.substring(0,index);
+				String path = loc.substring(index+2,loc.length());
+				locationMaps.put(key, path);
+			}
+		}
+		logger.debug("Locations found ( " + locationMaps +" )"); 
+		return locationMaps;
+	}
 	
+	public String getMessageAttachmentUIName(MessageAttachmentBeanJson messageAttachmentBeanJson){
+		String uiName = messageAttachmentBeanJson.getBeanName() + "( " + 
+				messageAttachmentBeanJson.getOriginalFileName() + ";" + 
+				messageAttachmentBeanJson.getCretDate() + ";" + 
+				messageAttachmentBeanJson.getFileFormat() + " )";
+		return uiName;
+	}
+	
+	public String getEmailTemplateAttachmentKeyByName(String templateName, String attachmentName){
+		HunterEmailTemplateBean emailTemplateBean = HunterCacheUtil.getInstance().getAllEmailTemplateBeanMap().get(templateName);
+		Map<String, String> attachments = emailTemplateBean.getAttachments();
+		if( attachments != null && !attachments.isEmpty() ){
+			for(Map.Entry<String, String> entry : attachments.entrySet()){
+				String key = entry.getKey();
+				if( entry.getValue().equalsIgnoreCase(attachmentName) ){
+					logger.debug("Attachment Key : " + key + ", Attachment Value : " + entry.getValue() ); 
+					return key;
+				}
+			}
+		}
+		logger.debug("No key for attachment entered : " + attachmentName); 
+		return null;
+	}
+	
+	public String getEmailMsgTemplateBeanAttachmentString(String templateName, boolean isName){
+		HunterEmailTemplateBean emailTemplateBean = HunterCacheUtil.getInstance().getEmailTemplateBean(templateName);
+		Map<String,String> actualMap = emailTemplateBean.getAttachments();
+		Map<String,String> holderMap = new HashMap<>();
+		if( !HunterUtility.isMapNllOrEmpty(actualMap) ){
+			for(Map.Entry<String, String> entry : actualMap.entrySet()){
+				holderMap.put(isName ? entry.getValue() : entry.getKey(), NO_ATTACHMENT_CONFIGURED);
+			}
+		}
+		return getAttachmentStringForMap(holderMap);
+	}
+	
+	public String rplcMsgAttchmntKysWthNms(EmailMessage emailMessage){
+		
+		String messageAttachment = emailMessage.getMessageAttachments();
+		Map<String,String> replacedNmes = new HashMap<>();
+		MessageAttachmentBeanDao attachmentBeanDao = HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class);
+		HunterEmailTemplateBean emailTemplateBean = HunterCacheUtil.getInstance().getEmailTemplateBean(emailMessage.getEmailTemplateName());
+		Map<String,String> attachmentsMap = emailTemplateBean.getAttachments();
+		
+		if( messageAttachment == null && !attachmentsMap.isEmpty() ){
+			messageAttachment = getAttachmentStringForMap(attachmentsMap);
+		}
+		
+		logger.debug("Message attachment before replacement : " + emailMessage.getMessageAttachments());
+		
+		if( HunterUtility.notNullNotEmpty(messageAttachment) && !HunterUtility.isMapNllOrEmpty(attachmentsMap) ){ 
+			String[] attachments = messageAttachment.split(",");
+			for(String attachment : attachments){
+				int index = attachment.indexOf("||");
+				String key = attachment.substring(0,index);
+				String path = attachment.substring(index+2,attachment.length());
+				index = path.lastIndexOf("_");
+				path = path.substring(index+1, path.length());
+				String uiName = !HunterUtility.isNumeric(path) ? NO_ATTACHMENT_CONFIGURED : getMessageAttachmentUIName(attachmentBeanDao.getAttachmentBeanJsonById(HunterUtility.getLongFromObject(path)));
+				key = attachmentsMap.get(key);
+				replacedNmes.put(key, uiName);
+			}
+		}else{
+			return null;
+		}
+		String replacedStr = getAttachmentStringForMap(replacedNmes); 
+		logger.debug("Replaced attachment names : " + replacedStr); 
+		return replacedStr;
+	}
+	
+	public Map<String,String> setAndGetMessageAttachmentsStringForMsg(Message message, Long attchmentId, String templateAttachmentName ){
+		
+		EmailMessage emailMessage = (EmailMessage)message;
+		String templateName = emailMessage.getEmailTemplateName();
+		Map<String,String> orgnlAttchmntMap = getAttachmentsLocsMapForEmailMessage(emailMessage);
+		Map<String,String> returnMap = new HashMap<>();
+		MessageAttachmentBeanJson messageAttachmentBeanJson = HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class).getAttachmentBeanJsonById(attchmentId);
+		String UIName = getMessageAttachmentUIName(messageAttachmentBeanJson);
+		MessageDao messageDao = HunterDaoFactory.getInstance().getDaoObject(MessageDao.class);
+		String key = getEmailTemplateAttachmentKeyByName(templateName, templateAttachmentName);
+		
+		/* Just edit it if it exists */
+		if( orgnlAttchmntMap != null && !orgnlAttchmntMap.isEmpty() ){
+			orgnlAttchmntMap.put(key, "SYSTEM_ATTCHMNT_ID_" + attchmentId);
+			String content = getAttachmentStringForMap(orgnlAttchmntMap);
+			returnMap.put("UI_NAME", UIName);
+			returnMap.put("MSG_ATTCHMNT_STR", HunterUtility.getStringOrNullOfObj(content)); 
+			( (EmailMessage)message ).setMessageAttachments(content);
+			messageDao.updateMessage(message);
+			return returnMap;
+		}
+		
+		emailMessage.setMessageAttachments(getEmailMsgTemplateBeanAttachmentString(templateName, false));
+		orgnlAttchmntMap = getAttachmentsLocsMapForEmailMessage(emailMessage);
+		orgnlAttchmntMap.put(key, "SYSTEM_ATTCHMNT_ID_" + attchmentId);
+		String content = getAttachmentStringForMap(orgnlAttchmntMap);
+		( (EmailMessage)message ).setMessageAttachments(content);
+		messageDao.updateMessage(message);
+		returnMap.put("UI_NAME", UIName);
+		returnMap.put("MSG_ATTCHMNT_STR", HunterUtility.getStringOrNullOfObj(content));
+		logger.debug("Attachment contents returned : " + HunterUtility.stringifyMap(returnMap));
+		
+		return returnMap;
+	}
+	
+	public String getAttachmentStringForMap(Map<String,String> attachmentParams){
+		StringBuilder attachmentStr = new StringBuilder();
+		if( attachmentParams != null && !attachmentParams.isEmpty() ){
+			for(Map.Entry<String, String> entry : attachmentParams.entrySet()){
+				if( attachmentStr.length() != 0 ){
+					attachmentStr.append(",");
+				}
+				attachmentStr.append(entry.getKey() + "||" + entry.getValue());
+			}
+		}
+		logger.debug("Attachment string returned : " + attachmentStr); 
+		return attachmentStr.toString();
+	}
 	
 	public void setRegionService(RegionService regionService) {
 		this.regionService = regionService;

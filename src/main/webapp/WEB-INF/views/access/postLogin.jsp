@@ -341,6 +341,7 @@
                               		{ 'field': 'constituency', title : 'Constituency'  },
                               		{ 'field': 'ward', title : 'Ward'  },
                               		{ 'field': 'receiverCount', title : 'Receivers','width':'90px'},
+                              		{'field' : 'Delete', 'title':'Contacts','width':'75px','template' : '#=getRegionViewContactTemplate()#'},
                               		{'field' : 'Delete', 'title':'Delete','width':'75px','template' : '#=getRegionsDeleteTemplate()#'}
                            		]"
               				data-bind="source: selTaskRegionsDS,
@@ -421,6 +422,7 @@
 				       		{ 'field': 'receiverCount', title : 'Receiver Count'  },
 				       		{ 'field': 'firstName', title : 'Owner First Name'  },
 				       		{ 'field': 'lastName', title : 'Owner Last Name'  },
+				       		{'field' : '', 'title':'Contacts', 'width' : '95px','template' : '#=getViewTaskGroupContactsTemplate()#'},
 				       		{'field' : 'delete', 'title':'Delete', 'width' : '95px','template' : '#=getTaskGroupDeleteTemplate()#'}
 				   		]"
 						data-bind="source: receiverGroupDS, visible: isEverVisible"
@@ -446,7 +448,66 @@
 					<div style="width:100%;height:400px;border-radius:5px">
 						<textarea style="height:100%;width:100%;position:relative" 
 							data-role='editor' 
-							data-bind="value : taskEmailHtml, visible : isEverVisible, events : { change : onChangeTaskEmailHtml }" 
+							data-bind="value : taskEmailHtml, visible : isEverVisible, events : { change : onChangeTaskEmailHtml }"
+							data-tools=
+								"[
+								    'bold',
+									'italic',
+									'underline',
+									'strikethrough',
+									'superscript',
+									'subscript',
+									'justifyCenter',
+									'justifyLeft',
+									'justifyRight',
+									'justifyFull',
+									'insertUnorderedList',
+									'insertOrderedList',
+									'indent',
+									'outdent',
+									'createLink',
+									'unlink',
+									'insertImage',
+									'insertFile',
+									'insertHtml',
+									'fontName',
+									'fontNameInherit',
+									'fontSize',
+									'fontSizeInherit',
+									'formatBlock',
+									'formatting',
+									'style',
+									'viewHtml',
+									'emptyFolder',
+									'uploadFile',
+									'orderBy',
+									'orderBySize',
+									'orderByName',
+									'invalidFileType',
+									'deleteFile',
+									'overwriteFile',
+									'directoryNotFound',
+									'imageWebAddress',
+									'imageAltText',
+									'fileWebAddress',
+									'fileTitle',
+									'linkWebAddress',
+									'linkText',
+									'linkToolTip',
+									'linkOpenInNewWindow',
+									'dialogInsert',
+									'dialogUpdate',
+									'dialogCancel',
+									'dialogCancel',
+									'createTable',
+									'addColumnLeft',
+									'addColumnRight',
+									'addRowAbove',
+									'addRowBelow',
+									'deleteRow',
+									'deleteColumn'
+                                   
+                                   ]"
 						></textarea>
 					</div>
 				</td>
@@ -456,9 +517,9 @@
 					</div>
 					<div id="emailTemplateParamsEditor"  style="overflow-y : scroll;border-radius:5px;background-color:#E6FCFF;height:390px;padding:5px;">
 						<h2 style='align:center;' >Email Message Configurations</h2>
-				        <table style='with:100%;table-layout:fixed;' >
+				        <table style='width:100%;table-layout:fixed;' >
 				        	<tr style='with:100%;' >
-				        		<td style='with:50%;'>
+				        		<td style='with:36%;'>
 				        			<table style='min-with:50px;table-layout:fixed;' class='innerEmailConfigTables' >
 				        				<tr>
 				        					<td>Has Attachment</td>
@@ -564,7 +625,25 @@
 				        				</tr>
 				        			</table>
 				        			<br/>
-				        			<button class='k-button' style="background-color:rgb(212,239,249);width:100%;border : 1px solid rgb(120,186,210);" data-bind='events : {click:saveEmailMessageConfigurations}'  ><span class="k-icon k-i-tick"></span>Save Configurations</button>
+				        			<button class='k-button' style="background-color:rgb(212,239,249);width:80%;border : 1px solid rgb(120,186,210);" data-bind='events : {click:saveEmailMessageConfigurations}'  ><span class="k-icon k-i-tick"></span>Save Configurations</button>
+				        		</td>
+				        		<td style='width:64%;' id='hunterMessageAttachmentsTdContainer' >
+				        			<div style='width:100%;' >
+				        				<table id='hunterMessageAttachmentTable' style='table-layout: fixed;width:100%;'>
+				        					<tr>
+				        						<td style='margin-bottom:10px;height:30px;border-radius:3px;font-size: 20px;font-weight: bolder;width:100%;text-align: center;'>
+				        							Message Attachments<br/>
+				        						</td>
+				        					</tr>
+				        					<tr>
+				        						<td>
+					        						<div style='height:280px;overflow-y:scroll;width:100%;' id="messageAttachmentsContainer">
+					        								<img src="http://localhost:8080/Hunter/static/resources/images/refreshing_spinner_new.gif" style='margin-left:47%;margin-top:10%;' width="50px" height="50px"   />
+					        						</div>
+				        						</td>
+				        					</tr>
+				        				</table>
+				        			</div>
 				        		</td>
 				        	</tr>
 				        </table>
@@ -577,8 +656,10 @@
 			<button class='k-button' data-bind="events: { click : saveCurrentEditorContent }" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"  ><span class="k-icon k-i-tick"></span> Save</button>
 			<button class='k-button' data-bind="events: { click : clearCurrentEditorContent }" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-cancel"></span>Clear</button>
 			<button class='k-button' data-bind="events: { click : displayAllCurrentTemplates }" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-funnel "></span>Templates</button>
+			<button class='k-button' data-bind="events: { click : launchTaskEmailPreview }" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-funnel "></span>Preview</button>
 			<button class='k-button' data-bind="events: { click : showEmailParameters }" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-restore "></span><span data-bind="text : currentParamButtonText" ></span></button>
 			<button class='k-button' data-bind="events: { click : showPopupToDeleteEmail }" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-funnel "></span>Delete Email</button>
+			<button class='k-button' data-bind="events: { click : showMessageAttachmentMappings }" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"  ><span class="k-icon k-i-search"></span>Attachments</button>
 			<button class='k-button' data-bind="events: { click : refreshElemeAttributes }" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-refresh"></span>Refresh</button>
 			<button class='k-button' data-bind="events: { click : closeEmailTemplateSection }" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-arrow-w"></span>Close</button>
 		</div>
@@ -756,11 +837,41 @@
 
 
 
+<script type="text/x-kendo-template" id="hunterMessageAttachmentTemplate">
+<div style='width:98%;background-color: \\#D0F6F6;border-radius:5px;border:1px solid \\#B9EBEB;margin-bottom:10px;' >
+	<table style='table-layout: fixed;width:100%;' >
+		<tr>
+			<td style='font-size:15px;font-weight: bolder;padding:5px;'>
+				<button class='k-button' style="background-color:rgb(212,239,249);width:35px;border : 1px solid rgb(120,186,210);" onClick="hunterAdminClientUserVM.showPopupToEditMessageAttachments(this)"  ><span class="k-icon k-i-pencil"></span></button>
+				#=attachmentName#							        									
+			</td>
+		</tr>
+		<tr>
+			<td style='font-size:14px;padding:5px;'><span style='color:red;' >#=attachmentLocation#</span></td>
+		</tr>
+	</table>
+</div>
+</script>
 
 
-
-
-
+<script type="text/x-kendo-template" id="hunterAttachmentPopupTemplate">
+	<table style='table-layout: fixed;width:100%;' >
+		<tr>
+			<td>
+				<div style='width:100%;min-height: 220px;height: 220px;overflow-y:scroll;' id="messageAttachmentsMappingsDiv">
+					<img src='http://localhost:8080/Hunter/static/resources/images/refreshing_spinner_new.gif' style='margin-left:47%;margin-top:13%;' width='50px' height='50px'   />
+					<table class='hidden' id="messageAttachmentsMappingsTable" style='table-layout:fixed;width:90%;margin-left:5%;margin-top:4%;' >
+					</table>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button class='messageAttachmentsRecord' onClick="hunterAdminClientUserVM.closeMessageAttchmntPopup()" style="border-radius:3px;margin-left:20%;height:30px;width:60%;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" ><span class="k-icon k-cancel"></span>Close</button>
+			</td>
+		</tr>
+	</table>
+</script>
 
 <script type="text/x-kendo-template" id="hunterUserToolBar">
 <div class="toolbar" >
@@ -909,7 +1020,7 @@
 			<label for="taskObjective">Task Objective</label>
 		</div>
 		<div data-container-for="taskObjective" class="k-edit-field">
-			<textarea data-bind="value:taskObjective" cols="18" rows="6" style="background-color:rgb(242,249,255);border:1px solid rgb(129,166,174);" name="taskObjective" class="k-input k-textarea" ></textarea> 
+			<textarea data-bind="value:taskObjective" cols="21" rows="6" style="background-color:rgb(242,249,255);border:1px solid rgb(129,166,174);" name="taskObjective" class="k-input k-textarea" ></textarea> 
 		</div>
 		<div class="k-edit-label">
 			<label for="recurrentTask">Recurrent Task</label>
@@ -1251,7 +1362,7 @@
     </table>
  </div>
  <div class="tasProcessJobResultDiv" >
- 	<div style="word-wrap: break-word;width:88%;margin:5%;margin-bottom:3%;height:75%;overflow-y:scroll;font-size:13px;" >
+ 	<div style="word-wrap: break-word;width:88%;margin:5%;margin-bottom:3%;height:85%;overflow-y:scroll;font-size:13px;border-radius:3px;" >
 		#=data[i].msgIds#
  	</div>
  </div>
@@ -1263,6 +1374,7 @@
 <script type="text/x-kendo-template" id="taskProcessJobNoDataFoundTemplate">
 	<div id="taskProcessJobLoadingIcon"  style="font-size:18px;color:black;text-align:center;background-color:#;margin-top:15%;"> Loading Process Results..... </div>
 </script>
+
 
 <script type="text/x-kendo-template" id="tskRgnCntSummry">
 	<div id="tskRgnCntSummryContainer"  style="font-size:18px;width:530px;height:180px;border-radius:4px;border:1px solid rgb(175,202,210)">
@@ -1293,7 +1405,7 @@
 			</table>
 			<table style="width:34%;margin-left:33%;" >
 				<tr>
-					<td><button id="taskRegionEditButton"  class="k-button"  onClick="hunterAdminClientUserVM.loadEdiTaskRegionView()" style="margin-bottom:7px;margin-top:10px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-pencil" ></span>Edit</button></td>
+					<td><button id="taskRegionEditButton"  class="k-button"  onClick="hunterAdminClientUserVM.closePopupAndLoadEdiTaskRegionView()" style="margin-bottom:7px;margin-top:10px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-pencil" ></span>Edit</button></td>
 					<td><button class="k-button"  onClick="kendoKipHelperInstance.closeWindowWithOnClose()" style="margin-bottom:7px;margin-top:10px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);"><span class="k-icon k-i-cancel" ></span>Close</button></td>
 				</tr>
 			</table>

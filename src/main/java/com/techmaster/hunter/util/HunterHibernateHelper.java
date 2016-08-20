@@ -317,6 +317,8 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 	}
 	
 	public static void deleteEntity(Object obj){
+		
+		if( obj == null ) return;
 
 		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
 		Session session = null;
@@ -358,8 +360,10 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 			session = sessionFactory.openSession();
 			t = (T)session.get(clazz, id);
 			// just make it a string so it can lazy load.
-			@SuppressWarnings("unused")
-			String tStr = t.toString();
+			if( t != null ){
+				@SuppressWarnings("unused")
+				String tStr = t.toString();
+			}
 			closeSession(session);
 			
 			logger.debug("Finished fetching entity by id of Entity(" + getEntitySimpleName(clazz) + ")");

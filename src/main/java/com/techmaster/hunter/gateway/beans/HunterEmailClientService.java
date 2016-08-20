@@ -74,9 +74,9 @@ public class HunterEmailClientService extends AbstractGateWayClientService{
 		logger.debug("Preparing task process job bean..."); 
 		String processJobKey = TaskProcessor.getInstance().getNextProcessJobKey(task.getTaskId());
 		Map<String,String> contextParams = getDefaultProcessJobContextParams(allMsgs.size(), HunterConstants.CLIENT_HUNTER_EMAIL, 1);
-		String getMessageIds = GateWayClientHelper.getInstance().getMessageIds(allMsgs);
-		Map<String,String> workerParams = getDefaultProcessWorkerParams(task, getMessageIds, allMsgs.size());
-		TaskProcessJob processJob = createNewTaskProcessJob(task, processJobKey, contextParams, auditInfo);
+		String messageContacts = GateWayClientHelper.getInstance().getMessageContacts(allMsgs);
+		Map<String,String> workerParams = getDefaultProcessWorkerParams(task, messageContacts, allMsgs.size());
+		TaskProcessJob processJob = TaskProcessJobHandler.getInstance().createNewTaskProcessJob(task.getTaskId(), processJobKey, contextParams, auditInfo);
 		
 		Long startPoint = System.currentTimeMillis();
 		Long endPoint = 0L;
@@ -210,10 +210,6 @@ public class HunterEmailClientService extends AbstractGateWayClientService{
 		return values;
 	}
 	
-	private TaskProcessJob createNewTaskProcessJob(Task task, String processJobKey,Map<String, String> jobContextParams, AuditInfo auditInfo){
-		TaskProcessJob processJob = TaskProcessJobHandler.getInstance().createNewTaskProcessJob(task.getTaskId(), processJobKey, jobContextParams, auditInfo);
-		return processJob;
-	};
 	
 
 }

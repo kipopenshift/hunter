@@ -25,11 +25,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.proc.ProcedureHandler;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
+import com.techmaster.hunter.dao.types.ReceiverGroupDao;
 import com.techmaster.hunter.dao.types.ReceiverRegionDao;
 import com.techmaster.hunter.dao.types.TaskHistoryDao;
 import com.techmaster.hunter.enums.TaskHistoryEventEnum;
@@ -38,13 +41,15 @@ import com.techmaster.hunter.json.ConstituencyJson;
 import com.techmaster.hunter.json.ConstituencyWardJson;
 import com.techmaster.hunter.json.CountryJson;
 import com.techmaster.hunter.json.CountyJson;
+import com.techmaster.hunter.json.PagedHunterMessageReceiverData;
+import com.techmaster.hunter.json.PagedHunterMessageReceiverJson;
 import com.techmaster.hunter.json.ReceiverRegionJson;
 import com.techmaster.hunter.obj.beans.Constituency;
 import com.techmaster.hunter.obj.beans.ConstituencyWard;
 import com.techmaster.hunter.obj.beans.County;
+import com.techmaster.hunter.obj.beans.ReceiverGroup;
 import com.techmaster.hunter.obj.beans.RegionHierarchy;
 import com.techmaster.hunter.obj.beans.TaskHistory;
-import com.techmaster.hunter.region.RegionHierarchyAdapter;
 import com.techmaster.hunter.region.RegionHierarchyNavBean;
 import com.techmaster.hunter.region.RegionService;
 import com.techmaster.hunter.task.TaskManager;
@@ -61,7 +66,6 @@ public class RegionController extends HunterBaseController {
 	@Autowired private TaskManager taskManager;
 	@Autowired private TaskHistoryDao taskHistoryDao;
 	
-	RegionHierarchyAdapter regionHierarchyAdapter = RegionHierarchyAdapter.getInstance(); 
 	private static final Logger logger = Logger.getLogger(RegionController.class);
 	
 	@RequestMapping(value="/action/region/home" )
@@ -216,9 +220,9 @@ public class RegionController extends HunterBaseController {
 	
 	
 	@RequestMapping(value="/action/import/receiverRegions", method=RequestMethod.POST) 
-	@ResponseBody public byte[] importReceiverRegions(HttpServletRequest request, HttpServletResponse response){
+	@ResponseBody public byte[] importReceiverRegions(MultipartHttpServletRequest request, HttpServletResponse response){
 		
-		Object[] wbkExtracts = HunterUtility.getWorkbookFromRequest(request);
+		Object[] wbkExtracts = HunterUtility.getWorkbookFromMultiPartRequest(request);
 		Workbook workbook = (Workbook)wbkExtracts[0];
 		String fileName = (String)wbkExtracts[1];
 		
@@ -535,6 +539,78 @@ public class RegionController extends HunterBaseController {
 			taskHistoryDao.insertTaskHistory(taskHistory);
 			return jsonObject.toString();
 		}
+	}
+	
+	@Consumes("applicaiton/json")
+	@Produces("applicaiton/json")
+	@RequestMapping(value="/action/task/regions/receivers/getPageReceivers", method=RequestMethod.POST) 
+	@ResponseBody public PagedHunterMessageReceiverData getPagedRegionHunterMessageReceivers(HttpServletRequest request, HttpServletResponse response){
+		
+		String reqParams = request.getParameter("regParams");
+		String[] regionNames = reqParams.split("::");
+		
+		int 
+		skip = Integer.valueOf( request.getParameter("skip") ),
+		pageNo = Integer.valueOf( request.getParameter("page") ),
+		total = Integer.valueOf( request.getParameter("take") ),
+		pageSize = Integer.valueOf( request.getParameter("pageSize") );
+		
+		PagedHunterMessageReceiverData data = new PagedHunterMessageReceiverData();
+		
+		if( regionNames[0].equals("RECEIVER_GROUP_ID") ){
+			
+			Long groupId = Long.valueOf( regionNames[1] );
+			String msgType = regionNames[2];
+			
+			logger.debug("Fetching contacts for receiver group : " + groupId);
+			
+			/* groupId,msg_typ,pageNo,pageSize,pageNo,pageSize */
+			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject( HunterJDBCExecutor.class );
+			String query =  hunterJDBCExecutor.getQueryForSqlId("getReceiverGroupContacts");
+			
+			List<Object> values = new ArrayList<>();
+			values.add(groupId);
+			values.add(msgType);
+			values.add(pageNo);
+			values.add(pageSize);
+			values.add(pageNo);
+			values.add(pageSize);
+			
+			List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, values);
+			List<PagedHunterMessageReceiverJson> messageReceiverJsons = new ArrayList<>();
+			
+			if( !HunterUtility.isCollectionNullOrEmpty(rowMapList) ){
+				for(Map<String, Object> rowMap : rowMapList){
+					PagedHunterMessageReceiverJson receiverJson = new PagedHunterMessageReceiverJson();
+					receiverJson.setContact( HunterUtility.getStringOrNullOfObj( rowMap.get("RCVR_CNTCT") ) ); 
+					receiverJson.setIndex( Integer.valueOf( HunterUtility.getStringOrNullOfObj( rowMap.get("ROW_NUM") ) ) );
+					receiverJson.setCount( Integer.valueOf( HunterUtility.getStringOrNullOfObj( rowMap.get("CNT") ) ) );
+					messageReceiverJsons.add(receiverJson);
+				}
+				data.setData(messageReceiverJsons); 
+			}
+			
+			data.setTotal( messageReceiverJsons.isEmpty() ? 0 : messageReceiverJsons.get(0).getCount() );
+			
+			return data;
+			
+		}
+		
+		String
+		countryName = regionNames[0].equalsIgnoreCase("NULL") ? null : regionNames[0],
+		countyName = regionNames[1].equalsIgnoreCase("NULL") ? null : regionNames[1],
+		consName = regionNames[2].equalsIgnoreCase("NULL") ? null : regionNames[2],
+		wardName = regionNames[3].equalsIgnoreCase("NULL") ? null : regionNames[3],
+		rcvrTyp = regionNames[4].equalsIgnoreCase("NULL") ? null : regionNames[4];
+		
+		logger.debug( HunterUtility.getCommaDelimitedStrings(new Object[]{skip,pageNo-1,total,pageSize,reqParams}) );  
+		List<PagedHunterMessageReceiverJson> messageReceiverJsons = regionService.getMessageReceiversForRegion(countryName, countyName, consName, wardName, pageNo, pageSize,rcvrTyp);
+		
+		data.setTotal( messageReceiverJsons.isEmpty() ? 0 : messageReceiverJsons.get(0).getCount() );
+		data.setData(messageReceiverJsons); 
+		
+		return data;
+		
 	}
 	
 

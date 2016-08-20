@@ -1,5 +1,10 @@
 package com.techmaster.hunter.obj.beans;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import com.techmaster.hunter.util.HunterUtility;
+
 
 
 public class EmailMessage extends Message {
@@ -19,6 +24,8 @@ public class EmailMessage extends Message {
 	private String replyTo = null;
 	private int priority = 0;
 	private String emailTemplateName;
+	private String messageAttachments;// format path||key,path||key
+	private Set<MessageAttachmentMetadata> messageAttachmentMetadata = new HashSet<MessageAttachmentMetadata>();
 	
 		
 	public EmailMessage() {
@@ -115,18 +122,18 @@ public class EmailMessage extends Message {
 	public void setEmailTemplateName(String emailTemplateName) {
 		this.emailTemplateName = emailTemplateName;
 	}
-
-	@Override
-	public String toString() {
-		System.out.println(getProvider()); 
-		return "EmailMessage [eSubject=" + eSubject + ", eBody=" + eBody
-				+ ", eFooter=" + eFooter + ", toList=" + toList + ", eFrom="
-				+ eFrom + ", ccList=" + ccList + ", multiPart=" + multiPart
-				+ ", hasAttachment=" + hasAttachment + ", attchmntBnId="
-				+ attchmntBnId + ", attchmtntFileType=" + attchmtntFileType
-				+ ", contentType=" + contentType + ", cssObject=" + cssObject
-				+ ", replyTo=" + replyTo + ", priority=" + priority
-				+ ", emailTemplateName=" + emailTemplateName + "]";
+	public String getMessageAttachments() {
+		return messageAttachments;
+	}
+	public void setMessageAttachments(String messageAttachments) {
+		this.messageAttachments = messageAttachments;
+	}
+	public Set<MessageAttachmentMetadata> getMessageAttachmentMetadata() {
+		return messageAttachmentMetadata;
+	}
+	public void setMessageAttachmentMetadata(
+			Set<MessageAttachmentMetadata> messageAttachmentMetadata) {
+		this.messageAttachmentMetadata = messageAttachmentMetadata;
 	}
 
 	@Override
@@ -154,6 +161,10 @@ public class EmailMessage extends Message {
 				+ ((emailTemplateName == null) ? 0 : emailTemplateName
 						.hashCode());
 		result = prime * result + (hasAttachment ? 1231 : 1237);
+		result = prime
+				* result
+				+ ((messageAttachments == null) ? 0 : messageAttachments
+						.hashCode());
 		result = prime * result + (multiPart ? 1231 : 1237);
 		result = prime * result + priority;
 		result = prime * result + ((replyTo == null) ? 0 : replyTo.hashCode());
@@ -222,6 +233,11 @@ public class EmailMessage extends Message {
 			return false;
 		if (hasAttachment != other.hasAttachment)
 			return false;
+		if (messageAttachments == null) {
+			if (other.messageAttachments != null)
+				return false;
+		} else if (!messageAttachments.equals(other.messageAttachments))
+			return false;
 		if (multiPart != other.multiPart)
 			return false;
 		if (priority != other.priority)
@@ -238,6 +254,22 @@ public class EmailMessage extends Message {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "EmailMessage [eSubject=" + eSubject + ", eBody=" + eBody
+				+ ", eFooter=" + eFooter + ", toList=" + toList + ", eFrom="
+				+ eFrom + ", ccList=" + ccList + ", multiPart=" + multiPart
+				+ ", hasAttachment=" + hasAttachment + ", attchmntBnId="
+				+ attchmntBnId + ", attchmtntFileType=" + attchmtntFileType
+				+ ", contentType=" + contentType + ", cssObject=" + cssObject
+				+ ", replyTo=" + replyTo + ", priority=" + priority
+				+ ", emailTemplateName=" + emailTemplateName
+				+ ", messageAttachments=" + messageAttachments
+				+ ", messageAttachmentMetadata=" + HunterUtility.stringifySet(messageAttachmentMetadata) + "]"; 
+	}
+
+	
 	
 	
 

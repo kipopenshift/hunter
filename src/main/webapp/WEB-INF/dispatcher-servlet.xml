@@ -26,6 +26,8 @@
 		<property name="basename" value="messages" />
 	</bean>
 	
+	 <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+	
 	<bean id="hunterJDBCExecutor" class="com.techmaster.hunter.dao.impl.HunterJDBCExecutorImpl">
         <constructor-arg index="0"> 
 			<ref local="jdbcTemplate" />
@@ -47,7 +49,7 @@
         <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
         <property name="url" value="jdbc:oracle:thin:@localhost:1521:orcl"/>
         <property name="username" value="system"/>
-        <property name="password" value="Never.90"/>
+        <property name="password" value="Never.1900"/>
     </bean> 
     
     <!-- This is for json -->

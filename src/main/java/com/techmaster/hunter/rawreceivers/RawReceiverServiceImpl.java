@@ -1,5 +1,7 @@
 package com.techmaster.hunter.rawreceivers;
 
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,14 +11,17 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.picketbox.commons.cipher.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.proc.ProcedureHandler;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterRawReceiverDao;
 import com.techmaster.hunter.dao.types.HunterRawReceiverUserDao;
+import com.techmaster.hunter.dao.types.HunterUserDao;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.Constituency;
 import com.techmaster.hunter.obj.beans.ConstituencyWard;
@@ -24,6 +29,7 @@ import com.techmaster.hunter.obj.beans.Country;
 import com.techmaster.hunter.obj.beans.County;
 import com.techmaster.hunter.obj.beans.HunterRawReceiver;
 import com.techmaster.hunter.obj.beans.HunterRawReceiverUser;
+import com.techmaster.hunter.obj.beans.HunterUser;
 import com.techmaster.hunter.region.RegionService;
 import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterUtility;
@@ -56,7 +62,7 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 	public int getRawReceiverVersion(String givenByUserName) {
 		List<Object> values = new ArrayList<>();
 		values.add("givenByUserName"); 
-		Object nextVersion = hunterJDBCExecutor.executeQueryForOnReturn(hunterJDBCExecutor.getQueryForSqlId("getNextRawReceiverVersion"), values);
+		Object nextVersion = hunterJDBCExecutor.executeQueryForOneReturn(hunterJDBCExecutor.getQueryForSqlId("getNextRawReceiverVersion"), values);
 		if(nextVersion != null){
 			return Integer.parseInt(nextVersion.toString());
 		}
@@ -198,6 +204,7 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 		wardId 		= 0L;
 		
 		List<Country> countries = HunterCacheUtil.getInstance().getAllCountries();
+		
 		country:for(Country country : countries){
 			if(country.getCountryName().equals(countryName)){
 				countryId = country.getCountryId();
@@ -233,6 +240,7 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 	@Override
 	public JSONObject createOrUpdateRawReceiver(Map<String, String> rawReceiverData, AuditInfo auditInfo) {
 		
+		HunterUtility.threadSleepFor(1000); 
 		JSONObject json = new JSONObject();
 		HunterRawReceiver receiver = new HunterRawReceiver();
 		
@@ -301,6 +309,7 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 					hunterRawReceiverDao.updateHunterRawReceiver(receiver);
 				}else{
 					hunterRawReceiverDao.insertHunterRawReceiver(receiver);
+					updateRawReceiverCountsForUser(auditInfo.getLastUpdatedBy());
 				}
 				HunterUtility.setJSONObjectForSuccess(json, "Successfully "+ ( update? "updated" : "created"  )+" contact!");
 			}
@@ -311,6 +320,57 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 		} 
 		
 		return json;
+	}
+
+	@Override
+	public void updateRawReceiverCountsForUser(String userName) {
+		logger.debug("Updating the count of raw receivers for user : " + userName); 
+		String query = hunterJDBCExecutor.getQueryForSqlId("updateRawReceiverCountsForFieldUser");
+		List<Object> values = new ArrayList<>();
+		values.add(userName);
+		values.add(userName);
+		hunterJDBCExecutor.executeUpdate(query, values);
+		logger.debug("Successfully finished updating the count!"); 
+	}
+
+	@Override
+	public String getBase64PhotoForUser(String userName) {
+		HunterUser user = HunterDaoFactory.getInstance().getDaoObject(HunterUserDao.class).getUserByUserName(userName);
+		Blob userPhoto = user.getUserProfPhoto() != null ? user.getUserProfPhoto().getPhotoBlob() : null;
+		byte[] bytes = null;
+		
+		if( userPhoto != null ){
+			try {
+				bytes = userPhoto.getBytes(1, (int)userPhoto.length());
+				if( bytes != null && bytes.length > 0 ){
+					String b64Str = Base64.encodeBytes(bytes);
+					logger.debug(b64Str); 
+					return b64Str;
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return null;
+	}
+
+	@Override
+	public List<String> getDistinctContactsForUser(String userName) {
+		logger.debug("Pulling up existing contacts for the user : " + userName); 
+		List<String> contacts = new ArrayList<>();
+		String query = hunterJDBCExecutor.getQueryForSqlId("getDstntRwRcvrCntctForUser");
+		List<Object> values = new ArrayList<>();
+		values.add(userName);
+		Map<Integer, List<Object>> rowMapLists = hunterJDBCExecutor.executeQueryRowList(query, values);
+		if(rowMapLists != null && !rowMapLists.isEmpty()){
+			for(Map.Entry<Integer, List<Object>> entry : rowMapLists.entrySet()){
+				List<Object> contact_ = entry.getValue();
+				contacts.add(HunterUtility.getStringOrNullOfObj(contact_ != null && !contact_.isEmpty() ? contact_.get(0) : null)); 
+			}
+		}
+		logger.debug("Successfully pulled up distinct contacts. Size ( "+ contacts.size() +" )");
+		return contacts;
 	}
 	
 	

@@ -25,7 +25,9 @@ body{
 	position:fixed;
 }
 
-
+#hunterFieldPopupContainer table[data-name='popup-action-button']a:hover{
+	background-color: red;
+}
 
 .fielProfilePicClass{
 	border : 1px solid white;
@@ -187,22 +189,6 @@ body{
 	padding-left:15px;
 }
 
-#importNewContainerSubButt:hover{
-	border:4px solid white;
-	background-color: red;
-}
-
-#importNewContainerCloseButt:hover{
-	border:4px solid white;
-	background-color: red;
-}
-
-#createNewContactButt:hover{
-	color:white;
-	background-color:#5291B0;
-	border:4px solid white;
-}
-
 #downloadImportTempButt:hover{
 	color:white;
 	background-color:#5291B0;
@@ -343,7 +329,7 @@ select[name='fieldProfileDataTable_length']{
 
 
 #fieldProfileDataTable tbody tr td{
-	border-bottom : 1px dotted #08586C;
+	border-bottom : 1px dotted #0489AB;
 }
 
 select{
@@ -402,12 +388,26 @@ select{
 	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#408c99', endColorstr='#599bb3',GradientType=0);
 	background-color:#408c99;
 }
+
+
 .uploadProfilePic:active {
 	position:relative;
 	top:1px;
 }
 
+.ui-progressbar {
+	position: relative;
+}
+	
+.progress-label {
+	position: absolute;
+	left: 50%;
+	top: 4px;
+	font-weight: bold;
+	text-shadow: 1px 1px 0 #fff;
+}
 
-
-
+#hunterFieldPopupContainer button[id='importNewContainerSubButt']:hover{
+	border:1px solid red;
+}
 

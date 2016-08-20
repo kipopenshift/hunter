@@ -2,17 +2,115 @@
 var userData = null,
 	rotateEvent = null,
 	regionContainer = {"country":null,"county":null,"constituency":null,"ward":null, "level":null},
+	tickImg = function(){
+		var url = getBaseURL("Hunter/static/resources/images/tick.png"),
+		image = '<img  src="'+ url +'" width="30px" height="30px" class="progressIconImg" data-name="successIconImg" >';
+		return image;
+	},
+	xImg = function(){
+		var url = getBaseURL("Hunter/static/resources/images/x-button.png"),
+		image = '<img  src="'+ url +'" width="30px" height="30px" class="progressIconImg" data-name="successIconImg" >';
+		return image;
+	},
 	loadUserEditData = false,
 	selUserData = null,
 	dataTable = null,
 	isFileSelected = false,
+	secondsTakenInterval = null,
+	currSecs = 0,
+	isProfileUploaded = false,
 	profileData = {};
 
 var progressSpinner = "<span id='progressSpinnerHolderSpan' style='width:100%;font-size:30px;color:#004B0A;' ><img src='http://localhost:8080/Hunter/static/resources/images/refreshing_spinner_new.gif' style='border-radius:50%' width='50' height='50'  /></span>";
 
 $("document").ready(function(){
+	//loadUserProfileData();
+	//loadContactsData();
+	//bindProgressFunctions();
+	launchProgressPopup();
+});
+
+function launchProgressPopup(){
+	$(".popup-inner").empty();
+	$('[data-popup="popup-1"]').fadeIn(200, function(){
+		$(".popup-inner").append("<div id='hunterFieldPopupContainer' ></div>"); 
+		var html = $("#progressTemplateContainer div[data-name='loadProfileAndReceivers']").html();
+		$("#hunterFieldPopupContainer").append(html);
+		var progressBar = $("#hunterFieldPopupContainer div[data-name='progressbar']");
+		var progressLabel = $("#hunterFieldPopupContainer div[data-name='progressBarLabel']");
+		var secondsTaken = $("#hunterFieldPopupContainer span[data-name='numberOfSecondsTaken']");
+		secondsTakenInterval = setInterval(function(){
+			currSecs++;
+			$(secondsTaken).html(currSecs + " seconds"); 
+		}, 1000);
+		launchProgressHandler(progressBar, progressLabel, 'Completed!');
+		updateProgressHandler(progressBar, 5, 'Loading Data...');
+		loadUserProfileData(progressBar);
+	});
+}
+
+function loadUserProfileData(progressBar){
+	var r = $.Deferred();
 	
-	getRawReceiverUsers();
+	loadLogout();
+	
+	var url = getBaseURL("Hunter/rawReceiver/action/read/rawReceiverUser");
+	$.ajax({
+		url: url,
+	    data : null,
+	    method: "POST",
+	    dataType : "json", 
+	    contentType : "application/json"
+	}).done(function(data) {
+		
+		if(data != null){
+			
+			data = JSON.stringify(data);
+			data = $.parseJSON(data);
+			
+			var fullName = data["fullname"];
+			
+			$("#fieldUserTotalContacts").	text( data["all"] 		=== 'undefined' ? "" : data["all"] 		);
+			$("#fieldUserCountry").			text( data["country"] 	=== 'undefined' ? "" : data["country"] 	);
+			$("#fieldUserCounty").			text( data["county"] 	=== 'undefined' ? "" : data["county"] 	);
+			$("#fieldUserVerifiedContacts").text( data["verified"] 	=== 'undefined' ? "" : data["verified"] );
+			$("#fieldUserWard").			text( data["ward"] 		=== 'undefined' ? "" : data["ward"] 	);
+			$("#fieldUserPhone").			text( data["phone"] 	=== 'undefined' ? "" : data["phone"] 	);
+			$("#fieldUserEmail").			text( data["email"] 	=== 'undefined' ? "" : data["email"] 	);
+			$("#fieldUserConstituency").	text( data["cons"] 		=== 'undefined' ? "" : data["cons"] 	);
+			$("#fieldUserFullName").		html( fullName );
+			$("#fieldUserTotalPayout").		text( data["compensation"] === 'undefined' ? "" : data["compensation"] );
+			
+			profileData = data;
+			
+			$("#hunterFieldPopupContainer td[data-name='profileProgressIcon']").html( tickImg() );
+			setTimeout(function(){
+				$("#hunterFieldPopupContainer tr[data-name='loadContactsDataDisplay']").css({"display":""});
+				updateProgressHandler(progressBar, 35, 'Completed!');
+				loadContactsData(progressBar);
+			}, 200);
+			
+		}else{
+			notifyError("Failed to obtain your profile data");
+			updateProgressHandler(progressBar, 0, 'No data found!');
+			$("#hunterFieldPopupContainer td[data-name='profileProgressIcon']").html( xImg() );
+		}
+		
+	 }).fail(function(data) {
+		 var message = data.statusText + " (" + data.status + "). Please contact Production Support.";
+		 notifyError(message);
+		 updateProgressHandler(progressBar, 0, 'No data found!');
+		 $("#hunterFieldPopupContainer td[data-name='profileProgressIcon']").html( xImg() );
+		 closeHunterPopup1();
+	 });
+	
+	return r;
+}
+
+function loadContactsData(progressBar){
+
+	$("#hunterFieldPopupContainer div[data-name='progressBarLabel']").text( "Loading Data..." );
+	var r = $.Deferred();
 	
 	dataTable = $('#fieldProfileDataTable').DataTable( {
 		 "ajax": {
@@ -31,62 +129,76 @@ $("document").ready(function(){
 	     "displayLength": 15,
 	     "dom": '<"toolbar">frtip',
 	     "aLengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+	     "initComplete": function( settings, json ) {
+	    	  secondsTakenInterval = null;
+	    	    if(json != null && json.length > 0){
+	    	    	$("#hunterFieldPopupContainer td[data-name='contactsProgressIcon']").html( tickImg() );
+	    	    	$("#hunterFieldPopupContainer div[data-name='progressBarLabel']").text( "Completed!" );
+	    	    }else{
+	    	    	$("#hunterFieldPopupContainer td[data-name='contactsProgressIcon']").html( xImg() );
+	    	    	notifyError("And error occurred trying to load your contacts!");
+	    	    }
+	    	    $("#hunterFieldPopupContainer div[data-name='progressBarLabel']").text( "Completed!" );
+	    	    updateProgressHandler(progressBar, 30, 'Completed!');
+	    	 	setTimeout(function(){
+	    	 		closeHunterPopup1();
+	    	 	},200);
+	      },
 		 "columns": [
-            { "data" : "rawReceiverId" },
-            { "data" : "receiverContact" },
-            { "data" : "firstName" },
-            { "data" : "lastName" },
-            { "data" : "countryName" },
-            { "data" : "countyName" },
-            { "data" : "consName" }, 
-            { "data" : "consWardName" },
-            { "data" : "verified" },
-            { "data" : "edit" },
-            { "data" : "delete" }
-        ],
-        columnDefs : [
-              {
-            	targets : 8,
-            	"mRender" : function(data,type,full,meta){
-            		if(data == 'true'){
-            			return '<center><img src="http://localhost:8080/Hunter/static/resources/images/tick.png" width="15px" height="15px" style="border:1px solid rgb(14,65,68);border-radius:50%;"  /></center>';
-            		}else{
-            			return '<center><img src="http://localhost:8080/Hunter/static/resources/images/cross-icon-img.png" width="15px" height="15px" style="border:1px solid rgb(14,65,68);border-radius:50%;"  /></center>';
-            		}
-            	}
-            },
-            {
-            	targets : 9,
-            	"mRender" : function(data,type,full,meta){
-            		var id = full["rawReceiverId"];
-            		return '<center><a  data-popup-open="popup-1" href="#" value="'+ id + '_EditContact"  class="ui-btn ui-corner-all ui-icon-edit ui-btn-icon-notext" class="shadowAllConersGray"   style="width:20px;height:20px;padding:0px;border:1px solid white;margin:0;" ></a></center>';
-            	}
-            },
-            {
-            	targets : 10,
-            	"mRender" : function(data,type,full,meta){
-            		var id = full["rawReceiverId"];
-            		return '<center><a data-popup-open="popup-1" href="#" value="'+ id + '_DeleteContact"  class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-notext" class="shadowAllConersGray" style="width:20px;height:20px;padding:0px;border:1px solid white;margin:0;" ></a></center>';
-            	}
-            }
-              
-         ]
-        
-    });
+           { "data" : "rawReceiverId" },
+           { "data" : "receiverContact" },
+           { "data" : "firstName" },
+           { "data" : "lastName" },
+           { "data" : "countryName" },
+           { "data" : "countyName" },
+           { "data" : "consName" }, 
+           { "data" : "consWardName" },
+           { "data" : "verified" },
+           { "data" : "edit" },
+           { "data" : "delete" }
+       ],
+       columnDefs : [
+             {
+           	targets : 8,
+           	"mRender" : function(data,type,full,meta){
+           		if(data == 'true'){
+           			return '<center><img src="http://localhost:8080/Hunter/static/resources/images/tick.png" width="15px" height="15px" style="border:1px solid rgb(14,65,68);border-radius:50%;"  /></center>';
+           		}else{
+           			return '<center><img src="http://localhost:8080/Hunter/static/resources/images/cross-icon-img.png" width="15px" height="15px" style="border:1px solid rgb(14,65,68);border-radius:50%;"  /></center>';
+           		}
+           	}
+           },
+           {
+           	targets : 9,
+           	"mRender" : function(data,type,full,meta){
+           		var id = full["rawReceiverId"];
+           		return '<center><a  data-popup-open="popup-1" href="#" value="'+ id + '_EditContact"  class="ui-btn ui-corner-all ui-icon-edit ui-btn-icon-notext" class="shadowAllConersGray"   style="width:20px;height:20px;padding:0px;border:1px solid white;margin:0;" ></a></center>';
+           	}
+           },
+           {
+           	targets : 10,
+           	"mRender" : function(data,type,full,meta){
+           		var id = full["rawReceiverId"];
+           		return '<center><a data-popup-open="popup-1" href="#" value="'+ id + '_DeleteContact"  class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-notext" class="shadowAllConersGray" style="width:20px;height:20px;padding:0px;border:1px solid white;margin:0;" ></a></center>';
+           	}
+           }
+             
+        ]
+       
+   });
 	
 	$("#fieldProfileDataTable_filter input").attr("placeholder","Search Contact");
 	$("#fieldProfileDataTable_filter").css({"width":"100%", "margin-bottom":"1px"});
-	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:-3.5%;margin-top:-8px;" ><button class="ui-btn ui-icon-arrow-d ui-btn-icon-left" onClick="downloadImportTemplate()" id="downloadImportTempButt" classs="highlightborder"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>Template</span></button></span>');
-	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:-3.5%;margin-top:-8px;" ><button class="ui-btn ui-icon-arrow-u ui-btn-icon-left" onClick="launchImportStage()" id="importNewContactButt" classs="highlightborder"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>Import</span></button></span>');
-	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:3.5%;margin-top:-8px;" ><button class="ui-btn ui-icon-plus ui-btn-icon-left" onClick="populatePopupForParams(\'0_NewContact\')" id="createNewContactButt"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>New</span></button></span>');
+	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:-3.5%;margin-top:-8px;" ><button onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" class="ui-btn ui-icon-arrow-d ui-btn-icon-left" onClick="downloadImportTemplate()" id="downloadImportTempButt" classs="highlightborder"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>Template</span></button></span>');
+	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:-3.5%;margin-top:-8px;" ><button onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" class="ui-btn ui-icon-arrow-u ui-btn-icon-left" onClick="launchImportStage()" id="importNewContactButt" classs="highlightborder"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>Import</span></button></span>');
+	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:3.5%;margin-top:-8px;" ><button onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" class="ui-btn ui-icon-plus ui-btn-icon-left" onClick="populatePopupForParams(\'0_NewContact\')" id="createNewContactButt"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>New</span></button></span>');
 	bindDataTableActionButtons();
 	$('#fieldProfileDataTable').on( 'draw.dt', function () {
 		bindDataTableActionButtons();
 	} );
 	
-	validateBasicProfile();
-	loadLogout();
-});
+	return r;
+}
 
 function getBaseURL(loc) {
     return location.protocol + "//" + location.hostname +
@@ -99,7 +211,7 @@ function getQuotedParam(param){
 }
 
 function defineAffirmButt(text, onClick, jClass){
-	var affirm = '<center><a href="#" id="defineAffirmButt" onClick="'+ onClick +'" class="'+ jClass +'" style="margin:10px;border:1px solid #216365;border-radius:5px;color:#0E4244;" >'+ text +'</a></center>';
+	var affirm = '<center><a href="#" onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" id="defineAffirmButt" onClick="'+ onClick +'" class="'+ jClass +'" style="min-width:200px;margin:10px;border:1px solid #93CADB;border-radius:5px;color:#0E4244;" >'+ text +'</a></center>';
 	$("#affirmPopupAction").html(affirm);
 }
 
@@ -124,6 +236,24 @@ function launchImportStage(){
 		$(".popup-inner").append("<div id='hunterFieldPopupContainer' ></div>"); 
 		var html = $("#importNewContainerTmplt").html();
 		$("#hunterFieldPopupContainer").append(html);
+		$("#importNewContainerSubButt *").css({"color":"red"});
+		$("#hunterFieldPopupContainer button[id='importNewContainerSubButt']").mouseenter(function(){
+			$(this).css({"border":"1px solid #62A1A5", "background-color":"#ACE1E5"});
+		}); 
+		$("#hunterFieldPopupContainer button[id='importNewContainerSubButt']").mouseleave(function(){
+			$(this).css({"border":"1px solid #93CADB","background-color":"#9BF3FF"});
+		});
+		$("#hunterFieldPopupContainer a").mouseenter(function(){
+			$(this).css({"border":"1px solid #62A1A5", "background-color":"#ACE1E5"});
+		}); 
+		$("#hunterFieldPopupContainer a:first-child").mouseleave(function(){
+			$(this).css({"border":"1px solid #93CADB","background-color":"#9BF3FF"});
+		});
+		
+		$("#hunterFieldPopupContainer form[data-name='importNewContactForm']").on('submit', function(){
+			closeImportStageAndOpenRefreshSec();
+		});
+		
 	});
 }
 
@@ -133,14 +263,22 @@ function downloadImportTemplate(){
 }
 
 
-function readURL(input) {
+function readURL(input, target) {
     if (input.files && input.files[0]) {
         var reader = new FileReader();
         reader.onload = function (e) {
-            $('#fielProfilePic_').attr('src', e.target.result);
+            $( target ).attr('src', e.target.result);
         };
         reader.readAsDataURL(input.files[0]);
     }
+}
+
+function onmouseoutCloseA(a){
+	$(a).css({"border":"1px solid #93CADB","background-color":"#9BF3FF"});
+}
+
+function onmouseenterCloseA(a){
+	$(a).css({"border":"1px solid #62A1A5", "background-color":"#8AC6CA"});
 }
 
 function populatePopupForParams(param){
@@ -219,7 +357,6 @@ function populatePopupForParams(param){
 			selUserData["consWardId"]		= profileData["wardid"];
 			
 			onChangeCountry(1, selUserData);
-			
 			
 			return;
 		});
@@ -545,6 +682,9 @@ function deleteContactAndRefresh(conId){
 	var userId = {"rawReceiverId" : conId};
 	userId = JSON.stringify(userId);
 	
+	closeHunterPopup1();
+	launchRefreshPopup();
+	
 	$.ajax({
 		url: getBaseURL("Hunter/rawReceiver/action/delete/rawReceiver"), 
 	    data : userId,
@@ -552,7 +692,6 @@ function deleteContactAndRefresh(conId){
 	    dataType : "json", 
 	    contentType : "application/json"
 	}).done(function(data) {
-		closeHunterPopup1();
 		data = $.parseJSON(data);
 		var message='',status='';
 		for(key in data){
@@ -728,6 +867,9 @@ function getEditedProfileValuesAndSave(){
 		}else{
 			notifyError(message);
 		}
+		if( isProfileUploaded ){
+			uploadProfilePhoto();
+		}
 		getRawReceiverUsers();
 		closeHunterPopup1();
 	 }).fail(function(data) {
@@ -736,6 +878,20 @@ function getEditedProfileValuesAndSave(){
 		 closeHunterPopup1();
 	 });
 	
+	
+}
+
+function uploadProfilePhoto(){
+	notifySuccess("Uploading profile photo..."); 
+	$("#hunterFieldPopupContainer form[data-name='uploadProfilePhotoForm'] button[name='submitEditProfilePhoto']").click();
+	closeHunterPopup1();
+	launchRefreshPopup();
+}
+
+function closeImportStageAndOpenRefreshSec(){
+	$("#hunterFieldPopupContainer form[data-name='importNewContactForm']").fadeOut(200,function(){
+		$("#hunterFieldPopupContainer table[id='importContainerRefreshTable']").fadeIn(300);
+	});
 }
 
 function getEditedValuesAndSave(id){
@@ -812,6 +968,7 @@ function getEditedValuesAndSave(id){
 		json = JSON.stringify(json);
 		
 		closeHunterPopup1();
+		launchRefreshPopup();
 		
 		$.ajax({
 			url: getBaseURL("Hunter/rawReceiver/action/create/rawReceiver"), 
@@ -855,9 +1012,21 @@ function notifyAndRefresh(message, type){
 	}else{
 		$.notify(message, type);
 	}
+	notifySuccess("Please wait. Refreshing...");
 	setTimeout( function () {
-		dataTable.ajax.reload();
+		dataTable.ajax.reload( function ( json ) {
+		    closeHunterPopup1();
+		} );
 	},1500);
+}
+
+function launchRefreshPopup(){
+	$(".popup-inner").empty();
+	$('[data-popup="popup-1"]').fadeIn(100, function(){
+		$(".popup-inner").append("<div id='hunterFieldPopupContainer' ></div>"); 
+		var html = $("#refreshPopupContainer").html();
+		$("#hunterFieldPopupContainer").append(html);
+	});
 }
 
 function ajaxPostDataForJsonResponseWthCllbck(data, contentType, dataType, method, url, callAfter,callException){
@@ -963,31 +1132,58 @@ function getRawReceiverUsers(){
 }
 
 
-function validateBasicProfile(){
-	$("#editProfilePhotoForm").validate({
-        rules: {
-        	editProfilePhotoInput: {
-                required: true,
-                accept: "gif|png|jpg|jpeg|pjpeg"                
-            }
-        },
-        
-        messages: {
-        	editProfilePhotoInput: {
-                required: "Empty file",
-                accept: "Wrong format!!"
-            }                  
-        },
-        
-        errorPlacement: function(error, element) {
-           notifyError(error);
-        }
-        
-    });
-}
 
 function loadLogout(){
 	var local = getBaseURL("Hunter/hunter/login/logout");
 	$("#logoutId").attr("href", local);
+}
+
+function updateProgressHandler(progressbar, newPercentage, text){
+	var val = progressbar.progressbar( "value" ) || 0;
+	if(newPercentage == 0 ){
+		progressbar.progressbar( "value", 0 );
+		return;
+	}
+	var counter = progressbar.progressbar( "value" ),
+		interval = setInterval(function(){
+			if(counter != val + newPercentage){
+				counter = counter + 1;
+				progressbar.progressbar( "value", val + counter );
+			}else{
+				interval = null;
+			}
+		}, 25);
+}
+
+function launchProgressHandler(progressbar, progressLabel, text){
+	
+	progressbar.progressbar({
+		value: false,
+		change: function() {
+			progressLabel.text( progressbar.progressbar( "value" ) + "%" );
+		},
+		complete: function() {
+			progressLabel.text( text );
+		}
+	});
+	
+	return progressbar;
+
+	/*
+	
+	function progress() {
+		var val = progressbar.progressbar( "value" ) || 0;
+	
+		progressbar.progressbar( "value", val + 2 );
+	
+		if ( val < 99 ) {
+			setTimeout( progress, 80 );
+		}
+	}
+
+	setTimeout( progress, 2000 );
+	
+	*/
+	
 }
 

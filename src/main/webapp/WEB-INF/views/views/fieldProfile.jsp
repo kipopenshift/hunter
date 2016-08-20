@@ -17,6 +17,10 @@
 
 <script src="<c:url value='/static/resources/scripts/plain/jqueryForm.js'/>"></script>
 <script src="<c:url value='/static/resources/scripts/plain/jQueryValidate.js'/>"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 
 <title>Hunter Officer Profile</title>
 </head>
@@ -58,7 +62,7 @@
 				<table style="table-layout: fixed; margin: 0 auto;" >
 					<tr>
 						<td>
-							<img 
+							<img
 								id="fielProfilePic" class="fielProfilePicClass" 
 								src="https://ikonmania.files.wordpress.com/2014/03/profile-pictures209.jpg" 
 								alt="Profile Pic" 
@@ -161,10 +165,10 @@
 <div id="hunterFieldTemplatesContainer" style="display:none;" >
 
 	<div id="hunterFieldPopupButts" >
-		<table style="width:20%;margin-left:35%;" >
+		<table data-name="popup-action-button" style="width:70%;margin-left:15%;" >
 			<tr>
 				<td id="affirmPopupAction" ></td>
-				<td><center><a href="#" onClick="closeHunterPopup1()" class="ui-btn ui-icon-forbidden ui-btn-icon-left" style="border:1px solid #216365;border-radius:5px;color:#0E4244;" >Close</a></center></td>
+				<td><center><a onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" id='closeHunterPopup' href="#" onClick="closeHunterPopup1()" class="ui-btn ui-icon-forbidden ui-btn-icon-left" style="min-width:200px;border:1px solid #93CADB;border-radius:5px;color:#0E4244;" >Close</a></center></td> 
 			</tr>
 		</table>
 	</div>
@@ -230,8 +234,14 @@
 	</div>
 	
 	<div id="importNewContainerTmplt" >
-		<div id="importNewContainer"  style="width:80%;margin-left:10%;" >
-			<form id="importNewContactForm" action="${pageContext.request.contextPath}/rawReceiver/action/rawReceiver/import/rawReceiver" method="POST" style="width:98%;margin-left:1%;"  enctype="multipart/form-data"  >
+		<div data-name="importNewContainer"  style="width:80%;margin-left:10%;" >
+			<table id="importContainerRefreshTable" style="display:none;width: 30%;margin-left:35%;font-size: 22px;" >
+				<tr>
+					<td>Refreshing...</td>
+					<td style="width:15%;height: 40px;text-align: left;"  data-name='contactsProgressIcon'><span data-name="" ><img  src="<c:url value='/static/resources/images/refreshing_spinner_new.gif'/>" width="30px" height="30px" data-name="progressIconImg" ></span></td>
+				</tr>
+			</table>
+			<form data-name="importNewContactForm" action="${pageContext.request.contextPath}/rawReceiver/action/rawReceiver/import/rawReceiver" method="POST" style="width:98%;margin-left:1%;"  enctype="multipart/form-data"  >
 				<h3 style="width:80%;margin-left:10%;" >Please upload your file below.</h3>
 				<h5 style="width:80%;margin-left:10%;color:brown;margin-bottom:30px;" >Note : Only .xlsx and .xls files are allowed.</h5> 
 				<input style="width:80%;margin-left:10%;margin-bottom:30px;border:1px solid #84BDC6;padding:15px;border-radius:5px;" onChange="updateFileSelected" id="importNewContactFile"  name="importNewContactFile" type="file" >
@@ -244,6 +254,44 @@
 			</form>
 		</div>
 	</div>
+	
+	<div id="progressTemplateContainer" >
+		<span data-name="" ><img  src="<c:url value='/static/resources/images/refreshing_spinner_gif.gif'/>" width="15px" height="15px" data-name="progressIconImg" ></span>
+		<span data-name="" ><img  src="<c:url value='/static/resources/images/tick.png'/>" width="15px" height="15px" class="progressIconImg" data-name="successIconImg" ></span>
+		<span data-name="" ><img  src="<c:url value='/static/resources/images/tick.png'/>" width="15px" height="15px" class="progressIconImg" data-name="failedIconImg" ></span>
+		<div data-name='loadProfileAndReceivers' >
+			<span style="width:10%;margin-left: 45%;text-align: center;" data-name="numberOfSecondsTaken" >0 seconds</span> 
+			<table style="width:60%;margin-left:20%;padding:20px;">
+				<tr><td>
+					<table style="width:100%;table-layout: fixed;font-size:20px;" >
+						<tr>
+							<td style="width:30%;height: 40px;border-bottom:1px solid #A6D3D7;" >Loading Profile</td>
+							<td style="width:15%;height: 40px;border-bottom:1px solid #A6D3D7;text-align: left;text-align: left;"  data-name='profileProgressIcon'><span data-name="" ><img  src="<c:url value='/static/resources/images/refreshing_spinner_new.gif'/>" width="30px" height="30px" data-name="progressIconImg" ></span></td>
+							<!-- <td style="width:30%;height: 40px;"  data-name='profileDataError' style='color:red;' ></td> -->
+						</tr>
+						<tr style="display:display;" data-name='loadContactsDataDisplay' >
+							<td style="width:30%;height: 40px;" >Loading Contacts</td>
+							<td style="width:15%;height: 40px;text-align: left;"  data-name='contactsProgressIcon'><span data-name="" ><img  src="<c:url value='/static/resources/images/refreshing_spinner_new.gif'/>" width="30px" height="30px" data-name="progressIconImg" ></span></td>
+							<!-- <td style="width:30%;height: 40px;"  data-name='contactsDataError'  style='color:red;'></td> -->
+						</tr>
+					</table>
+				</td></tr>
+				<tr><td style="height: 50px;" >
+					<div style="position:relative;width:90%;margin-left:5%;" data-name="progressbar"><div style="width:40%;margin-left:-15%;font-size:14px;" data-name="progressBarLabel" class="progress-label">Completed!</div></div>
+				</td></tr>
+			</table>
+		</div>
+	</div>
+	
+	<div id="refreshPopupContainer" >
+		<table style="width: 30%;margin-left:35%;font-size: 22px;" >
+			<tr>
+				<td>Refreshing...</td>
+				<td style="width:15%;height: 40px;text-align: left;"  data-name='contactsProgressIcon'><span data-name="" ><img  src="<c:url value='/static/resources/images/refreshing_spinner_new.gif'/>" width="30px" height="30px" data-name="progressIconImg" ></span></td>
+			</tr>
+		</table>
+	</div>
+	
 	
 </div>
 
@@ -260,6 +308,7 @@
 				<td style="text-align: center;">
 					<img 
 						id="fielProfilePic_" class="fielProfilePicClass"
+						data-name='editProfileDataPhotoPreview' 
 						src="https://ikonmania.files.wordpress.com/2014/03/profile-pictures209.jpg" 
 						alt="Profile Pic" 
 						width="100" 
@@ -270,10 +319,13 @@
 			</tr>
 			<tr>
 				<td  style="text-align: center;" >
-					<form action="${rpageContext.request.contextPath}" id="editProfilePhotoForm" method="POST" style="margin-top:20px;width:98%;margin-left:1%;" >
+					<form  accept-charset="utf-8" data-name='uploadProfilePhotoForm' action="${pageContext.request.contextPath}/rawReceiver/action/upload/profilePhoto" enctype="multipart/form-data" method="POST" style="margin-top:20px;width:98%;margin-left:1%;" >
   						<table style="width:100%;">
-  							<tr><td><input id="editProfilePhotoInput" name="editProfilePhotoInput" type="file" onChange="readURL(this)" style="width:98%;border:1px solid #1DB6C7;border-radius:3px;" ></td></tr>
-  							<tr><td data-name="filePhotoErrMsg" style="color:#C10000;font-size:13px;"></td></tr>
+  							<tr>
+  								<td><input onChange="onChangeProfilePhoto(this)" name="editProfilePhotoInput" type="file" style="width:98%;border:1px solid #1DB6C7;border-radius:3px;" ></td>
+  								<td><a onClick='resetEditProfilePhoto1(this)' href="#" class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-notext"></a></td>
+  							</tr>
+  							<tr  style="display:none;"><td><button name="submitEditProfilePhoto" type="submit"  ></button></td></tr>
   						</table>
 					</form>
 				</td>
@@ -289,6 +341,23 @@
 	</div>
 </div>
 
+
+<script type="text/javascript">
+	function resetEditProfilePhoto1(preview){
+		var input = $("#hunterFieldPopupContainer form input[name='editProfilePhotoInput']"),
+			profPic = $( fielProfilePic ),
+			profUrl = $( profPic ).attr('src'), 
+			target = $("#hunterFieldPopupContainer img[data-name='editProfileDataPhotoPreview']");
+		$( input ).val(''); 
+		$( target ).attr("src", profUrl);
+		isProfileUploaded = false;
+	}
+	function onChangeProfilePhoto(input){
+		isProfileUploaded = true;
+		var target = $("#hunterFieldPopupContainer img[data-name='editProfileDataPhotoPreview']");
+		readURL(input, target);
+	}
+</script>
 
 
 </body>

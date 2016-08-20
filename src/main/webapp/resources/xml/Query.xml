@@ -471,6 +471,24 @@
 			WHERE clnt.HNTR_CLNT_ID = usr.USR_ID
 		</statement>
 	</query>
+	<query id="updateRawReceiverCountsForFieldUser">
+		<description>
+		    It will update the counts of the receivers for a given user.
+		</description>
+		<statement>
+			update hntr_rw_rcvr_usr set all_cntct_no = (
+			select count( r.rcvr_cntct ) from hntr_rw_rcvr r where gvn_by_usr_nam = ?
+			)  where RW_USR_NAM = ?
+		</statement>
+	</query>
+	<query id="getDstntRwRcvrCntctForUser">
+		<description>
+		    Returns raw receiver contacts for given field user.
+		</description>
+		<statement>
+			select distinct rcvr_cntct from hntr_rw_rcvr where gvn_by_usr_nam = ?
+		</statement>
+	</query>
 	<query id="getRawReceiverUserData">
 		<description>
 		    Gets the details of a raw receiver user of the given user name.
@@ -603,7 +621,7 @@
 		    Used to make task draft approved again.
 		</description>
 		<statement>
-		  update task set TSK_DEL_STS = 'Conceptual', TSK_LF_STS = 'Approved' where tsk_id = ?
+		  UPDATE task SET TSK_DEL_STS = 'Conceptual', TSK_LF_STS = 'Approved' WHERE tsk_id IN ( ? )
 		</statement>
 	</query>
 	<query id="validateHunterUserDelete">
@@ -624,9 +642,16 @@
 		    gets the name and the role of the role being validated.
 		</description>
 		<statement>
-		  select us.RL_NAM, us.ROLE_ID from HNTR_USR_RLS rl, USER_ROLE us
-		  where rl.ROLE_ID = us.ROLE_ID
-		  and rl.USR_ID = ? and us.ROLE_ID = ?
+			SELECT 
+			  us.RL_NAM,
+			  us.ROLE_ID,
+			  us.RL_SHRT_NAM
+			FROM 
+			  HNTR_USR_RLS rl,
+			  USER_ROLE us
+			WHERE rl.ROLE_ID = us.ROLE_ID
+			AND rl.USR_ID    = ?
+			AND us.ROLE_ID   = ?
 		</statement>
 	</query>
 	<query id="getUserRoleIdForUserId">
@@ -636,6 +661,15 @@
 		<statement>
 	  		select listagg(ru.ROLE_ID, ',')  within group (order by ru.USR_ID) as "ROLE_IDS"
 			from HNTR_USR_RLS ru WHERE ru.USR_ID = ?
+		</statement>
+	</query>
+	<query id="getAllCommSprtdClientIDs">
+		<description>
+		    gets comma separated client ids for all clients in the system.
+		</description>
+		<statement>
+	  		select listagg(cl.hntr_clnt_id, ',')  within group (order by cl.hntr_clnt_id) as "CLIENT_IDS"
+			from hntr_clint cl
 		</statement>
 	</query>
 	<query id="getNextRawReceiverVersion">
@@ -758,6 +792,235 @@
 			WHERE prv.PROVIDER_ID = msg.PROVIDER
 			AND usr.USR_NAM = msg.MSG_OWNER 
 			AND MSG_ID = ?
+		</statement>
+	</query>
+	<query id="getAllUsersWithRoleId">
+		<description>
+		    Returns all user names and role IDs for.
+		</description>
+		<statement>
+		  	SELECT 
+			  hu.usr_nam,
+			  ur.role_id  
+			FROM user_role ur, hntr_usr_rls hur, hntr_usr hu
+			WHERE ur.role_id = ?
+			AND hur.USR_ID = hu.usr_id
+			AND ur.role_id = hur.role_id
+			AND ur.role_id = ur.role_id
+		</statement>
+	</query>
+	<query id="updateHunterClient">
+		<description>
+		    Updated hunter client
+		</description>
+		<statement>
+		  	UPDATE hntr_clint SET 
+			  clnt_tl_bdgt = ?, 
+			  IS_RCVR = ?, 
+			  LST_UPDTD_BY = ?, 
+			  LST_UPDATE = sysdate 
+			WHERE HNTR_CLNT_ID = ?
+		</statement>
+	</query>
+	<query id="getAllClientsJsonData">
+		<description>
+		    Pulls up all clients data
+		</description>
+		<statement>
+		  	SELECT 
+			  hc.hntr_clnt_id, 
+			  hu.frst_nam,
+			  hu.lst_nam,
+			  hu.email,
+			  hu.usr_nam,
+			  hc.is_rcvr,
+			  hc.clnt_tl_bdgt,
+			  to_char(hc.cret_date, 'yyyy-MM-dd HH:mm:ss')"CRET_DATE",
+			  hc.crtd_by,
+			  to_char(hc.lst_update, 'yyyy-MM-dd HH:mm:ss')"LST_UPDATE",
+			  hc.lst_updtd_by  
+			FROM HNTR_CLINT hc, HNTR_USR hu
+			WHERE hc.hntr_clnt_id = hu.usr_id
+			order by hc.lst_update desc
+		</statement>
+	</query>
+	<query id="getMessageAttachmentJsonForId">
+		<description>
+		    Pulls up all clients data
+		</description>
+		<statement>
+		  	SELECT 
+			  bn.bean_id,
+			  bn.bean_desc,
+			  bn.bean_name,
+			  bn.fle_frmt,
+			  bn.fle_hght,
+			  bn.fle_sze,
+			  bn.fle_wdth,
+        	  TO_CHAR(bn.cret_date, 'yyyy-MM-dd HH:mm:ss')"CRET_DATE",
+			  bn.crtd_by,
+			  TO_CHAR(bn.lst_updt_date, 'yyyy-MM-dd HH:mm:ss')"LST_UPDT_DATE",
+			  bn.lst_updtd_by,
+			  bn.orgnl_fl_nam
+			FROM msg_attchmnt_bean bn
+			WHERE bn.bean_id = ?
+			ORDER BY bn.bean_id DESC
+		</statement>
+	</query>
+	<query id="getAllMessageAttachmentJson">
+		<description>
+		    Pulls up all clients data
+		</description>
+		<statement>
+		  	SELECT 
+			  bn.bean_id,
+			  bn.bean_desc,
+			  bn.bean_name,
+			  bn.fle_frmt,
+			  bn.fle_hght,
+			  bn.fle_sze,
+			  bn.fle_wdth,
+        	  TO_CHAR(bn.cret_date, 'yyyy-MM-dd HH:mm:ss')"CRET_DATE",
+			  bn.crtd_by,
+			  TO_CHAR(bn.lst_updt_date, 'yyyy-MM-dd HH:mm:ss')"LST_UPDT_DATE",
+			  bn.lst_updtd_by,
+			  bn.orgnl_fl_nam,
+			  bn.CID
+			FROM msg_attchmnt_bean bn
+			ORDER BY bn.bean_id DESC
+		</statement>
+	</query>
+	<query id="setGenCIdForMsgAttchmntBean">
+		<description>
+		    Generates a message attachment cid for a given message attachment.
+		</description>
+		<statement>
+		  	UPDATE MSG_ATTCHMNT_BEAN bn
+			SET bn.CID =
+			  (SELECT REGEXP_REPLACE( bn.BEAN_NAME, '[[:space:]]', '_' )
+			    || '_'
+			    || bn.BEAN_ID
+			    || '_'
+			    ||( SUBSTR(
+			    ( SELECT dbms_random.value(1,100000)||'''' FROM dual
+			    ), 0, 5 ) ) AS cid
+			  FROM dual
+			  ) where bn.BEAN_ID = ?
+		</statement>
+	</query>
+	<query id="getAllEmailTemplateObjJsons">
+		<description>
+		    Gets all email template objects jsons with no xml document.
+		</description>
+		<statement>
+		  	SELECT 
+			  obj.TMPLT_ID,
+			  obj.TMPLT_NAM,
+			  obj.TMPLT_DESC,
+			  obj.STS,
+			  TO_CHAR(obj.CRET_DATE, 'yyyy-MM-dd HH:mm:ss')"CRET_DATE",
+			  obj.LST_UPDT_DATE,
+			  TO_CHAR(obj.LST_UPDT_DATE, 'yyyy-MM-dd HH:mm:ss')"LST_UPDT_DATE",
+			  obj.LST_UPDTD_BY
+			FROM EML_TMPLT_OBJ obj
+		</statement>
+	</query>
+	<query id="getEmailTemplateObjJsonForId">
+		<description>
+		    Retrieves templateObject json for id
+		</description>
+		<statement>
+			SELECT 
+			  obj.TMPLT_ID,
+			  obj.TMPLT_NAM,
+			  obj.TMPLT_DESC,
+        	  obj.STS,
+			  TO_CHAR(obj.CRET_DATE, 'yyyy-MM-dd HH:mm:ss')"CRET_DATE",
+			  obj.LST_UPDT_DATE,
+			  TO_CHAR(obj.LST_UPDT_DATE, 'yyyy-MM-dd HH:mm:ss')"LST_UPDT_DATE",
+			  obj.LST_UPDTD_BY
+			FROM EML_TMPLT_OBJ obj
+			WHERE TMPLT_ID = ?
+		</statement>
+	</query>
+	<query id="getEmailMsgsThatUseTemplate">
+		<description>
+		    Retrieves email messages that user template with template name.
+		</description>
+		<statement>
+		  	SELECT tsk.TSK_NAM || '( ' || tsk.TSK_ID || ' )' "TSK_INFO"
+			FROM EMAIL_MSG msg, TASK tsk 
+			WHERE msg.EML_TMPLT_NAM = ?
+			AND msg.MSG_ID = tsk.tsk_id
+		</statement>
+	</query>
+	<query id="getPagedHunterMsgReceiversForRegions">
+		<description>
+		    Returns a range of records of hunter message receivers for a specic regions.
+		    The values must be replaced before the query is returned. 
+		    If the page number is greater than the number of pages available, the last page is returned.
+		</description>
+		<statement>
+		  	SELECT *
+			FROM
+			  (SELECT r2.RCVR_CNTCT,
+			    r5.cnt,
+			    ( ROW_NUMBER() OVER ( ORDER BY RCVR_ID ASC) ) AS row_num
+			  FROM HNTR_MSG_RCVR r2
+			  JOIN
+			    (SELECT COUNT(*) AS CNT
+			    FROM HNTR_MSG_RCVR r3
+			    WHERE |:r3:|
+			    AND r3.RCVR_TYP = :rcvrTyp
+			    )r5
+			  ON 1 = 1
+			  WHERE |:r2:|
+			  AND r2.RCVR_TYP = :rcvrTyp
+			  )r3
+			WHERE r3.row_num BETWEEN
+			  CASE
+			    WHEN :page_num   * :page_count > r3.cnt
+			    THEN r3.cnt      - :page_count
+			    ELSE ( :page_num * :page_count ) - :page_count
+			  END
+			AND
+			  CASE
+			    WHEN :page_num * :page_count + :page_count >= r3.cnt
+			    THEN r3.cnt
+			    ELSE ( :page_num * :page_count + :page_count ) - :page_count
+			  END
+		</statement>
+	</query>
+	<query id="getReceiverGroupContacts">
+		<description>
+		    Returns paged receiver groups contacts for a given receiver group id, message type and the range:
+		    parameters : groupId,msg_typ,pageNo,pageSize,pageNo,pageSize
+		</description>
+		<statement>
+		  	WITH RAW_DATA AS
+			  (
+			    SELECT gp.GRP_ID,
+			      rc.RCVR_ID,
+			      rr.RCVR_CNTCT,
+			      ( ROW_NUMBER() OVER ( ORDER BY gp.GRP_ID ASC) ) AS ROW_NUM
+			    FROM RCVRGRP_RCVRGRPRCVR rc,
+			      RCVR_GRP_RCVR rr,
+			      RCVR_GRP gp
+			    WHERE gp.GRP_ID          = rc.GRP_ID
+			    AND rc.RCVR_ID           = rr.RCVR_ID
+			    AND gp.GRP_ID            = ?
+			    AND LOWER( gp.RCVR_TYP ) = LOWER( ? )
+			  )
+			SELECT
+			  ( SELECT COUNT(r.RCVR_CNTCT) FROM RAW_DATA r
+			  ) AS CNT,
+			  dat.RCVR_ID,
+			  dat.RCVR_CNTCT,
+			  dat.ROW_NUM,
+			  dat.GRP_ID
+			FROM RAW_DATA dat
+			WHERE dat.ROW_NUM BETWEEN ( ( ? - 1 ) * ? ) AND ( ? * ? ) 
+			order by dat.ROW_NUM ASC
 		</statement>
 	</query>
 </queries>

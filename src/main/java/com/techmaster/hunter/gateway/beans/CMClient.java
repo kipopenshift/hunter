@@ -253,7 +253,7 @@ public class CMClient extends AbsractGatewayClient{
 			gateWayMsg.setSendDate(null);
 			gateWayMsg.setStatus(HunterConstants.STATUS_DRAFT);
 			gateWayMsg.setTaskId(this.getTask().getTaskId()); 
-			gateWayMsg.setText(message);
+			gateWayMsg.setText(HunterUtility.getStringBlob(message));
 			gateWayMsg.setMessageType(messageType); 
 			gateWayMessages.add(gateWayMsg); 
 		}
@@ -449,7 +449,7 @@ public class CMClient extends AbsractGatewayClient{
             msgElement.appendChild(fromElement);
 
             Element bodyElement = doc.createElement("BODY");
-            Text bodyValue = doc.createTextNode(gateWayMessage.getText());
+            Text bodyValue = doc.createTextNode(HunterUtility.getBlobStr(gateWayMessage.getText())); 
             bodyElement.appendChild(bodyValue);
             msgElement.appendChild(bodyElement);
 

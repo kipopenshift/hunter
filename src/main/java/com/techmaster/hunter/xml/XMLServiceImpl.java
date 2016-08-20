@@ -43,6 +43,7 @@ public class XMLServiceImpl implements XMLService{
 	private XMLTree xmlTree = null;
 	private XPath xpath = XPathFactory.newInstance().newXPath();
 	
+	@Override
 	public XMLTree getXmlTree() {
 		return xmlTree;
 	}
@@ -302,6 +303,12 @@ public class XMLServiceImpl implements XMLService{
 			e.printStackTrace();
 		}
 		return null;
+	}
+	@Override
+	public Node importNode(Node node, Node appendTo, boolean bolean) {
+		Node newNode = getXmlTree().getDoc().importNode(node, bolean);
+		appendTo.appendChild(newNode);
+		return newNode;
 	}
 
 	
