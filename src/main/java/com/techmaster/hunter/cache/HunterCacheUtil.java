@@ -85,6 +85,10 @@ public class HunterCacheUtil {
 		XMLService taskProcessJobsTemplate = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.TASK_PROCESS_JOBS_TEMPLATE);
 		HunterCache.getInstance().put(HunterConstants.TASK_PROCESS_JOBS_TEMPLATE, taskProcessJobsTemplate);
 		logger.debug("Done caching taskProcessJobsTemplate xml!!");
+		logger.debug("Cachingg login data seed xml...");
+		XMLService loginDataSeedXMLService = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.LOGIN_DATA_SEE_XML);
+		HunterCache.getInstance().put(HunterConstants.LOGIN_DATA_SEE_XML, loginDataSeedXMLService);
+		logger.debug("Done cachingg login data seed xml!!");
 	}
 	
 	public void refreshCacheService(String xmlName){

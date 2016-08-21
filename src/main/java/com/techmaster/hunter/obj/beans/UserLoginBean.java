@@ -1,11 +1,16 @@
 package com.techmaster.hunter.obj.beans;
 
+import java.sql.Blob;
+
+import com.techmaster.hunter.util.HunterUtility;
+
 public class UserLoginBean {
 
 	private Long userId;
 	private java.util.Date lastLoginTime;
 	private boolean blocked;
 	private int faildedLoginCount;
+	private Blob loginData;
 	
 	public UserLoginBean() {
 		super();
@@ -34,6 +39,12 @@ public class UserLoginBean {
 	}
 	public void setFaildedLoginCount(int faildedLoginCount) {
 		this.faildedLoginCount = faildedLoginCount;
+	}
+	public Blob getLoginData() {
+		return loginData;
+	}
+	public void setLoginData(Blob loginData) {
+		this.loginData = loginData;
 	}
 
 	@Override
@@ -78,7 +89,8 @@ public class UserLoginBean {
 	public String toString() {
 		return "UserLoginBean [userId=" + userId + ", lastLoginTime="
 				+ lastLoginTime + ", blocked=" + blocked
-				+ ", faildedLoginCount=" + faildedLoginCount + "]";
+				+ ", faildedLoginCount=" + faildedLoginCount
+				+ ", loginData=" + HunterUtility.getBlobStr(loginData) + "]"; 
 	}
 	
 		

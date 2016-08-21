@@ -225,6 +225,7 @@ public class HunterConstants {
 	public static final String EMAIL_TEMPLATES_CACHED_SERVICE = "EMAIL_TEMPLATES_CACHED_SERVICE";
 	public static final String EMAIL_CONFIG_CACHED_SERVICE = "EMAIL_CONFIG_CACHED_SERVICE";
 	public static final String TASK_PROCESS_JOBS_TEMPLATE = "TASK_PROCESS_JOBS_TEMPLATE";
+	public static final String LOGIN_DATA_SEE_XML = "LOGIN_DATA_SEE_XML"; 
 	
 	//Hunter Cache service names 
 	public static final String EMAIL_TEMPLATES_CACHE_SERVICE = "emailTemplateCacheService";

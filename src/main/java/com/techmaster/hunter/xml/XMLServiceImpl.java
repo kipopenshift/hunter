@@ -310,6 +310,17 @@ public class XMLServiceImpl implements XMLService{
 		appendTo.appendChild(newNode);
 		return newNode;
 	}
+	@Override
+	public Node getFirstNodeUsingAjaxByName(String nodeName) {
+		NodeList nodeList = getNodeListForPathUsingJavax("//" + nodeName);
+		for(int i=0; i<nodeList.getLength();i++){
+			Node node = nodeList.item(i);
+			if( node.getNodeName().equalsIgnoreCase(nodeName) ){
+				return node;
+			}
+		}
+		return null;
+	}
 
 	
 	

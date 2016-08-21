@@ -79,7 +79,7 @@ public class RawReceiverController extends HunterBaseController{
 	
 	@Produces("application/json")
 	@Consumes("application/json")
-	@RequestMapping(value="/action/raw/getRawReceiversForValidation", method=RequestMethod.GET)
+	@RequestMapping(value="/action/raw/getRawReceiversForValidation", method=RequestMethod.POST)
 	public @ResponseBody List<HunterRawReceiverJson> getRawReceiversForValidation(HttpServletRequest request, HttpServletResponse response){
 		
 		String 

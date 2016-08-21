@@ -58,14 +58,13 @@ var RawReceiverModel = kendo.data.Model.define({
 var RawReceiverDS = new kendo.data.DataSource({
 	  transport: {
 	    read:  {
-	      url: HunterConstants.getHunterBaseURL("rawReceiver/action/raw/getUsersContacts"), 
+	      data : {
+	    	  getMode : "date"
+	      },
+	      url: HunterConstants.getHunterBaseURL("rawReceiver/action/raw/getRawReceiversForValidation"), 
 	      dataType: "json",
 	      contentType:"application/json",
 	      method: "POST",
-	      data : {
-	    	  "getMode" : "date",  /* date,givenBy,region,verifiedStatus */
-	    	  "modeVal" : "2015-08-12 08:12:25:::2015-08-12 08:12:25",
-	      }
 	    },
 	    create: {
 	        url: "http://localhost:8080/Hunter/messageReceiver/action/group/create",

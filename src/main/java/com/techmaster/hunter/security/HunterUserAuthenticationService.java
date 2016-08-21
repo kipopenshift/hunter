@@ -1,18 +1,36 @@
 package com.techmaster.hunter.security;
 
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import com.techmaster.hunter.cache.HunterCacheUtil;
+import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterUserDao;
+import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.obj.beans.HunterUser;
 import com.techmaster.hunter.obj.beans.UserLoginBean;
+import com.techmaster.hunter.util.HunterHibernateHelper;
+import com.techmaster.hunter.util.HunterSessionFactory;
+import com.techmaster.hunter.util.HunterUtility;
+import com.techmaster.hunter.xml.XMLService;
+import com.techmaster.hunter.xml.XMLServiceImpl;
+import com.techmaster.hunter.xml.XMLTree;
 
 
 public class HunterUserAuthenticationService {
@@ -102,19 +120,28 @@ public class HunterUserAuthenticationService {
 		
 		Object refPassword =  params.get("PSSWRD");
 		
+		UserLoginBean userLoginBean = null;
+		
 		if(refPassword == null || !refPassword.toString().equals(password)){
 			int newCount = getIncrementedFailureLoginCount(userName);
+			userLoginBean = getUserLoginBeanByUserName(userName);
+			updateLoginDataXMLForLogin(userLoginBean, HunterUtility.formatDate(new Date(), null), isLocked(newCount) ? "Blocked" : HunterConstants.STATUS_FAILED, "173.63.174.127", userName, password, Integer.toString(newCount)); 
 			putParamsForBlockedUnBlocked(params,newCount); 
 		}else{
+			String status = HunterConstants.STATUS_FAILED;
 			int newCount = getIncrementedFailureLoginCount(userName);
 			if(!isLocked(newCount)){ 
 				logger.debug("Login successful, resetting failed login count"); 
 				params.put("BLOCKED", false);
 				resetFailedLoginCounts(userName); 
 			}else{
+				status = "Blocked";
 				logger.debug("Account is blocked and cannot reset failed login counts."); 
-				putParamsForBlockedUnBlocked(params,newCount); 
+				putParamsForBlockedUnBlocked(params,newCount);
 			}
+			userLoginBean = getUserLoginBeanByUserName(userName);
+			updateLoginDataXMLForLogin(userLoginBean, HunterUtility.formatDate(new Date(), null), status, "173.63.174.127", userName, password, Integer.toString(newCount));
+			
 		}
 		
 		return params;
@@ -142,8 +169,9 @@ public class HunterUserAuthenticationService {
 	
 	public int getIncrementedFailureLoginCount(String userName){
 		Map<String, Object> userLoginDetails = getUserLoginDetails(userName);
+		int currCnt = 0;
 		if(userLoginDetails != null && !userLoginDetails.isEmpty()){
-			int currCnt = Integer.parseInt(userLoginDetails.get("FLD_LGN_CNT").toString());
+			currCnt = Integer.parseInt(userLoginDetails.get("FLD_LGN_CNT").toString());
 			logger.debug("Current failed login count : " + currCnt); 
 			if(isLocked(currCnt)){ 
 				logger.debug("User has had more than five failed login. Account being blocked.count : " + currCnt); 
@@ -151,24 +179,46 @@ public class HunterUserAuthenticationService {
 				currCnt++;
 				List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{currCnt,"Y", userName});
 				hunterJDBCExecutor.executeUpdate(blockQuery, values);
-				return currCnt;
 			}else{
 				logger.debug("Increasing failed login count for the user : " + userName); 
 				String incrementQuery = "UPDATE USR_LGN_BN bn SET bn.FLD_LGN_CNT = ? WHERE bn.USR_ID = (select hu.USR_ID from HNTR_USR hu where hu.USR_NAM = ?)";
 				currCnt++;
 				List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{currCnt,userName});
 				hunterJDBCExecutor.executeUpdate(incrementQuery, values);
-				return currCnt;
 			}
 		}else{
 			logger.debug("Did not find user login for userName : " + userName);  
 			UserLoginBean userLoginBean = createUserLoginForUser(userName);
-			int currCnt= userLoginBean.getFaildedLoginCount();
+			currCnt= userLoginBean.getFaildedLoginCount();
 			currCnt++;
 			userLoginBean.setFaildedLoginCount(currCnt);
 			hunterUserDao.updateUserLoginBean(userLoginBean); 
-			return currCnt;
 		}
+		return currCnt;
+	}
+	
+	public UserLoginBean getUserLoginBeanByUserName(String userName){
+		
+		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		Session session = null;
+		Query query = null;
+		List<?> userLoginBeans = null;
+		
+		
+		try {
+			session = sessionFactory.openSession();
+			String hql = "FROM UserLoginBean u WHERE u.userId = ( SELECT h.userId FROM HunterUser h WHERE h.userName = :userName )";      
+			query = session.createQuery(hql);
+			query.setParameter("userName", userName);
+			userLoginBeans = query.list();
+		} catch (HibernateException e) {
+			e.printStackTrace();
+		}finally{
+			HunterHibernateHelper.closeSession(session); 
+		}
+        
+		UserLoginBean userLoginBean = HunterUtility.isCollectionNullOrEmpty( userLoginBeans ) ? null : (UserLoginBean) userLoginBeans.get(0);
+		return userLoginBean;
 	}
 	
 	public UserLoginBean createUserLoginForUser(String userName){
@@ -197,5 +247,67 @@ public class HunterUserAuthenticationService {
 		logger.debug("Successfully reset login failed attempts for the user!"); 
 	}
 	
-
+	public int getNextLoginNum(XMLService existingLoginData){
+		NodeList nodeList = existingLoginData.getNodeListForPathUsingJavax("//login");
+		int loginNum = 1;
+		for(int i=0; i<nodeList.getLength();i++){
+			Node node = nodeList.item(i);
+			if( node.getNodeName().equalsIgnoreCase("login") ){
+				int currLoginNum = Integer.valueOf( node.getAttributes().getNamedItem("loginNum").getTextContent() );  
+				if( currLoginNum > loginNum ){
+					loginNum = currLoginNum;
+				}
+			}
+		}
+		return loginNum + 1;
+	}
+	
+	public void updateLoginDataXMLForLogin(UserLoginBean userLoginBean, String loginDate,String status,String ipAddress,String userName, String loginPassword, String failedNo){
+		
+		if(userName == null){
+			logger.debug("User login information does not exist for the user name : " + userName ); 
+			return;
+		}
+			
+ 		
+		XMLService loginDataXML = HunterCacheUtil.getInstance().getXMLService(HunterConstants.LOGIN_DATA_SEE_XML);
+		
+		String mainPath = "loginData/logins/login/";
+		loginDataXML.getNodeListForPathUsingJavax( mainPath + "date" ).item(0).setTextContent(loginDate); 
+		loginDataXML.getNodeListForPathUsingJavax( mainPath + "status" ).item(0).setTextContent(status); 
+		loginDataXML.getNodeListForPathUsingJavax( mainPath + "ip" ).item(0).setTextContent(ipAddress); 
+		loginDataXML.getNodeListForPathUsingJavax( mainPath + "userName" ).item(0).setTextContent(userName); 
+		loginDataXML.getNodeListForPathUsingJavax( mainPath + "password" ).item(0).setTextContent(loginPassword); 
+		loginDataXML.getNodeListForPathUsingJavax( mainPath + "currFailedCount" ).item(0).setTextContent(failedNo); 
+		
+		Blob orinalDocBlob = userLoginBean.getLoginData();
+		String loginData = HunterUtility.getBlobStr( orinalDocBlob );
+		
+		if( loginData == null ){
+			logger.debug("Setting login data for the first time..."); 
+			userLoginBean.setLoginData( HunterUtility.getStringBlob( loginDataXML.toString() ) ); 
+			HunterHibernateHelper.updateEntity( userLoginBean );
+			return;
+		}
+		
+		
+		try {
+			
+			XMLService existingDocument = new XMLServiceImpl( new XMLTree( loginData , true));
+			Node node = loginDataXML.getFirstNodeUsingAjaxByName("login");
+			((org.w3c.dom.Element )(node)).setAttribute("loginNum", Integer.toString( getNextLoginNum(existingDocument) ));   
+			Node node2 = existingDocument.getXmlTree().getDoc().importNode(node, true);
+			existingDocument.getFirstNodeUsingAjaxByName("logins").appendChild(node2);
+			userLoginBean.setLoginData( HunterUtility.getStringBlob( existingDocument.toString() ) ); 
+			HunterHibernateHelper.updateEntity( userLoginBean );
+			
+		} catch (HunterRunTimeException | ParserConfigurationException e) {
+			e.printStackTrace();
+			userLoginBean.setLoginData( orinalDocBlob ); 
+			HunterHibernateHelper.updateEntity( userLoginBean );
+			return;
+		}
+		
+	}
+	
 }
