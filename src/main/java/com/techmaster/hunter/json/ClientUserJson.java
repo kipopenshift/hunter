@@ -1,6 +1,5 @@
 package com.techmaster.hunter.json;
 
-import java.util.Arrays;
 
 public class ClientUserJson {
 	
@@ -12,14 +11,12 @@ public class ClientUserJson {
 	private String phoneNumber;
 	private String userType;
 	private String userName;
-	private String password;
-	private byte[] profilePhoto;
-	private java.util.Date cretDate;
-	private java.util.Date lastUpdate;
+	private String cretDate;
+	private String lastUpdate;
 	private String createdBy;
 	private String lastUpdatedBy;
 	private Long clientId;
-	private boolean hasClient;
+	private boolean hasClient = true;
 	private float clientTotalBudget;
 	private boolean receiver;
 	
@@ -98,35 +95,19 @@ public class ClientUserJson {
 		this.userName = userName;
 	}
 
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public byte[] getProfilePhoto() {
-		return profilePhoto;
-	}
-
-	public void setProfilePhoto(byte[] profilePhoto) {
-		this.profilePhoto = profilePhoto;
-	}
-
-	public java.util.Date getCretDate() {
+	public String getCretDate() {
 		return cretDate;
 	}
 
-	public void setCretDate(java.util.Date cretDate) {
+	public void setCretDate(String cretDate) {
 		this.cretDate = cretDate;
 	}
 
-	public java.util.Date getLastUpdate() {
+	public String getLastUpdate() {
 		return lastUpdate;
 	}
 
-	public void setLastUpdate(java.util.Date lastUpdate) {
+	public void setLastUpdate(String lastUpdate) {
 		this.lastUpdate = lastUpdate;
 	}
 
@@ -193,10 +174,7 @@ public class ClientUserJson {
 		result = prime * result
 				+ ((middleName == null) ? 0 : middleName.hashCode());
 		result = prime * result
-				+ ((password == null) ? 0 : password.hashCode());
-		result = prime * result
 				+ ((phoneNumber == null) ? 0 : phoneNumber.hashCode());
-		result = prime * result + Arrays.hashCode(profilePhoto);
 		result = prime * result + (receiver ? 1231 : 1237);
 		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
 		result = prime * result
@@ -263,17 +241,10 @@ public class ClientUserJson {
 				return false;
 		} else if (!middleName.equals(other.middleName))
 			return false;
-		if (password == null) {
-			if (other.password != null)
-				return false;
-		} else if (!password.equals(other.password))
-			return false;
 		if (phoneNumber == null) {
 			if (other.phoneNumber != null)
 				return false;
 		} else if (!phoneNumber.equals(other.phoneNumber))
-			return false;
-		if (!Arrays.equals(profilePhoto, other.profilePhoto))
 			return false;
 		if (receiver != other.receiver)
 			return false;
@@ -301,8 +272,7 @@ public class ClientUserJson {
 				+ ", lastName=" + lastName + ", middleName=" + middleName
 				+ ", email=" + email + ", phoneNumber=" + phoneNumber
 				+ ", userType=" + userType + ", userName=" + userName
-				+ ", password=" + password + ", profilePhoto="
-				+ Arrays.toString(profilePhoto) + ", cretDate=" + cretDate
+				+ ", cretDate=" + cretDate
 				+ ", lastUpdate=" + lastUpdate + ", createdBy=" + createdBy
 				+ ", lastUpdatedBy=" + lastUpdatedBy + ", clientId=" + clientId
 				+ ", clientTotalBudget=" + clientTotalBudget + ", receiver="

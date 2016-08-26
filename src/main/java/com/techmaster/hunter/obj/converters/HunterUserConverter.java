@@ -9,6 +9,7 @@ import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.json.HunterUserJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.HunterUser;
+import com.techmaster.hunter.util.HunterUtility;
 
 public class HunterUserConverter {
 	
@@ -46,7 +47,6 @@ public class HunterUserConverter {
 		hunterUser.setLastUpdatedBy(auditInfo.getLastUpdatedBy());
 		hunterUser.setLastUpdate(auditInfo.getLastUpdate()); 
 		hunterUser.setUserType(HunterConstants.HUNTER_CLIENT_USER); 
-		hunterUser.setPassword(hunterUserJson.getPassword()); 
 		updateWithHunterUserJson(hunterUserJson, hunterUser);
 		return hunterUser;
 	}
@@ -66,18 +66,17 @@ public class HunterUserConverter {
 				HunterUserJson json = new HunterUserJson();
 				json.setActive(hunterUser.isActive());
 				json.setCreatedBy(hunterUser.getCreatedBy());
-				json.setCretDate(hunterUser.getCretDate());
+				json.setCretDate(HunterUtility.formatDate(hunterUser.getCretDate(), HunterConstants.DATE_FORMAT_STRING)); 
 				json.setEmail(hunterUser.getEmail());
 				json.setFirstName(hunterUser.getFirstName());
 				json.setLastName(hunterUser.getLastName());
-				json.setLastUpdate(hunterUser.getLastUpdate());
+				json.setLastUpdate(HunterUtility.formatDate(hunterUser.getLastUpdate(), HunterConstants.DATE_FORMAT_STRING));
 				json.setLastUpdatedBy(hunterUser.getLastUpdatedBy());
 				json.setMiddleName(hunterUser.getMiddleName());
 				json.setPhoneNumber(hunterUser.getPhoneNumber());
 				json.setUserId(hunterUser.getUserId());
 				json.setUserName(hunterUser.getUserName());
 				json.setUserType(hunterUser.getUserType()); 
-				json.setPassword(hunterUser.getPassword()); 
 				jsons.add(json);
 			}
 		}

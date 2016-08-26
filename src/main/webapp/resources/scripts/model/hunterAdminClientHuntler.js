@@ -290,15 +290,6 @@ var hunterUserModel = kendo.data.Model.define({
 		"userName" : {
 			type : "string", validation : {required : true},editable:true, defaultValue:null
 		},
-		"password" : {
-			type : "string", validation : {required : true},editable:true, defaultValue:null
-		},
-		"addresses" : {
-			type : "object", validation : {required : true},editable:true, defaultValue:null
-		},
-		"creditCards" : {
-			type : "object", validation : {required : true},editable:true, defaultValue:null
-		},
 		"cretDate" : {
 			type : "string", validation : {required : true},editable:true, defaultValue:null
 		},
@@ -326,11 +317,11 @@ var hunterUserModel = kendo.data.Model.define({
 	},
 	getEditTemplate : function(){
 		return kendoKipHelperInstance.createContextEditButton(false);
-	},
+	}/*,
 	getClientTemplate : function(){
 		var id = this.get("userId");
 		return "<center><a cursor='ponter' style='color:blue;cursor:pointer'  id='"+ id +"' onClick='hunterAdminClientUserVM.loadSelUserTasksDetails(\""+ id +"\")'  >Client</a></center>";
-	}
+	}*/
 });
 
 var hunterClientDS = new kendo.data.DataSource({
@@ -2118,7 +2109,6 @@ var hunterAdminClientUserVM = kendo.observable({
 		console.log("Creating user grid..");
 		var userGrid = $("#hunterUserGrid").kendoGrid({
 			dataSource : hunterUserDS,
-			toolbar : kendo.template($("#hunterUserToolBar").html()),
 			pageable: {
                 refresh: true,
                 pageSizes: true,
@@ -2140,8 +2130,8 @@ var hunterAdminClientUserVM = kendo.observable({
 	           { field: "cretDate", title: "Created On" }, 
 	           { field: "createdBy", title: "Created By" }, 
 	           { field: "lastUpdate", title: "Last Updated On" }, 
-	           { field: "lastUpdatedBy", title: "Updated By", width: 150 },
-	           { field: "client", title: "Client", width: 60, template : "#=getClientTemplate()#" },
+	           { field: "lastUpdatedBy", title: "Updated By", width: 150 }
+	           /* { field: "client", title: "Client", width: 60, template : "#=getClientTemplate()#" }, */
 	           /*{ field: "editTemplate", title: "Edit", width: 60, template : "#=getEditTemplate()#" },*/
 	           /*{ "name": "Delete", "title": "Delete","width": 60, template : "#=getHunterUserDeleteButton()#", filterable: false,resizable: false  }*/
 	           
@@ -2508,9 +2498,10 @@ var hunterAdminClientUserVM = kendo.observable({
 	prepareStageToShowContacts : function(params){
 		var content = $("#selRegionMessgReceiverGridTemplate").html();
 		kendoKipHelperInstance.showWindowWithOnClose(content, "Receivers of regions params : " + params);
+		$("#selRegionMessgReceiverGridContainer").css({"height":"500px"});
 		kendo.ui.progress($("#contactsSpinner"), true);
 		setTimeout(function(){
-			hunterAdminClientUserVM.createSelRgnCntctsGrid(params );
+			kendoKipHelperInstance.showReceiversGridForRegionOrGroup(params);
 		}, 800);
 	},
 	getSelTaskMsgType : function(){
@@ -2535,61 +2526,6 @@ var hunterAdminClientUserVM = kendo.observable({
 			return 100;
 		}
 		return current;
-	},
-	createSelRgnCntctsGrid : function(params ){
-		kendo.destroy( $("#selRegionMessgReceiverGrid") );
-		$("#selRegionMessgReceiverGrid").html('');
-		$("#selRegionMessgReceiverGrid").kendoGrid({
-			 pageable: {
-			    pageSize: 100,
-			    previousNext: true,
-			    refresh: true,
-			    itemsPerPage: "Contacts Per Page"
-			  },
-			  columns : [
-		           	{"field":"index", "title":"Index", "width":"80px"}, 
-		           	{"field":"contact", "title":"Contact","width":"300px"}
-		           ],
-	        dataSource: {
-	        	transport: {
-	                read: {
-	                	data : {
-	                	   regParams : params
-	                	},
-	                	type:"json",
-	                	method:"POST",
-	                	url: HunterConstants.getHunterBaseURL("region/action/task/regions/receivers/getPageReceivers")
-	                }
-	            },
-	            requestStart: function(e) {
-	                var type = e.type;
-	                var message = null;
-	                if(type === 'read'){
-	                	return;
-	                }
-	                if(type === 'update')
-	                	message = "Updating record...";
-	                if(type === 'destroy')
-	                	message = "Deleting record...";
-	                if(type === 'create')
-	                	message = "Creating record...";
-	                
-	                if(message != null){
-	                	kendoKipHelperInstance.popupWarning(message, "Success");
-	                }
-	                
-	            },
-	            pageSize: 100,
-	            serverPaging: true,
-	            schema: {
-	                data: 'data',
-	                total: 'total',
-	                errors: 'errors'
-	            }
-	        }
-	        
-	    });
-		$("#selRegionMessgReceiverGrid").after('<button onClick="kendoKipHelperInstance.closeWindowWithOnClose()" class="k-button" style="width:200px;margin-left:38%;margin-top:10px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" ><span class="k-icon k-i-close"></span>Close</button>');
 	},
 	getSelectedTaskId : function(){
 		var taskId = hunterAdminClientUserVM.get("selTaskId");
@@ -2951,7 +2887,7 @@ var hunterAdminClientUserVM = kendo.observable({
     loadMessageAttachmentsContainer : function(){
     	var message = this.getSelectedTaskBeanMsg();
     	if( message != null ){
-    		var url = HunterConstants.getHunterBaseURL("/message/action/tskMsg/getMessageAttachmentsNamesString");
+    		var url = HunterConstants.getHunterBaseURL("message/action/tskMsg/getMessageAttachmentsNamesString");
     		var data = {"msgId" : message["msgId"]};
     		kendoKipHelperInstance.ajaxPostDataForJsonResponse(JSON.stringify(data), "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterGettingAttachmentNames");
     	}else{

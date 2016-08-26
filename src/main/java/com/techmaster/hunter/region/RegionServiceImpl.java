@@ -957,7 +957,7 @@ public class RegionServiceImpl extends AbstractRegionService {
 	    Map<String,Object> params = new HashMap<>();
 		params.put(":page_num", pageNumber);
 		params.put(":page_count", pageCount);
-		params.put(":rcvrTyp", HunterUtility.singleQuote( rcvrTyp )); 
+		params.put("=:rcvrTyp", rcvrTyp == null ? " IS NOT NULL " : "=" + HunterUtility.singleQuote( rcvrTyp )); 
 		String whrCls = "";
 	    
 	    if( wardName != null && consName != null && cntyNam != null && cntryNam != null ){

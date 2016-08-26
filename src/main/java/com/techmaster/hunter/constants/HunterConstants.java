@@ -251,4 +251,14 @@ public class HunterConstants {
 	//HUNTER PROCESS JSON SERIALIZED FILE NAME
 	public static final String HUNTER_PRCESS_SERIAL_PREF_KEY = "hntr_proc_srl_ref_key_";
 	
+	
+	//Hunter Social Constants.
+	public static final String MEDIA_TYPE_PHOTO = "mediaPhoto";
+	public static final String MEDIA_TYPE_SOUND = "mediaSound";
+	public static final String MEDIA_TYPE_VIDEO = "mediaVideo";
+	
+	public static final String SOCIAL_TYPE_FACEBOOK_GROUP = "socialTypeFacebookGroup";
+	public static final String SOCIAL_TYPE_GEOGRAPHIC_GROUP = "socialTypeGeographicGroup";
+	public static final String SOCIAL_TYPE_FOCUS_GROUP = "socialTypeFocusGroup";
+	
 }

@@ -15,7 +15,7 @@
 		<intercept-url pattern="/rawReceiver/**" access="ROLE_RAW_USER,ROLE_ADMIN" />
 		<intercept-url pattern="/admin/**" access="ROLE_ADMIN" />
 		
-		<form-login login-page='/hunter/login/page' default-target-url="/hunter/login/after" authentication-failure-url="/hunter/login/page"  />
+		<form-login login-page='/hunter/login/page' default-target-url="/hunter/home" authentication-failure-url="/hunter/login/page"  />
 		<logout logout-success-url="/hunter/login/logout" />
 	</http>
 	<beans:bean name="hunterUserAuthenticationService" class="com.techmaster.hunter.security.HunterUserAuthenticationService"  >

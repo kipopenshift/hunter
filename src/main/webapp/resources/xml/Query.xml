@@ -672,6 +672,34 @@
 			from hntr_clint cl
 		</statement>
 	</query>
+	<query id="getAllClientsDetails">
+		<description>
+		    gets comma separated client ids for all clients in the system.
+		</description>
+		<statement>
+	  		SELECT 
+			  us.FRST_NAM,
+			  us.LST_NAM,
+			  us.USR_ID,
+			  us.ACTIV,
+			  TO_CHAR(cl.CRET_DATE,'yyyy-MM-dd HH:mm:ss') AS CRET_DATE,
+			  cl.CRTD_BY,
+			  us.EMAIL,
+			  TO_CHAR(cl.LST_UPDATE,'yyyy-MM-dd HH:mm:ss') AS LST_UPDATE,
+			  cl.LST_UPDTD_BY,
+			  us.MDDL_NAM,
+			  us.PHN_NUMBR,
+			  us.USR_NAM,
+			  us.USR_TYP,
+			  cl.CLNT_TL_BDGT,
+			  cl.IS_RCVR
+			FROM 
+			  HNTR_USR us,
+			  HNTR_CLINT cl
+			WHERE us.USR_ID = cl.HNTR_CLNT_ID
+			ORDER BY cl.CRET_DATE DESC
+		</statement>
+	</query>
 	<query id="getNextRawReceiverVersion">
 		<description>
 		    This query will retrieve raw receiver version for a given contact.
@@ -971,11 +999,11 @@
 			    (SELECT COUNT(*) AS CNT
 			    FROM HNTR_MSG_RCVR r3
 			    WHERE |:r3:|
-			    AND r3.RCVR_TYP = :rcvrTyp
+			    AND r3.RCVR_TYP =:rcvrTyp
 			    )r5
 			  ON 1 = 1
 			  WHERE |:r2:|
-			  AND r2.RCVR_TYP = :rcvrTyp
+			  AND r2.RCVR_TYP =:rcvrTyp
 			  )r3
 			WHERE r3.row_num BETWEEN
 			  CASE

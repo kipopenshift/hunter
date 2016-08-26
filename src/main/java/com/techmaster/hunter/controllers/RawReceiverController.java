@@ -84,8 +84,10 @@ public class RawReceiverController extends HunterBaseController{
 		
 		String 
 		getMode = request.getParameter("getMode"),
-		modeVal = request.getParameter("modeVal");
+		modeVal = request.getParameter("modeVal"),
+		bodyStr = HunterUtility.getParamNamesAsStringsFrmRqst(request);
 		
+		logger.debug( bodyStr );
 		logger.debug("Get Parameters : " + getMode + "," + modeVal); 
 		
 		List<HunterRawReceiverJson> rawReceiverJsons = new ArrayList<>();

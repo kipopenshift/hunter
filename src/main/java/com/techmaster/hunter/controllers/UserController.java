@@ -20,6 +20,7 @@ import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.types.HunterClientDao;
 import com.techmaster.hunter.dao.types.HunterUserDao;
 import com.techmaster.hunter.json.HunterClientsDetailsJson;
+import com.techmaster.hunter.json.HunterUserJson;
 import com.techmaster.hunter.obj.beans.HunterUser;
 
 
@@ -63,8 +64,8 @@ public class UserController {
 	
 	@RequestMapping(value="/action/read/post", method=RequestMethod.POST )
 	@Produces("application/json")
-	public @ResponseBody List<HunterUser> readUsersPost(HttpServletResponse response){
-		List<HunterUser> users = userDao.getAllUsersWhoAreClients();
+	public @ResponseBody List<HunterUserJson> readUsersPost(HttpServletResponse response){
+		List<HunterUserJson> users = userDao.getAllUsersWhoAreClients();
 		return users;
 	}
 	

@@ -62,6 +62,16 @@ var RegionHierarchyModel = kendo.data.TreeListModel.define({
 		var id = this.get("id"); 
 		var editButton = kendoKipHelperInstance.createSimpleHunterButton('pencil',null, 'RegionHierarchyVM.showPopupToEditRegion("' + id +'")');
 		return editButton;
+	},
+	getRegionReceiversTemplate : function(){
+		var levelType = this.get("levelType"),
+			beanId = this.get("beanId");
+			
+			var params = beanId + "::" + levelType;
+				
+			var idString = '"' + params + '"',
+				html = kendoKipHelperInstance.createSimpleHunterButton('search',null, 'RegionHierarchyVM.displayContactsForRegion('+ idString +')');
+			return html;
 	}
 });
 
@@ -173,7 +183,17 @@ var RegionHierarchyVM = kendo.observable({
 	afterInit : function(){
 		console.log("RegionHierarchyVM successfully initialized!!");
 	},
-	
+	displayContactsForRegion : function(params){
+		var countryId = $("#countryDropDownList").data("kendoDropDownList").value();
+		params = "REGION_HIERARCHY::" + countryId + "::" + params;
+		var content = $("#selRegionMessgReceiverGridTemplate").html();
+		kendoKipHelperInstance.showWindowWithOnClose(content, "Region Hierarchy receivers of regions params : " + params);
+		$("#selRegionMessgReceiverGridContainer").css({"height":"500px"});
+		kendo.ui.progress($("#contactsSpinner"), true);
+		setTimeout(function(){
+			kendoKipHelperInstance.showReceiversGridForRegionOrGroup(params);
+		}, 800);
+	},
 	showPopupToEditRegion : function(id){
 		var model = this.get("regionTreeList").dataSource.get(id);
 		model = $.parseJSON(kendo.stringify(model));
@@ -347,6 +367,7 @@ var RegionHierarchyVM = kendo.observable({
 						{ field:'regionCode', title:'Code', filterable: true,width:110 },
 						{ field:'hasState', title:'Has State',  filterable: true,width:110},
 						{ field:'receivers', title:'Receivers',  filterable: true,width:110 },
+						{ field: "viewReceivers", title : "Receivers", width:80, template : "#=getRegionReceiversTemplate()#"},
 						{ field: "editTask", title : "Edit", width:80, template : "#=getEditHierarchyTemplate()#"}
 	         ],
 	          editable: "inline"

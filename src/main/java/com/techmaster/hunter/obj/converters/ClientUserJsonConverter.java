@@ -36,7 +36,6 @@ public class ClientUserJsonConverter {
 		String cretDate = HunterUtility.getStringOrNullFromJSONObj(json, "cretDate");
 		String lastUpdate = HunterUtility.getStringOrNullFromJSONObj(json, "lastUpdate");
 		String createdBy = HunterUtility.getStringOrNullFromJSONObj(json, "createdBy");
-		String password = HunterUtility.getStringOrNullFromJSONObj(json, "password");
 		String lastUpdatedBy = HunterUtility.getStringOrNullFromJSONObj(json, "lastUpdatedBy");
 		String clientTotalBudgetStr = HunterUtility.getStringOrNullFromJSONObj(json, "clientTotalBudget");
 		float clientTotalBudget = Float.parseFloat(clientTotalBudgetStr);
@@ -47,12 +46,11 @@ public class ClientUserJsonConverter {
 		userJson.setClientId(clientId);
 		userJson.setClientTotalBudget(clientTotalBudget);
 		userJson.setCreatedBy(createdBy);
-		userJson.setCretDate(cretDate == null ? null : HunterUtility.parseDate(cretDate, HunterConstants.DATE_FORMAT_STRING)); 
+		userJson.setCretDate(cretDate);
 		userJson.setEmail(email);
 		userJson.setFirstName(firstName);
-		userJson.setLastUpdate(lastUpdate == null ? null : HunterUtility.parseDate(lastUpdate, HunterConstants.DATE_FORMAT_STRING));
+		userJson.setLastUpdate(lastUpdate);
 		userJson.setMiddleName(middleName); 
-		userJson.setPassword(password); 
 		userJson.setPhoneNumber(phoneNumber);
 		userJson.setReceiver(receiver);
 		userJson.setUserId(userId);
@@ -80,11 +78,11 @@ public class ClientUserJsonConverter {
 			clientUserJson.setClientId(client.getClientId());
 			clientUserJson.setClientTotalBudget(client.getClientTotalBudget());
 			clientUserJson.setCreatedBy(client.getCreatedBy());
-			clientUserJson.setCretDate(client.getCretDate()); 
+			clientUserJson.setCretDate(HunterUtility.formatDate(client.getCretDate(), HunterConstants.DATE_FORMAT_STRING));  
 			clientUserJson.setEmail(client.getUser().getEmail());
 			clientUserJson.setFirstName(client.getUser().getFirstName());
 			clientUserJson.setLastName(client.getUser().getLastName());
-			clientUserJson.setLastUpdate(client.getLastUpdate());
+			clientUserJson.setLastUpdate(HunterUtility.formatDate(client.getLastUpdate(), HunterConstants.DATE_FORMAT_STRING));
 			clientUserJson.setLastUpdatedBy(client.getLastUpdatedBy());
 			clientUserJson.setMiddleName(client.getUser().getMiddleName());
 			clientUserJson.setReceiver(client.isReceiver());

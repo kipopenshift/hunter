@@ -292,13 +292,24 @@
 </script>
 
 <script type="text/x-kendo-template" id="selRegionMessgReceiverGridTemplate">
-	<div style='height:390px;width:800px;' >
-		<div id='selRegionMessgReceiverGrid' >
+	<div style='height:390px;width:800px;'id="selRegionMessgReceiverGridContainer" >
+		<div id='selRegionMessgReceiverGrid' style="height:390px;width:800px;" >
 			<span id='contactsSpinner' ></span>
 		<div>
 	</div>
 </script>
 
+
+<script type="text/x-kendo-template" id="importSectionTemplate">
+<div id="importSectionTemplateCover" style="width:450px;height:220px;" >
+	<div id="kendoUploadContainer"> 
+		<input type="file" name="select import file" id="receiverGroupInput" />
+	</div>
+	<div id='closeButtonDiv'   onClick='kendoKipHelperInstance.closeWindowWithOnClose()' style='width:40%;cursor:pointer;margin-left:30%;margin-top:20px;text-align: center;background-color:#F2D6D6;border:1px solid #BD9A9A;font-size:12px;padding:4px;border-radius:4px;' >
+		<span class="k-icon k-i-cancel"></span>Close
+	</div>
+</div>
+</script>
 
 
 </div>

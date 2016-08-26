@@ -18,6 +18,7 @@
 <div 
 					style="height:300px;"
 					data-role="grid"
+					data-toolbar = "[{'template' : '#=getToolBarTemplate()#'}]"
 					id="validateRawReceiverGrid"
              				data-scrollable="true"
              				data-height="280"

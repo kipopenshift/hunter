@@ -71,7 +71,7 @@
 			}else if(text != null && text === "Combobox"){
 				navigate("/workflow/action/text/cascadeComboBox");
 			}else if(text != null && text === "Home"){
-				navigate("");
+				navigate("/hunter/login/after");
 			}else if(text != null && text === "Regions Hierarchies"){
 				navigate("/region/action/regions/hierarchies/action/home");
 			}else if(text != null && text === "Receiver Groups"){
@@ -84,8 +84,12 @@
 				navigate("/admin/action/fieldProfile");
 			}else if(text != null && text === "Contacts Pagination") {
 				navigate("/admin/action/raw/pagination");
+			}else if(text != null && text === "Receiver Tasks") {
+				navigate("/hunter/tasks/home");
+			}else if(text != null && text === "Social Tasks") {
+				navigate("/hunter/tasks/home");
 			}else if(text != null && text === "Validate Raw Receivers") {
-				navigate("/admin/action/raw/validateReceivers");
+				navigate("/admin/action/raw/validateReceivers"); 
 			}
 		}
 
@@ -171,9 +175,14 @@
 <div id="hunterTopDiv" >
 
 	<ul class="myMenu" id="menuUlId" style="z-index:10000;margin-left:39%;color:white;">
-		<li style="border-left : 3px solid #93B1B7;" class="underLined" ><a href="#" id="homeTabHome" class="homeNavTabClass"  class="homeCurrentTab"   >Home</a></li>
+		<li style="border-left : 3px solid #93B1B7;" class="underLined" ><a href="#" id="homeTabHome" class="homeNavTabClass"  class="homeCurrentTab"   >Home</a>
+			<ul class="rightAndLeftBottom" style='margin-left:-3px;' >
+				<li><a href="#">Receiver Tasks</a></li>
+				<li><a href="#">Social Tasks</a></li>
+			</ul>
+		</li>
 	    <li class="underLined" ><a href="#"  id="homeTabTasks"  class="homeNavTabClass" >Regions</a>
-	       <ul class="rightAndLeftBottom" >
+	       <ul class="rightAndLeftBottom"  >
 	       		<li><a href="#">Receiver Groups</a></li>
 	        	<li><a href="#">Regions Hierarchies</a></li>
 	        	<li><a href="#">Validate Raw Receivers</a></li>

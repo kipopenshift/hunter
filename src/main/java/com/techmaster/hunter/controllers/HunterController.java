@@ -37,7 +37,39 @@ public class HunterController extends HunterBaseController{
 
 	@RequestMapping(value="/home", method=RequestMethod.GET)
 	public String home(){
-		return "views/home";
+		
+		Collection<GrantedAuthority> grantedAuthorities = getAuthentication().getAuthorities();
+		List<GrantedAuthority> authList = new ArrayList<>();
+		authList.addAll(grantedAuthorities);
+		
+		String homePage = "views/hunterHome";
+		
+		for( GrantedAuthority grantedAuthority : grantedAuthorities ){
+			String userRole = grantedAuthority.getAuthority();
+			if(userRole.equals(HunterUserRolesEnums.HNTR_RW_MSG_RCVR_USR.getName())){
+				for(GrantedAuthority authority : grantedAuthorities){
+					if(HunterUserRolesEnums.ROLE_ADMIN.getName().equals(authority.getAuthority())){
+						return homePage;
+					}
+				}
+				
+				//if the user has not been registered as row user and is raw user, turn them away
+				HunterRawReceiverUserDao rawReceiverUserDao = HunterDaoFactory.getInstance().getDaoObject(HunterRawReceiverUserDao.class);
+				HunterRawReceiverUser rawReceiver = rawReceiverUserDao.getRawUserByUserName(getUserName()); 
+				if(rawReceiver == null){
+					return "views/fieldProfileNotFound";
+				}
+				
+				// refresh regions so it the page is fast enough for users.
+				if(!HunterCacheUtil.getInstance().isCountriesLoaded()){
+					HunterCacheUtil.getInstance().loadCountries();
+				}
+				return "views/fieldProfile";
+			}
+		}
+		
+		return homePage;
+		
 	}
 	
 	@RequestMapping(value="/login/params", method=RequestMethod.POST)
@@ -53,7 +85,7 @@ public class HunterController extends HunterBaseController{
 		List<GrantedAuthority> authList = new ArrayList<>();
 		authList.addAll(grantedAuthorities);
 		
-		String homePage = "access/postLogin";
+		String homePage = "views/hunterHome";
 		
 		for( GrantedAuthority grantedAuthority : grantedAuthorities ){
 			String userRole = grantedAuthority.getAuthority();
@@ -96,6 +128,11 @@ public class HunterController extends HunterBaseController{
 		SecurityContextHolder.getContext().setAuthentication(null);
 		HunterUtility.getSessionForRequest(request).invalidate();
 	     return "access/logout";
+	}
+	
+	@RequestMapping(value="/tasks/home", method=RequestMethod.GET)
+	public String goToHunterTasksHome(HttpServletRequest request, HttpServletResponse response){
+		return "access/postLogin";
 	}
 	
 

@@ -13,7 +13,7 @@
 		margin-left:30%;
 		background-color : #F3F9FC;
 		border:1px solid #91B1C1;
-		margin-top:20%;
+		margin-top:15%;
 		border-radius:4px;
 		height:4%;
 		text-align: center;

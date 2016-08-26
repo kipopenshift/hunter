@@ -55,7 +55,12 @@ var RawReceiverModel = kendo.data.Model.define({
 	}
 });
 
+function getToolBarTemplate(){
+	return "<button class='k-button' >Click</button>";
+}
+
 var RawReceiverDS = new kendo.data.DataSource({
+	 serverPaging: true,
 	  transport: {
 	    read:  {
 	      data : {
@@ -63,8 +68,9 @@ var RawReceiverDS = new kendo.data.DataSource({
 	      },
 	      url: HunterConstants.getHunterBaseURL("rawReceiver/action/raw/getRawReceiversForValidation"), 
 	      dataType: "json",
-	      contentType:"application/json",
+	      contentType : "application/json",
 	      method: "POST",
+	      type:"json"
 	    },
 	    create: {
 	        url: "http://localhost:8080/Hunter/messageReceiver/action/group/create",
@@ -136,14 +142,49 @@ var RawReceiverDS = new kendo.data.DataSource({
 });
 
 var ValidateRawReceiverVM = kendo.observable({
-	rawReceiverDS : RawReceiverDS,
+	rawReceiverDS : {
+    	transport: {
+            read: {
+            	data : {
+            		getMode : "getMode",
+            		modeVal : "modeVal"
+            	},
+            	type:"json",
+            	method:"POST",
+            	url: HunterConstants.getHunterBaseURL("rawReceiver/action/raw/getRawReceiversForValidation")
+            }
+        },
+        requestStart: function(e) {
+            var type = e.type;
+            var message = null;
+            if(type === 'read'){
+            	return;
+            }
+            if(type === 'update')
+            	message = "Updating record...";
+            if(type === 'destroy')
+            	message = "Deleting record...";
+            if(type === 'create')
+            	message = "Creating record...";
+            
+            if(message != null){
+            	kendoKipHelperInstance.popupWarning(message, "Success");
+            }
+            
+        },
+        pageSize: 100,
+        serverPaging: true,
+        schema: {
+            data: 'data',
+            total: 'total',
+            errors: 'errors'
+        }
+    },
 	beforeInit : function(){
 		kendoKipHelperInstance =  new kendoKipHelper();
 		kendoKipHelperInstance.init();
 	},
 	init : function(){
-		console.log("Hey");
-		alert("hey!");
 		console.log("Initializing validate raw receiver VM...");
 		this.beforeInit();
 		kendo.bind($("#validateRawReceiversContainer"), ValidateRawReceiverVM);

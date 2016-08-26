@@ -592,6 +592,91 @@ public class RegionController extends HunterBaseController {
 			
 			return data;
 			
+		}else if( regionNames[0].equals("REGION_HIERARCHY") ){
+			
+			String 
+			countryId 	= regionNames[1],
+			regionId  	= regionNames[2],
+			levelType	= regionNames[3],
+			countryName = null,
+			countyName 	= null,
+			consName 	= null,
+			wardName 	= null;
+			
+			List<PagedHunterMessageReceiverJson> messageReceiverJsons = null;
+			
+			switch (levelType) {
+			case  HunterConstants.RECEIVER_LEVEL_COUNTRY : 
+				
+				List<Object> values0 = new ArrayList<>();
+				values0.add(regionId);
+				String query = hunterJDBCExecutor.getQueryForSqlId("getCountryNameAndId"); 
+				Map<String, Object> cntryMap = hunterJDBCExecutor.executeQueryFirstRowMap(query, values0);
+				
+				if( !HunterUtility.isMapNllOrEmpty( cntryMap )){ 
+					countryName = HunterUtility.getStringOrNullOfObj(cntryMap.get("CNTRY_NAM"));
+					messageReceiverJsons = regionService.getMessageReceiversForRegion(countryName, countyName, consName, wardName, pageNo, pageSize,null);
+				}
+				
+				break;
+				
+			case HunterConstants.RECEIVER_LEVEL_COUNTY:
+				
+				String query1 = hunterJDBCExecutor.getQueryForSqlId("getCountryNameIdAndCodeForCountyId");
+				List<Object> values = new ArrayList<>();
+				values.add(regionId);
+				
+				Map<String,Object> firstRow = hunterJDBCExecutor.executeQueryFirstRowMap(query1, values);
+				
+				if( !HunterUtility.isMapNllOrEmpty( firstRow )){
+					countryName = HunterUtility.getStringOrNullOfObj(firstRow.get("COUNTRY_NAME"));
+					countyName = HunterUtility.getStringOrNullOfObj(firstRow.get("CNTY_NAM"));
+					messageReceiverJsons = regionService.getMessageReceiversForRegion(countryName, countyName, consName, wardName, pageNo, pageSize,null);
+				}
+				
+				break;
+				
+			case HunterConstants.RECEIVER_LEVEL_CONSITUENCY: 
+				
+				String query2 = hunterJDBCExecutor.getQueryForSqlId("getCountryCountyConsNameIdAndForConsId");
+				List<Object> values2  = new ArrayList<>();
+				values2.add(regionId);
+				Map<String, Object> firstRow2 = hunterJDBCExecutor.executeQueryFirstRowMap(query2, values2);
+				
+				if(!HunterUtility.isMapNllOrEmpty( firstRow2 )){
+					countryName = HunterUtility.getStringOrNullOfObj(firstRow2.get("COUNTRY_NAME"));
+					countyName = HunterUtility.getStringOrNullOfObj(firstRow2.get("CNTY_NAM"));
+					consName = HunterUtility.getStringOrNullOfObj(firstRow2.get("CNSTTNCY_NAM"));
+					messageReceiverJsons = regionService.getMessageReceiversForRegion(countryName, countyName, consName, wardName, pageNo, pageSize,null);
+				}
+				break;
+				
+			case HunterConstants.RECEIVER_LEVEL_WARD : 
+				
+				String getCntryCntyConstyConswardIdCodeNameId = hunterJDBCExecutor.getQueryForSqlId("getCntryCntyConstyConswardIdCodeNameId");
+				List<Object> values3 = new ArrayList<Object>();
+				values3.add(regionId);
+				Map<String, Object> wardMap = hunterJDBCExecutor.executeQueryFirstRowMap(getCntryCntyConstyConswardIdCodeNameId, values3);
+				
+				if( !HunterUtility.isMapNllOrEmpty( wardMap ) ){
+					countryName = HunterUtility.getStringOrNullOfObj(wardMap.get("CNTRY_NAM"));
+					countyName = HunterUtility.getStringOrNullOfObj(wardMap.get("CNTY_NAM"));
+					consName = HunterUtility.getStringOrNullOfObj(wardMap.get("CNSTTNCY_NAM"));
+					wardName = HunterUtility.getStringOrNullOfObj(wardMap.get("WRD_NAM"));
+					messageReceiverJsons = regionService.getMessageReceiversForRegion(countryName, countyName, consName, wardName, pageNo, pageSize,null);
+				}
+				break;
+			default:
+				break;
+			}
+			
+			logger.debug("Retrieving receivers for region hierarcy.CountryId("+ countryId +") and Region Type ( "+ levelType +" ) and region Id ("+ regionId +")");
+			
+			data.setTotal(HunterUtility.isCollectionNullOrEmpty( messageReceiverJsons ) ? 0 : messageReceiverJsons.get(0).getCount() );
+			data.setData(messageReceiverJsons); 
+			
+			return data;
+			
 		}
 		
 		String

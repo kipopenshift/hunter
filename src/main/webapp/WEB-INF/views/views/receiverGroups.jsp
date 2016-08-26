@@ -29,6 +29,7 @@
        		{'field' : 'createdBy', 'title':'Created By'},
        		{'field' : 'lastUpdate', 'title':'Last Upadate'},
        		{'field' : 'lastUpdatedBy', 'title':'Updated By'},
+       		{'field' : 'viewReceivers', 'title':'Receivers','editable' : false, 'width' : '90px','template' : '#=getViewReceiversButton()#'},
        		{'field' : 'importButton', 'title':'Import','editable' : false, 'width' : '90px','template' : '#=getReceiverImportButton()#'},
        		{'field' : 'download', 'title':'Excel','editable' : false, 'width' : '90px','template' : '#=getImportFilesTemplate()#'},
        		{'field' : 'edit', 'title':'Edit','editable' : false, 'width' : '110px','template' : '#=getGroupEditTemplate()#','editor' : editorButtonEdit},
@@ -71,6 +72,11 @@
 </script>
 
 
+<script type="text/x-kendo-template" id="openKendoImportSectionTemplate">
+	<div style='height:300px;width:400px;'id="openKendoImportSection" >
+		<input type="file" name="select import file" id="receiverGroupInput" />
+	</div>
+</script>
 
 
 </body>

@@ -10,12 +10,11 @@ public class HunterUserJson {
 	private String phoneNumber;
 	private String userType;
 	private String userName;
-	private String password;
 	private boolean active;
 	private boolean blocked;
 	
-	private java.util.Date cretDate;
-	private java.util.Date lastUpdate;
+	private String cretDate;
+	private String lastUpdate;
 	private String createdBy;
 	private String lastUpdatedBy;
 	
@@ -95,22 +94,19 @@ public class HunterUserJson {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-
-	public java.util.Date getCretDate() {
+	public String getCretDate() {
 		return cretDate;
 	}
-
-	public void setCretDate(java.util.Date cretDate) {
+	public void setCretDate(String cretDate) {
 		this.cretDate = cretDate;
 	}
-
-	public java.util.Date getLastUpdate() {
+	public String getLastUpdate() {
 		return lastUpdate;
 	}
-
-	public void setLastUpdate(java.util.Date lastUpdate) {
+	public void setLastUpdate(String lastUpdate) {
 		this.lastUpdate = lastUpdate;
 	}
+
 
 	public String getCreatedBy() {
 		return createdBy;
@@ -132,12 +128,6 @@ public class HunterUserJson {
 	}
 	public void setBlocked(boolean blocked) {
 		this.blocked = blocked;
-	}
-	public String getPassword() {
-		return password;
-	}
-	public void setPassword(String password) {
-		this.password = password;
 	}
 
 
@@ -187,7 +177,7 @@ public class HunterUserJson {
 				+ ", lastName=" + lastName + ", middleName=" + middleName
 				+ ", email=" + email + ", phoneNumber=" + phoneNumber
 				+ ", userType=" + userType + ", userName=" + userName
-				+ ", password=" + password + ", active=" + active
+				+ ", active=" + active
 				+ ", blocked=" + blocked + ", cretDate=" + cretDate
 				+ ", lastUpdate=" + lastUpdate + ", createdBy=" + createdBy
 				+ ", lastUpdatedBy=" + lastUpdatedBy + "]";

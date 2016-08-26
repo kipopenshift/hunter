@@ -72,7 +72,7 @@ var ReceiverGroupModel = kendo.data.Model.define({
 	getReceiverImportButton : function(){
 		var groupId = this.get("groupId");
 		//var html = "<center><span class='k-icon k-i-seek-n'></span><a style='color:#0038D2;cursor:pointer' onClick='receiverGroupVM.openImportSection(\""+ groupId +"\")'>import</a></center>";
-		var button = kendoKipHelperInstance.createSimpleHunterButton("seek-n",null, "receiverGroupVM.openImportSection(\""+ groupId +"\")");
+		var button = kendoKipHelperInstance.createSimpleHunterButton("seek-n",null, "receiverGroupVM.openKendoImportSection(\""+ groupId +"\")");
 		return button;
 	},
 	getImportFilesTemplate : function(){
@@ -80,6 +80,11 @@ var ReceiverGroupModel = kendo.data.Model.define({
 		//var html = "<center><span class='k-icon k-i-seek-s'></span><a style='color:#0038D2;cursor:pointer' onClick='receiverGroupVM.ajaxPostGetImportData(\""+ groupId +"\")'>download</a></center>";
 		//var b1 = kendoKipHelperInstance.createKendoSmallIconTagTemplate("close", 'receiverGroupVM.ajaxPostGetImportData("' + groupId +'")', null);
 		var button = kendoKipHelperInstance.createSimpleHunterButton("seek-s",null, 'receiverGroupVM.ajaxPostGetImportData("' + groupId +'")');
+		return button;
+	},
+	getViewReceiversButton : function(){
+		var params = "RECEIVER_GROUP_ID::" + this.get("groupId") + "::" + this.get("receiverType"),
+			button = kendoKipHelperInstance.createSimpleHunterButton("search",null, 'receiverGroupVM.displayContactsForGroupId("' + params +'")');
 		return button;
 	}
 });
@@ -246,6 +251,23 @@ var receiverGroupVM = kendo.observable({
 		console.log(html);
 		$(html).appendTo(container);
 	},
+	openKendoImportSection : function(groupId){
+		kendo.destroy( $("#receiverGroupInput"));
+		kendo.destroy($("#importSectionTemplateCover"));
+		$("#importSectionTemplateCover").empty();
+		var content = $("#importSectionTemplate").html();
+		kendoKipHelperInstance.showWindowWithOnClose(content, "Upload file");
+		var url = HunterConstants.HUNTER_BASE_URL + "/messageReceiver/action/group/import/receiverGroupReceivers/" + groupId;
+		 $("#receiverGroupInput").kendoUpload({
+		        async: { 
+		            saveUrl: url,
+		            removeUrl: "remove",
+		            autoUpload: false,
+		            multiple: true,
+		            error : onError
+		        }
+		  });
+	},
 	openImportSection : function(groupId){
 		kendo.destroy( $("#receiverGroupInput"));
 		$("#kendoUploadContainer").empty();
@@ -369,6 +391,19 @@ var receiverGroupVM = kendo.observable({
 	closeImportSection : function(){
 		$("#importSectionTemplateCover").fadeOut(100);
 		ReceiverGroupDS.read();
+	},
+	prepareStageToShowContacts : function(params){
+		var content = $("#selRegionMessgReceiverGridTemplate").html();
+		kendoKipHelperInstance.showWindowWithOnClose(content, "Receivers of regions params : " + params);
+		$("#selRegionMessgReceiverGridContainer").css({"height":"500px"});
+		kendo.ui.progress($("#contactsSpinner"), true);
+		setTimeout(function(){
+			kendoKipHelperInstance.showReceiversGridForRegionOrGroup(params);
+		}, 800);
+	},
+	displayContactsForGroupId : function(params){
+		console.log( params );
+		this.prepareStageToShowContacts(params);
 	}
 	
 });

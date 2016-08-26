@@ -367,14 +367,39 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	}
 
 	@Override
-	public List<HunterUser> getAllUsersWhoAreClients() {
+	public List<HunterUserJson> getAllUsersWhoAreClients() {
+		
+		logger.debug("Loading users who are clients..."); 
+		
+		List<HunterUserJson> hunterUserJsons = new ArrayList<>();
 		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
-		String 
-			query = hunterJDBCExecutor.getQueryForSqlId("getAllCommSprtdClientIDs"),
-			clientIds = hunterJDBCExecutor.executeQueryFirstRowMap(query, null).get("CLIENT_IDS").toString(),
-			hibernateQ = "FROM HunterUser h WHERE h.userId IN ( "+ clientIds +" )";
-		List<HunterUser> clients = HunterHibernateHelper.executeQueryForObjList(HunterUser.class, hibernateQ);
-		return clients;
+		String  query = hunterJDBCExecutor.getQueryForSqlId("getAllClientsDetails");
+		List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, null);
+		
+		if( !HunterUtility.isCollectionNullOrEmpty( rowMapList ) ){
+			for(Map<String,Object> rowMap : rowMapList){
+				HunterUserJson userJson = new HunterUserJson();
+		        userJson.setActive(HunterUtility.getBooleanForYN(rowMap.get("ACTIV")+""));
+				userJson.setBlocked(HunterUtility.getBooleanForYN(rowMap.get("ACTIV")+"")); 
+				userJson.setCreatedBy(HunterUtility.getStringOrNullOfObj( rowMap.get("CRTD_BY") ));
+				userJson.setCretDate(HunterUtility.getStringOrNullOfObj( rowMap.get("CRET_DATE") ));
+				userJson.setEmail(HunterUtility.getStringOrNullOfObj( rowMap.get("EMAIL") ));;
+				userJson.setFirstName(HunterUtility.getStringOrNullOfObj( rowMap.get("FRST_NAM") ));
+				userJson.setLastName(HunterUtility.getStringOrNullOfObj( rowMap.get("LST_NAM") ));
+				userJson.setLastUpdate(HunterUtility.getStringOrNullOfObj( rowMap.get("LST_UPDATE") ));
+				userJson.setLastUpdatedBy(HunterUtility.getStringOrNullOfObj( rowMap.get("LST_UPDTD_BY") ));
+				userJson.setMiddleName(HunterUtility.getStringOrNullOfObj( rowMap.get("MDDL_NAM") ));
+				userJson.setPhoneNumber(HunterUtility.getStringOrNullOfObj( rowMap.get("PHN_NUMBR") ));
+				userJson.setUserId( HunterUtility.getLongFromObject( rowMap.get("USR_ID") ) ); 
+				userJson.setUserName(HunterUtility.getStringOrNullOfObj( rowMap.get("USR_NAM") )); 
+				userJson.setUserType(HunterUtility.getStringOrNullOfObj( rowMap.get("USR_TYP") ));
+				hunterUserJsons.add(userJson); 
+			}
+		}
+		
+		logger.debug("Finished loading users who are clients..."); 
+		return hunterUserJsons;
+		 
 	}
 	
 	
