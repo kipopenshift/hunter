@@ -51,6 +51,10 @@
         <desc>Task has been submitted and is pending processing</desc>
         <text>Task has been submitted and is pending processing</text>
     </message>
+    <message id="MSG_TASK_013" >
+        <desc>Task processing is pending. Changing status not allowed!</desc>
+        <text>Task processing is pending. Changing status not allowed!</text>
+    </message>
     <message id="MSG_REGION_001" >
         <desc>Error message conversion of consituency converter</desc>
         <text>Exception at conversion! Please contact hunter support!</text>

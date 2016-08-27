@@ -30,8 +30,7 @@ import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.gateway.beans.CMClientService;
 import com.techmaster.hunter.gateway.beans.GateWayClientHelper;
 import com.techmaster.hunter.gateway.beans.GateWayClientService;
-import com.techmaster.hunter.gateway.beans.GatewayClient;
-import com.techmaster.hunter.gateway.beans.HunterEmailClientService;
+import com.techmaster.hunter.gateway.beans.HunterEmailProcessClientService;
 import com.techmaster.hunter.gateway.beans.OzekiClientService;
 import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
@@ -260,6 +259,14 @@ public class TaskManagerImpl implements TaskManager{
 		List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{taskId});
 		Map<Integer, List<Object>> stsRowListMap = hunterJDBCExecutor.executeQueryRowList(stsQuery, values);
 		String currentStatus = stsRowListMap == null || stsRowListMap.isEmpty() ? null : stsRowListMap.get(1).get(0).toString();
+		
+		String delStatus = taskDao.getTaskStatuses(task.getTaskId()).get(HunterConstants.STATUS_TYPE_DELIVERY);
+		if( HunterConstants.STATUS_PENDING.equals( delStatus ) ){
+			/* Task processing is pending. Changing status not allowed! */
+			errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_013));
+			return errors;
+		}
+		
 		values.clear();
 		/*
 		 * User must have approver role to approve or unapprove a task.
@@ -352,7 +359,7 @@ public class TaskManagerImpl implements TaskManager{
 		String type = task.getTskMsgType();
 		if(type.equals(HunterConstants.MESSAGE_TYPE_EMAIL)){
 			executeClientMap = new HashMap<>();
-			executeClientMap.put(GatewayClient.TASK_BEAN, task);
+			executeClientMap.put(GateWayClientService.TASK_BEAN, task);
 		}
 		return executeClientMap;
 	}
@@ -368,8 +375,8 @@ public class TaskManagerImpl implements TaskManager{
 			String message = HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_010 );
 			logger.debug(message); 
 			processErrors.add(message);
-			results.put(GatewayClient.TASK_VALIDATION_ERRORS, processErrors);
-			results.put(GatewayClient.TASK_VALIDATION_STATUS, HunterConstants.STATUS_FAILED);
+			results.put(GateWayClientService.TASK_VALIDATION_ERRORS, processErrors);
+			results.put(GateWayClientService.TASK_VALIDATION_STATUS, HunterConstants.STATUS_FAILED);
 			return results;
 		}
 		
@@ -392,8 +399,8 @@ public class TaskManagerImpl implements TaskManager{
 			GateWayClientService clientService = getClientForTask(task); 
 			new TaskSubmitter(task, auditInfo, clientService).start();
 		}else{
-			results.put(GatewayClient.TASK_VALIDATION_ERRORS, errors);
-			results.put(GatewayClient.TASK_VALIDATION_STATUS, HunterConstants.STATUS_FAILED);
+			results.put(GateWayClientService.TASK_VALIDATION_ERRORS, errors);
+			results.put(GateWayClientService.TASK_VALIDATION_STATUS, HunterConstants.STATUS_FAILED);
 		}
 		
 		return results;
@@ -522,7 +529,7 @@ public class TaskManagerImpl implements TaskManager{
 		}else if(task.getGateWayClient().equals(HunterConstants.CLIENT_OZEKI)){
 			clientService = new OzekiClientService();
 		}else if(task.getGateWayClient().equals(HunterConstants.CLIENT_HUNTER_EMAIL)){ 
-			clientService = new HunterEmailClientService();
+			clientService = new HunterEmailProcessClientService();
 		}
 		return clientService;
 	}

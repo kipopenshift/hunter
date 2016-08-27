@@ -91,7 +91,7 @@ public class EmailTemplateUtil {
 			values.add(emailTemplateObj.getTemplateName());
 			List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, values);
 			List<String> results = new ArrayList<>();
-			if( !HunterUtility.isCollectionNullOrEmpty(rowMapList) ){ 
+			if( HunterUtility.isCollectionNotEmpty(rowMapList) ){ 
 				for(Map<String,Object> rowMap : rowMapList){
 					results.add(HunterUtility.getStringOrNullOfObj(rowMap.get("TSK_INFO"))); 
 				}

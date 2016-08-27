@@ -14,7 +14,7 @@ import com.techmaster.hunter.obj.beans.GateWayMessage;
 import com.techmaster.hunter.obj.beans.TaskClientConfigBean;
 import com.techmaster.hunter.util.HunterUtility;
 
-public class HunterProcessWorker implements TaskProcessWorker{
+public class HunterProcessWorker extends AbstratTaskProcessWorker{
 	
 	private TaskClientConfigBean configBean;
 	private Set<GateWayMessage> messages;
@@ -31,22 +31,6 @@ public class HunterProcessWorker implements TaskProcessWorker{
 		this.processJobKey = processJobKey;
 	}
 	
-	public String getMessageIds(){
-		StringBuilder builder = new StringBuilder();
-		if(messages != null && !messages.isEmpty()){
-			for(GateWayMessage message : messages){
-				builder.append(message.getContact());
-				builder.append(",");
-			}
-		}
-		String msgIdStr = builder.toString();
-		if(msgIdStr.endsWith(",")){
-			msgIdStr = msgIdStr.substring(0, msgIdStr.length() - 1);
-		}
-		logger.debug("Message Ids : " + msgIdStr); 
-		return msgIdStr;
-	}
-	
 	@Override
 	public void run() {
 		
@@ -55,7 +39,7 @@ public class HunterProcessWorker implements TaskProcessWorker{
 		
 		Map<String, String> values = new HashMap<>();
 		values.put(TaskProcessConstants.WORKER_NAME, toString());
-		values.put(TaskProcessConstants.MESSAGE_IDS, getMessageIds());
+		values.put(TaskProcessConstants.MESSAGE_IDS, getMessageIds(messages));
 		values.put(TaskProcessConstants.ERROR_TYPE, "Application Error");
 		values.put(TaskProcessConstants.ERROR_TEXT, "There was an exception while making a connection to the client server");
 		Long duration = System.currentTimeMillis();
@@ -140,16 +124,6 @@ public class HunterProcessWorker implements TaskProcessWorker{
 	}
 	
 	
-	@Override
-	public void setDuration(Long duration, Set<GateWayMessage> messages) {
-		if(messages != null && !messages.isEmpty()){
-			duration = duration/messages.size();
-			for(GateWayMessage msg : messages){
-				msg.setDuration(duration);
-			}
-		}
-	}
-
 	public void logWorker(String message){
 		Logger.getLogger(HunterProcessWorker.class).debug(this.toString() + " : " + message);
 	}

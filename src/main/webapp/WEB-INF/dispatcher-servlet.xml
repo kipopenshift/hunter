@@ -136,17 +136,6 @@
 	</bean> -->
 	
 	
-	<bean name="methodInvokingFactoryBean5" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="com.techmaster.hunter.gateway.beans.HunterEmailClient.wireHunterEmailManager"/>
-        <property name="arguments">
-            <list>
-                <ref bean="taskDao"/>
-                <ref bean="hunterJDBCExecutor"/>
-                <ref bean="gateWayMessageDao"/>
-            </list>
-       </property>
-	</bean>
-	
 	<bean name="methodInvokingFactoryBean6" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="com.techmaster.hunter.email.HunterBusinessEmailService.injectStaticBeans"/>
         <property name="arguments">
@@ -167,16 +156,6 @@
             </list>
        </property>
 	</bean>
-	
-	<bean name="methodInvokingFactoryBean8" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="com.techmaster.hunter.gateway.beans.AbsractGatewayClient.injectStaticBeans"/>
-        <property name="arguments">
-            <list>
-                <ref bean="hunterJDBCExecutor"/>
-            </list>
-       </property>
-	</bean>
-	
 	
     <!--   <context:property-placeholder location="jdbc.properties"/>     -->
     

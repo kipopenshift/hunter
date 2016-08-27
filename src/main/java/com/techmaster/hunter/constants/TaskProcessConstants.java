@@ -27,6 +27,7 @@ public interface TaskProcessConstants {
 	public static final String ERROR_TYPE_EXCEPTION = "exception";
 	public static final String ERROR_TYPE_RESPONSE = "response";
 	public static final String ERROR_TYPE_VALIDATION = "response";
+	public static final String ERROR_TYPE_EMAIL_EXCEPTION = "emailException";
 	
 	
 	/* Hunter Connection Connection */

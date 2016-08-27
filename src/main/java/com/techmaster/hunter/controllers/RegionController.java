@@ -577,7 +577,7 @@ public class RegionController extends HunterBaseController {
 			List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, values);
 			List<PagedHunterMessageReceiverJson> messageReceiverJsons = new ArrayList<>();
 			
-			if( !HunterUtility.isCollectionNullOrEmpty(rowMapList) ){
+			if( HunterUtility.isCollectionNotEmpty(rowMapList) ){
 				for(Map<String, Object> rowMap : rowMapList){
 					PagedHunterMessageReceiverJson receiverJson = new PagedHunterMessageReceiverJson();
 					receiverJson.setContact( HunterUtility.getStringOrNullOfObj( rowMap.get("RCVR_CNTCT") ) ); 
@@ -672,7 +672,7 @@ public class RegionController extends HunterBaseController {
 			
 			logger.debug("Retrieving receivers for region hierarcy.CountryId("+ countryId +") and Region Type ( "+ levelType +" ) and region Id ("+ regionId +")");
 			
-			data.setTotal(HunterUtility.isCollectionNullOrEmpty( messageReceiverJsons ) ? 0 : messageReceiverJsons.get(0).getCount() );
+			data.setTotal(HunterUtility.isCollectionNotEmpty( messageReceiverJsons ) ? 0 : messageReceiverJsons.get(0).getCount() );
 			data.setData(messageReceiverJsons); 
 			
 			return data;

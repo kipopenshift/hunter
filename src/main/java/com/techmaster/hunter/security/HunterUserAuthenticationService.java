@@ -217,7 +217,7 @@ public class HunterUserAuthenticationService {
 			HunterHibernateHelper.closeSession(session); 
 		}
         
-		UserLoginBean userLoginBean = HunterUtility.isCollectionNullOrEmpty( userLoginBeans ) ? null : (UserLoginBean) userLoginBeans.get(0);
+		UserLoginBean userLoginBean = !HunterUtility.isCollectionNotEmpty( userLoginBeans ) ? null : (UserLoginBean) userLoginBeans.get(0);
 		return userLoginBean;
 	}
 	

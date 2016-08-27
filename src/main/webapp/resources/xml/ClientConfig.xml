@@ -110,15 +110,15 @@
 			</configs>
         </configurations>
     </client>
-    <client clientName="HUNTER_EMAIL_CONFIGS" clientId="3" >
+    <client clientName="Hunter Email" clientId="3" >
         <configurations>
             <context>
                 <security>
                 	<userName>techmaster.hunter.mail@gmail.com</userName>
             		<password>hunter.admin.1900</password>
 	            </security>
-	            <batch batchType="multiple" batchNo="100" batchMark="200" />
-	            <worker workerDefault="false" workerName="POST_MUL_REQ_PR_MSG"  />
+	            <batch batchType="multiple" batchNo="99" batchMark="99" /> 
+	            <worker workerDefault="false" workerName="DEFAULT_EMAIL_MUL_REQ_PR_MSG"  />
 	            <messageType>Email</messageType>
 	             <preempt>
 	            	<receivers>hillangat@gmail.com,hklangat@gmail.com</receivers>

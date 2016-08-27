@@ -59,7 +59,7 @@ public class TaskScheduledUpdaterJob extends TimerTask {
 			if (failedSts > 0 && successSts > 0) {
 				taskStatus = HunterConstants.STATUS_PARTIAL;
 			} else if (failedSts == 0 && successSts > 0) {
-				taskStatus = HunterConstants.STATUS_SUCCESS;
+				taskStatus = HunterConstants.STATUS_PROCESSED;
 			} else if (failedSts > 0 && successSts == 0) {
 				taskStatus = HunterConstants.STATUS_FAILED;
 			}

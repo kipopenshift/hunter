@@ -66,7 +66,7 @@ public class EmailTemplateObjDaoImpl implements EmailTemplateObjDao{
 		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
 		String query = hunterJDBCExecutor.getQueryForSqlId("getAllEmailTemplateObjJsons");
 		List<Map<String, Object>> rowListMap = hunterJDBCExecutor.executeQueryRowMap(query, null);
-		if( !HunterUtility.isCollectionNullOrEmpty(rowListMap) ){
+		if( HunterUtility.isCollectionNotEmpty(rowListMap) ){
 			for(Map<String,Object> rowMap : rowListMap){
 				EmailTemplateObjJson json = createJsonFromMap(rowMap);
 				emailTemplateObjs.add(json);

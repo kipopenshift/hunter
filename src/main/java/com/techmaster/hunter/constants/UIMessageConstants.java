@@ -15,6 +15,7 @@ public interface UIMessageConstants {
 	public static String MSG_TASK_010 = "MSG_TASK_010";
 	public static String MSG_TASK_011 = "MSG_TASK_011";
 	public static String MSG_TASK_012 = "MSG_TASK_012";
+	public static String MSG_TASK_013 = "MSG_TASK_013"; 
 	
 	// Task Message validations. 
 	public static String MSG_MSG_002 = "MSG_MSG_002";
@@ -30,6 +31,6 @@ public interface UIMessageConstants {
 	
 	// Region json conversion messages.
 	public static String MSG_REGION_001 = "MSG_REGION_001";
-	public static String EMAIL_MSG_002 = "EMAIL_MSG_002"; 
+	public static String EMAIL_MSG_002 = "EMAIL_MSG_002";
 
 }

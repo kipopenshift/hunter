@@ -105,8 +105,8 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	   return builder.toString();
    }
    
-   public static boolean isCollectionNullOrEmpty(Collection<?> collection){
-	   return collection == null || collection.isEmpty();
+   public static boolean isCollectionNotEmpty(Collection<?> collection){
+	   return collection != null && !collection.isEmpty();
    }
    
    public static String getBlobStr(Blob blob){

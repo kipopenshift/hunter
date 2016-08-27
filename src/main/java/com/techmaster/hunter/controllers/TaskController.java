@@ -33,7 +33,7 @@ import com.techmaster.hunter.dao.types.TaskHistoryDao;
 import com.techmaster.hunter.email.HunterEmailManager;
 import com.techmaster.hunter.enums.HunterUserRolesEnums;
 import com.techmaster.hunter.enums.TaskHistoryEventEnum;
-import com.techmaster.hunter.gateway.beans.GatewayClient;
+import com.techmaster.hunter.gateway.beans.GateWayClientService;
 import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.json.TaskProcessJobJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
@@ -306,7 +306,7 @@ public class TaskController extends HunterBaseController{
 		Map<String, Object> result = taskManager.processTask(task,auditInfo);
 		
 		@SuppressWarnings("unchecked")
-		List<String> validationErrors = (List<String>) result.get(GatewayClient.TASK_VALIDATION_ERRORS);
+		List<String> validationErrors = (List<String>) result.get(GateWayClientService.TASK_VALIDATION_ERRORS);
 		if (validationErrors != null && !validationErrors.isEmpty()) {
 			StringBuilder errBuilder = new StringBuilder();
 			for (String error : validationErrors) {

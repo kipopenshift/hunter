@@ -19,6 +19,7 @@ public class TaskProcessWorkerFactory {
 	
 	public static final String DEFAULT_POST_MUL_REQ_PR_MSG = "DEFAULT_POST_MUL_REQ_PR_MSG";
 	public static final String DEFAULT_GET_MUL_REQ_PR_MSG = "DEFAULT_GET_MUL_REQ_PR_MSG";
+	public static final String DEFAULT_EMAIL_MUL_REQ_PR_MSG = "DEFAULT_EMAIL_MUL_REQ_PR_MSG";
 	
 	static{
 		if(factory == null){
@@ -58,6 +59,13 @@ public class TaskProcessWorkerFactory {
 			
 		}else if(DEFAULT_GET_MUL_REQ_PR_MSG.equals(workerType)){ 
 			
+		}else if(DEFAULT_EMAIL_MUL_REQ_PR_MSG.equals(workerType)){ 
+			for(Set<GateWayMessage> messageSet : messageSets){
+				Long workerId = getWorkerId();
+				TaskProcessWorker processWorker = new HunterEmailProcessWorker(configBean, messageSet, workerId, processJobKey);
+				processWorkers.add(processWorker);
+			}
+			return processWorkers;
 		}
 		
 		return processWorkers;
