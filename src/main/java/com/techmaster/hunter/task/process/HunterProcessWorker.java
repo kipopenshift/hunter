@@ -14,7 +14,7 @@ import com.techmaster.hunter.obj.beans.GateWayMessage;
 import com.techmaster.hunter.obj.beans.TaskClientConfigBean;
 import com.techmaster.hunter.util.HunterUtility;
 
-public class HunterProcessWorker extends AbstratTaskProcessWorker{
+public class HunterProcessWorker extends AbstractTaskProcessWorker{
 	
 	private TaskClientConfigBean configBean;
 	private Set<GateWayMessage> messages;

@@ -8,7 +8,7 @@ import com.techmaster.hunter.obj.beans.GateWayMessage;
 import com.techmaster.hunter.obj.beans.TaskClientConfigBean;
 import com.techmaster.hunter.util.HunterUtility;
 
-public abstract class AbstratTaskProcessWorker implements TaskProcessWorker {
+public abstract class AbstractTaskProcessWorker implements TaskProcessWorker {
 	
 	private Logger logger = Logger.getLogger(getClass());
 

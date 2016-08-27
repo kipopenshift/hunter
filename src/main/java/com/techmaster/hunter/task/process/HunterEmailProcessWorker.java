@@ -17,7 +17,7 @@ import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TaskClientConfigBean;
 import com.techmaster.hunter.util.HunterUtility;
 
-public class HunterEmailProcessWorker extends AbstratTaskProcessWorker {
+public class HunterEmailProcessWorker extends AbstractTaskProcessWorker {
 	
 	private Set<GateWayMessage> messages;
 	private Long workerId;
