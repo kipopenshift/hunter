@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.techmaster.hunter.cache.HunterCacheUtil;
+import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.proc.ProcedureHandler;
 import com.techmaster.hunter.dao.types.EmailTemplateObjDao;
@@ -50,6 +52,8 @@ import com.techmaster.hunter.json.EmailTemplateObjJson;
 import com.techmaster.hunter.json.HunterClientJson;
 import com.techmaster.hunter.json.HunterUserJson;
 import com.techmaster.hunter.json.MessageAttachmentBeanJson;
+import com.techmaster.hunter.json.RawUsersDropdownJson;
+import com.techmaster.hunter.json.RegionJsonForDropdowns;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.EmailTemplateObj;
 import com.techmaster.hunter.obj.beans.HunterAddress;
@@ -623,7 +627,121 @@ public class HunterAdminController extends HunterBaseController{
 		return "views/validateRawReceivers";
 	}
 	
+	@RequestMapping(value="/action/raw/validate/getAvailableRawReceiverUsers", method=RequestMethod.POST)
+	@Consumes("application/json")
+	@Produces("application/json")
+	public @ResponseBody List<RawUsersDropdownJson> getAvailableRawReceiverUsers(HttpServletRequest request){
+		
+		List<RawUsersDropdownJson> usersDropdownJsons = new ArrayList<>();
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		String query = hunterJDBCExecutor.getQueryForSqlId("getAvailableRawReceiverUsers");
+		Map<Integer, List<Object>> rowListMap = hunterJDBCExecutor.executeQueryRowList(query, null);
+		
+		if( HunterUtility.isMapNotEmpty( rowListMap ) ) {
+			for(Map.Entry<Integer, List<Object>> rowList : rowListMap.entrySet()){ 
+				List<Object> row = rowList.getValue();
+				String userFullName = HunterUtility.getStringOrNullOfObj( row.get(0) );
+				Long userId = HunterUtility.getLongFromObject( row.get(1) );
+				RawUsersDropdownJson rawUsersDropdownJson = new RawUsersDropdownJson();
+				rawUsersDropdownJson.setUserFullName(userFullName);
+				rawUsersDropdownJson.setUserId(userId);
+				usersDropdownJsons.add(rawUsersDropdownJson);
+			}
+		}
+		
+		return usersDropdownJsons;		
+	}
 	
+	
+	@RequestMapping(value="/action/raw/validate/getRegionDataForDropdowns", method=RequestMethod.POST)
+	@Consumes("application/json")
+	@Produces("application/json")
+	public @ResponseBody List<RegionJsonForDropdowns> getRegionDataForDropdowns(@RequestBody Map<String,Object> params){
+		
+		List<RegionJsonForDropdowns> regionJsons = new ArrayList<>();
+		String regionLevel = HunterUtility.getStringOrNullOfObj( params.get("regionLevel") );
+		Long regionId = HunterUtility.getLongFromObject( params.get("forRegionId") );
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject( HunterJDBCExecutor.class );
+		
+		String query = null;
+		List<Map<String, Object>> rowMapList = null;
+		List<Object> values = new ArrayList<>();
+		values.add(regionId);
+
+		
+		switch ( regionLevel ) {
+		
+		case HunterConstants.RECEIVER_LEVEL_COUNTRY: 
+			
+			query = hunterJDBCExecutor.getQueryForSqlId("getCountryNameAndId");
+			rowMapList =  hunterJDBCExecutor.executeQueryRowMap(query, null);
+			
+			if( HunterUtility.isCollectionNotEmpty(rowMapList) ){ 
+				for(Map<String,Object> rowMap : rowMapList){
+					RegionJsonForDropdowns regionJson = new RegionJsonForDropdowns();
+					regionJson.setRegionId( HunterUtility.getLongFromObject( rowMap.get("COUNTRYID") ) );
+					regionJson.setRegionName( HunterUtility.getStringOrNullOfObj( rowMap.get("CNTRY_NAM") ) ); 
+					regionJsons.add(regionJson); 
+				}
+			}
+			
+			break;
+			
+		case HunterConstants.RECEIVER_LEVEL_COUNTY: 
+			
+			query = hunterJDBCExecutor.getQueryForSqlId("getCountiesNameAndIdForSelCountry");
+			rowMapList =  hunterJDBCExecutor.executeQueryRowMap(query, values);
+			
+			if( HunterUtility.isCollectionNotEmpty(rowMapList) ){ 
+				for(Map<String,Object> rowMap : rowMapList){
+					RegionJsonForDropdowns regionJson = new RegionJsonForDropdowns();
+					regionJson.setRegionId( HunterUtility.getLongFromObject( rowMap.get("COUNTYID") ) );
+					regionJson.setRegionName( HunterUtility.getStringOrNullOfObj( rowMap.get("COUNTYNAME") ) ); 
+					regionJsons.add(regionJson); 
+				}
+			}
+			
+			break;
+			
+		case HunterConstants.RECEIVER_LEVEL_CONSITUENCY: 
+			
+			query = hunterJDBCExecutor.getQueryForSqlId("getConstituenciesNameAndIdForSelCounty");
+			rowMapList =  hunterJDBCExecutor.executeQueryRowMap(query, values);
+			
+			if( HunterUtility.isCollectionNotEmpty(rowMapList) ){ 
+				for(Map<String,Object> rowMap : rowMapList){
+					RegionJsonForDropdowns regionJson = new RegionJsonForDropdowns();
+					regionJson.setRegionId( HunterUtility.getLongFromObject( rowMap.get("CONSTITUENCY_ID") ) );
+					regionJson.setRegionName( HunterUtility.getStringOrNullOfObj( rowMap.get("CONSTITUENCY_NAME") ) ); 
+					regionJsons.add(regionJson); 
+				}
+			}
+			
+			break;
+			
+		case HunterConstants.RECEIVER_LEVEL_WARD: 
+			
+			query = hunterJDBCExecutor.getQueryForSqlId("getConstituencyWardsForSelCons");
+			rowMapList =  hunterJDBCExecutor.executeQueryRowMap(query, values);
+			
+			if( HunterUtility.isCollectionNotEmpty(rowMapList) ){ 
+				for(Map<String,Object> rowMap : rowMapList){
+					RegionJsonForDropdowns regionJson = new RegionJsonForDropdowns();
+					regionJson.setRegionId( HunterUtility.getLongFromObject( rowMap.get("WARD_ID") ) );
+					regionJson.setRegionName( HunterUtility.getStringOrNullOfObj( rowMap.get("WRD_NAME") ) ); 
+					regionJsons.add(regionJson); 
+				}
+			}
+			
+			break;
+
+		default:
+			break;
+		}
+		
+		
+		return regionJsons;
+	}
 	
 	
 	

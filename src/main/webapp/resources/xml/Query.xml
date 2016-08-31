@@ -506,7 +506,12 @@
 			    THEN ' '
 			    ELSE r.VLLGE
 			  END AS "village",
-			  r.VRFD_CNTCT_NO "verified",
+	          (
+		          SELECT COUNT(*)
+		          FROM HNTR_RW_RCVR rcv
+		          WHERE rcv.GVN_BY_USR_NAM = r.RW_USR_NAM
+		          AND rcv.VRYFD            = 'Y'
+	          ) AS "verified",
 			  r.WRD "ward",
 			  u.PHN_NUMBR "phone",
 			  u.FRST_NAM "firstname",
@@ -1049,6 +1054,97 @@
 			FROM RAW_DATA dat
 			WHERE dat.ROW_NUM BETWEEN ( ( ? - 1 ) * ? ) AND ( ? * ? ) 
 			order by dat.ROW_NUM ASC
+		</statement>
+	</query>
+	<query id="getAvailableRawReceiverUsers">
+		<description>
+		    Returns all raw receiver users for dropdowns.
+		</description>
+		<statement>
+		  	select DISTINCT
+			s.FRST_NAM || ' ' || s.LST_NAM || '(' || s.EMAIL || ')' USR_FULL_NAM,
+			s.USR_ID  AS USR_ID
+			from HNTR_RW_RCVR_USR u, HNTR_USR s
+			WHERE s.USR_NAM = u.RW_USR_NAM
+		</statement>
+	</query>
+	<query id="getPageRawReceiversForDefaultDate">
+		<description>
+		    Returns all raw receiver users for dropdowns.
+		    verified?,pageNo,pageSize,pageNo,pageSize
+		</description>
+		<statement>
+		  	WITH RAW_DATA AS (    
+			  SELECT
+			    ( ROW_NUMBER() OVER ( ORDER BY rc.RW_RCVR_ID ASC) ) AS ROW_NUM,
+			    rc.CNTRY_NAM,
+			    rc.CNTY_NAM,
+			    rc.CONS_NAM,
+			    TO_CHAR(rc.CRET_DATE, 'yyyy-MM-dd HH:mm:ss') AS CRET_DATE,
+			    rc.CRTD_BY,
+			    rc.ERR_MSG,
+			    rc.FRST_NAM,
+			    rc.GVN_BY_USR_NAM,
+			    rc.LST_NAM,
+			    TO_CHAR(rc.LST_UPDT_DATE, 'yyyy-MM-dd HH:mm:ss') AS LST_UPDT_DATE,
+			    rc.LST_UPDTD_BY,
+			    rc.RCVR_CNTCT,
+			    rc.RCVR_TYP,
+			    rc.RCVR_VRSN,
+			    rc.RW_RCVR_ID,
+			    rc.VLLG,
+			    rc.VRYFD,
+			    rc.VRYFD_BY,
+			    rc.WRD_NAM
+			  FROM HNTR_RW_RCVR rc
+			  where rc.VRYFD = ?
+			  ORDER BY rc.CRET_DATE DESC
+			)
+			SELECT
+			  ( SELECT COUNT(r.RCVR_CNTCT) FROM RAW_DATA r) AS CNT,
+			  r.*
+			FROM RAW_DATA r WHERE r.ROW_NUM BETWEEN ( ( ? - 1 ) * ? ) AND ( ? * ? ) 
+			order by r.ROW_NUM ASC
+		</statement>
+	</query>
+	<query id="getPageRawReceiversForWhereCls">
+		<description>
+		    Returns all raw receiver users for dropdowns.
+		    verified?,pageNo,pageSize,pageNo,pageSize
+		</description>
+		<statement>
+		  	WITH RAW_DATA AS (    
+			  SELECT
+			    ( ROW_NUMBER() OVER ( ORDER BY rcv.RW_RCVR_ID ASC) ) AS ROW_NUM,
+			    rcv.CNTRY_NAM,
+			    rcv.CNTY_NAM,
+			    rcv.CONS_NAM,
+			    TO_CHAR(rcv.CRET_DATE, 'yyyy-MM-dd HH:mm:ss') AS CRET_DATE,
+			    rcv.CRTD_BY,
+			    rcv.ERR_MSG,
+			    rcv.FRST_NAM,
+			    rcv.GVN_BY_USR_NAM,
+			    rcv.LST_NAM,
+			    TO_CHAR(rcv.LST_UPDT_DATE, 'yyyy-MM-dd HH:mm:ss') AS LST_UPDT_DATE,
+			    rcv.LST_UPDTD_BY,
+			    rcv.RCVR_CNTCT,
+			    rcv.RCVR_TYP,
+			    rcv.RCVR_VRSN,
+			    rcv.RW_RCVR_ID,
+			    rcv.VLLG,
+			    rcv.VRYFD,
+			    rcv.VRYFD_BY,
+			    rcv.WRD_NAM
+			  FROM HNTR_RW_RCVR rcv
+			  where rcv.VRYFD = ? AND 
+			  :selectWhereClause
+			  ORDER BY rcv.CRET_DATE DESC
+			)
+			SELECT
+			  ( SELECT COUNT(r.RCVR_CNTCT) FROM RAW_DATA r) AS CNT,
+			  r.*
+			FROM RAW_DATA r WHERE r.ROW_NUM BETWEEN ( ( ? - 1 ) * ? ) AND ( ? * ? ) 
+			order by r.ROW_NUM ASC
 		</statement>
 	</query>
 </queries>

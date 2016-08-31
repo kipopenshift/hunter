@@ -136,8 +136,8 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	}
    }
    
-   public static boolean isMapNllOrEmpty(Map<?,?> map){
-	   return map == null || map.isEmpty();
+   public static boolean isMapNotEmpty(Map<?,?> map){
+	   return map != null && !map.isEmpty();
    }
    
    public static String getFirstUpperCase(String string){
@@ -639,6 +639,16 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		XMLService service = HunterCacheUtil.getInstance().getXMLService(HunterConstants.QUERY_XML_CACHED_SERVICE);
 		String query  = service.getTextValue(builder.toString());
 		return query.trim();
+	}
+	
+	public static String getQueryDescForSqlId(String id) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("queries/query[@id=\"");
+		builder.append(id);
+		builder.append("\"]/description");
+		XMLService service = HunterCacheUtil.getInstance().getXMLService(HunterConstants.QUERY_XML_CACHED_SERVICE);
+		String description  = service.getTextValue(builder.toString());
+		return description.trim();
 	}
 	
 	public static XMLService createXMLServiceForDoc(Document doc) throws ParserConfigurationException, HunterRemoteException {

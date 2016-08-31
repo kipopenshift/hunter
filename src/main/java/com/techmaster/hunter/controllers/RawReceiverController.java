@@ -48,6 +48,7 @@ import com.techmaster.hunter.dao.types.HunterUserDao;
 import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.imports.extractors.RawReceiverExtractor;
 import com.techmaster.hunter.json.HunterRawReceiverJson;
+import com.techmaster.hunter.json.PagedHunterRawReceiverJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.HunterRawReceiver;
 import com.techmaster.hunter.obj.beans.HunterRawReceiverUser;
@@ -77,22 +78,180 @@ public class RawReceiverController extends HunterBaseController{
 		return "access/login";
 	}
 	
+
+	@Produces("application/json")
+	@Consumes("application/json")
+	@RequestMapping(value="/action/raw/validate/certifySelectedReceivers", method=RequestMethod.POST)
+	public @ResponseBody String certifySelectedReceivers( HttpServletRequest request ){
+		
+		String reqBody = null;
+		JSONObject results = new JSONObject();
+		JSONObject data = null;
+		
+		try {
+			reqBody = HunterUtility.getRequestBodyAsString(request);
+			data = new JSONObject(reqBody);
+			String update = "UPDATE HNTR_RW_RCVR rc SET rc.VRYFD = 'Y', rc.VRYFD_BY = ? WHERE rc.RW_RCVR_ID IN (:RW_RCVR_ID)";
+			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+			StringBuilder receiverIds = new StringBuilder();
+			for(int i=0; i<data.length(); i++){
+				receiverIds.append(data.get(i+""));
+				if( i != data.length() - 1 ){
+					receiverIds.append(",");
+				}
+			}
+			if( receiverIds.length() != 0  ){
+				List<Object> values = new ArrayList<>();
+				values.add( getUserName() );
+				update = update.replace(":RW_RCVR_ID", receiverIds);
+				logger.debug("Replaced query : " + update); 
+				hunterJDBCExecutor.executeUpdate(update, values);
+			}
+			results = HunterUtility.setJSONObjectForSuccess(results, data.length() + " receivers have been certified successfully!");
+		} catch (IOException e) {
+			e.printStackTrace();
+			results = HunterUtility.setJSONObjectForSuccess(results, "Error while certifying contacts( "+ e.getMessage() +" )");
+		}
+		
+		return results.toString();
+		
+	}
+	
 	@Produces("application/json")
 	@Consumes("application/json")
 	@RequestMapping(value="/action/raw/getRawReceiversForValidation", method=RequestMethod.POST)
-	public @ResponseBody List<HunterRawReceiverJson> getRawReceiversForValidation(HttpServletRequest request, HttpServletResponse response){
+	public @ResponseBody PagedHunterRawReceiverJson getRawReceiversForValidation(HttpServletRequest request, HttpServletResponse response){
+		
+		boolean 
+		isDateChecked 			= Boolean.valueOf( request.getParameter("isDateChecked") ),
+		isRegionChecked 		= Boolean.valueOf( request.getParameter("isRegionChecked") ),
+		isUserChecked 			= Boolean.valueOf( request.getParameter("isUserChecked") ),
+		isDefaultDateSelected 	= Boolean.valueOf( request.getParameter("isDefaultDateSelected") );
 		
 		String 
-		getMode = request.getParameter("getMode"),
-		modeVal = request.getParameter("modeVal"),
-		bodyStr = HunterUtility.getParamNamesAsStringsFrmRqst(request);
+		selDateFrom 		= request.getParameter("selDateFrom"),
+		selDateTo 			= request.getParameter("selDateTo"),
+		checkedUserId 		= request.getParameter("checkedUserId"),
+		selCountry 			= request.getParameter("selCountry"),
+		selCounty 			= request.getParameter("selCounty"),
+		selConstituency		= request.getParameter("selConstituency"),
+		selWard 			= request.getParameter("selWard"),
+		selCertifiedStatus 	= request.getParameter("selCertifiedStatus");
 		
-		logger.debug( bodyStr );
-		logger.debug("Get Parameters : " + getMode + "," + modeVal); 
+		int
+		take 		= Integer.valueOf( request.getParameter("take")),
+		skip 		= Integer.valueOf( request.getParameter("skip")),
+		page 		= Integer.valueOf( request.getParameter("page")),
+		pageSize 	= Integer.valueOf( request.getParameter("pageSize"));
+		
+		String[] reqParams = new String[]{
+			"selDateFrom = " 			+ selDateFrom,
+			"selDateFrom = " 			+ selDateFrom,
+			"selDateTo = " 				+ selDateTo,
+			"checkedUserId = " 			+ checkedUserId,
+			"selCountry = " 			+ selCountry,
+			"selCounty = " 				+ selCounty,
+			"selConstituency = " 		+ selConstituency,
+			"selWard = " 				+ selWard,
+			"take = " 					+ take,
+			"skip = " 					+ skip,
+			"page  = " 					+ page,
+			"pageSize = " 				+ pageSize,
+			"isDefaultDateSelected = " 	+ isDefaultDateSelected
+		};
 		
 		List<HunterRawReceiverJson> rawReceiverJsons = new ArrayList<>();
+		PagedHunterRawReceiverJson pagedHunterRawReceiverJson = new PagedHunterRawReceiverJson() ;
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		List<Object> values = new ArrayList<>();
 		
-		return rawReceiverJsons;
+		/* Return paged receivers if default date is selected. Order by creation date */
+		if( isDefaultDateSelected ){
+			
+			String defQuery = hunterJDBCExecutor.getQueryForSqlId("getPageRawReceiversForDefaultDate");
+			values.add(selCertifiedStatus);
+			values.add(page);
+			values.add(pageSize);
+			values.add(page);
+			values.add(pageSize);
+			
+			List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(defQuery, values);
+			RawReceiverService rawReceiverService = HunterDaoFactory.getInstance().getDaoObject(RawReceiverService.class);
+			rawReceiverJsons = rawReceiverService.getRawReceiverJsonForDbMap(rowMapList);
+			
+			pagedHunterRawReceiverJson.setData(rawReceiverJsons);;
+			pagedHunterRawReceiverJson.setTotal( HunterUtility.isCollectionNotEmpty( rowMapList ) ? Integer.valueOf( rowMapList.get(0).get("CNT") + "" ) : 0 );
+			
+			return pagedHunterRawReceiverJson;
+			
+		}
+		
+		logger.debug("Request Parameters : \n " + HunterUtility.getCommaDelimitedStrings( reqParams ));
+		
+		StringBuilder whereClause = new StringBuilder();
+		String baseQuery = hunterJDBCExecutor.getQueryForSqlId("getPageRawReceiversForWhereCls");
+
+		if( isDateChecked ){
+		  whereClause.append(" rcv.CRET_DATE BETWEEN TO_DATE('"+ selDateFrom +"', 'yyyy-MM-dd') AND TO_DATE('"+ selDateTo +"', 'yyyy-MM-dd') ");
+		}
+		
+		if( isDateChecked && isUserChecked ){
+			whereClause.append(" AND ");
+		}
+		
+		if( isUserChecked ){
+			whereClause.append(" rcv.CRTD_BY = ( SELECT u.USR_NAM FROM HNTR_USR u WHERE u.USR_ID = "+ checkedUserId +" ) ");
+		}
+		
+		if( ( isDateChecked || isUserChecked ) && isRegionChecked ){
+			whereClause.append(" AND ");
+		}
+		
+		if( isRegionChecked ){
+			
+			boolean 
+			isCountryLevel 		= HunterUtility.notNullNotEmpty(selCountry) && !HunterUtility.notNullNotEmpty(selCounty) && !HunterUtility.notNullNotEmpty(selConstituency) && !HunterUtility.notNullNotEmpty(selWard),
+			isCountyLevel 		= HunterUtility.notNullNotEmpty(selCountry) && HunterUtility.notNullNotEmpty(selCounty) && !HunterUtility.notNullNotEmpty(selConstituency) && !HunterUtility.notNullNotEmpty(selWard),
+			isConstituencyLevel = HunterUtility.notNullNotEmpty(selCountry) && HunterUtility.notNullNotEmpty(selCounty) && HunterUtility.notNullNotEmpty(selConstituency) && !HunterUtility.notNullNotEmpty(selWard), 
+			isWardLevel 		= HunterUtility.notNullNotEmpty(selCountry) && HunterUtility.notNullNotEmpty(selCounty) && HunterUtility.notNullNotEmpty(selConstituency) && HunterUtility.notNullNotEmpty(selWard);
+			
+			String
+			subCountry 			= " rcv.CNTRY_NAM =  ( SELECT c.CNTRY_NAM FROM CNTRY c WHERE c.CNTRY_ID = "+ selCountry +") ",
+			subCounty 			= " AND rcv.CNTY_NAM = ( SELECT c.CNTY_NAM FROM CNTY c WHERE c.CNTY_ID = "+ selCounty +") ",
+			subConstituency 	= " AND rcv.CONS_NAM = ( SELECT c.CNSTTNCY_NAM FROM CNSTTNCY c WHERE c.CNSTTNCY_ID = "+ selConstituency +") ",
+			subWard 			= " AND rcv.WRD_NAM = ( SELECT c.WRD_NAM FROM CNSTTNCY_WRD c WHERE c.WRD_ID = "+ selWard +") ";
+			
+			if (isCountryLevel){
+				whereClause.append(subCountry); 
+			}else if (isCountyLevel){
+				whereClause.append(subCountry).append(subCounty);
+			}else if (isConstituencyLevel){
+				whereClause.append(subCountry).append(subCounty).append(subConstituency);
+			}else if (isWardLevel){
+				whereClause.append(subCountry).append(subCounty).append(subConstituency).append(subWard);
+			}
+			
+		}
+		logger.debug( whereClause ); 
+		baseQuery = baseQuery.replaceAll(":selectWhereClause", whereClause.toString());
+		logger.debug("Replaced base query = " + baseQuery);
+		
+		values.clear();
+		values.add(selCertifiedStatus);
+		values.add(page);
+		values.add(pageSize);
+		values.add(page);
+		values.add(pageSize);
+		
+		List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(baseQuery, values);
+		RawReceiverService rawReceiverService = HunterDaoFactory.getInstance().getDaoObject(RawReceiverService.class);
+		rawReceiverJsons = rawReceiverService.getRawReceiverJsonForDbMap(rowMapList);
+		
+		pagedHunterRawReceiverJson.setData(rawReceiverJsons);;
+		pagedHunterRawReceiverJson.setTotal( HunterUtility.isCollectionNotEmpty( rowMapList ) ? Integer.valueOf( rowMapList.get(0).get("CNT") + "" ) : 0 );
+		
+		return pagedHunterRawReceiverJson;
+		
 	}
 	
 	@Produces("application/json")

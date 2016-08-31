@@ -14,6 +14,8 @@ public class HunterSocialGroup {
 	private String consName;
 	private String wardName;
 	private AuditInfo auditInfo;
+	private boolean active;
+	private HunterSocialGroupCredentials groupCredentials;
 	
 	public Long getGroupId() {
 		return groupId;
@@ -87,12 +89,23 @@ public class HunterSocialGroup {
 	public void setHunterGroupAdmin(String hunterGroupAdmin) {
 		this.hunterGroupAdmin = hunterGroupAdmin;
 	}
+	public boolean isActive() {
+		return active;
+	}
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+	public HunterSocialGroupCredentials getGroupCredentials() {
+		return groupCredentials;
+	}
+	public void setGroupCredentials(HunterSocialGroupCredentials groupCredentials) {
+		this.groupCredentials = groupCredentials;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((auditInfo == null) ? 0 : auditInfo.hashCode());
+		result = prime * result + (active ? 1231 : 1237);
 		result = prime * result
 				+ ((clientUserName == null) ? 0 : clientUserName.hashCode());
 		result = prime * result
@@ -107,6 +120,9 @@ public class HunterSocialGroup {
 		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
 		result = prime * result
 				+ ((groupName == null) ? 0 : groupName.hashCode());
+		result = prime
+				* result
+				+ ((hunterGroupAdmin == null) ? 0 : hunterGroupAdmin.hashCode());
 		result = prime * result + (hunterOwned ? 1231 : 1237);
 		result = prime * result
 				+ ((socialType == null) ? 0 : socialType.hashCode());
@@ -123,10 +139,7 @@ public class HunterSocialGroup {
 		if (getClass() != obj.getClass())
 			return false;
 		HunterSocialGroup other = (HunterSocialGroup) obj;
-		if (auditInfo == null) {
-			if (other.auditInfo != null)
-				return false;
-		} else if (!auditInfo.equals(other.auditInfo))
+		if (active != other.active)
 			return false;
 		if (clientUserName == null) {
 			if (other.clientUserName != null)
@@ -163,6 +176,11 @@ public class HunterSocialGroup {
 				return false;
 		} else if (!groupName.equals(other.groupName))
 			return false;
+		if (hunterGroupAdmin == null) {
+			if (other.hunterGroupAdmin != null)
+				return false;
+		} else if (!hunterGroupAdmin.equals(other.hunterGroupAdmin))
+			return false;
 		if (hunterOwned != other.hunterOwned)
 			return false;
 		if (socialType == null) {
@@ -179,16 +197,17 @@ public class HunterSocialGroup {
 	}
 	
 	
-	
 	@Override
 	public String toString() {
 		return "HunterSocialGroup [groupId=" + groupId + ", groupName="
 				+ groupName + ", groupDescription=" + groupDescription
 				+ ", socialType=" + socialType + ", hunterOwned=" + hunterOwned
-				+ ", clientUserName=" + clientUserName + ", countryName="
-				+ countryName + ", countyName=" + countyName + ", consName="
-				+ consName + ", wardName=" + wardName + ", auditInfo="
-				+ auditInfo + ", hunterGroupAdmin=" + hunterGroupAdmin   + "]";
+				+ ", clientUserName=" + clientUserName + ", hunterGroupAdmin="
+				+ hunterGroupAdmin + ", countryName=" + countryName
+				+ ", countyName=" + countyName + ", consName=" + consName
+				+ ", wardName=" + wardName + ", auditInfo=" + auditInfo
+				+ ", active=" + active + ", groupCredentials="
+				+ groupCredentials + "]";
 	}
 	
 	

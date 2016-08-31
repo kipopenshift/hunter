@@ -22,6 +22,7 @@ import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterRawReceiverDao;
 import com.techmaster.hunter.dao.types.HunterRawReceiverUserDao;
 import com.techmaster.hunter.dao.types.HunterUserDao;
+import com.techmaster.hunter.json.HunterRawReceiverJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.Constituency;
 import com.techmaster.hunter.obj.beans.ConstituencyWard;
@@ -371,6 +372,43 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 		}
 		logger.debug("Successfully pulled up distinct contacts. Size ( "+ contacts.size() +" )");
 		return contacts;
+	}
+
+	@Override
+	public List<HunterRawReceiverJson> getRawReceiverJsonForDbMap(List<Map<String, Object>> rowMapList) {
+		
+		List<HunterRawReceiverJson> receiverJsons = new ArrayList<>();
+		
+		for(Map<String,Object> rowMap : rowMapList){
+			HunterRawReceiverJson receiverJson = new HunterRawReceiverJson();
+			receiverJson.setCretDate( HunterUtility.parseDate(HunterUtility.getStringOrNullOfObj( rowMap.get("CRET_DATE")), HunterConstants.DATE_FORMAT_STRING ) );  
+			receiverJson.setCreatedBy( HunterUtility.getStringOrNullOfObj( rowMap.get("CRTD_BY") ));
+			receiverJson.setLastUpdate( HunterUtility.parseDate(HunterUtility.getStringOrNullOfObj( rowMap.get("LST_UPDT_DATE")), HunterConstants.DATE_FORMAT_STRING ) );
+			receiverJson.setLastUpdatedBy( HunterUtility.getStringOrNullOfObj( rowMap.get("LST_UPDTD_BY") )); 
+			receiverJson.setConsId(null);
+			receiverJson.setConsName( HunterUtility.getStringOrNullOfObj( rowMap.get("CONS_NAM")) );
+			receiverJson.setConsWardId(null);
+			receiverJson.setConsWardName( HunterUtility.getStringOrNullOfObj( rowMap.get("WRD_NAM")) );
+			receiverJson.setCountryId(null);
+			receiverJson.setCountryName( HunterUtility.getStringOrNullOfObj( rowMap.get("CNTRY_NAM")) ); 
+			receiverJson.setCountyId(null); 
+			receiverJson.setCountyName( HunterUtility.getStringOrNullOfObj( rowMap.get("CNTY_NAM")) ); 
+			receiverJson.setErrorMessage( HunterUtility.getStringOrNullOfObj( rowMap.get("ERR_MSG")) );
+			receiverJson.setFirstName( HunterUtility.getStringOrNullOfObj( rowMap.get("FRST_NAM")) ); 
+			receiverJson.setLastName( HunterUtility.getStringOrNullOfObj( rowMap.get("LST_NAM")) ); 
+			receiverJson.setGivenByUserName( HunterUtility.getStringOrNullOfObj( rowMap.get("GVN_BY_USR_NAM")) );  
+			receiverJson.setRawReceiverId( HunterUtility.getLongFromObject( rowMap.get("RW_RCVR_ID") ) );  
+			receiverJson.setReceiverContact( HunterUtility.getStringOrNullOfObj( rowMap.get("RCVR_CNTCT")) ); 
+			receiverJson.setReceiverType( HunterUtility.getStringOrNullOfObj( rowMap.get("RCVR_TYP")) ); 
+			receiverJson.setReceiverVersion(1);
+			receiverJson.setVerified( HunterUtility.getBooleanForYN( rowMap.get("VRYFD") + "" ) ); 
+			receiverJson.setVerifiedBy( HunterUtility.getStringOrNullOfObj( rowMap.get("VRYFD_BY")) );  
+			receiverJson.setVillage( HunterUtility.getStringOrNullOfObj( rowMap.get("VLLG")) );
+			receiverJson.setVillageId(null); 
+			receiverJsons.add(receiverJson);
+		}
+		
+		return receiverJsons;
 	}
 	
 	

@@ -41,7 +41,9 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 		if(id == null || id.trim().equalsIgnoreCase("")) 
 			throw new IllegalArgumentException("Id provided is null or empty >> " + id); 
 		
-		String query = HunterUtility.getQueryForSqlId(id);
+		String query = HunterUtility.getQueryForSqlId(id),
+			   desc = HunterUtility.getQueryDescForSqlId(id);
+		logger.debug("Description :  " + desc); 
 		logger.debug("Retrieved query for id = " + id + " \n" + query);
 		return query;
 	}
@@ -239,7 +241,7 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 	@Override
 	public String replaceAllColonedParams(String query, Map<String, Object> params) {
 		logger.debug("Replacing parameters : " + HunterUtility.stringifyMap(params)); 
-		if( query == null || HunterUtility.isMapNllOrEmpty(params) ){ 
+		if( query == null || !HunterUtility.isMapNotEmpty(params) ){ 
 			String message = "Either the query is null or no parameters to replace. Returning the as is query...";
 			logger.debug( message );
 			throw new IllegalArgumentException( message   );

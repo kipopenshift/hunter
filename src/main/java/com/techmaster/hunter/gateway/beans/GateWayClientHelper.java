@@ -626,7 +626,7 @@ public class GateWayClientHelper {
 		Map<String,String> messageAttachmentMap = getAttachmentLocsMap(task);
 		logger.debug("Message Attachments Map : " + HunterUtility.stringifyMap(messageAttachmentMap)); 
 		List<Long> attachmentIds = new ArrayList<>();
-		if( !HunterUtility.isMapNllOrEmpty(messageAttachmentMap) ){
+		if( HunterUtility.isMapNotEmpty(messageAttachmentMap) ){
 			for(Map.Entry<String, String> entry : messageAttachmentMap.entrySet()){
 				String path = entry.getValue();
 				if( path != null && !NO_ATTACHMENT_CONFIGURED.equals(path) && path.startsWith( SYSTEM_ATTCHMNT_ID ) ){
@@ -837,7 +837,7 @@ public class GateWayClientHelper {
 		HunterEmailTemplateBean emailTemplateBean = HunterCacheUtil.getInstance().getEmailTemplateBean(templateName);
 		Map<String,String> actualMap = emailTemplateBean.getAttachments();
 		Map<String,String> holderMap = new HashMap<>();
-		if( !HunterUtility.isMapNllOrEmpty(actualMap) ){
+		if( HunterUtility.isMapNotEmpty(actualMap) ){
 			for(Map.Entry<String, String> entry : actualMap.entrySet()){
 				holderMap.put(isName ? entry.getValue() : entry.getKey(), NO_ATTACHMENT_CONFIGURED);
 			}
@@ -859,7 +859,7 @@ public class GateWayClientHelper {
 		
 		logger.debug("Message attachment before replacement : " + emailMessage.getMessageAttachments());
 		
-		if( HunterUtility.notNullNotEmpty(messageAttachment) && !HunterUtility.isMapNllOrEmpty(attachmentsMap) ){ 
+		if( HunterUtility.notNullNotEmpty(messageAttachment) && HunterUtility.isMapNotEmpty(attachmentsMap) ){ 
 			String[] attachments = messageAttachment.split(",");
 			for(String attachment : attachments){
 				int index = attachment.indexOf("||");

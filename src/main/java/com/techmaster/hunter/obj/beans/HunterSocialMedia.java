@@ -10,6 +10,7 @@ public class HunterSocialMedia {
 	private String mediaType;
 	private String mediaDescription;
 	private String clientName;
+	private String dstrbtnDrctns;
 	private boolean hunterOwned;
 	private int byteSize;
 	private Blob mediaData;
@@ -20,6 +21,8 @@ public class HunterSocialMedia {
 	private String channelType;
 	private double durationInSecs;
 	private String mediaSuffix;
+	private int width;
+	private int height;
 	private AuditInfo auditInfo;
 	
 	
@@ -119,21 +122,36 @@ public class HunterSocialMedia {
 	public void setAuditInfo(AuditInfo auditInfo) {
 		this.auditInfo = auditInfo;
 	}
+	public String getDstrbtnDrctns() {
+		return dstrbtnDrctns;
+	}
+	public void setDstrbtnDrctns(String dstrbtnDrctns) {
+		this.dstrbtnDrctns = dstrbtnDrctns;
+	}
+	public int getWidth() {
+		return width;
+	}
+	public void setWidth(int width) {
+		this.width = width;
+	}
+	public int getHeight() {
+		return height;
+	}
+	public void setHeight(int height) {
+		this.height = height;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + byteSize;
 		result = prime * result
 				+ ((channelType == null) ? 0 : channelType.hashCode());
 		result = prime * result
 				+ ((clientName == null) ? 0 : clientName.hashCode());
-		long temp;
-		temp = Double.doubleToLongBits(durationInSecs);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result
+				+ ((dstrbtnDrctns == null) ? 0 : dstrbtnDrctns.hashCode());
 		result = prime * result
 				+ ((fileFormat == null) ? 0 : fileFormat.hashCode());
-		result = prime * result + (hunterOwned ? 1231 : 1237);
 		result = prime
 				* result
 				+ ((mediaDescription == null) ? 0 : mediaDescription.hashCode());
@@ -142,10 +160,6 @@ public class HunterSocialMedia {
 				+ ((mediaName == null) ? 0 : mediaName.hashCode());
 		result = prime * result
 				+ ((mediaSuffix == null) ? 0 : mediaSuffix.hashCode());
-		result = prime * result
-				+ ((mediaType == null) ? 0 : mediaType.hashCode());
-		result = prime * result
-				+ ((mimeType == null) ? 0 : mimeType.hashCode());
 		result = prime
 				* result
 				+ ((originalFileName == null) ? 0 : originalFileName.hashCode());
@@ -160,8 +174,6 @@ public class HunterSocialMedia {
 		if (getClass() != obj.getClass())
 			return false;
 		HunterSocialMedia other = (HunterSocialMedia) obj;
-		if (byteSize != other.byteSize)
-			return false;
 		if (channelType == null) {
 			if (other.channelType != null)
 				return false;
@@ -172,15 +184,15 @@ public class HunterSocialMedia {
 				return false;
 		} else if (!clientName.equals(other.clientName))
 			return false;
-		if (Double.doubleToLongBits(durationInSecs) != Double
-				.doubleToLongBits(other.durationInSecs))
+		if (dstrbtnDrctns == null) {
+			if (other.dstrbtnDrctns != null)
+				return false;
+		} else if (!dstrbtnDrctns.equals(other.dstrbtnDrctns))
 			return false;
 		if (fileFormat == null) {
 			if (other.fileFormat != null)
 				return false;
 		} else if (!fileFormat.equals(other.fileFormat))
-			return false;
-		if (hunterOwned != other.hunterOwned)
 			return false;
 		if (mediaDescription == null) {
 			if (other.mediaDescription != null)
@@ -202,16 +214,6 @@ public class HunterSocialMedia {
 				return false;
 		} else if (!mediaSuffix.equals(other.mediaSuffix))
 			return false;
-		if (mediaType == null) {
-			if (other.mediaType != null)
-				return false;
-		} else if (!mediaType.equals(other.mediaType))
-			return false;
-		if (mimeType == null) {
-			if (other.mimeType != null)
-				return false;
-		} else if (!mimeType.equals(other.mimeType))
-			return false;
 		if (originalFileName == null) {
 			if (other.originalFileName != null)
 				return false;
@@ -226,13 +228,19 @@ public class HunterSocialMedia {
 		return "HunterSocialMedia [mediaId=" + mediaId + ", mediaName="
 				+ mediaName + ", mediaType=" + mediaType
 				+ ", mediaDescription=" + mediaDescription + ", clientName="
-				+ clientName + ", hunterOwned=" + hunterOwned + ", byteSize="
-				+ byteSize + ", userSpecs=" + userSpecs + ", fileFormat="
-				+ fileFormat + ", originalFileName=" + originalFileName
-				+ ", mimeType=" + mimeType + ", channelType=" + channelType
+				+ clientName + ", dstrbtnDrctns=" + dstrbtnDrctns
+				+ ", hunterOwned=" + hunterOwned + ", byteSize=" + byteSize
+				+ ", userSpecs=" + userSpecs + ", fileFormat=" + fileFormat
+				+ ", originalFileName=" + originalFileName + ", mimeType="
+				+ mimeType + ", channelType=" + channelType
 				+ ", durationInSecs=" + durationInSecs + ", mediaSuffix="
-				+ mediaSuffix + ", auditInfo=" + auditInfo + "]";
+				+ mediaSuffix + ", width=" + width + ", height=" + height
+				+ ", auditInfo=" + auditInfo + "]";
 	}
+	
+	
+	
+	
 	
 	
 	

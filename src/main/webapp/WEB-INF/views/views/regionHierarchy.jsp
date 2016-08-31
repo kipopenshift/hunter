@@ -9,10 +9,10 @@
 <script src="<c:url value='/static/resources/scripts/plain/kendoHelper.js'/>"></script>
 <script src="<c:url value='http://localhost:8080/Hunter/static/resources/scripts/model/regionHierarchy.js'/>"></script>
 
-<div style="width:80%;margin-left:10%;" id="regionHierarchyTreeListVMContainer"  >
+<div style="width:98%;border:1px solid #CADDE9;margin-left:1%;background-color:#E1F2FC;padding:10px;border-radius:5px;" id="regionHierarchyTreeListVMContainer"  >
 
 <div id="countriesDropdownList" >
-	<table style="width:10%;">
+	<table style="margin-left:3%;margin-top:20px;">
 		<tr>
 			<td>
 				 <input id="countryDropDownList"
@@ -33,7 +33,7 @@
 	</table>
 </div>
 
-<div id="regionHierarchyTreeList"  >
+<div id="regionHierarchyTreeList"  style="width:93%;margin-left:3%;margin-bottom:2%;"  >
 	
 </div>
 

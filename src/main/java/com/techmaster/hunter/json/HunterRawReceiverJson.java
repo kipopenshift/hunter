@@ -27,7 +27,14 @@ public class HunterRawReceiverJson {
 	private String createdBy;
 	private java.util.Date lastUpdate;
 	private String lastUpdatedBy;
+	private boolean selected;
 	
+	public boolean isSelected() {
+		return selected;
+	}
+	public void setSelected(boolean selected) {
+		this.selected = selected;
+	}
 	public long getRawReceiverId() {
 		return rawReceiverId;
 	}

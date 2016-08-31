@@ -613,7 +613,7 @@ public class RegionController extends HunterBaseController {
 				String query = hunterJDBCExecutor.getQueryForSqlId("getCountryNameAndId"); 
 				Map<String, Object> cntryMap = hunterJDBCExecutor.executeQueryFirstRowMap(query, values0);
 				
-				if( !HunterUtility.isMapNllOrEmpty( cntryMap )){ 
+				if( HunterUtility.isMapNotEmpty( cntryMap )){ 
 					countryName = HunterUtility.getStringOrNullOfObj(cntryMap.get("CNTRY_NAM"));
 					messageReceiverJsons = regionService.getMessageReceiversForRegion(countryName, countyName, consName, wardName, pageNo, pageSize,null);
 				}
@@ -628,7 +628,7 @@ public class RegionController extends HunterBaseController {
 				
 				Map<String,Object> firstRow = hunterJDBCExecutor.executeQueryFirstRowMap(query1, values);
 				
-				if( !HunterUtility.isMapNllOrEmpty( firstRow )){
+				if( HunterUtility.isMapNotEmpty( firstRow )){
 					countryName = HunterUtility.getStringOrNullOfObj(firstRow.get("COUNTRY_NAME"));
 					countyName = HunterUtility.getStringOrNullOfObj(firstRow.get("CNTY_NAM"));
 					messageReceiverJsons = regionService.getMessageReceiversForRegion(countryName, countyName, consName, wardName, pageNo, pageSize,null);
@@ -643,7 +643,7 @@ public class RegionController extends HunterBaseController {
 				values2.add(regionId);
 				Map<String, Object> firstRow2 = hunterJDBCExecutor.executeQueryFirstRowMap(query2, values2);
 				
-				if(!HunterUtility.isMapNllOrEmpty( firstRow2 )){
+				if(HunterUtility.isMapNotEmpty( firstRow2 )){
 					countryName = HunterUtility.getStringOrNullOfObj(firstRow2.get("COUNTRY_NAME"));
 					countyName = HunterUtility.getStringOrNullOfObj(firstRow2.get("CNTY_NAM"));
 					consName = HunterUtility.getStringOrNullOfObj(firstRow2.get("CNSTTNCY_NAM"));
@@ -658,7 +658,7 @@ public class RegionController extends HunterBaseController {
 				values3.add(regionId);
 				Map<String, Object> wardMap = hunterJDBCExecutor.executeQueryFirstRowMap(getCntryCntyConstyConswardIdCodeNameId, values3);
 				
-				if( !HunterUtility.isMapNllOrEmpty( wardMap ) ){
+				if( HunterUtility.isMapNotEmpty( wardMap ) ){
 					countryName = HunterUtility.getStringOrNullOfObj(wardMap.get("CNTRY_NAM"));
 					countyName = HunterUtility.getStringOrNullOfObj(wardMap.get("CNTY_NAM"));
 					consName = HunterUtility.getStringOrNullOfObj(wardMap.get("CNSTTNCY_NAM"));
@@ -672,7 +672,7 @@ public class RegionController extends HunterBaseController {
 			
 			logger.debug("Retrieving receivers for region hierarcy.CountryId("+ countryId +") and Region Type ( "+ levelType +" ) and region Id ("+ regionId +")");
 			
-			data.setTotal(HunterUtility.isCollectionNotEmpty( messageReceiverJsons ) ? 0 : messageReceiverJsons.get(0).getCount() );
+			data.setTotal(HunterUtility.isCollectionNotEmpty( messageReceiverJsons ) ? messageReceiverJsons.get(0).getCount() : 0 );
 			data.setData(messageReceiverJsons); 
 			
 			return data;

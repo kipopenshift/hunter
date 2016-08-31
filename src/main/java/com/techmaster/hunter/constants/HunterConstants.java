@@ -256,8 +256,12 @@ public class HunterConstants {
 	public static final String MEDIA_TYPE_PHOTO = "mediaPhoto";
 	public static final String MEDIA_TYPE_SOUND = "mediaSound";
 	public static final String MEDIA_TYPE_VIDEO = "mediaVideo";
+	public static final String MEDIA_TYPE_GIF = "mediaGIF";
 	
 	public static final String SOCIAL_TYPE_FACEBOOK_GROUP = "socialTypeFacebookGroup";
+	public static final String SOCIAL_TYPE_INSTAGRAM_GROUP = "socialTypeInstagramGroup";
+	public static final String SOCIAL_TYPE_TWITTER_GROUP = "socialTypeTwitterGroup";
+	public static final String SOCIAL_TYPE_BLOG_GROUP = "socialTypeBlogGroup";
 	public static final String SOCIAL_TYPE_GEOGRAPHIC_GROUP = "socialTypeGeographicGroup";
 	public static final String SOCIAL_TYPE_FOCUS_GROUP = "socialTypeFocusGroup";
 	

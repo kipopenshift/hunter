@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
+import com.techmaster.hunter.json.HunterRawReceiverJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.HunterRawReceiver;
 import com.techmaster.hunter.obj.beans.HunterRawReceiverUser;
@@ -25,6 +26,7 @@ public interface RawReceiverService {
 	public void updateRawReceiverCountsForUser(String userName);
 	public String getBase64PhotoForUser(String userName);
 	public List<String> getDistinctContactsForUser(String userName);
+	public List<HunterRawReceiverJson> getRawReceiverJsonForDbMap(List<Map<String,Object>> rowMapList);
 	
 	
 }
