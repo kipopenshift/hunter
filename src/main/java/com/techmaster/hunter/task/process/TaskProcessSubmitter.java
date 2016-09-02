@@ -7,7 +7,7 @@ import com.techmaster.hunter.gateway.beans.GateWayClientService;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.Task;
 
-public class TaskSubmitter extends Thread {
+public class TaskProcessSubmitter extends Thread {
 	
 	private Task task = null;
 	private AuditInfo auditInfo = null;
@@ -15,7 +15,7 @@ public class TaskSubmitter extends Thread {
 	private Map<String,Object> executeParams = new HashMap<String, Object>();
 	private boolean isValid = false;
 
-	public TaskSubmitter(Task task, AuditInfo auditInfo,GateWayClientService clientService) {
+	public TaskProcessSubmitter(Task task, AuditInfo auditInfo,GateWayClientService clientService) {
 		super();
 		this.task = task;
 		this.auditInfo = auditInfo;

@@ -10,10 +10,14 @@ public class HunterSocialSubTask {
 	private Long parentTaskId;
 	private String status;
 	private String comments;
+	private float estimatedLabor;
+	private String laborCurrency;
 	private List<HunterSocialReceiver> socialReceivers = new ArrayList<>();
 	private String assignedToUserName;
 	private AuditInfo auditInfo;
 	private Date dateline;
+	
+	
 	public Long getSubTaskId() {
 		return subTaskId;
 	}
@@ -61,6 +65,18 @@ public class HunterSocialSubTask {
 	}
 	public void setDateline(Date dateline) {
 		this.dateline = dateline;
+	}
+	public float getEstimatedLabor() {
+		return estimatedLabor;
+	}
+	public void setEstimatedLabor(float estimatedLabor) {
+		this.estimatedLabor = estimatedLabor;
+	}
+	public String getLaborCurrency() {
+		return laborCurrency;
+	}
+	public void setLaborCurrency(String laborCurrency) {
+		this.laborCurrency = laborCurrency;
 	}
 	@Override
 	public int hashCode() {
@@ -131,16 +147,20 @@ public class HunterSocialSubTask {
 	}
 	
 	
-	
 	@Override
 	public String toString() {
 		return "HunterSocialSubTask [subTaskId=" + subTaskId
 				+ ", parentTaskId=" + parentTaskId + ", status=" + status
-				+ ", comments=" + comments + ", socialReceivers="
-				+ socialReceivers + ", assignedToUserName="
-				+ assignedToUserName + ", auditInfo=" + auditInfo
-				+ ", dateline=" + dateline + "]";
+				+ ", comments=" + comments + ", estimatedLabor="
+				+ estimatedLabor + ", laborCurrency=" + laborCurrency
+				+ ", socialReceivers=" + socialReceivers
+				+ ", assignedToUserName=" + assignedToUserName + ", auditInfo="
+				+ auditInfo + ", dateline=" + dateline + "]";
 	}
+	
+	
+	
+	
 	
 	
 	

@@ -314,7 +314,7 @@
 
 <script id="cnfrmCrtfyRwRcvrPopup" type="text/x-kendo-template">
 	<div id="cnfrmCrtfyRwRcvrPopupCover" style="width:300px;height:100px;" >
-       	You have selected <span style='position:relative;font-weigh:bolder;font-size:16px;color:rgb(145,5,0)'>#=dataCount# </span>receivers. <br> They will all be certified. Are you sure ?
+       	You have selected <span style='position:relative;font-weigh:bolder;font-size:16px;color:rgb(145,5,0)'>#=dataCount# #=message == 'certified' ? 'uncertified' : 'certified' # </span>receivers. <br> They will all be <span style="color:#=color#;" >#=message#</span>. Are you sure ?
 		<br>
 		<table style="width:80%;margin-left:10%;">
 			<tr>

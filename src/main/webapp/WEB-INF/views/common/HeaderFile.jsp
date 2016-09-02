@@ -82,14 +82,14 @@
 				navigate("/admin/action/admin/main");
 			}else if(text != null && text === "Hunter Field Profile"){
 				navigate("/admin/action/fieldProfile");
-			}else if(text != null && text === "Contacts Pagination") {
-				navigate("/admin/action/raw/pagination");
 			}else if(text != null && text === "Receiver Tasks") {
 				navigate("/hunter/tasks/home");
 			}else if(text != null && text === "Social Tasks") {
 				navigate("/hunter/tasks/home");
 			}else if(text != null && text === "Validate Raw Receivers") {
 				navigate("/admin/action/raw/validateReceivers"); 
+			}else if(text != null && text === "Social Associate Profile") {
+				navigate("/socialAssociate/action/profileHome"); 
 			}
 		}
 
@@ -193,7 +193,7 @@
 	        	<li><a href="#">My Account</a></li>
 	        	<li><a href="#">Hunter Admin</a></li>
 	        	<li><a href="#">Hunter Field Profile</a></li>
-	        	<li><a href="#">Contacts Pagination</a></li>
+	        	<li><a href="#">Social Associate Profile</a></li>
 	            <li><a href="<c:url value="${pageContext.request.contextPath}/j_spring_security_logout" />" >Logout</a></li>
 	        </ul>
 	    </li>

@@ -46,7 +46,7 @@ import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.obj.beans.TaskMessageReceiver;
 import com.techmaster.hunter.obj.beans.TextMessage;
 import com.techmaster.hunter.region.RegionService;
-import com.techmaster.hunter.task.process.TaskSubmitter;
+import com.techmaster.hunter.task.process.TaskProcessSubmitter;
 import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -397,7 +397,7 @@ public class TaskManagerImpl implements TaskManager{
 			task.setProcessedOn(new Date());
 			task.setProcessedBy(auditInfo.getLastUpdatedBy()); // this is set immediately.
 			GateWayClientService clientService = getClientForTask(task); 
-			new TaskSubmitter(task, auditInfo, clientService).start();
+			new TaskProcessSubmitter(task, auditInfo, clientService).start();
 		}else{
 			results.put(GateWayClientService.TASK_VALIDATION_ERRORS, errors);
 			results.put(GateWayClientService.TASK_VALIDATION_STATUS, HunterConstants.STATUS_FAILED);

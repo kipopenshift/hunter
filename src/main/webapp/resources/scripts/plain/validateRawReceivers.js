@@ -55,6 +55,10 @@ var RawReceiverModel = kendo.data.Model.define({
 		"lastUpdatedBy" : {
 			type : "string", validation : {required : true},editable:false, defaultValue:null
 		}
+	},
+	getContentTemplate : function(){
+		var verified = this.get("verified"); 
+		return "<center><span>"+ ( this.get("receiverContact") ) +"</span>"+ ( verified ? "<span class='k-icon k-i-tick'></span>" : "" )+ "</center>";
 	}
 });
 
@@ -86,15 +90,28 @@ var ValidateRawReceiverVM = kendo.observable({
 	selConstituency : null,
 	selWard : null,
 	rawReceiversGrid : null,
-	disableVerifybutton : function(radio){
-		var name =  $(radio).attr("id");
-		$("#certifySelRcvrsButton").prop("disabled", name === 'certifiedReceivers');
+	changeNameOfCertButton : function(radio){
+		
+		var name 	=  $(radio).attr("id"),
+			certify = name === 'certifiedReceivers';  
+		
+		if( certify ){
+			$("#certifySelSpan").text( "Uncertify Selected" );
+			$("#certifyButtIcon").removeClass("k-icon k-i-tick");
+			$("#certifyButtIcon").addClass("k-icon k-i-close");
+			ValidateRawReceiverVM.set("selCertifiedStatus", "Y");
+		}else{
+			$("#certifySelSpan").text( "Certify Selected" );
+			$("#certifyButtIcon").removeClass("k-icon k-i-close");
+			$("#certifyButtIcon").addClass("k-icon k-i-tick");
+			ValidateRawReceiverVM.set("selCertifiedStatus", "N");
+		}
+		
 		ValidateRawReceiverVM.get("rawReceiversGrid").dataSource.read();
 	},
 	unSelectAllOthersCheckBoxes : function(this_){
 		var checked = $(this_).prop("checked"); 
 		if( checked ){
-			kendoKipHelperInstance.showSuccessNotification( checked );
 			ValidateRawReceiverVM.set("isDateChecked", false);
 			ValidateRawReceiverVM.set("isUserChecked", false);
 			ValidateRawReceiverVM.set("isRegionChecked", false);
@@ -282,7 +299,7 @@ var ValidateRawReceiverVM = kendo.observable({
 				isAllEmpty 		= false;
 			
 			if( isAllNull || isAllEmpty ){
-				kendoKipHelperInstance.showErrorNotification("Please region or uncheck region field.");
+				kendoKipHelperInstance.showErrorNotification("Please select region or uncheck region field.");
 				return;
 			}
 		}
@@ -296,7 +313,7 @@ var ValidateRawReceiverVM = kendo.observable({
 		var rawReceiversGrid = $("#validateRawReceiverGrid").kendoGrid({
 			toolbar : kendo.template(
 					'<button onClick="ValidateRawReceiverVM.validateOnFilter()" class="k-button" style="margin-top:2px;float:left;z-index:1005;width:150px;height:38px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" ><span class="k-icon k-i-refresh"></span>Filter Receivers</button>' +
-					'<button id="certifySelRcvrsButton" onClick="ValidateRawReceiverVM.showPopupToConfirmCertify()" class="k-button" style="margin-top:2px;float:left;z-index:1005;width:150px;height:38px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" ><span class="k-icon k-i-tick"></span>Certify Selected</button>'
+					'<button id="certifySelRcvrsButton" onClick="ValidateRawReceiverVM.showPopupToConfirmCertify()" class="k-button" style="margin-top:2px;float:left;z-index:1005;width:150px;height:38px;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" ><span id="certifyButtIcon" class="k-icon k-i-tick"></span><span id="certifySelSpan">Certify Selected<span></button>'
 			),
 			 pageable: {
 			    pageSize: 100,
@@ -308,7 +325,7 @@ var ValidateRawReceiverVM = kendo.observable({
 			            { 'field':'','title':'',
 			            	headerTemplate: '<label><center><input id="selectAll" type="checkbox" /></center></label>', 
 			            	template: '<center><input rawReceiverId="#=rawReceiverId#" onClick="ValidateRawReceiverVM.bindSelectedReceiverId(this)" type="checkbox" #=selected ? "checked=checked" : "" # /></center>', 'width':'70px' },
-			            { 'field': 'receiverContact', title : 'Contact','width':'150px'  },
+			            { 'field': 'receiverContact',template:"#=getContentTemplate()#", title : 'Contact','width':'150px'  },
                   		{ 'field': 'receiverType', title : 'Type'  },
                   		{ 'field': 'firstName', title : 'First Name' },
                   		{ 'field': 'lastName', title : 'Last Name'  },
@@ -358,7 +375,8 @@ var ValidateRawReceiverVM = kendo.observable({
 	            schema: {
 	                data: 'data',
 	                total: 'total',
-	                errors: 'errors'
+	                errors: 'errors',
+	                model : RawReceiverModel
 	            }
 	        }
 	    }).data("kendoGrid"); 
@@ -410,7 +428,9 @@ var ValidateRawReceiverVM = kendo.observable({
         var 
         html = $("#cnfrmCrtfyRwRcvrPopup").html(),
 		template = kendo.template(html),
-		template2 = template({dataCount:count});
+		certified = ValidateRawReceiverVM.get("selCertifiedStatus") == 'Y',
+		message  = certified ? "uncertified" : "certified",
+		template2 = template({dataCount:count, message : message, color : certified ? "rgb(145,5,0)" : "green"  });
         
 		kendoKipHelperInstance.showWindowWithOnClose(template2,"Hunter Confirmation");
 	},

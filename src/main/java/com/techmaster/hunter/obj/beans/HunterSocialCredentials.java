@@ -3,7 +3,7 @@ package com.techmaster.hunter.obj.beans;
 import java.util.Date;
 
 
-public class HunterSocialGroupCredentials {
+public class HunterSocialCredentials {
 	
 	private Long id;
 	private String userName;
@@ -96,7 +96,7 @@ public class HunterSocialGroupCredentials {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		HunterSocialGroupCredentials other = (HunterSocialGroupCredentials) obj;
+		HunterSocialCredentials other = (HunterSocialCredentials) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;

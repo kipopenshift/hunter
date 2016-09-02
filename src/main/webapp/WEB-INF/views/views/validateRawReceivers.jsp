@@ -143,11 +143,11 @@
 				<table>
 					<tr>
 						<td>
-							<input onClick="ValidateRawReceiverVM.disableVerifybutton(this)" data-bind="attr:{name:radioGroup}, checked:selCertifiedStatus" value="N" type="radio" name="uncertifiedReceivers" id="uncertifiedReceivers" class="k-radio">
+							<input onClick="ValidateRawReceiverVM.changeNameOfCertButton(this)" data-bind="attr:{name:radioGroup}, checked:selCertifiedStatus" value="N" type="radio" name="uncertifiedReceivers" id="uncertifiedReceivers" class="k-radio">
 		              		<label class="k-radio-label" for="uncertifiedReceivers">Uncertified</label>
 						</td>
 						<td>
-							<input onClick="ValidateRawReceiverVM.disableVerifybutton(this)"  data-bind="attr:{name:radioGroup}, checked:selCertifiedStatus" value="Y" type="radio" name="certifiedReceivers" id="certifiedReceivers" class="k-radio">
+							<input onClick="ValidateRawReceiverVM.changeNameOfCertButton(this)"  data-bind="attr:{name:radioGroup}, checked:selCertifiedStatus" value="Y" type="radio" name="certifiedReceivers" id="certifiedReceivers" class="k-radio">
 		              		<label class="k-radio-label" for="certifiedReceivers">Certified</label>
 						</td>
 					</tr>

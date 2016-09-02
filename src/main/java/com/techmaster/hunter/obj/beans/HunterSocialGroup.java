@@ -7,6 +7,7 @@ public class HunterSocialGroup {
 	private String groupDescription;
 	private String socialType;
 	private boolean hunterOwned;
+	private int receiversCount;
 	private String clientUserName;
 	private String hunterGroupAdmin;
 	private String countryName;
@@ -15,7 +16,15 @@ public class HunterSocialGroup {
 	private String wardName;
 	private AuditInfo auditInfo;
 	private boolean active;
-	private HunterSocialGroupCredentials groupCredentials;
+	
+	public int getReceiversCount() {
+		return receiversCount;
+	}
+	public void setReceiversCount(int receiversCount) {
+		this.receiversCount = receiversCount;
+	}
+
+	private HunterSocialCredentials groupCredentials;
 	
 	public Long getGroupId() {
 		return groupId;
@@ -95,10 +104,10 @@ public class HunterSocialGroup {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-	public HunterSocialGroupCredentials getGroupCredentials() {
+	public HunterSocialCredentials getGroupCredentials() {
 		return groupCredentials;
 	}
-	public void setGroupCredentials(HunterSocialGroupCredentials groupCredentials) {
+	public void setGroupCredentials(HunterSocialCredentials groupCredentials) {
 		this.groupCredentials = groupCredentials;
 	}
 	@Override
@@ -202,13 +211,16 @@ public class HunterSocialGroup {
 		return "HunterSocialGroup [groupId=" + groupId + ", groupName="
 				+ groupName + ", groupDescription=" + groupDescription
 				+ ", socialType=" + socialType + ", hunterOwned=" + hunterOwned
-				+ ", clientUserName=" + clientUserName + ", hunterGroupAdmin="
-				+ hunterGroupAdmin + ", countryName=" + countryName
-				+ ", countyName=" + countyName + ", consName=" + consName
-				+ ", wardName=" + wardName + ", auditInfo=" + auditInfo
-				+ ", active=" + active + ", groupCredentials="
-				+ groupCredentials + "]";
+				+ ", receiversCount=" + receiversCount + ", clientUserName="
+				+ clientUserName + ", hunterGroupAdmin=" + hunterGroupAdmin
+				+ ", countryName=" + countryName + ", countyName=" + countyName
+				+ ", consName=" + consName + ", wardName=" + wardName
+				+ ", auditInfo=" + auditInfo + ", active=" + active
+				+ ", groupCredentials=" + groupCredentials + "]";
 	}
+	
+	
+	
 	
 	
 	

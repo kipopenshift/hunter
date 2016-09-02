@@ -17,6 +17,7 @@ public class HunterSocialTask {
 	private String clientUserName;
 	private String subTaskSpecs;
 	private String originalRequest;
+	private List<HunterSocialAssociate> selectedAssociates = new ArrayList<>();
 	private List<HunterSocialGroup> socialGroups = new ArrayList<>(); 
 	private List<HunterSocialMedia> socialMedias = new ArrayList<>();
 	private AuditInfo auditInfo;
@@ -106,7 +107,13 @@ public class HunterSocialTask {
 	public void setSocialMedias(List<HunterSocialMedia> socialMedias) {
 		this.socialMedias = socialMedias;
 	}
-	
+
+	public List<HunterSocialAssociate> getSelectedAssociates() {
+		return selectedAssociates;
+	}
+	public void setSelectedAssociates(List<HunterSocialAssociate> selectedAssociates) {
+		this.selectedAssociates = selectedAssociates;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;

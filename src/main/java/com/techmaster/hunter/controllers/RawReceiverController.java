@@ -91,7 +91,7 @@ public class RawReceiverController extends HunterBaseController{
 		try {
 			reqBody = HunterUtility.getRequestBodyAsString(request);
 			data = new JSONObject(reqBody);
-			String update = "UPDATE HNTR_RW_RCVR rc SET rc.VRYFD = 'Y', rc.VRYFD_BY = ? WHERE rc.RW_RCVR_ID IN (:RW_RCVR_ID)";
+			String update = "UPDATE HNTR_RW_RCVR rc SET rc.VRYFD = ( CASE WHEN rc.VRYFD = 'N' THEN 'Y' ELSE 'N' END ), rc.VRYFD_BY = ? WHERE rc.RW_RCVR_ID IN (:RW_RCVR_ID)";
 			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
 			StringBuilder receiverIds = new StringBuilder();
 			for(int i=0; i<data.length(); i++){
@@ -107,10 +107,10 @@ public class RawReceiverController extends HunterBaseController{
 				logger.debug("Replaced query : " + update); 
 				hunterJDBCExecutor.executeUpdate(update, values);
 			}
-			results = HunterUtility.setJSONObjectForSuccess(results, data.length() + " receivers have been certified successfully!");
+			results = HunterUtility.setJSONObjectForSuccess(results, data.length() + " receivers have been updated!");
 		} catch (IOException e) {
 			e.printStackTrace();
-			results = HunterUtility.setJSONObjectForSuccess(results, "Error while certifying contacts( "+ e.getMessage() +" )");
+			results = HunterUtility.setJSONObjectForFailure(results, "Error while certifying contacts( "+ e.getMessage() +" )");
 		}
 		
 		return results.toString();
