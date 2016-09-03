@@ -7,6 +7,8 @@ import java.util.List;
 public class HunterSocialTask {
 	
 	private Long taskId;
+	private int desiredReceivers;
+	private int actualReceivers;
 	private String taskName;
 	private String taskDescription;
 	private String taskStatus;
@@ -20,8 +22,8 @@ public class HunterSocialTask {
 	private List<HunterSocialAssociate> selectedAssociates = new ArrayList<>();
 	private List<HunterSocialGroup> socialGroups = new ArrayList<>(); 
 	private List<HunterSocialMedia> socialMedias = new ArrayList<>();
+	private List<ReceiverRegion> selReceiverRegions = new ArrayList<>();
 	private AuditInfo auditInfo;
-	
 	
 	public Long getTaskId() {
 		return taskId;
@@ -107,13 +109,31 @@ public class HunterSocialTask {
 	public void setSocialMedias(List<HunterSocialMedia> socialMedias) {
 		this.socialMedias = socialMedias;
 	}
-
 	public List<HunterSocialAssociate> getSelectedAssociates() {
 		return selectedAssociates;
 	}
 	public void setSelectedAssociates(List<HunterSocialAssociate> selectedAssociates) {
 		this.selectedAssociates = selectedAssociates;
 	}
+	public List<ReceiverRegion> getSelReceiverRegions() {
+		return selReceiverRegions;
+	}
+	public void setSelReceiverRegions(List<ReceiverRegion> selReceiverRegions) {
+		this.selReceiverRegions = selReceiverRegions;
+	}
+	public int getDesiredReceivers() {
+		return desiredReceivers;
+	}
+	public void setDesiredReceivers(int desiredReceivers) {
+		this.desiredReceivers = desiredReceivers;
+	}
+	public int getActualReceivers() {
+		return actualReceivers;
+	}
+	public void setActualReceivers(int actualReceivers) {
+		this.actualReceivers = actualReceivers;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -218,6 +238,9 @@ public class HunterSocialTask {
 				+ ", socialGroups=" + socialGroups + ", auditInfo=" + auditInfo
 				+ ", originalRequest=" + originalRequest
 				+ ", socialMedias=" + socialMedias
+				+ ", selectedAssociates=" + selectedAssociates
+				+ ", desiredReceivers=" + desiredReceivers
+				+ ", actualReceivers=" + actualReceivers
 				+ "]";
 	}
 	

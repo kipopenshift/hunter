@@ -1,6 +1,6 @@
 <%@include file="../common/JSTL_tags.jsp"%>
 <!DOCTYPE html>
-<html style="font-size:13px;" >
+<html style="font-size:12px;" >
 <head>
 
 
@@ -25,7 +25,7 @@
 <title>Hunter Officer Profile</title>
 </head>
 
-<div id="fieldProfileContainer" style="margin-top:1%;"  > 
+<div id="fieldProfileContainer" style="margin-top:1%;font-size:0.9em;"  > 
 
 <div style="height:20%;width:100%;text-align: center;" >
 <span style="margin-right:-1050px;margin-top:-10%;" ><a style="color:white;" id="logoutId" href="//hunter/login/logout" >Logout</a></span>
@@ -48,7 +48,7 @@
 					</tr>
 					<tr>
 						<td>Available Payout  </td>
-						<td> Ksh <span id="fieldUserAvailablePayout" ></span></td>
+						<td> Ksh <span id="fieldUserAvailablePayout" >0.00</span></td>
 					</tr>
 					<tr>
 						<td>Email </td>

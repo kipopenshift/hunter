@@ -50,6 +50,7 @@ import com.techmaster.hunter.imports.extractors.RawReceiverExtractor;
 import com.techmaster.hunter.json.HunterRawReceiverJson;
 import com.techmaster.hunter.json.PagedHunterRawReceiverJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
+import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
 import com.techmaster.hunter.obj.beans.HunterRawReceiver;
 import com.techmaster.hunter.obj.beans.HunterRawReceiverUser;
 import com.techmaster.hunter.obj.beans.HunterUser;
@@ -106,9 +107,12 @@ public class RawReceiverController extends HunterBaseController{
 				update = update.replace(":RW_RCVR_ID", receiverIds);
 				logger.debug("Replaced query : " + update); 
 				hunterJDBCExecutor.executeUpdate(update, values);
+				List<HunterMessageReceiver> msgMessageReceivers = rawReceiverService.createHntrMsgReceiversForRawReceivers(receiverIds.toString(), getAuditInfo());
+				logger.debug("Created hunter message receivers ( " + msgMessageReceivers.size()  +" )" );
+				msgMessageReceivers = null;
 			}
 			results = HunterUtility.setJSONObjectForSuccess(results, data.length() + " receivers have been updated!");
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			results = HunterUtility.setJSONObjectForFailure(results, "Error while certifying contacts( "+ e.getMessage() +" )");
 		}

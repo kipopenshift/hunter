@@ -106,6 +106,9 @@ public class HunterConstants {
 	public static final String HUNTER_REGION_CITY = "City";
 	public static final String HUNTER_REGION_VILLAGE = "Village";
 	
+	public static final String REGION_LEVEL_NAME = "regionLevelName";
+	public static final String REGION_LEVEL_Type = "regionLevelType";
+	
 	
 	// date 
 	public static final String DATE_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss";
@@ -264,5 +267,9 @@ public class HunterConstants {
 	public static final String SOCIAL_TYPE_BLOG_GROUP = "socialTypeBlogGroup";
 	public static final String SOCIAL_TYPE_GEOGRAPHIC_GROUP = "socialTypeGeographicGroup";
 	public static final String SOCIAL_TYPE_FOCUS_GROUP = "socialTypeFocusGroup";
+	
+	public static final String ASSOCIATE_TYPE_CONTIGENT = "associateTypeContigent";
+	public static final String ASSOCIATE_TYPE_GROUP_MANAGER = "associateTypeGroupManager";
+	public static final String ASSOCIATE_TYPE_HUNTER_ASSOCIATE_MANAGER = "associateTypeHunterAssociateManager";
 	
 }

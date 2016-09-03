@@ -79,7 +79,7 @@ function loadUserProfileData(progressBar){
 			$("#fieldUserEmail").			text( data["email"] 	=== 'undefined' ? "" : data["email"] 	);
 			$("#fieldUserConstituency").	text( data["cons"] 		=== 'undefined' ? "" : data["cons"] 	);
 			$("#fieldUserFullName").		html( fullName );
-			$("#fieldUserTotalPayout").		text( data["compensation"] === 'undefined' ? "" : data["compensation"] );
+			$("#fieldUserTotalPayout").		text( data["compensation"] === 'undefined' ? "0.00" : data["compensation"] );
 			
 			profileData = data;
 			
@@ -155,13 +155,13 @@ function loadContactsData(progressBar){
            { "data" : "consWardName" },
            { "data" : "verified" },
            { "data" : "edit" },
-           { "data" : "delete" }
+           { "data" : "delete", "width": "0.7em" }
        ],
        columnDefs : [
              {
            	targets : 8,
            	"mRender" : function(data,type,full,meta){
-           		if(data == 'true'){
+           		if(data +'' === 'true'){
            			return '<center><img src="http://localhost:8080/Hunter/static/resources/images/tick.png" width="15px" height="15px" style="border:1px solid rgb(14,65,68);border-radius:50%;"  /></center>';
            		}else{
            			return '<center><img src="http://localhost:8080/Hunter/static/resources/images/cross-icon-img.png" width="15px" height="15px" style="border:1px solid rgb(14,65,68);border-radius:50%;"  /></center>';

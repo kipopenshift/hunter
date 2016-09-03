@@ -495,7 +495,10 @@
 		</description>
 		<statement>
 			SELECT r.ALL_CNTCT_NO "all",
-			  r.CMNPSTN "compensation",
+			  CASE
+		          WHEN r.CMNPSTN = 0 THEN '0.00'
+		          ELSE r.CMNPSTN || ''
+		      END AS "compensation",
 			  r.CNSTTNCY "cons",
 			  r.CNTRY "country",
 			  r.CNTY "county",
@@ -1145,6 +1148,63 @@
 			  r.*
 			FROM RAW_DATA r WHERE r.ROW_NUM BETWEEN ( ( ? - 1 ) * ? ) AND ( ? * ? ) 
 			order by r.ROW_NUM ASC
+		</statement>
+	</query>
+	<query id="getJoinedHntrMsgRcvrsAndRawRcvrs">
+		<description>
+		    Returns data from raw receivers and hunter message receivers to be used
+		    to create hunter message receivers.
+		</description>
+		<statement>
+		  	SELECT 
+			  r.RW_RCVR_ID,
+			  r.RCVR_CNTCT,
+			  r.RCVR_TYP,
+			  r.CNTRY_NAM,
+			  r.CNTY_NAM,
+			  r.CONS_NAM,
+			  r.WRD_NAM,
+			  r.VRYFD,
+			  r.GVN_BY_USR_NAM,
+			  r.FRST_NAM,
+			  r.LST_NAM,
+			  m.RCVR_ID,
+			  m.ACTV,
+			  m.RCVR_CNTCT     AS RCVR_CNTCT_MSG,
+			  m.GVN_BY_USR_NAM AS GVN_BY_USR_NAM_MSG
+			FROM 
+			  HNTR_RW_RCVR r,
+			  HNTR_MSG_RCVR m
+			WHERE m.RCVR_CNTCT(+)   = r.RCVR_CNTCT
+			AND m.RCVR_TYP(+)       = r.RCVR_TYp
+			AND m.GVN_BY_USR_NAM(+) = r.GVN_BY_USR_NAM 
+			AND r.RW_RCVR_ID in (:receiverIds)
+		</statement>
+	</query>
+	<query id="getUpdateHunterMsgReceiversBadedOnRawReceivers">
+		<description>
+		    Returns data from raw receivers and hunter message receivers to be used
+		    to create hunter message receivers.
+		</description>
+		<statement>
+		  	UPDATE 
+			  HNTR_MSG_RCVR rc
+			SET rc.ACTV = (
+			  CASE
+			    WHEN (
+			      SELECT 
+			        r.VRYFD
+			      FROM 
+			        HNTR_RW_RCVR r
+			      WHERE r.RCVR_CNTCT    = rc.RCVR_CNTCT
+			      AND rc.GVN_BY_USR_NAM = r.GVN_BY_USR_NAM
+			      AND rc.RCVR_TYP       = r.RCVR_TYP
+			    ) = 'Y'
+			    THEN 'Y'
+			    ELSE 'N'
+			  END ),
+			  rc.LST_UPDTD_BY = :lst_updated_by
+			WHERE rc.RCVR_ID IN (:RCVR_ID)
 		</statement>
 	</query>
 </queries>

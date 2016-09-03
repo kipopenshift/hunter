@@ -12,7 +12,7 @@ public class HunterSocialAssociate extends HunterUser implements Serializable{
 	private Long associatedId;
 	private boolean active;
 	private String associateType;
-	private List<HunterSocialSubTask> subTasks = new ArrayList<HunterSocialSubTask>(); 
+	private List<HunterSocialSubTask> subTasks = new ArrayList<HunterSocialSubTask>();
 	private String rawUserName;
 	private float compensation;
 	private String country;

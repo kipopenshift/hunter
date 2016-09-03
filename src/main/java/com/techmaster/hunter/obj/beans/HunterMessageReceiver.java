@@ -16,6 +16,9 @@ public class HunterMessageReceiver {
 	private String consName;
 	private String consWardName;
 	private String receiverRegionLevelName;
+	private String firstName;
+	private String lastName;
+	private String givenByUserName;
 	private AuditInfo auditInfo;
 	
 	public HunterMessageReceiver() {
@@ -113,6 +116,24 @@ public class HunterMessageReceiver {
 	public void setConsWardName(String consWardName) {
 		this.consWardName = consWardName;
 	}
+	public String getFirstName() {
+		return firstName;
+	}
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+	public String getLastName() {
+		return lastName;
+	}
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+	public String getGivenByUserName() {
+		return givenByUserName;
+	}
+	public void setGivenByUserName(String givenByUserName) {
+		this.givenByUserName = givenByUserName;
+	}
 
 
 	@Override
@@ -120,8 +141,6 @@ public class HunterMessageReceiver {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (active ? 1231 : 1237);
-		result = prime * result
-				+ ((auditInfo == null) ? 0 : auditInfo.hashCode());
 		result = prime * result + (blocked ? 1231 : 1237);
 		result = prime * result
 				+ ((consName == null) ? 0 : consName.hashCode());
@@ -132,6 +151,12 @@ public class HunterMessageReceiver {
 		result = prime * result
 				+ ((countyName == null) ? 0 : countyName.hashCode());
 		result = prime * result + failDeliveryTimes;
+		result = prime * result
+				+ ((firstName == null) ? 0 : firstName.hashCode());
+		result = prime * result
+				+ ((givenByUserName == null) ? 0 : givenByUserName.hashCode());
+		result = prime * result
+				+ ((lastName == null) ? 0 : lastName.hashCode());
 		result = prime * result
 				+ ((receiverContact == null) ? 0 : receiverContact.hashCode());
 		result = prime * result + (int) (receiverId ^ (receiverId >>> 32));
@@ -163,11 +188,6 @@ public class HunterMessageReceiver {
 		HunterMessageReceiver other = (HunterMessageReceiver) obj;
 		if (active != other.active)
 			return false;
-		if (auditInfo == null) {
-			if (other.auditInfo != null)
-				return false;
-		} else if (!auditInfo.equals(other.auditInfo))
-			return false;
 		if (blocked != other.blocked)
 			return false;
 		if (consName == null) {
@@ -191,6 +211,21 @@ public class HunterMessageReceiver {
 		} else if (!countyName.equals(other.countyName))
 			return false;
 		if (failDeliveryTimes != other.failDeliveryTimes)
+			return false;
+		if (firstName == null) {
+			if (other.firstName != null)
+				return false;
+		} else if (!firstName.equals(other.firstName))
+			return false;
+		if (givenByUserName == null) {
+			if (other.givenByUserName != null)
+				return false;
+		} else if (!givenByUserName.equals(other.givenByUserName))
+			return false;
+		if (lastName == null) {
+			if (other.lastName != null)
+				return false;
+		} else if (!lastName.equals(other.lastName))
 			return false;
 		if (receiverContact == null) {
 			if (other.receiverContact != null)
@@ -237,7 +272,9 @@ public class HunterMessageReceiver {
 				+ countryName + ", stateName=" + stateName + ", countyName="
 				+ countyName + ", consName=" + consName + ", consWardName="
 				+ consWardName + ", receiverRegionLevelName="
-				+ receiverRegionLevelName + ", auditInfo=" + auditInfo + "]";
+				+ receiverRegionLevelName + ", firstName=" + firstName
+				+ ", lastName=" + lastName + ", givenByUserName="
+				+ givenByUserName + ", auditInfo=" + auditInfo + "]";
 	}
 	
 

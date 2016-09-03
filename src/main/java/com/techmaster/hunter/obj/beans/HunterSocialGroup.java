@@ -16,6 +16,9 @@ public class HunterSocialGroup {
 	private String wardName;
 	private AuditInfo auditInfo;
 	private boolean active;
+	private boolean suspensionStatus;
+	private String suspensionDescription;
+	private HunterSocialAccessConfig accessConfig;
 	
 	public int getReceiversCount() {
 		return receiversCount;
@@ -23,8 +26,20 @@ public class HunterSocialGroup {
 	public void setReceiversCount(int receiversCount) {
 		this.receiversCount = receiversCount;
 	}
+	public boolean isSuspensionStatus() {
+		return suspensionStatus;
+	}
+	public void setSuspensionStatus(boolean suspensionStatus) {
+		this.suspensionStatus = suspensionStatus;
+	}
+	public String getSuspensionDescription() {
+		return suspensionDescription;
+	}
+	public void setSuspensionDescription(String suspensionDescription) {
+		this.suspensionDescription = suspensionDescription;
+	}
 
-	private HunterSocialCredentials groupCredentials;
+	private HunterSocialAccessConfig groupCredentials;
 	
 	public Long getGroupId() {
 		return groupId;
@@ -104,12 +119,19 @@ public class HunterSocialGroup {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-	public HunterSocialCredentials getGroupCredentials() {
+	public HunterSocialAccessConfig getGroupCredentials() {
 		return groupCredentials;
 	}
-	public void setGroupCredentials(HunterSocialCredentials groupCredentials) {
+	public void setGroupCredentials(HunterSocialAccessConfig groupCredentials) {
 		this.groupCredentials = groupCredentials;
 	}
+	public HunterSocialAccessConfig getAccessConfig() {
+		return accessConfig;
+	}
+	public void setAccessConfig(HunterSocialAccessConfig accessConfig) {
+		this.accessConfig = accessConfig;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -216,7 +238,9 @@ public class HunterSocialGroup {
 				+ ", countryName=" + countryName + ", countyName=" + countyName
 				+ ", consName=" + consName + ", wardName=" + wardName
 				+ ", auditInfo=" + auditInfo + ", active=" + active
-				+ ", groupCredentials=" + groupCredentials + "]";
+				+ ", groupCredentials=" + groupCredentials 
+				+ ", suspensionStatus=" + suspensionStatus 
+				+ ", suspensionDescription=" + suspensionDescription + "]";
 	}
 	
 	

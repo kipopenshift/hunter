@@ -23,6 +23,10 @@
 		<property name="consName" column="CONS_NAM"  type="java.lang.String"   />
 		<property name="consWardName" column="WRD_NAM"  type="java.lang.String"  />
 		
+		<property name="firstName" column="FRST_NAM"  type="java.lang.String"  />
+		<property name="lastName" column="LST_NAM"  type="java.lang.String"  />
+		<property name="givenByUserName" column="GVN_BY_USR_NAM"  type="java.lang.String"  />
+		
 		<property name="receiverRegionLevelName" column="RCVR_RGN_LVL_NAM"  type="java.lang.String"  length="100" not-null="true" />
 		
 		 <component name="auditInfo" class="com.techmaster.hunter.obj.beans.AuditInfo">

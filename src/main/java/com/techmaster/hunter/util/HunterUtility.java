@@ -540,7 +540,6 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		try {
 			SimpleDateFormat formatter = new SimpleDateFormat(format);
 			date = formatter.parse(strDate);
-			HunterLogFactory.getLog(HunterUtility.class).debug("Returning parsedDate >> " + getFormatedDate(date, format)); 
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -1043,7 +1042,7 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	}
 	
 	public static boolean getBooleanForYN(String yn){
-		boolean ynb = yn.equalsIgnoreCase("Y") ? true : false;
+		boolean ynb = "Y".equalsIgnoreCase(yn) ? true : false;
 		return ynb;
 	}
 	
@@ -1133,6 +1132,46 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		params.put(HunterConstants.RECEIVER_LEVEL_CONSITUENCY, "Bomet Central");
 		String where = getWhrClsFrRcvrRgnTyp(HunterConstants.RECEIVER_LEVEL_VILLAGE, params);
 		System.out.println(where);  
+	}
+	
+	public static String getLevelNameOrType(String levelNameType, final String countryName, final String countyName, String consName, String wardName){
+		if( null == countryName ){
+			if( HunterConstants.REGION_LEVEL_NAME.equals(levelNameType) ){ 
+				return countryName;
+			}else{
+				return HunterConstants.RECEIVER_LEVEL_COUNTRY;
+			}
+		}
+		if( null == countyName ){
+			if( HunterConstants.REGION_LEVEL_NAME.equals(levelNameType) ){ 
+				return countyName;
+			}else{
+				return HunterConstants.RECEIVER_LEVEL_COUNTY;
+			}
+		}
+		if( null == consName ){
+			if( HunterConstants.REGION_LEVEL_NAME.equals(levelNameType) ){ 
+				return consName;
+			}else{
+				return HunterConstants.RECEIVER_LEVEL_CONSITUENCY;
+			}
+		}
+		if( null != wardName ){
+			if( HunterConstants.REGION_LEVEL_NAME.equals(levelNameType) ){ 
+				return wardName;
+			}else{
+				return HunterConstants.RECEIVER_LEVEL_WARD;
+			}
+		}
+		
+		StringBuilder builder = new StringBuilder();
+		builder.append(levelNameType).append(",").
+		append(countryName).append(",").
+		append(countyName).append(",").
+		append(consName).append(",").
+		append(wardName);
+		
+		throw new HunterRunTimeException("Inside get level name or type : Cannot mapped the request ( " + builder.toString()  +" )"); 
 	}
 	
 	

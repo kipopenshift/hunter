@@ -261,6 +261,12 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 		return query;
 	}
 
+	@Override
+	public String getReplacedAllColonedParamsQuery(String queryName, Map<String, Object> params) {
+		String replaced = replaceAllColonedParams(getQueryForSqlId(queryName), params); 
+		return replaced;
+	}
+
 	
 	
 	

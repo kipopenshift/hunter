@@ -19,6 +19,7 @@ import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.proc.ProcedureHandler;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
+import com.techmaster.hunter.dao.types.HunterMessageReceiverDao;
 import com.techmaster.hunter.dao.types.HunterRawReceiverDao;
 import com.techmaster.hunter.dao.types.HunterRawReceiverUserDao;
 import com.techmaster.hunter.dao.types.HunterUserDao;
@@ -28,6 +29,7 @@ import com.techmaster.hunter.obj.beans.Constituency;
 import com.techmaster.hunter.obj.beans.ConstituencyWard;
 import com.techmaster.hunter.obj.beans.Country;
 import com.techmaster.hunter.obj.beans.County;
+import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
 import com.techmaster.hunter.obj.beans.HunterRawReceiver;
 import com.techmaster.hunter.obj.beans.HunterRawReceiverUser;
 import com.techmaster.hunter.obj.beans.HunterUser;
@@ -409,6 +411,100 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 		}
 		
 		return receiverJsons;
+	}
+
+	
+	
+	
+	@Override
+	public List<HunterMessageReceiver> createHntrMsgReceiversForRawReceivers(String rawReceiverIds, AuditInfo auditInfo) {
+		
+		List<HunterMessageReceiver> hunterMessageReceivers = new ArrayList<>();
+		HunterMessageReceiverDao msgReceiverDao = HunterDaoFactory.getInstance().getDaoObject(HunterMessageReceiverDao.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		Map<String,Object> params = new HashMap<>();
+		params.put(":receiverIds", rawReceiverIds);
+		String query = hunterJDBCExecutor.getReplacedAllColonedParamsQuery("getJoinedHntrMsgRcvrsAndRawRcvrs", params);
+		List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, null);
+		StringBuilder activeReceiverIds = new StringBuilder();
+		
+		if( HunterUtility.isCollectionNotEmpty(rowMapList) ){ 
+			
+			for(Map<String, Object> rowMap : rowMapList){
+				
+				String contact = HunterUtility.getStringOrNullOfObj( rowMap.get("RCVR_CNTCT_MSG") ) ;
+				String receiverId = HunterUtility.getStringOrNullOfObj( rowMap.get("RCVR_ID") ) ;
+				boolean exists = HunterUtility.notNullNotEmpty(contact);
+				
+				if( exists ){
+					
+					activeReceiverIds.append( receiverId ).append(",");  
+					
+				}else{
+					
+					String countryName = HunterUtility.getStringOrNullOfObj( rowMap.get("CNTRY_NAM") );
+					String consName = HunterUtility.getStringOrNullOfObj( rowMap.get("CONS_NAM") );
+					String countyName = HunterUtility.getStringOrNullOfObj( rowMap.get("CNTY_NAM") );
+					String wardName = HunterUtility.getStringOrNullOfObj( rowMap.get("WRD_NAM") );
+					String receiverType = HunterUtility.getStringOrNullOfObj( rowMap.get("RCVR_TYP") );
+					
+					
+					HunterMessageReceiver hunterMessageReceiver = new HunterMessageReceiver();
+					hunterMessageReceiver.setReceiverContact( HunterUtility.getStringOrNullOfObj( rowMap.get("RCVR_CNTCT") ) ); 
+					hunterMessageReceiver.setGivenByUserName( HunterUtility.getStringOrNullOfObj( rowMap.get("GVN_BY_USR_NAM") ));
+					hunterMessageReceiver.setActive(true);
+					hunterMessageReceiver.setAuditInfo(auditInfo); 
+					hunterMessageReceiver.setBlocked(false);
+					hunterMessageReceiver.setConsName( consName ); 
+					hunterMessageReceiver.setConsWardName( wardName );
+					hunterMessageReceiver.setCountryName( countryName  ); 
+					hunterMessageReceiver.setCountyName( countyName ); 
+					hunterMessageReceiver.setFailDeliveryTimes( 0 ); 
+					hunterMessageReceiver.setFirstName( HunterUtility.getStringOrNullOfObj( rowMap.get("FRST_NAM") ) ); 
+					hunterMessageReceiver.setLastName( HunterUtility.getStringOrNullOfObj( rowMap.get("FRST_NAM") )  );
+					hunterMessageReceiver.setReceiverRegionLevel( HunterUtility.getLevelNameOrType(HunterConstants.REGION_LEVEL_Type, countryName, countyName, consName, wardName) );  
+					hunterMessageReceiver.setReceiverRegionLevelName( HunterUtility.getLevelNameOrType(HunterConstants.REGION_LEVEL_Type, countryName, countyName, consName, wardName) ); 
+					hunterMessageReceiver.setReceiverType(receiverType); 
+					hunterMessageReceiver.setStateName(null);
+					hunterMessageReceiver.setStateName(null); 
+					hunterMessageReceiver.setSuccessDeliveryTimes(0); 
+				
+					hunterMessageReceivers.add(hunterMessageReceiver);
+					
+				}
+				
+			}
+			
+			
+			if( HunterUtility.isCollectionNotEmpty(hunterMessageReceivers) ){
+				logger.debug("HunterMessageReceivers created. Size : " + hunterMessageReceivers.size()); 
+				msgReceiverDao.insertHunterMessageReceivers(hunterMessageReceivers); 
+			}else{
+				logger.debug("No hunter message receivers created! Moving on..."); 
+			}
+			
+			if( HunterUtility.notNullNotEmpty( activeReceiverIds.toString() )){
+				
+				String activeReceiverIdsStr = null;
+				
+				if( activeReceiverIds.toString().endsWith(",") ){
+					activeReceiverIdsStr = activeReceiverIds.substring(0, activeReceiverIds.length() - 1);
+				}else{
+					activeReceiverIdsStr = activeReceiverIds.toString();
+				}
+				
+				logger.debug("There are some receivers who are already there that need to be updated("+ activeReceiverIds +"). Updating the receivers...");   
+				Map<String,Object> repParams = new HashMap<>();
+				repParams.put(":RCVR_ID", activeReceiverIdsStr);
+				repParams.put(":lst_updated_by", HunterUtility.singleQuote(auditInfo.getLastUpdatedBy())); 
+				String update = hunterJDBCExecutor.getReplacedAllColonedParamsQuery("getUpdateHunterMsgReceiversBadedOnRawReceivers", repParams);
+				int rowsUpdated = hunterJDBCExecutor.executeUpdate(update, null);
+				logger.debug("Rows updated : " + rowsUpdated); 
+			}
+			
+		}
+		
+		return hunterMessageReceivers;
 	}
 	
 	

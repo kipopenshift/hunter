@@ -261,9 +261,10 @@ public class TaskManagerImpl implements TaskManager{
 		String currentStatus = stsRowListMap == null || stsRowListMap.isEmpty() ? null : stsRowListMap.get(1).get(0).toString();
 		
 		String delStatus = taskDao.getTaskStatuses(task.getTaskId()).get(HunterConstants.STATUS_TYPE_DELIVERY);
-		if( HunterConstants.STATUS_PENDING.equals( delStatus ) ){
+		if( HunterConstants.STATUS_PENDING.equals(delStatus) ){  
 			/* Task processing is pending. Changing status not allowed! */
-			errors.add(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_013));
+			String msg = HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.MSG_TASK_013);
+			errors.add(msg);
 			return errors;
 		}
 		

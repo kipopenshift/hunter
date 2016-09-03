@@ -43,7 +43,7 @@ body{
 
 .profileDetTables tr  td{
 	height: 23px;
-	border-bottom: 1px solid #477DA1;
+	border-bottom: 1px dotted #3D95A2;
 }
 
 .profileDetTables tr  td:first-child{

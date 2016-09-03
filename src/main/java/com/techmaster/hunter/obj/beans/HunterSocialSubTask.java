@@ -7,9 +7,11 @@ import java.util.List;
 public class HunterSocialSubTask {
 	
 	private Long subTaskId;
+	private int stmtdRcvrsCount;
 	private Long parentTaskId;
 	private String status;
 	private String comments;
+	private String subTaskDirections;
 	private float estimatedLabor;
 	private String laborCurrency;
 	private List<HunterSocialReceiver> socialReceivers = new ArrayList<>();
@@ -77,6 +79,18 @@ public class HunterSocialSubTask {
 	}
 	public void setLaborCurrency(String laborCurrency) {
 		this.laborCurrency = laborCurrency;
+	}
+	public String getSubTaskDirections() {
+		return subTaskDirections;
+	}
+	public void setSubTaskDirections(String subTaskDirections) {
+		this.subTaskDirections = subTaskDirections;
+	}
+	public int getStmtdRcvrsCount() {
+		return stmtdRcvrsCount;
+	}
+	public void setStmtdRcvrsCount(int stmtdRcvrsCount) {
+		this.stmtdRcvrsCount = stmtdRcvrsCount;
 	}
 	@Override
 	public int hashCode() {
@@ -155,7 +169,8 @@ public class HunterSocialSubTask {
 				+ estimatedLabor + ", laborCurrency=" + laborCurrency
 				+ ", socialReceivers=" + socialReceivers
 				+ ", assignedToUserName=" + assignedToUserName + ", auditInfo="
-				+ auditInfo + ", dateline=" + dateline + "]";
+				+ auditInfo + ", dateline=" + dateline 
+				+ ", subTaskDirections=" + subTaskDirections + "]";
 	}
 	
 	

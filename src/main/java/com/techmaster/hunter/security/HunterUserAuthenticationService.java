@@ -128,7 +128,7 @@ public class HunterUserAuthenticationService {
 			updateLoginDataXMLForLogin(userLoginBean, HunterUtility.formatDate(new Date(), null), isLocked(newCount) ? "Blocked" : HunterConstants.STATUS_FAILED, "173.63.174.127", userName, password, Integer.toString(newCount)); 
 			putParamsForBlockedUnBlocked(params,newCount); 
 		}else{
-			String status = HunterConstants.STATUS_FAILED;
+			String status = HunterConstants.STATUS_SUCCESS;
 			int newCount = getIncrementedFailureLoginCount(userName);
 			if(!isLocked(newCount)){ 
 				logger.debug("Login successful, resetting failed login count"); 
