@@ -34,6 +34,11 @@ public class HunterController extends HunterBaseController{
 		return "access/login";
 	}
 	
+	@RequestMapping(value="/testing/socialMessageView", method=RequestMethod.GET)
+	public String socialMessageView(){
+		return "views/socialMessageView";
+	}
+	
 
 	@RequestMapping(value="/home", method=RequestMethod.GET)
 	public String home(){

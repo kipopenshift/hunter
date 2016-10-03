@@ -36,7 +36,8 @@ HunterConstants.GATE_WAY_CLIENT_ARRAY =
 	 	{"text" : "Ozeki", "value" : "OZEKI"},
 	 	{"text" : "Safaricom", "value" : "SAFARICOM"},
 	 	{"text" : "Tech Masters", "value" : "TECH MASTERS"},
-	 	{"text" : "Hunter Email", "value" : "Hunter Email"}
+	 	{"text" : "Hunter Email", "value" : "Hunter Email"},
+	 	{"text" : "Hunter Social", "value" : "Hunter Social"}
     ];
 
 HunterConstants.SERVICE_PROVIDER_DATA = [
@@ -56,11 +57,10 @@ HunterConstants.HUNTER_LIFE_STATUSES = [
       ];
 
 HunterConstants.TASK_MSG_TYP_ARRAY = [
-			{"msgTypVal" : "Audio", "msgTypText" : "Audio"},
 			{"msgTypVal" : "Email", "msgTypText" : "Email"},
 			{"msgTypVal" : "Text", "msgTypText" : "Text"},
-			{"msgTypVal" : "Call", "msgTypText" : "Call"},
-			{"msgTypVal" : "Voice Mail", "msgTypText" : "Voice Mail"}
+			{"msgTypVal" : "Voice Mail", "msgTypText" : "Voice Mail"},
+			{"msgTypVal" : "Social", "msgTypText" : "Social Message"}
         ];
 
 HunterConstants.RECEIVER_TYP_ARRAY = [
@@ -70,5 +70,43 @@ HunterConstants.RECEIVER_TYP_ARRAY = [
 			{"value" : "Call", 	"text" : "Call"}
       ];
 
+HunterConstants.SOCIAL_MEDIA_TYPS_ARRAY = [
+  			{"value" : "mediaPhoto", "text" : "Photo"},
+  			{"value" : "mediaSound", "text" : "Sound"},
+  			{"value" : "mediaVideo", "text" : "Video"},
+  			{"value" : "mediaGIF",   "text" : "GIF"}
+        ];
 
 
+
+/*
+public static final String SOCIAL_POST_TYPE_LINK_NEWS = "socialPostLinkNews";
+public static final String SOCIAL_POST_TYPE_LINK_OTHER = "socialPostLinkOther";
+public static final String SOCIAL_POST_TYPE_TEXT = "socialPostText";
+public static final String SOCIAL_POST_TYPE_IMAGE = "socialPostImage";
+public static final String SOCIAL_POST_TYPE_VIDEO = "socialPostVideo";
+public static final String SOCIAL_POST_TYPE_AUDIO = "socialPostAudio";
+*/
+
+HunterConstants.SOCIAL_POST_ARRAY = [
+            {"value" : "socialPostText", 		"text" : "Text"},
+			{"value" : "socialPostImage",   	"text" : "Image"},
+			{"value" : "socialPostVideo", 		"text" : "Video"},
+			{"value" : "socialPostAudio",   	"text" : "Audio"},
+ 			{"value" : "socialPostLinkNews",   	"text" : "New Link"},
+ 			{"value" : "socialPostLinkOther", 	"text" : "Other Links"}
+       ];
+
+/*
+ * public static final String SOCIAL_TYPE_FACEBOOK_GROUP = "Facebook Group";
+	public static final String SOCIAL_TYPE_INSTAGRAM_GROUP = "InstagramG roup";
+	public static final String SOCIAL_TYPE_TWITTER_GROUP = "Twitter Group";
+	public static final String SOCIAL_TYPE_BLOG_GROUP = "Blog Group";
+ * */
+
+HunterConstants.SOCIAL_TYPES_ARRAY = [
+            {"value" : "Facebook", 		"text" : "Facebook"},
+ 			{"value" : "Instagram",   	"text" : "Instagram"},
+ 			{"value" : "Twitter", 		"text" : "Twitter"},
+ 			{"value" : "Blog",   		"text" : "Blog"}
+        ];

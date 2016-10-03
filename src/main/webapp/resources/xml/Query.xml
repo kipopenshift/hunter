@@ -1207,4 +1207,34 @@
 			WHERE rc.RCVR_ID IN (:RCVR_ID)
 		</statement>
 	</query>
+	<query id="rawQueryForUncompleteTaskMessage">
+		<description>
+		    Unapproves the message by setting life status to 'Draft' and 
+		    delivery status to conceptual.
+		    :msgTable table for the mssage,
+		    :lstUpdatedBy the user updating the message, 
+		    :tskId the task for which the message is to be unapproved.
+		</description>
+		<statement>
+		  	UPDATE :msgTable msg SET 
+			  msg.MSG_LIF_STS = 'Approved',
+			  msg.MSG_DEL_STS   = 'Conceptual',
+			  msg.LST_UPDTD_BY  = :lstUpdatedBy
+			WHERE msg.MSG_ID    = :tskId
+		</statement>
+	</query>
+	<query id="getTskIdsAndMsgTypes">
+		<description>
+		    Returns task ids and task types.
+		</description>
+		<statement>
+		  	SELECT 
+		  	  t.TSK_ID, 
+			  CASE 
+			    WHEN LOWER(t.TSK_MSG_TYP) = 'email' THEN 'EMAIL_MSG'
+			    WHEN LOWER(t.TSK_MSG_TYP) = 'text' THEN 'TXT_MSG'
+			  END AS TSK_MSG_TYP
+			FROM task t WHERE t.TSK_ID in ( :tskIds )
+		</statement>
+	</query>
 </queries>

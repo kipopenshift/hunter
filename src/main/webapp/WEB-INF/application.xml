@@ -63,6 +63,7 @@
 				<entry key="rawReceiverService" value-ref="rawReceiverService" />
 				<entry key="messageAttachmentBeanDao" value-ref="messageAttachmentBeanDao" />
 				<entry key="emailTemplateObjDao" value-ref="emailTemplateObjDao" />
+				<entry key="taskManager" value-ref="taskManager" />
 			</map>
 		</property>
 	</bean>

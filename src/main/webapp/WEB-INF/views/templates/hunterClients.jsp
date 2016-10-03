@@ -10,6 +10,7 @@
         data-scrollable="true"
         data-editable="{'mode' : 'popup', 'template' : kendo.template($('\\#hunterClientTemplate').html()) }"
         data-pageable="true"
+        data-toolbar='["create"]'
         data-columns="[
         	{'field' : 'clientId', title : 'Client Id',width:'120px' },
         	{ 'field': 'firstName', title : 'First Name'  },
@@ -103,3 +104,8 @@
 </script>
 
 
+<script type="text/x-kendo-template" id="hunterClientsToolBarTemplate">
+<div class="toolbar" >
+	<button data-command="create" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" class="k-button k-button-icontext k-grid-add"><span class="k-icon k-add"></span>New</button>
+</div>
+</script>

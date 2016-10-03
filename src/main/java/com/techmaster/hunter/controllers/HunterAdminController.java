@@ -46,7 +46,9 @@ import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterRawReceiverUserDao;
 import com.techmaster.hunter.dao.types.HunterUserDao;
 import com.techmaster.hunter.dao.types.MessageAttachmentBeanDao;
+import com.techmaster.hunter.dao.types.TaskHistoryDao;
 import com.techmaster.hunter.dao.types.UserRoleDao;
+import com.techmaster.hunter.enums.TaskHistoryEventEnum;
 import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.json.EmailTemplateObjJson;
 import com.techmaster.hunter.json.HunterClientJson;
@@ -60,9 +62,11 @@ import com.techmaster.hunter.obj.beans.HunterAddress;
 import com.techmaster.hunter.obj.beans.HunterRawReceiverUser;
 import com.techmaster.hunter.obj.beans.HunterUser;
 import com.techmaster.hunter.obj.beans.MessageAttachmentBean;
+import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.obj.beans.UserRole;
 import com.techmaster.hunter.obj.converters.HunterClientConverter;
 import com.techmaster.hunter.obj.converters.HunterUserConverter;
+import com.techmaster.hunter.task.TaskManager;
 import com.techmaster.hunter.util.EmailTemplateUtil;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -81,6 +85,12 @@ public class HunterAdminController extends HunterBaseController{
 	public String goAdminHome(){
 		return "views/adminHome";
 	}
+	
+	@RequestMapping(value="/action/social/fb/home", method=RequestMethod.GET)
+	public String goToFbHome(){
+		return "views/testFacebokConnection";
+	}
+	
 	
 	@RequestMapping(value="/action/emailTemplateObj/loadTemplateMetaData/{templateId}", method = RequestMethod.GET )
 	public void loadTemplateMetaData( @PathVariable("templateId") Long templateId, HttpServletResponse response ){
@@ -561,6 +571,7 @@ public class HunterAdminController extends HunterBaseController{
 		Map<String, Object> inParams = new HashMap<String, Object>();
 		inParams.put("p_attachment_id", HunterUtility.getLongFromObject(params.get("attachmentId"))); 
 		Map<String, Object> msgIdsMap = get_msg_ids_usng_attchmnt_id.execute_(inParams);
+		
 		String[] msgIds = null;
 		Object[] msgIdsHolder = null;
 		Set<String> sets = new HashSet<>();
@@ -588,14 +599,21 @@ public class HunterAdminController extends HunterBaseController{
 	public @ResponseBody String uncompleteTaskIds(@PathVariable("taskIds") String taskIds){
 		
 		JSONObject jsonObject = new JSONObject();
+		String[] taskIdsArray = null;
+		TaskManager taskManager = HunterDaoFactory.getInstance().getDaoObject(TaskManager.class); 
+		TaskHistoryDao taskHistoryDao = HunterDaoFactory.getInstance().getDaoObject(TaskHistoryDao.class);
 		
 		try{
 			
-			String[] taskIdsArray = taskIds != null ? taskIds.split(",") : new String[0];
+			taskIdsArray = taskIds != null ? taskIds.split(",") : new String[0];
+			if( taskIdsArray.length == 0 ){
+				jsonObject = HunterUtility.setJSONObjectForFailure(jsonObject, "Task ids are required. ( "+ taskIds +" )!"); 
+				return jsonObject.toString();
+			}
 			
 			for(String taskId : taskIdsArray){
 				if(!HunterUtility.isNumeric(taskId)){
-					String message =  "Error. Task ids provided are invalid ( " + taskIds + " )"; 
+					String message =  "Error. Task ids provided are invalid ( " + HunterUtility.getCommaDelimitedStrings(taskIdsArray) + " )";  
 					jsonObject = HunterUtility.setJSONObjectForFailure(jsonObject, message);
 					return jsonObject.toString();
 				}
@@ -606,13 +624,46 @@ public class HunterAdminController extends HunterBaseController{
 			updateQuery = updateQuery.replaceAll("\\?", taskIds);
 			hunterJDBCExecutor.executeUpdate(updateQuery, null);
 			
-			HunterJDBCExecutor jdbcExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class); 
-			jdbcExecutor.executeUpdate(updateQuery, null);
+			for(String taskId : taskIdsArray){
+				TaskHistory taskHistory = taskManager.getNewTaskHistoryForEventName(HunterUtility.getLongFromObject(taskId), TaskHistoryEventEnum.UNCOMPLETE.getEventName(), getUserName()); 
+				taskManager.setTaskHistoryStatusAndMessage(taskHistory,HunterConstants.STATUS_SUCCESS,"Successfully uncompleted task");
+				taskHistoryDao.insertTaskHistory(taskHistory); 
+			}
+			
+			logger.debug("Successfully updated tasks. Uncompleting messages.... "); 
+			
+			Map<String,Object> params = new HashMap<>();
+			params.put(":tskIds", taskIds.trim());
+			String tskDetailsQ = hunterJDBCExecutor.getReplacedAllColonedParamsQuery("getTskIdsAndMsgTypes", params);
+			List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(tskDetailsQ, null);
+			
+			for(Map<String,Object> rowMap : rowMapList){
+				Long tskId = HunterUtility.getLongFromObject(rowMap.get("TSK_ID"));
+				String msgTable = HunterUtility.getStringOrNullOfObj(rowMap.get("TSK_MSG_TYP"));
+				if(taskIds != null && msgTable != null){
+					params.clear();
+					params.put(":msgTable", msgTable);
+					params.put(":lstUpdatedBy", HunterUtility.singleQuote(getUserName())); 
+					params.put(":tskId", tskId+"");
+					updateQuery = hunterJDBCExecutor.getReplacedAllColonedParamsQuery("rawQueryForUncompleteTaskMessage", params);
+					hunterJDBCExecutor.executeUpdate(updateQuery, null);
+				}
+			}
+			
+			logger.debug("Successfully uncompleted task messages!!");  
+			
 			jsonObject = HunterUtility.setJSONObjectForSuccess(jsonObject, "Sucessfully uncompleted task(s) " + taskIds);
 			
 			return jsonObject.toString();
 			
 		}catch(Exception e){
+			
+			for(String taskId : taskIdsArray){
+				TaskHistory taskHistory = taskManager.getNewTaskHistoryForEventName(HunterUtility.getLongFromObject(taskId), TaskHistoryEventEnum.UNCOMPLETE.getEventName(), getUserName()); 
+				taskManager.setTaskHistoryStatusAndMessage(taskHistory,HunterConstants.STATUS_FAILED,"Failed to uncomplete task." + e.getMessage());
+				taskHistoryDao.insertTaskHistory(taskHistory); 
+			}
+			
 			String message = e.getMessage();
 			jsonObject = HunterUtility.setJSONObjectForFailure(jsonObject, message);
 			return jsonObject.toString();

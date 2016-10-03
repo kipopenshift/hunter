@@ -5,6 +5,9 @@ $("document").ready(function(){
         animation: { 
        	 open: { effects: "fadeIn"} 
         },
+        show : function(e) {
+        	registerNavigation("My Hunter", $(e.item).find("> .k-link").text());
+        },
         contentUrls: [
                       '/Hunter/admin/action/templates/roles',
                       '/Hunter/admin/action/templates/msgAttachments'

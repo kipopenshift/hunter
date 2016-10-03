@@ -37,7 +37,7 @@ function placeProgressIcon(){
 }
 
 function removeProgressIcon(){
-	$("#hunterCacheProgIcon").fadeOut(100,function(){
+	$("#hunterCacheProgIcon").fadeOut(2000,function(){
 		$(this).remove();
 		enableButtonsAndInputs();
 	});

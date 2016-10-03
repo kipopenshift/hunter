@@ -16,8 +16,6 @@
 	     </ul>
 	</div>
 	
-	<span data-bind="text: testVMValue">f</span>
-	
 </div>
 
 

@@ -138,7 +138,7 @@ public class TaskDaoImpl implements TaskDao{
 	@Override
 	public void deleteTask(Task task) {
 		logger.debug("Deleting task >> " + task);
-		regionService.removeAllRegionsForTask(task.getTaskId());
+		HunterDaoFactory.getInstance().getDaoObject(RegionService.class).removeAllRegionsForTask(task.getTaskId()); 
 		HunterHibernateHelper.deleteEntity(task); 
 		logger.debug("Finished deleting task!");
 	}

@@ -11,6 +11,7 @@ import com.techmaster.hunter.json.ReceiverGroupJson;
 public class Task {
 	
 	private long taskId;
+	private Long clientId;
 	private String taskType;
 	private String taskName;
 	private String taskObjective;
@@ -38,7 +39,6 @@ public class Task {
 	private java.util.Date lastUpdate;
 	private String updatedBy;
 	private String createdBy;
-	private Long clientId;
 	
 	private Message taskMessage;
 	private Set<ReceiverRegion> taskRegions  = new HashSet<>();

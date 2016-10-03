@@ -1,4 +1,6 @@
 
+registerNavigation("Admin Main", "Email Template Object");
+
 var codeMirrorEditor = null;
 
 var EmailTemplateObjModel = kendo.data.Model.define({

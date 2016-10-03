@@ -210,10 +210,8 @@ public class TaskController extends HunterBaseController{
 
 			bodyString = HunterUtility.getRequestBodyAsString(request);
 			task = new TaskConverter(bodyString).convertBasic();
-			task.setCretDate(new Date());
-			task.setLastUpdate(new Date());
-			task.setCreatedBy("hlangat01");
-			task.setUpdatedBy("hlangat01");
+			task.setLastUpdate(new Date()); 
+			task.setUpdatedBy( getUserName() );
 			task.setTaskDateline(new Date());
 
 		} catch (IOException e) {
@@ -229,6 +227,59 @@ public class TaskController extends HunterBaseController{
 		taskHistoryDao.insertTaskHistory(taskHistory); 
 		
 		return task;
+	}
+	
+	@RequestMapping(value = "/action/create/createTaskForCilentIdNew", method = RequestMethod.POST)
+	@Produces("application/json")
+	@Consumes("application/json")
+	@ResponseBody
+	public String createTaskForCilentIdNew(HttpServletRequest request) {
+
+		String bodyString = null;
+		Task task = new Task();
+		
+		String userName = getUserName();
+		TaskHistory taskHistory = taskManager.getNewTaskHistoryForEventName(null, TaskHistoryEventEnum.CREATE.getEventName(), userName);
+
+		try {
+
+			bodyString = HunterUtility.getRequestBodyAsString(request);
+			task = new TaskConverter(bodyString).convertBasic();
+			task.setLastUpdate(new Date()); 
+			task.setCreatedBy( task.getCreatedBy() != null ? task.getCreatedBy() : getUserName() );
+			task.setUpdatedBy( getUserName() );
+			task.setTaskDateline(new Date());
+			
+			if( task.getTaskId() != 0 ){
+				Task persitentTask = taskDao.getTaskById(task.getTaskId());
+				persitentTask.setTaskName(task.getTaskName());
+				persitentTask.setDescription(task.getDescription());
+				persitentTask.setTaskType(task.getTaskType());
+				persitentTask.setTskMsgType(task.getTskMsgType()); 
+				persitentTask.setGateWayClient(task.getGateWayClient());
+				persitentTask.setTaskObjective(task.getTaskObjective()); 
+				persitentTask.setRecurrentTask(task.isRecurrentTask()); 
+				persitentTask.setTaskBudget(task.getTaskBudget()); 
+				persitentTask.setDesiredReceiverCount(task.getDesiredReceiverCount()); 
+				taskDao.update(persitentTask); 
+				return HunterUtility.setJSONObjectForSuccess(new JSONObject(), "Successfully created task").toString();
+			}
+			
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			return HunterUtility.setJSONObjectForFailure(null, e.getMessage()).toString();
+		}
+		String parameters = HunterUtility.getParamNamesAsStringsFrmRqst(request);
+		logger.debug("Request parameters >> " + parameters);
+		taskDao.insertTask(task);
+		logger.debug("Returning new task >> " + task);
+		
+		taskHistory.setTaskId(task.getTaskId()); 
+		taskManager.setTaskHistoryStatusAndMessage(taskHistory, HunterConstants.STATUS_SUCCESS, "Successfully created task."); 
+		taskHistoryDao.insertTaskHistory(taskHistory); 
+		
+		return HunterUtility.setJSONObjectForSuccess(new JSONObject(), "Successfully created task").toString();
 	}
 
 	@RequestMapping(value = "action/update/updateTaskForClientId", method = RequestMethod.POST)
@@ -277,7 +328,8 @@ public class TaskController extends HunterBaseController{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Task task = new TaskConverter(requestBody).convert();
+		Long taskId = new JSONObject(requestBody).getLong("taskId");
+		Task task = taskDao.getTaskById(taskId);
 		taskDao.deleteTask(task);
 		
 		String userName = getUserName();

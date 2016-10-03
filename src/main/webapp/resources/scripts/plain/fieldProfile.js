@@ -188,10 +188,11 @@ function loadContactsData(progressBar){
    });
 	
 	$("#fieldProfileDataTable_filter input").attr("placeholder","Search Contact");
+	$("#fieldProfileDataTable_filter input").css({"background-color":"#DFF2F5"});
 	$("#fieldProfileDataTable_filter").css({"width":"100%", "margin-bottom":"1px"});
-	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:-3.5%;margin-top:-8px;" ><button onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" class="ui-btn ui-icon-arrow-d ui-btn-icon-left" onClick="downloadImportTemplate()" id="downloadImportTempButt" classs="highlightborder"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>Template</span></button></span>');
-	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:-3.5%;margin-top:-8px;" ><button onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" class="ui-btn ui-icon-arrow-u ui-btn-icon-left" onClick="launchImportStage()" id="importNewContactButt" classs="highlightborder"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>Import</span></button></span>');
-	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:3.5%;margin-top:-8px;" ><button onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" class="ui-btn ui-icon-plus ui-btn-icon-left" onClick="populatePopupForParams(\'0_NewContact\')" id="createNewContactButt"  style="width:150px;border-radius:4px;background-color:#9BF3FF;color:green;height:45px;margin-bottom:-3px;" ><span>New</span></button></span>');
+	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:-3.5%;margin-top:-8px;" ><button onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" class="ui-btn ui-icon-arrow-d ui-btn-icon-left" onClick="downloadImportTemplate()" id="downloadImportTempButt" classs="highlightborder"  style="width:150px;border-radius:4px;background-color:#DFF2F5;color:green;height:45px;margin-bottom:-3px;" ><span>Template</span></button></span>');
+	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:-3.5%;margin-top:-8px;" ><button onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" class="ui-btn ui-icon-arrow-u ui-btn-icon-left" onClick="launchImportStage()" id="importNewContactButt" classs="highlightborder"  style="width:150px;border-radius:4px;background-color:#DFF2F5;color:green;height:45px;margin-bottom:-3px;" ><span>Import</span></button></span>');
+	$("#fieldProfileDataTable_filter").prepend('<span style="float:left;width:200px;margin-left:3.5%;margin-top:-8px;" ><button onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" class="ui-btn ui-icon-plus ui-btn-icon-left" onClick="populatePopupForParams(\'0_NewContact\')" id="createNewContactButt"  style="width:150px;border-radius:4px;background-color:#DFF2F5;color:green;height:45px;margin-bottom:-3px;" ><span>New</span></button></span>');
 	bindDataTableActionButtons();
 	$('#fieldProfileDataTable').on( 'draw.dt', function () {
 		bindDataTableActionButtons();
@@ -211,7 +212,7 @@ function getQuotedParam(param){
 }
 
 function defineAffirmButt(text, onClick, jClass){
-	var affirm = '<center><a href="#" onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" id="defineAffirmButt" onClick="'+ onClick +'" class="'+ jClass +'" style="min-width:200px;margin:10px;border:1px solid #93CADB;border-radius:5px;color:#0E4244;" >'+ text +'</a></center>';
+	var affirm = '<center><a href="#" onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" id="defineAffirmButt" onClick="'+ onClick +'" class="'+ jClass +'" style="background-color:#DFF2F5;min-width:200px;margin:10px;border:1px solid #93CADB;border-radius:5px;color:#0E4244;" >'+ text +'</a></center>';
 	$("#affirmPopupAction").html(affirm);
 }
 
@@ -241,13 +242,13 @@ function launchImportStage(){
 			$(this).css({"border":"1px solid #62A1A5", "background-color":"#ACE1E5"});
 		}); 
 		$("#hunterFieldPopupContainer button[id='importNewContainerSubButt']").mouseleave(function(){
-			$(this).css({"border":"1px solid #93CADB","background-color":"#9BF3FF"});
+			$(this).css({"border":"1px solid #93CADB","background-color":"#DFF2F5"});
 		});
 		$("#hunterFieldPopupContainer a").mouseenter(function(){
 			$(this).css({"border":"1px solid #62A1A5", "background-color":"#ACE1E5"});
 		}); 
 		$("#hunterFieldPopupContainer a:first-child").mouseleave(function(){
-			$(this).css({"border":"1px solid #93CADB","background-color":"#9BF3FF"});
+			$(this).css({"border":"1px solid #93CADB","background-color":"#DFF2F5"});
 		});
 		
 		$("#hunterFieldPopupContainer form[data-name='importNewContactForm']").on('submit', function(){
@@ -274,7 +275,7 @@ function readURL(input, target) {
 }
 
 function onmouseoutCloseA(a){
-	$(a).css({"border":"1px solid #93CADB","background-color":"#9BF3FF"});
+	$(a).css({"border":"1px solid #93CADB","background-color":"##DFF2F5"});
 }
 
 function onmouseenterCloseA(a){
@@ -628,6 +629,9 @@ function loadValuesForContactId(contactId){
 	var contact = getDataTableJson(contactId);
 	loadUserEditData = true;
 	
+	console.log("Loaddding for edit.................................");
+	console.log(JSON.stringify(contact));
+	
 	if(contact != null){
 		
 		var contact_ = contact["receiverContact"];
@@ -908,6 +912,8 @@ function getEditedValuesAndSave(id){
 		ward 		= 	$("#hunterFieldPopupContainer select[data-name='wardInput'] option:selected").val(),
 	    json		= {};
 	
+	console.log("::::::::::::::::::::::::::::::::::::::::::: Ward in edit mode : " + ward );
+		
 		var valid		= true;
 		var nextNumb = 1;	
 		

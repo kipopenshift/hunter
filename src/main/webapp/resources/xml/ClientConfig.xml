@@ -133,4 +133,27 @@
             </configs>
         </configurations>
     </client>
+    <client clientName="Hunter Social Facebook Client" clientId="3" >
+        <configurations>
+            <context>
+                <security>
+                	<userName></userName>
+            		<password></password>
+	            </security>
+	            <batch batchType="multiple" batchNo="99" batchMark="99" /> 
+	            <worker workerDefault="false" workerName="DEFAULT_HUNTER_SOCIAL_WORKER"  />
+	            <messageType>Social</messageType>
+	             <preempt>
+	            	<receivers></receivers>
+	            	<percentage></percentage>
+	            </preempt>
+            </context>
+            <configs>
+                <config>
+                    <label></label>
+                    <value></value>
+                </config>
+            </configs>
+        </configurations>
+    </client>
 </clients>

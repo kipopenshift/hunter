@@ -46,7 +46,7 @@ public class ClientController extends HunterBaseController{
 		String clientString = null;
 		try {
 			clientString = mapper.writeValueAsString(clients);
-			System.out.println(clientString);
+			logger.debug(clientString);
 		} catch (JsonGenerationException e) {
 			e.printStackTrace();
 		} catch (JsonMappingException e) {

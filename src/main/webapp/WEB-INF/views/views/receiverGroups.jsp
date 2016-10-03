@@ -7,7 +7,7 @@
 	<div 
 		id="receiverGroupGrid"
 		data-role="grid"
-		data-height="650"
+		data-height="800"
 		data-refreshable="true"
 		data-sortable="true"
 		data-editable="inline"

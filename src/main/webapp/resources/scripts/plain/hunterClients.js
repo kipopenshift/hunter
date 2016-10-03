@@ -1,5 +1,6 @@
 
 var kendoKipHelperInstance = null;
+registerNavigation("My Hunter", "Hunter Clients"); 
 
 var hunterClientsModel = kendo.data.Model.define({
 	id:"clientId",
@@ -8,13 +9,13 @@ var hunterClientsModel = kendo.data.Model.define({
 			type : "number", validation : {required : true},editable:false, defaultValue:null
 		},
 		"firstName" : {
-			type : "string", validation : {required : true},editable:false, defaultValue:null
+			type : "string", validation : {required : true},editable:true, defaultValue:null
 		},
 		"lastName" : {
-			type : "string", validation : {required : true},editable:false, defaultValue:null
+			type : "string", validation : {required : true},editable:true, defaultValue:null
 		},
 		"email" : {
-			type : "string", validation : {required : false},editable:false, defaultValue:null
+			type : "string", validation : {required : false},editable:true, defaultValue:null
 		},
 		"receiver" : {
 			type : "boolean", validation : {required : true},editable:true, defaultValue:null

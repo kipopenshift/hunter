@@ -2,6 +2,9 @@
 var kendoKipHelperInstance;
 var hunterWindow;
 
+registerNavigation("Hunter", "Tasks"); 
+
+
 var ReceiverGroupModel = kendo.data.Model.define({
 	id:"groupId",
 	fields : {
@@ -752,13 +755,21 @@ var hunterTaskModel = kendo.data.Model.define({
 		return html;
 	},
 	getEditTaskTemplate : function(){
-		var lifeStatus = this.get("taskLifeStatus");
-		if(lifeStatus === "Draft" ){
-			return kendoKipHelperInstance.createContextEditButton(false);
-		}else{
-			return "";
-		}
 		
+		var 
+		taskLifeStatus 	= this.get("taskLifeStatus"),
+		taskId 			= this.get("taskId"),
+		actionName 		= "editTask",
+		idString		= null,
+		html			= null;
+		
+		if(taskLifeStatus !== "Draft"){
+			return "";
+		}else{
+			idString = "\""+ actionName + ":" + taskId +"\"";
+			html = kendoKipHelperInstance.createSimpleHunterButton("pencil",null, "hunterAdminClientUserVM.launchTaskEditView("+ idString +")" );
+			return html; 
+		}		
 	},
 	getCloneTaskTemplate : function(){
 		var taskLifeStatus = this.get("taskLifeStatus");
@@ -895,6 +906,7 @@ var hunterAdminClientUserVM = kendo.observable({
 	deleteCurMsgFlag : false,
 	hunterTaskHistoryGrid : null,
 	createTextMessageManager : null,
+	createSocialMessageManager : null,
 	
 	
 	
@@ -1659,6 +1671,14 @@ var hunterAdminClientUserVM = kendo.observable({
 			return;
 		}
 		
+		if(lifeStatus != "Draft" && lifeStatus != "Approved" && lifeStatus != "Review" &&  (msgType.toLowerCase() == "social") ){
+			hunterAdminClientUserVM.showPopupForProcessedTaskSocialMsg(id);
+			return;
+		}else if((lifeStatus == "Draft" || lifeStatus == "Approved" || lifeStatus == "Review") &&  (msgType.toLowerCase() == "social") ){
+			this.get("createSocialMessageManager").execute(); 
+			return;
+		}
+		
 		hunterAdminClientUserVM.loadNewTaskMessageView(id);
 		this.loadMessageAttachmentsContainer();
 		
@@ -1883,6 +1903,21 @@ var hunterAdminClientUserVM = kendo.observable({
 		kendoKipHelperInstance.showWindowWithOnClose(html,"Task Process Progress");
 		$("#taskProcessPopupTaskName").html(desc);
 	},
+	showPopupForProcessedTaskSocialMsg : function(taskId){
+		
+		alert("This method has not been implemented yet!!!!!!!!!!!!!!!!!!");
+		
+		this.set("selTaskId", taskId);
+		var desc = this.get("hunterClientTaskGrid").dataSource.get(taskId).get("description");
+		/*
+		var model = this.get("hunterClientTaskGrid").dataSource.get(taskId);
+		var data  = JSON.stringify(model);
+		var url = "http://localhost:8080/Hunter/task/action/processTask/" + taskId;
+		kendoKipHelperInstance.ajaxPostDataForJsonResponse(data, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterProcessTask");*/
+		var html = $("#processTaskProgressPopupTemplate").html();
+		kendoKipHelperInstance.showWindowWithOnClose(html,"Task Process Progress");
+		$("#taskProcessPopupTaskName").html(desc);
+	},
 	afterProcessTask : function(data){
 		var json = jQuery.parseJSON(data);
 		var status = json.status;
@@ -2035,6 +2070,277 @@ var hunterAdminClientUserVM = kendo.observable({
 		var taskName = hunterAdminClientUserVM.getSelectedTaskBean().get("taskName");
 		$("#cloneTaskNameLabel").text(taskName);
 	},
+	createNewTask : function(){
+
+		var 
+		userId 	= this.get("selUserId"),
+		url 	= HunterConstants.getHunterBaseURL("task/action/create/createTaskForCilentIdNew"),
+		after 	= "hunterAdminClientUserVM.afterCreatingNewTask",
+		taskId 	= hunterAdminClientUserVM.get("selTaskId"), 
+		
+		values 	= {
+			
+			"taskName" 		: $("#editTaskTemplateForm input[id='editTaskTemplateTaskName']").val(),
+			"description"	: $("#editTaskTemplateForm input[id='editTaskTemplateTaskDescription']").val(),
+			"taskType" 		: $("#editTaskTemplateForm input[id='editTaskTemplateTskType']").val(),
+			"tskMsgType"	: $("#editTaskTemplateForm input[id='editTaskTemplateTskMsgType']").val(),
+			"taskObjective"	: $("#editTaskTemplateForm textarea[id='editTaskTemplateTaskObjective']").val(),
+			"recurrentTask"	: $("#editTaskTemplateForm input[id='editTaskTemplateRecurrentTask']").prop("checked"),
+			"taskBudget"	: $("#editTaskTemplateForm input[id='editTaskTemplateBudget']").val(),
+			"gateWayClient" : $("#editTaskTemplateForm input[id='editTaskTemplateTaskClient']").val(),
+			
+			"clientId"		: userId,
+			"taskId"		: taskId == null || taskId === 'undefined' ? 0 : taskId, 
+			"taskCost" 		: 0,
+			
+			"desiredReceiverCount"		: $("#editTaskTemplateForm input[id='editTaskTemplateDesiredReceivers']").val(),
+		},
+		
+		valuesStr = JSON.stringify(values);
+		kendo.ui.progress($("#editTaskTemplateForm"), true);
+		
+		setTimeout(function(){
+			kendoKipHelperInstance.ajaxPostData(valuesStr, "application/json", "json", "POST", url , after );
+		}, 1500);
+		
+	},
+	afterCreatingNewTask : function(data){
+		var dataStr = data+"";
+		var dataJson = jQuery.parseJSON(dataStr);
+		var status = dataJson["status"]; 
+		var message = dataJson["message"];
+		if(status != null && message != null){
+			if(status !== "Failed"){
+				kendoKipHelperInstance.popupWarning(status + " : " + message, "Success");
+			}else{
+				kendoKipHelperInstance.showErrorNotification(status + " : " + message);
+			}
+		}	
+		this.closeProcessWindowAndRefresh();
+	},
+	getAndValidateNewTaskValues:function(){
+		var validator = $("#editTaskTemplateForm").kendoValidator({
+			messages:{
+				custom : function(input){
+					var name	= input.attr("name");
+					console.log( name );
+					if( name == "editTaskTemplateTskMsgType" || name == "editTaskTemplateTaskClient" || name == "editTaskTemplateTskType" ){
+		        		   return "Task field is required." ;
+		        	   } 
+				},
+				length : function(input){
+					var name = $(input).attr("name");
+		             if ( name === "editTaskTemplateTaskName" ) {
+		            	 return "Task name is required and is less than 50 characters.";
+		             }else if ( name === "editTaskTemplateTaskDescription" ) {
+		            	 return "Task description is required and is less than 100 characters.";
+		             }else if ( name == "editTaskTemplateTaskObjective" ){
+		            	 return "Task objective is required and is less than 2000 characters.";
+		             }
+				},
+				specialCharacters : function(input){
+					return "Only alphanumeric, comma, colon, semi colon and period are allowed!";
+				},
+				required : "Required field!"
+			},
+			rules: {
+	           custom: function(input) {
+	        	   
+	        	   var 
+	        	    value 	= input.val(), 
+	        	    name	= input.attr("name");
+	        	   
+	        	   if( name == "editTaskTemplateTskMsgType" || name == "editTaskTemplateTaskClient" || name == "editTaskTemplateTskType" ){
+	        		   return !( value == null || value === "undefined" || value.trim().length == 0 ); 
+	        	   } 
+
+	        	   return true;
+	           },
+	           length : function(input){
+	        	   	
+	        	    var 
+	        	    value 	= input.val(), 
+	        	    name	= input.attr("name"); 
+		        	
+		            if ( name === "editTaskTemplateTaskName" || name === "editTaskTemplateTaskDescription" ) {
+		            	return !( value == null || value.trim().length == 0 || value.trim().length >= 50 ) ;
+		            }else if( name === "editTaskTemplateTaskObjective" ){
+		            	return !( value.length == 0 || value.length > 2000 );
+		            }
+		            
+		            return true;
+	           },
+	           specialCharacters : function(input){
+	        	   
+	        	   var 
+	        	   name = $(input).attr("name"),
+	        	   value = input.val(),
+	        	   pass =  new RegExp(/^[a-zA-Z0-9. ,:;]+$/).test( value ),
+	        	   objctv =  new RegExp(/^[a-zA-Z0-9. '",:;]+$/).test( value );
+	        	   
+				  if( name == "editTaskTemplateTaskName" || name == "editTaskTemplateTaskDescription"){
+					return pass;
+				  }else if( name == "editTaskTemplateTaskObjective"  ){
+					  return objctv;
+				  }
+					
+				  return true;
+	           }
+	         }
+		}).data("kendoValidator"); 
+		
+		var isValid = validator.validate();
+		
+		if( isValid ){
+			this.createNewTask();
+		}
+		
+	},
+	
+	newTaskTypeSelected : "Email",
+	modifiedClientsForMsgType : "Email",
+	
+	launchTaskEditView : function(action){
+		
+		var 
+		actionName 	= action.split(":")[0],
+		taskId 		= action.split(":")[1],
+		html 		= $("#editTaskNewTemplate").html(),
+		selTaskBean = null;
+		
+		if( taskId !== "undefined" ){
+			this.set("selTaskId",taskId);
+			selTaskBean = hunterAdminClientUserVM.getSelectedTaskBean();
+		}else{
+			this.set("selTaskId",null);
+		}
+		
+		console.log(actionName + " : " + taskId);
+		
+		kendoKipHelperInstance.showWindowWithOnClose(html, "Task Details");
+		$("#editTaskTemplateForm td").css({"height":"1.4em"}); 
+		
+		var tskTypeDropdownList = $("#editTaskTemplateTskType").kendoDropDownList({
+			value : hunterAdminClientUserVM.newTaskTypeSelected,
+			dataSource:HunterConstants.TASK_TYPES_ARRAY,
+			dataTextField : "text",
+			optionLabel : "Select Task Type",
+			dataValueField : "value"
+		}).data("kendoDropDownList");
+		
+		var applicableClients = [{"text" : "Hunter Email", "value" : "Hunter Email"}];
+		
+		var tskMsgTypeDropdown = $("#editTaskTemplateTskMsgType").kendoDropDownList({
+			dataSource:HunterConstants.TASK_MSG_TYP_ARRAY,
+			dataTextField : "msgTypText",
+			dataValueField : "msgTypVal",
+			optionLabel : "Select Task Message Type",
+			change:function(e){
+				
+				var value = this.value(),
+					clients = null;
+				
+				if( value === "Email" ){
+					clients = 
+					[
+					 	{"text" : "Hunter Email", "value" : "Hunter Email"}
+				    ];
+				}else if( value === "Text"){
+					clients = 
+						[
+						 	{"text" : "CM", "value" : "CM"},
+						 	{"text" : "Ozeki", "value" : "OZEKI"},
+						 	{"text" : "Safaricom", "value" : "SAFARICOM"}
+					    ];
+				}else if( value === "Voice Mail"){
+					clients = 
+					[
+					 	{"text" : "CM", "value" : "CM"},
+					 	{"text" : "Ozeki", "value" : "OZEKI"},
+					 	{"text" : "Safaricom", "value" : "SAFARICOM"}
+				    ];
+				}else if( value === "Social"){
+					clients = 
+					[
+					 	{"text" : "Hunter Social", "value" : "Hunter Social"}
+				    ];
+				}
+				
+				$("#editTaskTemplateTaskClient").data("kendoDropDownList").setDataSource(clients); 
+			}
+		}).data("kendoDropDownList");
+
+		var taskClientDropdownList = $("#editTaskTemplateTaskClient").kendoDropDownList({
+			dataSource: {
+			    data: applicableClients
+			},
+			dataTextField : "text",
+			dataValueField : "value",
+			optionLabel : "Select Task Client",
+			change:function(){
+				
+			}
+		}).data("kendoDropDownList"); 
+		
+		 var budgetNumeric = $("#editTaskTemplateBudget").kendoNumericTextBox({
+			 value : 0.00,
+			 min : 0.00,
+			 max : 2500000,
+		 }).data("kendoNumericTextBox"); 
+		 
+		 
+		 var desiredRcvrsNumeric = $("#editTaskTemplateDesiredReceivers").kendoNumericTextBox({
+			 value : 1,
+			 min: 0,
+			 decimals: false,
+			 max : 1000000,
+		 }).data("kendoNumericTextBox"); 
+		 
+		 
+		 if(actionName === 'editTask' ){
+			 
+			$("#editTaskTemplateForm input[id='editTaskTemplateTaskName']").val( selTaskBean.get("taskName") ); 
+			$("#editTaskTemplateForm input[id='editTaskTemplateTaskDescription']").val( selTaskBean.get("description") );
+			$("#editTaskTemplateForm input[id='editTaskTemplateRecurrentTask']").prop("checked", selTaskBean.get("recurrentTask")); 
+			$("#editTaskTemplateForm textarea[id='editTaskTemplateTaskObjective']").val( selTaskBean.get("taskObjective") ); 
+			tskMsgTypeDropdown.value( selTaskBean.get("tskMsgType") ); 
+			tskTypeDropdownList.value( selTaskBean.get("taskType") );
+			taskClientDropdownList.value( selTaskBean.get("gateWayClient") );
+			budgetNumeric.value( selTaskBean.get("taskBudget") );
+			desiredRcvrsNumeric.value( selTaskBean.get("desiredRcvrsNumeric") );
+			
+	     }
+		
+		
+	},
+	getApplicableClientsForMsgType : function(){
+		var msgTyp = hunterAdminClientUserVM.get("newTaskTypeSelected");
+		if( msgTyp === "Email" ){
+			return 
+			[
+			 	{"text" : "Hunter Email", "value" : "Hunter Email"}
+		    ];
+		}else if( msgTyp === "Text"){
+			return 
+			[
+			 	{"text" : "CM", "value" : "CM"},
+			 	{"text" : "Ozeki", "value" : "OZEKI"},
+			 	{"text" : "Safaricom", "value" : "SAFARICOM"}
+		    ];
+		}else if( msgTyp === "Voice Mail"){
+			return 
+			[
+			 	{"text" : "CM", "value" : "CM"},
+			 	{"text" : "Ozeki", "value" : "OZEKI"},
+			 	{"text" : "Safaricom", "value" : "SAFARICOM"}
+		    ];
+		}else if( msgTyp === "Social Message"){
+			return 
+			[
+			 	{"text" : "Hunter Social", "value" : "Hunter Social"}
+		    ];
+		}
+	},
 	createTasksGrid : function(json){
 		
 		//numericize input
@@ -2055,10 +2361,6 @@ var hunterAdminClientUserVM = kendo.observable({
             },
             height: 350,
             sortable: true,
-            editable: {
-				mode: "popup",
-				template: kendo.template($("#hunterClientTasksPopupEditTemplate").html())
-            },
             columns: [
                { field: "taskId", title: "ID", width: 30 },
                { field: "taskName", title: "Name", width: 150 },

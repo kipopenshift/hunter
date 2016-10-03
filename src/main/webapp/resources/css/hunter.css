@@ -6,6 +6,14 @@ body{
 	background-color:#F9FEFF;
 }
 
+#createSocialMsgFieldsTable td:first-child {
+	border-bottom:1px solid #D8E8F0;
+}
+
+#createSocialMsgFieldsTable td {
+	height : 30px;
+}
+
 #taskTxtMsgViewTable td{
 	height:22px;
 	font-size:15px;
@@ -17,6 +25,11 @@ body{
 	font-weight: bold;
 	width:40%;
 }
+
+.k-invalid-msg{
+	color:red;
+}
+
 
 #menuUlId li{
 	font-size:15px;
@@ -119,7 +132,7 @@ body{
 	opacity:2;
 	border-radius : 4px;
 	background-size: 100% 100%;
-	margin-top:-5px;
+	margin-top:-12px;
 }
 
 .homeCurrentTab{

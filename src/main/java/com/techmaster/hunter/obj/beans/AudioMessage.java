@@ -1,7 +1,7 @@
 package com.techmaster.hunter.obj.beans;
 
 
-public class AudioMessage extends Message{
+public class AudioMessage extends Message {
 	
 	
 	

@@ -1,3 +1,6 @@
+
+registerNavigation("Regions", "Region Hierarchies");
+
 var kendoWindow;
 var kendoKipHelperInstance;
 

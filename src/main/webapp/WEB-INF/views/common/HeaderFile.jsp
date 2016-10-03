@@ -42,6 +42,12 @@
 <title>Hunter</title> 
 
 <script type="text/javascript">
+
+function registerNavigation(parent, child){
+	$("#currLocPar").html(parent);
+	$("#currLocChld").html(child);
+}
+
 	$("document").ready(function() {
 		
 		$('.myMenu > li').bind('mouseover', openSubMenu);
@@ -57,7 +63,6 @@
 		
 		function loadClickedMenuActions(){
 			var text = $(this).text().trim();
-			console.log(text);
 			if(text != null && text === "Client Tasks"){
 				navigate("/login/postlogin");  
 			}else if(text != null && text === "Addresses"){
@@ -70,7 +75,7 @@
 				navigate("/workflow/action/config/home");
 			}else if(text != null && text === "Combobox"){
 				navigate("/workflow/action/text/cascadeComboBox");
-			}else if(text != null && text === "Home"){
+			}else if(text != null && text === "Hunter"){
 				navigate("/hunter/login/after");
 			}else if(text != null && text === "Regions Hierarchies"){
 				navigate("/region/action/regions/hierarchies/action/home");
@@ -82,21 +87,25 @@
 				navigate("/admin/action/admin/main");
 			}else if(text != null && text === "Hunter Field Profile"){
 				navigate("/admin/action/fieldProfile");
-			}else if(text != null && text === "Receiver Tasks") {
-				navigate("/hunter/tasks/home");
-			}else if(text != null && text === "Social Tasks") {
+			}else if(text != null && text === "Tasks") {
 				navigate("/hunter/tasks/home");
 			}else if(text != null && text === "Validate Raw Receivers") {
 				navigate("/admin/action/raw/validateReceivers"); 
 			}else if(text != null && text === "Social Associate Profile") {
 				navigate("/socialAssociate/action/profileHome"); 
+			}else if(text != null && text === "Social Groups") {
+				navigate("/social/action/groups/home"); 
+			}else if(text != null && text === "Social Regions") {
+				navigate("/social/action/regions/home"); 
+			}else if(text != null && text === "Social Apps") {
+				navigate("/social/action/socialApp/home"); 
 			}
 		}
 
 		function navigate(url){
 			window.location.href = HunterConstants.HUNTER_BASE_URL + url;
 		}
-				   
+		
 	});
 </script>
 
@@ -164,6 +173,13 @@
 	
 	/* Notification template */
 	
+	.arrow-right {
+	  width: 0; 
+	  height: 0; 
+	  border-top: 8px solid transparent;
+	  border-bottom: 8px solid transparent;
+	  border-left: 8px solid #6E8C9E;
+	}
 	
 </style>
 
@@ -172,19 +188,26 @@
 <body>
 
 
-<div id="hunterTopDiv" >
 
-	<ul class="myMenu" id="menuUlId" style="z-index:10000;margin-left:39%;color:white;">
-		<li style="border-left : 3px solid #93B1B7;" class="underLined" ><a href="#" id="homeTabHome" class="homeNavTabClass"  class="homeCurrentTab"   >Home</a>
+<div id="hunterTopDiv" >
+	
+	<ul class="myMenu" id="menuUlId" style="z-index:10000;margin-left:37%;color:white;">
+		<li style="border-left : 3px solid #93B1B7;" class="underLined" ><a href="#" id="homeTabHome" class="homeNavTabClass"  class="homeCurrentTab"   >Hunter</a>
 			<ul class="rightAndLeftBottom" style='margin-left:-3px;' >
-				<li><a href="#">Receiver Tasks</a></li>
-				<li><a href="#">Social Tasks</a></li>
+				<li><a href="#">Tasks</a></li>
 			</ul>
 		</li>
 	    <li class="underLined" ><a href="#"  id="homeTabTasks"  class="homeNavTabClass" >Regions</a>
 	       <ul class="rightAndLeftBottom"  >
-	       		<li><a href="#">Receiver Groups</a></li>
 	        	<li><a href="#">Regions Hierarchies</a></li>
+	        	<li><a href="#">Social Regions</a></li>
+	        </ul>
+	    </li>
+	     <li class="underLined" ><a href="#"  id="homeTabTasks"  class="homeNavTabClass" >Groups</a>
+	       <ul class="rightAndLeftBottom"  >
+	       		<li><a href="#">Receiver Groups</a></li>
+	       		<li><a href="#">Social Groups</a></li>
+	       		<li><a href="#">Social Apps</a></li>
 	        	<li><a href="#">Validate Raw Receivers</a></li>
 	        </ul>
 	    </li>
@@ -193,12 +216,20 @@
 	        	<li><a href="#">My Account</a></li>
 	        	<li><a href="#">Hunter Admin</a></li>
 	        	<li><a href="#">Hunter Field Profile</a></li>
-	        	<li><a href="#">Social Associate Profile</a></li>
 	            <li><a href="<c:url value="${pageContext.request.contextPath}/j_spring_security_logout" />" >Logout</a></li>
 	        </ul>
 	    </li>
 	</ul>
 </div>
+<table cellspacing="0" style="margin-left:auto;margin-right:auto;margin-bottom:5px;margin-top:-12px;color:black;cell-spacing:0px;"  >
+		<tr>
+			<td style="border-bottom:3px solid #93B1B7;padding:6px;border-left:3px solid #93B1B7;background-color: #E4F3F6;" id="currLocPar" >Tasks</td>
+			<td style="border-bottom:3px solid #93B1B7;padding:6px;background-color: #E4F3F6;" >&nbsp;&nbsp;</td>
+			<td style="border-bottom:3px solid #93B1B7;padding:6px;background-color: #E4F3F6;"><div class="arrow-right" style="float:right;" ></div></td>
+			<td style="border-bottom:3px solid #93B1B7;padding:6px;background-color: #E4F3F6;" >&nbsp;&nbsp;</td>
+			<td style="border-bottom:3px solid #93B1B7;padding:6px;border-right:3px solid #93B1B7;background-color: #E4F3F6;padding-right:8px;" id="currLocChld"  >Tasks</td>
+		</tr>
+	</table>
 
 
 

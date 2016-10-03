@@ -281,6 +281,16 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		return obj;
 	}
 	
+	public static String getStringOrNulFromJSONObj(JSONObject msgJson, String key){
+		Object obj = getNullOrValFromJSONObj(msgJson, key);
+		return obj == null ? null : obj.toString();
+	}
+	
+	public static Long getLongOrNulFromJSONObj(JSONObject msgJson, String key){
+		Object obj = getNullOrValFromJSONObj(msgJson, key);
+		return obj == null ? null : getLongFromObject(obj); 
+	}
+	
 	public static int getIntOrZeroFromJsonStr(JSONObject json, String key){
 		String value = getStringOrNullFromJSONObj(json, key);
 		int int_ = Integer.parseInt(value == null || value.equalsIgnoreCase("null") ? "0" : value);
@@ -512,6 +522,7 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	}
 	
 	public static String formatDate(java.util.Date date, String formatStr){
+		if(date == null) return null;
 		if(formatStr == null)
 			formatStr = HunterConstants.DATE_FORMAT_STRING;
 		SimpleDateFormat format = new SimpleDateFormat(formatStr);

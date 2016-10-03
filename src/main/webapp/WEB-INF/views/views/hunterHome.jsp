@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Tech Master Hunter Home</title>
+<title>Tech Masters Hunter Home</title>
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 <style>
 	
@@ -76,7 +76,7 @@
 	<img id='hunterCircularHomeWidgetImg' src="http://www.happydaycatering.com/wp-content/uploads/2012/03/Earth-icon.png" style="width:200px;height:200px;" >
 </div>
 
-<h2 style='100%;text-align:center;margin : 0 auto;margin-top:10px;	text-shadow: 1px 1px gray'><a id="hunterNavA" style="text-decoration:none;" href="http://localhost:8080/Hunter/hunter/login/after" >Tech Master Services</a><sup>@</sup></h2>
+<h2 style='100%;text-align:center;margin : 0 auto;margin-top:10px;	text-shadow: 1px 1px gray'><a id="hunterNavA" style="text-decoration:none;" href="http://localhost:8080/Hunter/hunter/login/after" >Tech Masters Services</a><sup>@</sup></h2>
 
 
 </body>

@@ -168,7 +168,7 @@
 		<table data-name="popup-action-button" style="width:70%;margin-left:15%;" >
 			<tr>
 				<td id="affirmPopupAction" ></td>
-				<td><center><a onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" id='closeHunterPopup' href="#" onClick="closeHunterPopup1()" class="ui-btn ui-icon-forbidden ui-btn-icon-left" style="min-width:200px;border:1px solid #93CADB;border-radius:5px;color:#0E4244;" >Close</a></center></td> 
+				<td><center><a onmouseover="onmouseenterCloseA(this)" onmouseout="onmouseoutCloseA(this)" id='closeHunterPopup' href="#" onClick="closeHunterPopup1()" class="ui-btn ui-icon-forbidden ui-btn-icon-left" style="background-color:#DFF2F5;min-width:200px;border:1px solid #93CADB;border-radius:5px;color:#0E4244;" >Close</a></center></td> 
 			</tr>
 		</table>
 	</div>
@@ -247,8 +247,8 @@
 				<input style="width:80%;margin-left:10%;margin-bottom:30px;border:1px solid #84BDC6;padding:15px;border-radius:5px;" onChange="updateFileSelected" id="importNewContactFile"  name="importNewContactFile" type="file" >
 				<table style="table-layout: fixed;width:100%;margin-bottom:30px;" >
 					<tr>
-						<td><button id="importNewContainerSubButt" type="submit" class="ui-btn ui-icon-carat-u ui-btn-icon-left" style="width:90%;margin-left:5%;border-radius:5px;color:#0089FF;background-color: #9BF3FF;border:1px solid #93CADB;" >Submit</button></td>
-						<td><a  id="importNewContainerCloseButt" style="width:90%;margin-left:5%;border-radius:5px;background-color: #9BF3FF;border:1px solid #93CADB;color:#0089FF;" href="#" onClick="closeHunterPopup1()" class="ui-btn ui-icon-forbidden ui-btn-icon-left">Close</a></td>
+						<td><button id="importNewContainerSubButt" type="submit" class="ui-btn ui-icon-carat-u ui-btn-icon-left" style="width:90%;margin-left:5%;border-radius:5px;color:#0089FF;background-color:#DFF2F5;border:1px solid #93CADB;" >Submit</button></td>
+						<td><a  id="importNewContainerCloseButt" style="width:90%;margin-left:5%;border-radius:5px;background-color:#DFF2F5;border:1px solid #93CADB;color:#0089FF;" href="#" onClick="closeHunterPopup1()" class="ui-btn ui-icon-forbidden ui-btn-icon-left">Close</a></td>
 					</tr>
 				</table>
 			</form>

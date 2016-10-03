@@ -1,6 +1,5 @@
 <script src="/Hunter/static/resources/scripts/model/emailTemplateViewJS.js"></script>
 
-
 <div id="kendoEditorVM" >
 
 <div style="width:96%;margin-left:2%;padding:10px" id='emailEditTemplateCover' >

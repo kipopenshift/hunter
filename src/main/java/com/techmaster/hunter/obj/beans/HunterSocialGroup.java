@@ -1,36 +1,57 @@
 package com.techmaster.hunter.obj.beans;
 
+import java.util.Date;
+
+import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.util.HunterUtility;
+
 public class HunterSocialGroup {
 	
 	private Long groupId;
+	private String externalId;
 	private String groupName;
 	private String groupDescription;
 	private String socialType;
 	private boolean hunterOwned;
+	private boolean acquired;
+	private String acquiredFromFullName;
 	private int receiversCount;
 	private String clientUserName;
 	private String hunterGroupAdmin;
-	private String countryName;
-	private String countyName;
-	private String consName;
-	private String wardName;
+	private boolean existent;
+	private String verifiedBy;
+	private Date verifiedDate;
 	private AuditInfo auditInfo;
+	private String status = HunterConstants.STATUS_DRAFT;
 	private boolean active;
-	private boolean suspensionStatus;
+	private boolean suspended;
 	private String suspensionDescription;
-	private HunterSocialAccessConfig accessConfig;
 	
+	private HunterSocialRegion socialRegion;
+	
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 	public int getReceiversCount() {
 		return receiversCount;
 	}
 	public void setReceiversCount(int receiversCount) {
 		this.receiversCount = receiversCount;
 	}
-	public boolean isSuspensionStatus() {
-		return suspensionStatus;
+	public boolean isSuspended() {
+		return suspended;
 	}
-	public void setSuspensionStatus(boolean suspensionStatus) {
-		this.suspensionStatus = suspensionStatus;
+	public void setSuspended(boolean suspended) {
+		this.suspended = suspended;
+	}
+	public HunterSocialRegion getSocialRegion() {
+		return socialRegion;
+	}
+	public void setSocialRegion(HunterSocialRegion socialRegion) {
+		this.socialRegion = socialRegion;
 	}
 	public String getSuspensionDescription() {
 		return suspensionDescription;
@@ -39,8 +60,6 @@ public class HunterSocialGroup {
 		this.suspensionDescription = suspensionDescription;
 	}
 
-	private HunterSocialAccessConfig groupCredentials;
-	
 	public Long getGroupId() {
 		return groupId;
 	}
@@ -64,30 +83,6 @@ public class HunterSocialGroup {
 	}
 	public void setSocialType(String socialType) {
 		this.socialType = socialType;
-	}
-	public String getCountryName() {
-		return countryName;
-	}
-	public void setCountryName(String countryName) {
-		this.countryName = countryName;
-	}
-	public String getCountyName() {
-		return countyName;
-	}
-	public void setCountyName(String countyName) {
-		this.countyName = countyName;
-	}
-	public String getConsName() {
-		return consName;
-	}
-	public void setConsName(String consName) {
-		this.consName = consName;
-	}
-	public String getWardName() {
-		return wardName;
-	}
-	public void setWardName(String wardName) {
-		this.wardName = wardName;
 	}
 	public AuditInfo getAuditInfo() {
 		return auditInfo;
@@ -119,46 +114,58 @@ public class HunterSocialGroup {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-	public HunterSocialAccessConfig getGroupCredentials() {
-		return groupCredentials;
+	
+	public String getExternalId() {
+		return externalId;
 	}
-	public void setGroupCredentials(HunterSocialAccessConfig groupCredentials) {
-		this.groupCredentials = groupCredentials;
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
 	}
-	public HunterSocialAccessConfig getAccessConfig() {
-		return accessConfig;
+	public boolean isExistent() {
+		return existent;
 	}
-	public void setAccessConfig(HunterSocialAccessConfig accessConfig) {
-		this.accessConfig = accessConfig;
+	public void setExistent(boolean existent) {
+		this.existent = existent;
 	}
+	public String getVerifiedBy() {
+		return verifiedBy;
+	}
+	public void setVerifiedBy(String verifiedBy) {
+		this.verifiedBy = verifiedBy;
+	}
+	public Date getVerifiedDate() {
+		return verifiedDate;
+	}
+	public void setVerifiedDate(Date verifiedDate) {
+		this.verifiedDate = verifiedDate;
+	}
+	public boolean isAcquired() {
+		return acquired;
+	}
+	public void setAcquired(boolean acquired) {
+		this.acquired = acquired;
+	}
+	public String getAcquiredFromFullName() {
+		return acquiredFromFullName;
+	}
+	public void setAcquiredFromFullName(String acquiredFromFullName) {
+		this.acquiredFromFullName = acquiredFromFullName;
+	}
+	
 	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (active ? 1231 : 1237);
-		result = prime * result
-				+ ((clientUserName == null) ? 0 : clientUserName.hashCode());
-		result = prime * result
-				+ ((consName == null) ? 0 : consName.hashCode());
-		result = prime * result
-				+ ((countryName == null) ? 0 : countryName.hashCode());
-		result = prime * result
-				+ ((countyName == null) ? 0 : countyName.hashCode());
 		result = prime
 				* result
 				+ ((groupDescription == null) ? 0 : groupDescription.hashCode());
 		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
 		result = prime * result
 				+ ((groupName == null) ? 0 : groupName.hashCode());
-		result = prime
-				* result
-				+ ((hunterGroupAdmin == null) ? 0 : hunterGroupAdmin.hashCode());
-		result = prime * result + (hunterOwned ? 1231 : 1237);
 		result = prime * result
 				+ ((socialType == null) ? 0 : socialType.hashCode());
-		result = prime * result
-				+ ((wardName == null) ? 0 : wardName.hashCode());
 		return result;
 	}
 	@Override
@@ -171,26 +178,6 @@ public class HunterSocialGroup {
 			return false;
 		HunterSocialGroup other = (HunterSocialGroup) obj;
 		if (active != other.active)
-			return false;
-		if (clientUserName == null) {
-			if (other.clientUserName != null)
-				return false;
-		} else if (!clientUserName.equals(other.clientUserName))
-			return false;
-		if (consName == null) {
-			if (other.consName != null)
-				return false;
-		} else if (!consName.equals(other.consName))
-			return false;
-		if (countryName == null) {
-			if (other.countryName != null)
-				return false;
-		} else if (!countryName.equals(other.countryName))
-			return false;
-		if (countyName == null) {
-			if (other.countyName != null)
-				return false;
-		} else if (!countyName.equals(other.countyName))
 			return false;
 		if (groupDescription == null) {
 			if (other.groupDescription != null)
@@ -207,27 +194,13 @@ public class HunterSocialGroup {
 				return false;
 		} else if (!groupName.equals(other.groupName))
 			return false;
-		if (hunterGroupAdmin == null) {
-			if (other.hunterGroupAdmin != null)
-				return false;
-		} else if (!hunterGroupAdmin.equals(other.hunterGroupAdmin))
-			return false;
-		if (hunterOwned != other.hunterOwned)
-			return false;
 		if (socialType == null) {
 			if (other.socialType != null)
 				return false;
 		} else if (!socialType.equals(other.socialType))
 			return false;
-		if (wardName == null) {
-			if (other.wardName != null)
-				return false;
-		} else if (!wardName.equals(other.wardName))
-			return false;
 		return true;
 	}
-	
-	
 	@Override
 	public String toString() {
 		return "HunterSocialGroup [groupId=" + groupId + ", groupName="
@@ -235,11 +208,14 @@ public class HunterSocialGroup {
 				+ ", socialType=" + socialType + ", hunterOwned=" + hunterOwned
 				+ ", receiversCount=" + receiversCount + ", clientUserName="
 				+ clientUserName + ", hunterGroupAdmin=" + hunterGroupAdmin
-				+ ", countryName=" + countryName + ", countyName=" + countyName
-				+ ", consName=" + consName + ", wardName=" + wardName
+				+ ", socialRegion=" + socialRegion 
 				+ ", auditInfo=" + auditInfo + ", active=" + active
-				+ ", groupCredentials=" + groupCredentials 
-				+ ", suspensionStatus=" + suspensionStatus 
+				+ ", suspended=" + suspended + ", status=" + status
+				+ ", externalId=" + externalId
+				+ ", existent=" + existent 
+				+ ", verifiedBy=" + verifiedBy
+				+ ", acquired=" + acquired 
+				+ ", verifiedDate=" + HunterUtility.formatDate(verifiedDate, HunterConstants.DATE_FORMAT_STRING)
 				+ ", suspensionDescription=" + suspensionDescription + "]";
 	}
 	

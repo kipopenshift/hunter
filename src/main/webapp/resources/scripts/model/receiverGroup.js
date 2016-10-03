@@ -1,4 +1,6 @@
 
+registerNavigation("Groups", "Receiver Groups");
+
 var kendoKipHelperInstance = new kendoKipHelper();
 
 var ReceiverGroupModel = kendo.data.Model.define({

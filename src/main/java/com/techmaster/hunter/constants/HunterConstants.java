@@ -59,6 +59,7 @@ public class HunterConstants {
 	// message type audio, message, email, etc.
 	public static final String MESSAGE_TYPE_AUDIO = "Audio";
 	public static final String MESSAGE_TYPE_EMAIL = "Email";
+	public static final String MESSAGE_TYPE_SOCIAL = "Social";
 	public static final String MESSAGE_TYPE_TEXT = "Text";
 	public static final String MESSAGE_TYPE_PHONE_CALL = "Call";
 	public static final String MESSAGE_TYPE_VOICE_MAIL = "Voice Mail";
@@ -93,6 +94,7 @@ public class HunterConstants {
 	
 	// task types 
 	public static final String TASK_TYPE_POLITICAL = "Political";
+	public static final String TASK_TYPE_SOCIAL = "Social";
 	public static final String TASK_TYPE_CORPORATE = "Corporate";
 	public static final String TASK_TYPE_EDUCATIONAL = "Educational";
 	public static final String TASK_TYPE_TESTING = "Testing";
@@ -139,6 +141,7 @@ public class HunterConstants {
 	public static final String RECEIVER_TYPE_TEXT = "Text";
 	public static final String RECEIVER_TYPE_VOICE_MAIL = "Voice";
 	public static final String RECEIVER_TYPE_CALL = "Call";
+	public static final String RECEIVER_TYPE_SOCIAL = "Social";
 	
 	// Clients business names
 	public static final String CLIENT_CM = "CM";
@@ -146,6 +149,7 @@ public class HunterConstants {
 	public static final String CLIENT_SAFARICOM = "SAFARICOM";
 	public static final String CLIENT_TECH_MASTERS = "TECH MASTERS";
 	public static final String CLIENT_HUNTER_EMAIL = "Hunter Email";
+	public static final String CLIENT_HUNTER_SOCIAL = "Hunter Social";
 	
 	// Client Configurations Element Names
 
@@ -261,15 +265,17 @@ public class HunterConstants {
 	public static final String MEDIA_TYPE_VIDEO = "mediaVideo";
 	public static final String MEDIA_TYPE_GIF = "mediaGIF";
 	
-	public static final String SOCIAL_TYPE_FACEBOOK_GROUP = "socialTypeFacebookGroup";
-	public static final String SOCIAL_TYPE_INSTAGRAM_GROUP = "socialTypeInstagramGroup";
-	public static final String SOCIAL_TYPE_TWITTER_GROUP = "socialTypeTwitterGroup";
-	public static final String SOCIAL_TYPE_BLOG_GROUP = "socialTypeBlogGroup";
-	public static final String SOCIAL_TYPE_GEOGRAPHIC_GROUP = "socialTypeGeographicGroup";
-	public static final String SOCIAL_TYPE_FOCUS_GROUP = "socialTypeFocusGroup";
+	public static final String SOCIAL_TYPE_FACEBOOK = "Facebook";
+	public static final String SOCIAL_TYPE_INSTAGRAM = "Instagram";
+	public static final String SOCIAL_TYPE_TWITTER = "Twitter";
+	public static final String SOCIAL_TYPE_BLOG = "Blog";
 	
-	public static final String ASSOCIATE_TYPE_CONTIGENT = "associateTypeContigent";
-	public static final String ASSOCIATE_TYPE_GROUP_MANAGER = "associateTypeGroupManager";
-	public static final String ASSOCIATE_TYPE_HUNTER_ASSOCIATE_MANAGER = "associateTypeHunterAssociateManager";
+	public static final String SOCIAL_POST_TYPE_LINK_NEWS = "Post Link News";
+	public static final String SOCIAL_POST_TYPE_LINK_OTHER = "Post Link Other";
+	public static final String SOCIAL_POST_TYPE_TEXT = "Post Text";
+	public static final String SOCIAL_POST_TYPE_IMAGE = "Post Image";
+	public static final String SOCIAL_POST_TYPE_VIDEO = "Post Video";
+	public static final String SOCIAL_POST_TYPE_AUDIO = "Post Audio";
 	
 }
+

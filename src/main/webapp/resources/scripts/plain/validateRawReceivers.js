@@ -1,4 +1,6 @@
 
+registerNavigation("Groups", "Validate Raw Receivers");
+
 var kendoKipHelperInstance;
 
 var RawReceiverModel = kendo.data.Model.define({

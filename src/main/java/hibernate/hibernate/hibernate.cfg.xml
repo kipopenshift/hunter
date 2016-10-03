@@ -45,6 +45,10 @@
 <mapping resource="hibernate/hbm/MessageAttachmentBean.hbm.xml" />
 <mapping resource="hibernate/hbm/MessageAttachmentMetadata.hbm.xml" />
 <mapping resource="hibernate/hbm/EmailTemplateObj.hbm.xml" />
+<mapping resource="hibernate/hbm/HunterSocialMedia.hbm.xml" />
+<mapping resource="hibernate/hbm/HunterSocialRegion.hbm.xml" />
+<mapping resource="hibernate/hbm/HunterSocialGroup.hbm.xml" />
+<mapping resource="hibernate/hbm/HunterSocialApp.hbm.xml" />
 
  
 </session-factory>

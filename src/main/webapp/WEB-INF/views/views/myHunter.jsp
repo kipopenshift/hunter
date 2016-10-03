@@ -1,5 +1,9 @@
 <%@include file="../common/HeaderFile.jsp"%>
 
+<script type="text/javascript"> 
+registerNavigation("My Hunter", "My Account");
+</script>
+
 <script src="<c:url value='/static/resources/scripts/plain/kendoHelper.js'/>"></script>
 
 <style>

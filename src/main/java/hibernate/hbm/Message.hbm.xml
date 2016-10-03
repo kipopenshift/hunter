@@ -76,6 +76,23 @@
 			<property name="toPhone" column="TO_PHONE" type="java.lang.String" />
 		</union-subclass>
 		
+		<union-subclass name="com.techmaster.hunter.obj.beans.SocialMessage" table="SCL_MSG">
+			<property name="socialMsgId" column="SCL_MSG_ID" type="java.lang.Long" />
+			<property name="externalId" column="EXTRNL_ID" type="java.lang.String" />
+			<property name="description" column="DSCPTN"  type="java.lang.String" />
+			<property name="socialPost" column="SCL_PST" type="java.lang.String"  /> 
+			<property name="socialPostType" column="SCL_PST_TYP" type="java.lang.String" />
+			<property name="originalFileFormat" column="ORGNL_FL_NAM" type="java.lang.String" />
+			
+			<one-to-one name="socialMedia" class="com.techmaster.hunter.obj.beans.HunterSocialMedia" cascade="all"  ></one-to-one>
+			
+			<set name="hunterSocialGroups" cascade="save-update" table="SCL_MSG_SCL_GRPS">
+        		<key column="MSG_ID"/>
+         		<many-to-many column="GP_ID" class="com.techmaster.hunter.obj.beans.HunterSocialGroup"/>
+      		</set>
+			
+		</union-subclass>
+		
 	</class>
 	
 </hibernate-mapping>

@@ -20,5 +20,6 @@ public interface HunterURLConstants {
 	public static final String POST_LOGIN_URL = "http://localhost:8080/Hunter/hunter/login/after";
 	public static final String TESTING_ATTCHMENT_PATH = RESOURCE_BASE_PATH + "\\Notes\\testing_attachment.txt";
 	public static final String LOGIN_DATA_SEE_XML  = RESOURCE_BASE_XML_PATH +  "loginDataSeed.xml";
+	public static final String HUNTER_SOCIAL_APP_CONFIG_PATH = RESOURCE_BASE_XML_PATH + "hunterSocialAppConfig.xml";  
 
 }

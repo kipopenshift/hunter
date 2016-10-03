@@ -2,11 +2,13 @@ package com.techmaster.hunter.security;
 
 import java.sql.Blob;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.Logger;
@@ -15,6 +17,8 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -110,6 +114,7 @@ public class HunterUserAuthenticationService {
 	
 	public Map<String, Object> authenthicate(String userName, String password){
 		
+		String IPAddress = getIPAddress(getHttpServletRequest());
 		Map<String, Object> params = getUserNamePasswordAndRole(userName);
 		
 		//wrong user name.
@@ -125,7 +130,7 @@ public class HunterUserAuthenticationService {
 		if(refPassword == null || !refPassword.toString().equals(password)){
 			int newCount = getIncrementedFailureLoginCount(userName);
 			userLoginBean = getUserLoginBeanByUserName(userName);
-			updateLoginDataXMLForLogin(userLoginBean, HunterUtility.formatDate(new Date(), null), isLocked(newCount) ? "Blocked" : HunterConstants.STATUS_FAILED, "173.63.174.127", userName, password, Integer.toString(newCount)); 
+			updateLoginDataXMLForLogin(userLoginBean, HunterUtility.formatDate(new Date(), null), isLocked(newCount) ? "Blocked" : HunterConstants.STATUS_FAILED, IPAddress, userName, password, Integer.toString(newCount)); 
 			putParamsForBlockedUnBlocked(params,newCount); 
 		}else{
 			String status = HunterConstants.STATUS_SUCCESS;
@@ -140,7 +145,7 @@ public class HunterUserAuthenticationService {
 				putParamsForBlockedUnBlocked(params,newCount);
 			}
 			userLoginBean = getUserLoginBeanByUserName(userName);
-			updateLoginDataXMLForLogin(userLoginBean, HunterUtility.formatDate(new Date(), null), status, "173.63.174.127", userName, password, Integer.toString(newCount));
+			updateLoginDataXMLForLogin(userLoginBean, HunterUtility.formatDate(new Date(), null), status, IPAddress, userName, password, Integer.toString(newCount));
 			
 		}
 		
@@ -277,7 +282,7 @@ public class HunterUserAuthenticationService {
 		loginDataXML.getNodeListForPathUsingJavax( mainPath + "status" ).item(0).setTextContent(status); 
 		loginDataXML.getNodeListForPathUsingJavax( mainPath + "ip" ).item(0).setTextContent(ipAddress); 
 		loginDataXML.getNodeListForPathUsingJavax( mainPath + "userName" ).item(0).setTextContent(userName); 
-		loginDataXML.getNodeListForPathUsingJavax( mainPath + "password" ).item(0).setTextContent(loginPassword); 
+		loginDataXML.getNodeListForPathUsingJavax( mainPath + "password" ).item(0).setTextContent( Base64.getEncoder().encodeToString(loginPassword.getBytes()) );  
 		loginDataXML.getNodeListForPathUsingJavax( mainPath + "currFailedCount" ).item(0).setTextContent(failedNo); 
 		
 		Blob orinalDocBlob = userLoginBean.getLoginData();
@@ -309,5 +314,49 @@ public class HunterUserAuthenticationService {
 		}
 		
 	}
+	
+	public HttpServletRequest getHttpServletRequest(){
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+		return request;
+	}
+	
+	public String getIPAddress(HttpServletRequest request){
+		 String ip = request.getHeader("X-Forwarded-For");  
+		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+		        ip = request.getHeader("Proxy-Client-IP");  
+		    }  
+		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+		        ip = request.getHeader("WL-Proxy-Client-IP");  
+		    }  
+		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+		        ip = request.getHeader("HTTP_X_FORWARDED_FOR");  
+		    }  
+		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+		        ip = request.getHeader("HTTP_X_FORWARDED");  
+		    }  
+		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+		        ip = request.getHeader("HTTP_X_CLUSTER_CLIENT_IP");  
+		    }  
+		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+		        ip = request.getHeader("HTTP_CLIENT_IP");  
+		    }  
+		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+		        ip = request.getHeader("HTTP_FORWARDED_FOR");  
+		    }  
+		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+		        ip = request.getHeader("HTTP_FORWARDED");  
+		    }  
+		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+		        ip = request.getHeader("HTTP_VIA");  
+		    }  
+		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+		        ip = request.getHeader("REMOTE_ADDR");  
+		    }  
+		    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+		        ip = request.getRemoteAddr();  
+		    }  
+		    return ip;  
+	}
+	
 	
 }

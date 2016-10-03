@@ -17,9 +17,9 @@
 		<property name="taskBudget" column="TSK_BDGT"  type="java.lang.Float"  not-null="true" />
 		<property name="taskCost" column="TSK_CST"  type="java.lang.Float"  not-null="true" />
 		<property name="recurrentTask" column="RCCRRNT_TSK"  type="org.hibernate.type.YesNoType"   not-null="true" />
-		<property name="taskDateline" column="TSK_DT_LN"  type="java.util.Date" />
-		<property name="taskLifeStatus" column="TSK_LF_STS"  type="java.lang.String" />
-		<property name="taskDeliveryStatus" column="TSK_DEL_STS"  type="java.lang.String" />
+		<property name="taskDateline" column="TSK_DT_LN"  type="java.util.Date" not-null="true" />
+		<property name="taskLifeStatus" column="TSK_LF_STS"  type="java.lang.String" not-null="true" />
+		<property name="taskDeliveryStatus" column="TSK_DEL_STS"  type="java.lang.String" not-null="true" />
 		<property name="taskApproved" column="TSK_APPRVD"  type="org.hibernate.type.YesNoType" />
 		<property name="taskApprover" column="TSK_APPRVR"  type="java.lang.String" />
 		<property name="clientId" column="HNTR_CLNT_ID"  type="java.lang.Long" />

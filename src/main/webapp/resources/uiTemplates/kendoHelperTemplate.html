@@ -249,10 +249,91 @@
 		<table>
 			<tbody>
 				<tr>
-					<td><button onClick="newTxtMsgManagerInstance.validateAndSubmitTxtMsgData()" class="k-button" style="background-color: #d4eff9; border: 1px solid #78bad2; width: 200px;">Save</button></td>
-					<td><button onClick="newTxtMsgManagerInstance.closeTextMsgWindow()" class="k-button" style="background-color: #d4eff9; border: 1px solid #78bad2; width: 200px;">lose</button></td>
+					<td><button onClick="newTxtMsgManagerInstance.validateAndSubmitTxtMsgData()" class="k-button" style="background-color: #d4eff9; border: 1px solid #78bad2; width: 200px;"><span class="k-icon k-i-tick" ></span>Save</button></td>
+					<td><button onClick="newTxtMsgManagerInstance.closeTextMsgWindow()" class="k-button" style="background-color: #d4eff9; border: 1px solid #78bad2; width: 200px;"><span class="k-icon k-i-close" ></span>Close</button></td>
 				</tr>
 			</tbody>
+		</table>
+	</div>
+</div>
+</script>
+
+<script id=createNewSocialMessageTemplate type="text/x-kendo-template" style="width:900px;margin:0 auto;padding:4px;background-color:rgb(215,234,240);height:340px;border-radius:4px;border:1px solid rgb(175,202,210);" >
+<div id="createNewSocialMessageContainer" class="k-block k-info-colored" style="width: 1000px; margin: 0 auto; padding: 4px; background-color: #d7eaf0; height: 650px; order-radius: 4px; border: 1px solid #afcad2;">
+	<div id="processedTaskSocialMsg" style="position:relative;width: 90%; min-height: 500px; color: #0a2c2e; font-size: 13px; padding-left: 10px; background-color: #e6f7ff; margin-left: 4%; margin-top: 30px; border-radius: 4px; border: 1px solid #afcad2;">
+		<table style="width:98%;margin-left:1%;table-layout:fixed;height:98%;">
+		  <tr>
+			<td style="width:100%;min-height:480px;" >
+
+				<table style="width:50%;font-size:14px;" id="createSocialMsgFieldsTable" >
+					<tr>
+						<td>External ID : </td>
+						<td id="creatSclMsgExtrnlId" ></td>
+					</tr>
+					<tr>
+						<td>Media Type : </td>
+						<td><input id="createSocialMsgMedaiType" class="k-textbox" style="width:100%;" /></td>
+					</tr>
+					<tr>
+						<td>Description : </td>
+						<td><input id="createSocialMsgDescription" class="k-textbox" style="width:100%;background-color:#EBF6FC;" /></td>
+					</tr>
+					<tr>
+						<td>Social Post Type : </td>
+						<td><input id="createSocialMsgPostType" class="k-textbox" style="width:100%;" /></td>
+					</tr>
+				</table>
+			</td>
+		  </tr>
+		  <tr>
+			<td style="border-bottom:1px solid #e6f7ff;width:100%;" >
+				<table style="width:100%;">
+					<tr>
+						<td style="border-bottom:1px solid #e6f7ff;width:10.5%;">Social Post</td>
+						<td style="border-bottom:1px solid #e6f7ff;width:40%;"><textarea id="createSocialMsgPost" cols="1" rows="3" class="k-textbox" style="width:80%;padding:10px;resize: none;background-color:#EBF6FC;" /></td>
+					</tr>
+				</table>
+			</td>
+		  </tr>
+ 		  <tr>
+			<td style="width:100%;min-height:480px;" >
+			  <table style="width:96%;min-height:480px;" >
+					<tr style="width:100%;">
+						<td style="width:49%;border:1px solid #D8E8F0;height:300px;border-spacing: 2%;border-radius:5px;" >
+							<div style="height:80%;width:100%;" >
+
+
+  
+                                    <form id="soclPostUploadFileForms"  method="post" action="/kendo-ui/upload/submit" style="margin-top:10%;width:80%;margin-left:10%;" >
+                                        <div class="demo-section k-content">
+                                            <input name="createSclMsgUploadPost" id="createSclMsgUploadPost" type="file" />
+                                            <p style="text-align: right">
+                                            <input style="display:none;" type="submit" value="Upload" class="k-button k-primary" />
+                                            </p>
+                                        </div>
+                                   </form>								
+
+
+							</div>
+						</td>
+						<td style="width:2%;" ></td>
+						<td style="width:49%;border:1px solid #D8E8F0;height:300px;border-spacing: 2%;border-radius:5px;" ></td>
+					</tr>
+			  </table>
+			</td>
+		  </tr>
+		  <tr>
+			<td style="width:100%;" >
+				<table style="width:40%;margin-left:27%;" >
+					<tbody>
+						<tr>
+							<td><button onClick="newTxtMsgManagerInstance.validateAndSubmitTxtMsgData()" class="k-button" style="background-color: #d4eff9; border: 1px solid #78bad2; width: 200px;"><span class="k-icon k-i-tick" ></span>Save</button></td>
+							<td><button onClick="newTxtMsgManagerInstance.closeTextMsgWindow()" class="k-button" style="background-color: #d4eff9; border: 1px solid #78bad2; width: 200px;"><span class="k-icon k-i-cancel" ></span>lose</button></td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		  </tr>
 		</table>
 	</div>
 </div>
@@ -324,6 +405,150 @@
 		</table>
 	</div>
 </script>
+
+
+<script id="taskTypeSocialTemplate" type="text/x-kendo-template">
+	<div class="taskTypSocialCover" style="width:1200px;height:600px;" >
+       	
+	</div>
+</script>
+
+
+<script id="editTaskNewTemplate" type="text/x-kendo-template">
+	<div id="taskTypSocialCover" class="taskTypSocialCover" style="width:700px; min-height: 450px; color: #0a2c2e; font-size: 13px; background-color: #e6f7ff; margin: 1%;border-radius: 4px; border: 1px solid #afcad2;" >
+		<br>
+		<div style="width:98%;margin-left:1%;margin-top:15px;min-height:350px;border-radius: 4px;" >
+			<form id="editTaskTemplateForm" style="position:relative;width:100%;" >
+				<table style="position:relative;width:100%;font-size:14px;"  >
+					<tr>
+						<td>Task Name</td>
+						<td><input   name="editTaskTemplateTaskName" id="editTaskTemplateTaskName" placeholder="Enter Task Name" type="text" class="k-textbox" style="width: 70%;" /></td>
+					</tr>
+					<tr>
+						<td>Task Description</td>
+						<td><input   name="editTaskTemplateTaskDescription" id="editTaskTemplateTaskDescription" placeholder="Enter Task Name" type="text" class="k-textbox" style="width: 70%;" /></td>
+					</tr>
+					<tr>
+						<td>Task Type</td>
+						<td><input type="text" id="editTaskTemplateTskType" name="editTaskTemplateTskType" placeholder="Select Task Type" style="width: 70%;" /></td>
+					</tr>
+					<tr>
+						<td>Message Type</td>
+						<td><input type="text" id="editTaskTemplateTskMsgType"  name="editTaskTemplateTskMsgType" placeholder="Select Message Type" style="width: 70%;" /></td>
+					</tr>
+					<tr>
+						<td>Task Client</td>
+						<td><input type="text" id="editTaskTemplateTaskClient" name="editTaskTemplateTaskClient"style="width: 70%;" /></td>
+					</tr>
+					<tr>
+						<td>Task Objective</td>
+						<td><textarea id="editTaskTemplateTaskObjective" name="editTaskTemplateTaskObjective"  cols="50" rows="3" style="padding:10px;border:1px solid rgb(129,166,174);border-radius:4px;" name="editTaskTemplateTaskClient" class="k-input k-textarea"></textarea></td>
+					</tr>	
+					<tr>
+						<td>Recurrent Task</td>
+						<td><input type="checkbox" class="k-checkBox" id="editTaskTemplateRecurrentTask" name="editTaskTemplateRecurrentTask"  /></td>
+					</tr>
+					<tr>
+						<td>Task Budget</td>
+						<td><input name="editTaskTemplateBudget" id="editTaskTemplateBudget" /></td>
+					</tr>
+					<tr>
+						<td>Desired Receivers</td>
+						<td><input name="editTaskTemplateDesiredReceivers" id="editTaskTemplateDesiredReceivers" /></td>
+					</tr>						
+				</table>
+		</form>
+
+		</div>
+       	<table style="margin-top:1%;margin-bottom:2%;;table-layout:fixed;width:40%;margin-left:30%;" >
+			<tr>
+				<td style="text-align:center;width:50%;" ><button class="k-button" onClick="hunterAdminClientUserVM.getAndValidateNewTaskValues()" style='background-color:rgb(212,239,249);width:100%;'><span class="k-icon k-i-tick"></span>Submit</button></td>
+				<td style="text-align:center;width:50%;" ><button class="k-button" onClick="kendoKipHelperInstance.closeWindowWithOnClose()" style='background-color:rgb(212,239,249);width:100%;'><span class="k-icon k-i-close"></span>Close</button></td>
+			</tr>
+		</table>
+	</div>
+</script>
+
+<script id="SocialGroupPopupTemplate" type="text/x-kendo-template">
+	<div id="SocialGroupPopupCover" style="width:800px; min-height: 600px; color: rgb(10,44,46); font-size: 13px; background-color: rgb(230,247,255); border-radius: 4px; border: 1px solid rgb(175,202,210);" >
+       	<div style="width:98%;margin-left:1%;margin-top:15px;min-height:350px;border-radius: 4px;" >
+		
+			<h2 style="text-align:center;margin:0 auto;width:100%;"> Social Group Information </h2><br>
+			<form id="socialGroupValidateForm" style="position:relative;width:100%;" >
+			<table id="socialGroupPopupTempltTable" style="position:relative;width:80%;margin-left:5%;font-size:14px;"  >
+					<tr>
+						<td style="width:30%;" >Group ID</td>
+						<td style="width:70%;" ><span data-bind="text:selSocialGroup.groupId" ></span></td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >External ID</td>
+						<td style="width:70%;" ><span data-bind="text:selSocialGroup.externalId" ></span></td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >Group Name</td>
+						<td style="width:70%;" ><input data-bind="value:selSocialGroup.groupName"  name="groupName" id="groupName" placeholder="Enter Group Name" type="text" class="k-textbox" style="width: 100%;" /></td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >Group Description</td>
+						<td style="width:70%;" ><input data-bind="value:selSocialGroup.groupDescription"  name="groupDescription" id="groupDescription" placeholder="Enter Group Description" type="text" class="k-textbox" style="width: 100%;" /></td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >Group Social Type</td>
+						<td style="width:70%;" ><input data-bind="value:selSocialGroup.socialType"  name="groupSocialType" id="groupSocialType" style="width: 100%;" /></td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >Group Hunter Owned ?</td>
+						<td style="width:70%;" ><input type="checkbox" data-ref-name="hunterOwned" onClick="SocialGroupsVM.setSocialGroupBooleans(this)" name="groupHunterOwned" id="groupHunterOwned" /></td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >Group Acquired ?</td>
+						<td style="width:70%;" ><input  type="checkbox" data-ref-name="acquired" onClick="SocialGroupsVM.setSocialGroupBooleans(this)" name="groupAcquired" id="groupAcquired" style="float:left;" /></td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >Group Existent ?</td>
+						<td style="width:70%;" ><input  type="checkbox" data-ref-name="existent" onClick="SocialGroupsVM.setSocialGroupBooleans(this)" name="groupExistent" id="groupExistent" style="float:left;" /></td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >Group Suspended ?</td>
+						<td style="width:70%;" ><input  type="checkbox" data-ref-name="suspended" onClick="SocialGroupsVM.setSocialGroupBooleans(this)" name="groupSuspended" id="groupSuspended" style="float:left;" /></td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >Group Verified ?</td>
+						<td style="width:70%;" ><input type="checkbox" data-ref-name="verified" onClick="SocialGroupsVM.setSocialGroupBooleans(this)" name="groupVerified" id="groupVerified" style="float:left;" /></td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >Group Active ?</td>
+						<td style="width:70%;" ><input type="checkbox" data-ref-name="active" onClick="SocialGroupsVM.setSocialGroupBooleans(this)" name="groupActive" id="groupActive" style="float:left;" /></td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >Group Acquired From </td>
+						<td style="width:70%;" ><input data-bind="value:selSocialGroup.acquiredFromFullName"  name="groupAcquiredFrom" id="groupAcquiredFrom" placeholder="Enter where group was acquired" type="text" class="k-textbox" style="width: 100%;" /></td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >Number of Receivers</td>
+						<td style="width:70%;" ><input data-bind="value:selSocialGroup.regionPopulation"  name="groupReceiversCount" id="groupReceiversCount" placeholder="Enter Group Receivers Count" type="text" style="width: 100%;" /></td>
+					</tr>
+					<tr>		
+						<td style="width:30%;" >Group Suspension Description ?</td>
+						<td style="width:70%;" ><textarea placeholder="Describe how the group was suspended."  data-bind="value:selSocialGroup.suspensionDescription"  name="suspensionDescription" id="suspensionDescription"  class="k-textbox" style="padding:10px;width: 100%;height:100px;"></textarea> </td>
+					</tr>
+					<tr>
+						<td style="width:30%;" >Group Social Region</td>
+						<td style="width:70%;" ><input  data-bind="value:selSocialGroup.regionId"   name="groupSocialRegion" id="groupSocialRegion" type="text"  style="width: 100%;" /></td>
+					</tr>
+			</table>
+			</form>
+			<br/><br/>
+			<table style="margin-bottom:2%;width:40%;margin-left:30%;" >
+				<tr>
+					<td style="text-align:center;width:50%;" ><button class="k-button" onClick="SocialGroupsVM.validateAndUpdateGroup()" style='background-color:rgb(212,239,249);width:100%;'><span class="k-icon k-i-tick"></span>Submit</button></td>
+					<td style="text-align:center;width:50%;" ><button class="k-button" onClick="kendoKipHelperInstance.closeWindowWithOnClose()" style='background-color:rgb(212,239,249);width:100%;'><span class="k-icon k-i-close"></span>Close</button></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</script>
+
 
 </div>
 

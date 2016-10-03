@@ -316,6 +316,16 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		}
 	}
 	
+	public static void deleteEntityByLongId(Long id, Class<?> clazz){
+		Object obj = getEntityById(id, clazz);
+		if( obj != null ){
+			logger.debug("Entity with id ( "+ id +" ) found. Deleting the entity...");
+			deleteEntity(obj);
+		}else{
+			logger.warn("Cannot find the entity. Entity not deleted!!!!!!!"); 
+		}
+	}
+	
 	public static void deleteEntity(Object obj){
 		
 		if( obj == null ) return;

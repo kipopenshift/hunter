@@ -113,35 +113,42 @@ public class TaskConverter {
 		
 		Task task = new Task();
 		
-		String taskType = taskJson.getString("taskType");
-		String taskName = taskJson.getString("taskName");
-		String taskObjective = taskJson.getString("taskObjective");
-		String description = taskJson.getString("description");
-		long taskBudget = taskJson.getLong("taskBudget");
-		float taskBudgetF = (float)taskBudget;
-		long taskCost = taskJson.getLong("taskCost");
-		float taskCostF = (float)taskCost;
-		long taskId = taskJson.getLong("taskId");
-		Boolean recurrentTask = taskJson.getBoolean("recurrentTask");
-		Long clientId = taskJson.getLong("clientId");
+		String taskType 			= HunterUtility.getStringOrNulFromJSONObj(taskJson, "taskType");
+		String taskName 			= HunterUtility.getStringOrNulFromJSONObj(taskJson, "taskName");
+		String taskObjective 		= HunterUtility.getStringOrNulFromJSONObj(taskJson, "taskObjective");
+		String description 			= HunterUtility.getStringOrNulFromJSONObj(taskJson, "description");
+		String cretDate_ 			= HunterUtility.getStringOrNulFromJSONObj(taskJson, "cretDate");
+		String createdBy 			= HunterUtility.getStringOrNulFromJSONObj(taskJson, "createdBy");
+		String lastUpdate_			= HunterUtility.getStringOrNulFromJSONObj(taskJson, "lastUpdatedBy");
+		String lastUpdatedBy		= HunterUtility.getStringOrNulFromJSONObj(taskJson, "createdBy");
+		String taskDeliveryStatus 	= HunterUtility.getStringOrNulFromJSONObj(taskJson, "taskDeliveryStatus");
+		String taskLifeStatus 		= HunterUtility.getStringOrNulFromJSONObj(taskJson, "taskLifeStatus");
+		String taskDateline 		= HunterUtility.getStringOrNulFromJSONObj(taskJson, "taskDateline");
+		String taskApprover 		= HunterUtility.getStringOrNulFromJSONObj(taskJson, "taskApprover");
+		String gateWayClient 		= HunterUtility.getStringOrNulFromJSONObj(taskJson, "gateWayClient");
+		String tskMsgType 			= HunterUtility.getStringOrNulFromJSONObj(taskJson, "tskMsgType");
+		String tskAgrmntLoc 		= HunterUtility.getStringOrNulFromJSONObj(taskJson, "tskAgrmntLoc");
 		
-		String srlzdTskPrcssJbObjsFilLoc = taskJson.has("srlzdTskPrcssJbObjsFilLoc") ? taskJson.get("srlzdTskPrcssJbObjsFilLoc") != null ? taskJson.get("srlzdTskPrcssJbObjsFilLoc").toString() : null : null;
-		String taskDeliveryStatus = taskJson.has("taskDeliveryStatus") ? taskJson.get("taskDeliveryStatus") != null ? taskJson.get("taskDeliveryStatus").toString() : null : null;
-		String taskLifeStatus = taskJson.has("taskLifeStatus") ? taskJson.get("taskLifeStatus") != null ? taskJson.get("taskLifeStatus").toString() : null : null;
-		String taskDateline = taskJson.has("taskDateline") ? taskJson.get("taskDateline") != null ? taskJson.get("taskDateline").toString() : null : null;
-		String taskApprover = taskJson.has("taskApprover") ? taskJson.get("taskApprover") != null ? taskJson.get("taskApprover").toString() : null : null;
-		String gateWayClient = taskJson.has("gateWayClient") ? taskJson.get("gateWayClient") != null ? taskJson.get("gateWayClient").toString() : null : null;
-		String tskMsgType = taskJson.has("tskMsgType") ? taskJson.get("tskMsgType") != null ? taskJson.get("tskMsgType").toString() : null : null;
-		Boolean taskApproved = taskJson.getBoolean("taskApproved");
-		String tskAgrmntLoc = taskJson.has("tskAgrmntLoc") ? taskJson.get("tskAgrmntLoc") != null ? taskJson.get("tskAgrmntLoc").toString() : null : null;
+		Date cretDate 				= HunterUtility.parseDate(cretDate_, HunterConstants.HUNTER_DATE_FORMAT_MIN);
+		Date lastUpdate				= HunterUtility.parseDate(lastUpdate_, HunterConstants.HUNTER_DATE_FORMAT_MIN);
 		
-		int desiredReceiverCount = taskJson.has("desiredReceiverCount") ? taskJson.getInt("desiredReceiverCount") : 0 ;
-		int availableReceiverCount = taskJson.has("availableReceiverCount") ? taskJson.getInt("availableReceiverCount") : 0 ;
-		int confirmedReceiverCount = taskJson.has("confirmedReceiverCount") ? taskJson.getInt("confirmedReceiverCount") : 0 ;
+		Boolean taskApproved 		= Boolean.valueOf( HunterUtility.getStringOrNulFromJSONObj(taskJson, "taskApproved") );
+		Boolean recurrentTask 		= Boolean.valueOf( HunterUtility.getStringOrNulFromJSONObj(taskJson, "recurrentTask") );
 		
-		String cretDate_ = taskJson.has("cretDate") ? taskJson.get("cretDate") != null ? taskJson.get("cretDate").toString() : null : null;
-		Date cretDate = HunterUtility.parseDate(cretDate_, HunterConstants.HUNTER_DATE_FORMAT_MIN);
-		String createdBy =  taskJson.has("createdBy") ? taskJson.get("createdBy") != null ? taskJson.get("createdBy").toString() : null : null;
+		int desiredReceiverCount 	= Integer.valueOf( HunterUtility.getStringOrNulFromJSONObj(taskJson, "desiredReceiverCount") );
+		int availableReceiverCount 	= Integer.valueOf( HunterUtility.getStringOrNulFromJSONObj(taskJson, "availableReceiverCount") == null ? "0" : HunterUtility.getStringOrNulFromJSONObj(taskJson, "availableReceiverCount") );
+		int confirmedReceiverCount 	= Integer.valueOf( HunterUtility.getStringOrNulFromJSONObj(taskJson, "confirmedReceiverCount") == null ? "0" : HunterUtility.getStringOrNulFromJSONObj(taskJson, "confirmedReceiverCount") );
+		
+		long taskBudget 			= HunterUtility.getLongOrNulFromJSONObj(taskJson, "taskBudget");
+		long taskCost 				= HunterUtility.getLongOrNulFromJSONObj(taskJson, "taskCost");
+		long taskId 				= taskJson.get("taskId") == null ? 0 :  HunterUtility.getLongOrNulFromJSONObj(taskJson, "taskId");
+		long clientId 				= HunterUtility.getLongOrNulFromJSONObj(taskJson, "clientId");
+		
+		float taskCostF 			= (float)taskCost;
+		float taskBudgetF 			= (float)taskBudget;
+		
+		
+		String srlzdTskPrcssJbObjsFilLoc= HunterUtility.getStringOrNulFromJSONObj(taskJson, "srlzdTskPrcssJbObjsFilLoc");
 		
 		task.setSrlzdTskPrcssJbObjsFilLoc(srlzdTskPrcssJbObjsFilLoc); 
 		task.setTaskId(taskId); 
@@ -152,8 +159,8 @@ public class TaskConverter {
 		task.setTaskBudget(taskBudgetF);
 		task.setTaskCost(taskCostF);
 		task.setRecurrentTask(recurrentTask);
-		task.setTaskDeliveryStatus(taskDeliveryStatus); 
-		task.setTaskLifeStatus(taskLifeStatus); 
+		task.setTaskDeliveryStatus( taskDeliveryStatus == null ? HunterConstants.STATUS_CONCEPTUAL : taskDeliveryStatus ); 
+		task.setTaskLifeStatus(taskLifeStatus == null ? HunterConstants.STATUS_DRAFT : taskLifeStatus); 
 		task.setTaskDateline(HunterUtility.parseDate(taskDateline, HunterConstants.HUNTER_DATE_FORMAT_MIN));
 		task.setTaskApprover(taskApprover);
 		task.setTskMsgType(tskMsgType); 
@@ -165,11 +172,11 @@ public class TaskConverter {
 		task.setAvailableReceiverCount(availableReceiverCount);
 		task.setConfirmedReceiverCount(confirmedReceiverCount); 
 		
-		task.setCretDate(cretDate);
-		task.setLastUpdate(new Date());
+		task.setCretDate(cretDate == null ? new Date() : cretDate);
+		task.setLastUpdate( lastUpdate_ == null ? new Date() : lastUpdate );
 		task.setCreatedBy(createdBy); 
-		task.setUpdatedBy("hlangat01"); 
-		task.setClientId(clientId); 
+		task.setUpdatedBy( lastUpdatedBy ); 
+		task.setClientId( clientId == 0 ? null : clientId ); 
 		
 		logger.debug("Successfully created basic task from request body!\n  Request Body >> " + requestBody);
 		logger.debug("Basic task created >> " + task);

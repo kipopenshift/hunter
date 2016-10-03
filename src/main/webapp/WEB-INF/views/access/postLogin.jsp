@@ -4,6 +4,7 @@
 <script src="<c:url value='/static/resources/scripts/model/hunterAdminClientHuntler.js'/>"></script>
 <script src="<c:url value='/static/resources/scripts/model/taskProcessProgress.js'/>"></script>
 <script src="<c:url value='/static/resources/scripts/plain/createNewTextMessage.js'/>"></script>
+<script src="<c:url value='/static/resources/scripts/plain/createNewSocialMessage.js'/>"></script>
 
 <%-- <script src="<c:url value='/static/resources/scripts/model/regionVM.js'/>"></script> --%>
 
@@ -881,7 +882,7 @@
 
 <script type="text/x-kendo-template" id="hunterClientTasksToolBar">
 <div class="toolbar" >
-	<button data-command="create" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" class="k-button k-button-icontext k-grid-add"><span class="k-icon k-add"></span>New Task</button>
+	<button data-value-name="newTask" onClick="hunterAdminClientUserVM.launchTaskEditView('newTask')"  style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" class="k-button"><span class="k-icon k-add"></span>Create New Task</button>
 </div>
 </script>
 
@@ -959,102 +960,6 @@
 	</div>
 </div>
 
-
-
-<div id="hunterClientTasksPopupEditTemplate" style="display:none;">
-	<div class="k-edit-form-container">
-		<div class="k-edit-label">
-			<label for="taskName">Task Name</label>
-		</div>
-		<div data-container-for="taskName" class="k-edit-field">
-			<input type="text" class="k-input k-textbox" name="taskName"
-				required="required" data-bind="value:taskName">
-		</div>
-		<div class="k-edit-label">
-			<label for="description">Task Description</label>
-		</div>
-		<div data-container-for="description" class="k-edit-field">
-			<input type="text" class="k-input k-textbox" name="description"
-				required="required" data-bind="value:description">
-		</div>
-		<div class="k-edit-label">
-			<label for="taskType">Task Type</label>
-		</div>
-		<div data-container-for="taskType" class="k-edit-field">
-			<input type="text" id="taskType" 
-				name="taskType" 
-				id="taskTypeInput" 
-                data-bind="value:taskType"
-                data-value-field="value"
-                data-text-field="text"
-                data-source="HunterConstants.TASK_TYPES_ARRAY"
-                data-role="dropdownlist" />
-		</div>
-		<div class="k-edit-label">
-			<label for="taskType">Task Message Type</label>
-		</div>
-		<div data-container-for="tskMsgType" class="k-edit-field">
-			<input type="text" id="tskMsgType" 
-				name="tskMsgType" 
-				id="tskMsgTypeInput" 
-                data-bind="value:tskMsgType"
-                data-value-field="msgTypVal"
-                data-text-field="msgTypText"
-                data-source="HunterConstants.TASK_MSG_TYP_ARRAY"
-                data-role="dropdownlist" />
-		</div>
-		<div class="k-edit-label">
-			<label for="taskType">Gateway Client</label>
-		</div>
-		<div data-container-for="gateWayClient" class="k-edit-field">
-			<input type="text" id="gateWayClient" 
-				name="gateWayClient" 
-				id="gateWayClient" 
-                data-bind="value:gateWayClient"
-                data-value-field="value"
-                data-text-field="text"
-                data-source="HunterConstants.GATE_WAY_CLIENT_ARRAY"
-                data-role="dropdownlist" />
-		</div>
-		<div class="k-edit-label">
-			<label for="taskObjective">Task Objective</label>
-		</div>
-		<div data-container-for="taskObjective" class="k-edit-field">
-			<textarea data-bind="value:taskObjective" cols="21" rows="6" style="background-color:rgb(242,249,255);border:1px solid rgb(129,166,174);" name="taskObjective" class="k-input k-textarea" ></textarea> 
-		</div>
-		<div class="k-edit-label">
-			<label for="recurrentTask">Recurrent Task</label>
-		</div>
-		<div data-container-for="recurrentTask" class="k-edit-field">
-			<input 
-				type="checkbox" 
-				class="k-input" 
-				name="recurrentTask"
-				data-bind="value:recurrentTask">
-		</div>
-		<div class="k-edit-label">
-			<label for="taskBudget">Task Budget</label>
-		</div>
-		<div data-container-for="taskBudget" class="k-edit-field">
-			<input name="taskBudget" id="taskTaskBudgetNumericInput"
-				required="required" data-bind="value:taskBudget">
-		</div>
-		<div class="k-edit-label">
-			<label for="taskCost">Task Cost</label>
-		</div>
-		<div data-container-for="taskCost" class="k-edit-field">
-			<input  name="taskCost" id="taskTaskCostNumericInput"
-				required="required" data-bind="value:taskCost">
-		</div>
-		<div class="k-edit-label">
-			<label for="desiredReceiverCount">Desired Receivers</label>
-		</div>
-		<div data-container-for="desiredReceiverCount" class="k-edit-field">
-			<input name="desiredReceiverCount" id="desiredReceiverCountInput"
-				required="required" data-bind="value:desiredReceiverCount">
-		</div>
-	</div>
-</div>
 
 <div id="hunterClientTasksPopupViewTemplate" style="display:none;">
 	<div class="k-header" style="border:1px solid rgb(187,207,230); border-radius:4px;padding:10px;height:96%;width:96%;align:center;"> 

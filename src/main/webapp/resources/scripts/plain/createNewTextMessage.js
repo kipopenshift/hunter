@@ -1,14 +1,15 @@
-var newTxtMsgManagerInstance = null;
-var createTxtMsgOwnersData = null;
+var 
+newTxtMsgManagerInstance = null,
+createTxtMsgOwnersData 	 = null;
 
 $("document").ready(function(){
 	
 	var CreateTextMessageManager = kendo.Class.extend({
 		
-		sProvidersWidget : null,
+		sProvidersWidget 	: null,
 		messageStatusWidget : null,
-		msgOwnersWidget : null,
-		ownersData : {},
+		msgOwnersWidget 	: null,
+		ownersData 			: {},
 		
 		execute : function(){
 			 this.initialize();

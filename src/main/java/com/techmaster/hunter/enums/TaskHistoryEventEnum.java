@@ -16,7 +16,8 @@ public enum TaskHistoryEventEnum {
 	ADD_MESSAGE("Add Message", "Add Message to Task"),
 	PRE_EMPT("Preempt", "Preempt Task Process"),
 	VALIDATE_PROCESS("Validate Process", "Validate Task Process"),
-	PROCESS("Process", "Process Task");
+	PROCESS("Process", "Process Task"),
+	UNCOMPLETE("Uncomplete", "Uncomplete Task");
 	
 	private final String eventName;
 	private final String eventDesc;
