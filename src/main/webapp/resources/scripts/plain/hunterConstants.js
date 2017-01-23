@@ -1,7 +1,6 @@
 
 function HunterConstants(){};
 
-HunterConstants.HUNTER_BASE_URL = "http://localhost:8080/Hunter";
 HunterConstants.HUNTER_DATE_FORMAT_MILIS = "yyyy-MM-dd HH:mm:ss.SSS";
 HunterConstants.HUNTER_DATE_FORMAT_SECS = "yyyy-MM-dd HH:mm:ss";
 HunterConstants.HUNTER_DATE_FORMAT_MIN = "yyyy-MM-dd HH:mm";
@@ -14,6 +13,7 @@ HunterConstants.getBaseURL = function(loc) {
     return location.protocol + "//" + location.hostname +
        (location.port && ":" + location.port) + "/" + loc;
 };
+
 
 HunterConstants.getHunterBaseURL = function(loc) {
     return HunterConstants.getBaseURL("Hunter/" + loc);
@@ -77,32 +77,23 @@ HunterConstants.SOCIAL_MEDIA_TYPS_ARRAY = [
   			{"value" : "mediaGIF",   "text" : "GIF"}
         ];
 
-
-
 /*
-public static final String SOCIAL_POST_TYPE_LINK_NEWS = "socialPostLinkNews";
-public static final String SOCIAL_POST_TYPE_LINK_OTHER = "socialPostLinkOther";
-public static final String SOCIAL_POST_TYPE_TEXT = "socialPostText";
-public static final String SOCIAL_POST_TYPE_IMAGE = "socialPostImage";
-public static final String SOCIAL_POST_TYPE_VIDEO = "socialPostVideo";
-public static final String SOCIAL_POST_TYPE_AUDIO = "socialPostAudio";
+public static final String SOCIAL_POST_TYPE_LINK_NEWS = "Post Link News";
+public static final String SOCIAL_POST_TYPE_LINK_OTHER = "Post Link Other";
+public static final String SOCIAL_POST_TYPE_TEXT = "Post Text";
+public static final String SOCIAL_POST_TYPE_IMAGE = "Post Image";
+public static final String SOCIAL_POST_TYPE_VIDEO = "Post Video";
+public static final String SOCIAL_POST_TYPE_AUDIO = "Post Audio";
 */
 
 HunterConstants.SOCIAL_POST_ARRAY = [
-            {"value" : "socialPostText", 		"text" : "Text"},
-			{"value" : "socialPostImage",   	"text" : "Image"},
-			{"value" : "socialPostVideo", 		"text" : "Video"},
-			{"value" : "socialPostAudio",   	"text" : "Audio"},
- 			{"value" : "socialPostLinkNews",   	"text" : "New Link"},
- 			{"value" : "socialPostLinkOther", 	"text" : "Other Links"}
+            {"value" : "Post Text",			"text" : "Text"},
+			{"value" : "Post Image",   		"text" : "Image"},
+			{"value" : "Post Video",		"text" : "Video"},
+			{"value" : "Post Audio",   		"text" : "Audio"},
+ 			{"value" : "Post Link News",   	"text" : "News Link"},
+ 			{"value" : "Post Link Other", 	"text" : "Other Links"}
        ];
-
-/*
- * public static final String SOCIAL_TYPE_FACEBOOK_GROUP = "Facebook Group";
-	public static final String SOCIAL_TYPE_INSTAGRAM_GROUP = "InstagramG roup";
-	public static final String SOCIAL_TYPE_TWITTER_GROUP = "Twitter Group";
-	public static final String SOCIAL_TYPE_BLOG_GROUP = "Blog Group";
- * */
 
 HunterConstants.SOCIAL_TYPES_ARRAY = [
             {"value" : "Facebook", 		"text" : "Facebook"},

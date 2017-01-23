@@ -72,6 +72,12 @@ var SocialGroupModel = kendo.data.Model.define({
 		"verified" : {
 			type : "string", validation : {required : true},editable:false, defaultValue:null
 		},
+		"socialAppId" : {
+			type : "string", validation : {required : true},editable:false, defaultValue:null
+		},
+		"socialAppName" : {
+			type : "string", validation : {required : true},editable:false, defaultValue:null
+		},
 		"cretDate" : {
 			type : "string", validation : {required : true},editable:false, defaultValue:null
 		},
@@ -134,6 +140,7 @@ var SocialGroupsVM = kendo.observable({
 	SocialGroupsDS_ : null,
 	socialRegions 	: null,
 	selSocialGroupTemp : null,
+	socialAppsData  : null,
 	selSocialGroup	: {
 		"groupId"			:0,		"externalId"		:null,	"groupName"			:null, "existent"				:false,
 		"groupDescription"	:null,	"socialType"		:null,	"hunterOwned"		:true, "acquiredFromFullName"	:null,
@@ -141,7 +148,7 @@ var SocialGroupsVM = kendo.observable({
 		"regionId"			:null,	"regionName"		:null,	"regionPopulation"	:0,		"regionDesc"			:null,
 		"regionCountryName"	:null,	"regionCountyName"	:null,	"regionCoordinates"	:null,	"regionAssignedTo"		:null,
 		"verified"			:false,	"cretDate"			:null,	"createdBy"			:null,	"lastUpdate"			:null,	
-		"lastUpdatedBy"		:null
+		"lastUpdatedBy"		:null,	"socialAppId"		:null,	"socialAppName"		:null
 	},
 	resetSocialGroupValues : function(){
 		this.set("selSocialGroup",this.get("selSocialGroupTemp")); 
@@ -211,6 +218,7 @@ var SocialGroupsVM = kendo.observable({
 	afterInit : function(){
 		console.log("Successfully finished loading social groups!");
 		this.loadSocialRegions();
+		this.loadSocialApps();
 	},
 	loadSocialRegions : function(){
 		var url = HunterConstants.getHunterBaseURL("social/action/regions/readSelVal");
@@ -219,6 +227,14 @@ var SocialGroupsVM = kendo.observable({
 	afterGettingSocialRegions : function(data){
 		data = $.parseJSON(data);
 		SocialGroupsVM.set("socialRegions", data);
+	},
+	loadSocialApps : function(){
+		var url = HunterConstants.getHunterBaseURL("social/action/apps/dropdowns");
+		kendoKipHelperInstance.ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url, "SocialGroupsVM.afterGettingSocialApps");
+	},
+	afterGettingSocialApps : function(data){
+		data = $.parseJSON(data);
+		SocialGroupsVM.set("socialAppsData", data);
 	},
 	showPopupToChangeGroupStatus : function(keyStr){
 		
@@ -325,8 +341,21 @@ var SocialGroupsVM = kendo.observable({
              dataTextField	: "text",
              dataValueField	: "value",
              valuePrimitive : "true",
+             placeholder	: "Select Social Region",
              dataSource		: SocialGroupsVM.get("socialRegions")
         });
+		
+		$("#socialAppId").kendoComboBox({
+            dataTextField	: "text",
+            dataValueField	: "value",
+            valuePrimitive 	: "true",
+            placeholder		: "Select Social App",
+            dataSource	   	: SocialGroupsVM.get("socialAppsData"),
+            change	   		: function(){
+            	var value = this.text();
+            	SocialGroupsVM.get("socialAppsData").socialAppName = value;
+            }
+       });
 		
 		$("#groupReceiversCount").kendoNumericTextBox({
 			 value 		: 1,

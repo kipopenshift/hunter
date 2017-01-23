@@ -17,7 +17,8 @@ public enum TaskHistoryEventEnum {
 	PRE_EMPT("Preempt", "Preempt Task Process"),
 	VALIDATE_PROCESS("Validate Process", "Validate Task Process"),
 	PROCESS("Process", "Process Task"),
-	UNCOMPLETE("Uncomplete", "Uncomplete Task");
+	UNCOMPLETE("Uncomplete", "Uncomplete Task"),
+	DELETE_SCL_IMG("Delete Social Image", "Delete Social Message Media Image");
 	
 	private final String eventName;
 	private final String eventDesc;

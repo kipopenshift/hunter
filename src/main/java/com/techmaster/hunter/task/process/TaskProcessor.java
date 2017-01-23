@@ -123,7 +123,7 @@ public class TaskProcessor {
 		Long nextJobId = null;
 		/* It returns 0 if there is nothing in the map */
 		if(existentMaxJobId != 0){
-			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 			String query = "SELECT MAX(JB_ID) + 1  FROM TSK_PROCSS_JB";
 			Map<Integer, List<Object>> rowListMap = hunterJDBCExecutor.executeQueryRowList(query, null);
 			if(rowListMap != null && !rowListMap.isEmpty() && rowListMap.get(1) != null && rowListMap.get(1).isEmpty()){

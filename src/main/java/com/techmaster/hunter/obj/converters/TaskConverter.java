@@ -12,11 +12,15 @@ import org.json.JSONObject;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.obj.beans.EmailMessage;
+import com.techmaster.hunter.obj.beans.HunterSocialApp;
+import com.techmaster.hunter.obj.beans.HunterSocialGroup;
 import com.techmaster.hunter.obj.beans.Message;
 import com.techmaster.hunter.obj.beans.ReceiverRegion;
 import com.techmaster.hunter.obj.beans.ServiceProvider;
+import com.techmaster.hunter.obj.beans.SocialMessage;
 import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TextMessage;
+import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -221,6 +225,8 @@ public class TaskConverter {
 				return getTextMessage();
 			}else if(tskMsgType.equalsIgnoreCase(HunterConstants.MESSAGE_TYPE_EMAIL)){
 				return getEmailMessage();
+			}else if(tskMsgType.equalsIgnoreCase(HunterConstants.MESSAGE_TYPE_SOCIAL)){
+				return getSocialMessage();
 			}else{
 				throw new IllegalArgumentException("Please implement extraction for message type : " + tskMsgType);
 			}
@@ -382,6 +388,57 @@ public class TaskConverter {
 		
 		logger.debug("Successfully created textMessage >> " + message); 
 		
+		
+		return message;
+	}
+	
+	public SocialMessage getSocialMessage(){
+		logger.debug("Extracting social message...");
+		SocialMessage message = new SocialMessage();
+		JSONObject msgJson = getTskMsgJson();
+		
+		if(msgJson == null) {
+			logger.warn("Null task message!! Returning null!");
+			return null;
+		}
+		
+		Long 
+		socialMsgId 		= HunterUtility.getLongOrNulFromJSONObj(msgJson, "socialMsgId"),
+		defaultSocialAppId	= HunterUtility.getLongOrNulFromJSONObj(msgJson, "defaultSocialAppId");
+		
+		String 
+		externalId 			  = HunterUtility.getStringOrNulFromJSONObj(msgJson, "externalId"),
+		mediaType 			  = HunterUtility.getStringOrNulFromJSONObj(msgJson, "mediaType"),
+		description 		  = HunterUtility.getStringOrNulFromJSONObj(msgJson, "description"),
+		socialPost 			  = HunterUtility.getStringOrNulFromJSONObj(msgJson, "socialPost"),
+		socialPostType 		  = HunterUtility.getStringOrNulFromJSONObj(msgJson, "socialPostType");
+		//originalFileFormat 	  = HunterUtility.getStringOrNulFromJSONObj(msgJson, "originalFileFormat"),
+		//socialMediaId 		  = HunterUtility.getStringOrNulFromJSONObj(msgJson, "socialMediaId"),
+		
+		if( socialMsgId != null ){
+			message = HunterHibernateHelper.getEntityById(socialMsgId, SocialMessage.class);
+		}
+		
+		Set<HunterSocialGroup> hunterSocialGroups = new HashSet<HunterSocialGroup>();
+		JSONArray groupIds = msgJson.getJSONArray("hunterSocialGroupsIds");
+		
+		if( groupIds != null && groupIds.length() > 0 ){
+			for (int i = 0; i < groupIds.length(); i++){
+				Long groupId = groupIds.getLong(i);
+				HunterSocialGroup socialGroup = HunterHibernateHelper.getEntityById(groupId, HunterSocialGroup.class);
+				hunterSocialGroups.add(socialGroup);
+			}
+			message.setHunterSocialGroups(hunterSocialGroups);
+		}
+		
+		HunterSocialApp socialApp = HunterHibernateHelper.getEntityById(HunterUtility.getLongFromObject(defaultSocialAppId), HunterSocialApp.class);
+		
+		message.setExternalId(externalId);
+		message.setMediaType(mediaType);
+		message.setDescription(description);
+		message.setSocialPost(socialPost);
+		message.setSocialPostType(socialPostType);
+		message.setDefaultSocialApp(socialApp);
 		
 		return message;
 	}

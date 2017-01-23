@@ -2,8 +2,6 @@ package com.techmaster.hunter.obj.beans;
 
 import java.sql.Blob;
 
-import com.techmaster.hunter.util.HunterUtility;
-
 public class UserLoginBean {
 
 	private Long userId;
@@ -90,7 +88,7 @@ public class UserLoginBean {
 		return "UserLoginBean [userId=" + userId + ", lastLoginTime="
 				+ lastLoginTime + ", blocked=" + blocked
 				+ ", faildedLoginCount=" + faildedLoginCount
-				+ ", loginData=" + HunterUtility.getBlobStr(loginData) + "]"; 
+				+ ", loginData=" + /*HunterUtility.getBlobStr(loginData)*/ "(Masked)" + "]";  
 	}
 	
 		

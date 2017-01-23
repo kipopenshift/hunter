@@ -7,10 +7,14 @@ public class HunterDaoFactory {
 	
 	
 	private static HunterDaoFactory instance = null;
-	private Map<String, Object> daosMap = new HashMap<String, Object>();
+	private static Map<String, Object> daosMap = new HashMap<String, Object>();
 	
 	private HunterDaoFactory() {
 		super();
+	}
+	
+	public static <T>T getObject(Class<T> clzz){
+		return HunterDaoFactory.getDaoObject(clzz); 
 	}
 
 	public static synchronized HunterDaoFactory getInstance(){
@@ -25,15 +29,15 @@ public class HunterDaoFactory {
 	public void setDaosMap(Map<String, Object> daosMap) {
 		this.daosMap = daosMap; 
 	}
-	public Object get(String key){
+	public static Object get(String key){
 		Object obj = daosMap.get(key);
 		return obj;
 	}
 	
-	public <T>T getDaoObject(Class<T> clzz){
+	public static <T>T getDaoObject(Class<T> clzz){
 		String key = clzz.getSimpleName();
 		key = (key.substring(0,1)).toLowerCase()+ key.substring(1,key.length());
-		@SuppressWarnings("unchecked") T t = (T)get(key);
+		@SuppressWarnings("unchecked") T t = (T)get(key); 
 		return t;
 	}
 	

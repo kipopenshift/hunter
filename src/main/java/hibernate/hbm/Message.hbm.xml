@@ -83,8 +83,12 @@
 			<property name="socialPost" column="SCL_PST" type="java.lang.String"  /> 
 			<property name="socialPostType" column="SCL_PST_TYP" type="java.lang.String" />
 			<property name="originalFileFormat" column="ORGNL_FL_NAM" type="java.lang.String" />
+			<property name="mediaType" column="MDA_TYPE" type="java.lang.String" />
+			<property name="socialPostAction" column="SCL_PST_ACTN" type="java.lang.String" length="30" />
+			<property name="useRemoteMedia" column="US_RMT_MDA"  type="org.hibernate.type.YesNoType" /> 
 			
 			<one-to-one name="socialMedia" class="com.techmaster.hunter.obj.beans.HunterSocialMedia" cascade="all"  ></one-to-one>
+			<many-to-one name="defaultSocialApp" class="com.techmaster.hunter.obj.beans.HunterSocialApp" column="DFLT_SCL_APP" not-null="false"/>
 			
 			<set name="hunterSocialGroups" cascade="save-update" table="SCL_MSG_SCL_GRPS">
         		<key column="MSG_ID"/>

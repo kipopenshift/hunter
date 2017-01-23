@@ -2,6 +2,7 @@
 registerNavigation("Groups", "Receiver Groups");
 
 var kendoKipHelperInstance = new kendoKipHelper();
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
 
 var ReceiverGroupModel = kendo.data.Model.define({
 	id:"groupId",
@@ -100,13 +101,13 @@ var ReceiverGroupDS = new kendo.data.DataSource({
 	height:650,
 	  transport: {
 	    read:  {
-	      url: "http://localhost:8080/Hunter/messageReceiver/action/group/read",
+	      url: baseUrl + "messageReceiver/action/group/read",
 	      dataType: "json",
 	      contentType:"application/json",
 	      method: "POST"
 	    },
 	    create: {
-	        url: "http://localhost:8080/Hunter/messageReceiver/action/group/create",
+	        url: baseUrl + "messageReceiver/action/group/create",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST",
@@ -115,13 +116,13 @@ var ReceiverGroupDS = new kendo.data.DataSource({
 	         }
 	    },
 	    update: {
-	        url: "http://localhost:8080/Hunter/messageReceiver/action/group/update",
+	        url: baseUrl + "messageReceiver/action/group/update",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
 	    },
 	    destroy: {
-	        url: "http://localhost:8080/Hunter/messageReceiver/action/group/destroy",
+	        url: baseUrl + "messageReceiver/action/group/destroy",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
@@ -217,7 +218,7 @@ var receiverGroupVM = kendo.observable({
 		console.log("Successfully finished loading receiver groups!");
 	},
 	populateClientDetailsData : function(){
-		var url = HunterConstants.HUNTER_BASE_URL + "/hunteruser/action/client/getAllClientsDetails";
+		var url = baseUrl + "/hunteruser/action/client/getAllClientsDetails";
 		kendoKipHelperInstance.ajaxPostDataForJsonResponse("{}", "application/json", "json", "POST",url,"receiverGroupVM.afterPopulateClientDetailsData");
 	},
 	afterPopulateClientDetailsData : function(data){
@@ -230,7 +231,7 @@ var receiverGroupVM = kendo.observable({
 		console.log("Group Id : " + id); 
 		var model = this.get("receiverGroupDS_").get(id);
 		model = JSON.stringify(model);
-		var url = HunterConstants.HUNTER_BASE_URL + "/messageReceiver/action/group/destroy";
+		var url = baseUrl + "/messageReceiver/action/group/destroy";
 		kendoKipHelperInstance.ajaxPostData(model, "application/json", "json", "POST",url,"receiverGroupVM.callAfter");
 	},
 	callAfter : function(data){
@@ -259,7 +260,7 @@ var receiverGroupVM = kendo.observable({
 		$("#importSectionTemplateCover").empty();
 		var content = $("#importSectionTemplate").html();
 		kendoKipHelperInstance.showWindowWithOnClose(content, "Upload file");
-		var url = HunterConstants.HUNTER_BASE_URL + "/messageReceiver/action/group/import/receiverGroupReceivers/" + groupId;
+		var url = baseUrl + "/messageReceiver/action/group/import/receiverGroupReceivers/" + groupId;
 		 $("#receiverGroupInput").kendoUpload({
 		        async: { 
 		            saveUrl: url,
@@ -274,7 +275,7 @@ var receiverGroupVM = kendo.observable({
 		kendo.destroy( $("#receiverGroupInput"));
 		$("#kendoUploadContainer").empty();
 		$("#kendoUploadContainer").html('<input type="file" name="select import file" id="receiverGroupInput" />');
-		var url = HunterConstants.HUNTER_BASE_URL + "/messageReceiver/action/group/import/receiverGroupReceivers/" + groupId;
+		var url = baseUrl + "/messageReceiver/action/group/import/receiverGroupReceivers/" + groupId;
 		 $("#receiverGroupInput").kendoUpload({
 		        async: { 
 		            saveUrl: url,
@@ -302,7 +303,7 @@ var receiverGroupVM = kendo.observable({
 		this.set("selGroupId", groupId);
 		var data = {"groupId" : groupId};
 		data = JSON.stringify(data);
-		var url = HunterConstants.HUNTER_BASE_URL + "/messageReceiver/action/group/getImportDetails";
+		var url = baseUrl + "/messageReceiver/action/group/getImportDetails";
 		kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST",url,"receiverGroupVM.afterAjaxPostGetImportData");
 	},
 	afterAjaxPostGetImportData : function(data){
@@ -377,7 +378,7 @@ var receiverGroupVM = kendo.observable({
 	},
 	getLinkUrl : function(importId){
 		var extension = null;
-		var url = HunterConstants.HUNTER_BASE_URL + "/messageReceiver/action/group/";
+		var url = baseUrl + "/messageReceiver/action/group/";
 		if(importId != null && importId == "allReceivers"){
 			var groupId = this.get("selGroupId");
 			extension = "downloadAllReceivers/" + groupId;

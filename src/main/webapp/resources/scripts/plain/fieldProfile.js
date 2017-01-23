@@ -1,4 +1,6 @@
 
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
+
 var userData = null,
 	rotateEvent = null,
 	regionContainer = {"country":null,"county":null,"constituency":null,"ward":null, "level":null},
@@ -21,7 +23,7 @@ var userData = null,
 	isProfileUploaded = false,
 	profileData = {};
 
-var progressSpinner = "<span id='progressSpinnerHolderSpan' style='width:100%;font-size:30px;color:#004B0A;' ><img src='http://localhost:8080/Hunter/static/resources/images/refreshing_spinner_new.gif' style='border-radius:50%' width='50' height='50'  /></span>";
+var progressSpinner = "<span id='progressSpinnerHolderSpan' style='width:100%;font-size:30px;color:#004B0A;' ><img src='" + baseUrl + "static/resources/images/refreshing_spinner_new.gif' style='border-radius:50%' width='50' height='50'  /></span>";
 
 $("document").ready(function(){
 	//loadUserProfileData();
@@ -117,7 +119,7 @@ function loadContactsData(progressBar){
 	        "dataType": 'json',
 	        "contentType": "application/json",
 	        "type": "GET",
-	        "url":"http://localhost:8080/Hunter/rawReceiver/action/raw/getUsersContacts",
+	        "url":baseUrl + "rawReceiver/action/raw/getUsersContacts",
 	        "dataSrc": function (json) {
 	        	var json = $.parseJSON(json);
 	        	return json["data"];
@@ -162,9 +164,9 @@ function loadContactsData(progressBar){
            	targets : 8,
            	"mRender" : function(data,type,full,meta){
            		if(data +'' === 'true'){
-           			return '<center><img src="http://localhost:8080/Hunter/static/resources/images/tick.png" width="15px" height="15px" style="border:1px solid rgb(14,65,68);border-radius:50%;"  /></center>';
+           			return '<center><img src="' + baseUrl + 'static/resources/images/tick.png" width="15px" height="15px" style="border:1px solid rgb(14,65,68);border-radius:50%;"  /></center>';
            		}else{
-           			return '<center><img src="http://localhost:8080/Hunter/static/resources/images/cross-icon-img.png" width="15px" height="15px" style="border:1px solid rgb(14,65,68);border-radius:50%;"  /></center>';
+           			return '<center><img src="' + baseUrl + 'static/resources/images/cross-icon-img.png" width="15px" height="15px" style="border:1px solid rgb(14,65,68);border-radius:50%;"  /></center>';
            		}
            	}
            },

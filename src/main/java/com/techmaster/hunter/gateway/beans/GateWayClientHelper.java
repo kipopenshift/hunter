@@ -69,11 +69,11 @@ import com.techmaster.hunter.xml.XMLService;
 
 public class GateWayClientHelper {
 	
-	private RegionService regionService = HunterDaoFactory.getInstance().getDaoObject(RegionService.class);
-	private HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
-	private HunterJacksonMapper hunterJacksonMapper = HunterDaoFactory.getInstance().getDaoObject(HunterJacksonMapper.class);;
-	private MessageDao messageDao = HunterDaoFactory.getInstance().getDaoObject(MessageDao.class);
-	private TaskDao taskDao = HunterDaoFactory.getInstance().getDaoObject(TaskDao.class);
+	private RegionService regionService = HunterDaoFactory.getObject(RegionService.class);
+	private HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
+	private HunterJacksonMapper hunterJacksonMapper = HunterDaoFactory.getObject(HunterJacksonMapper.class);;
+	private MessageDao messageDao = HunterDaoFactory.getObject(MessageDao.class);
+	private TaskDao taskDao = HunterDaoFactory.getObject(TaskDao.class);
 	
 	
 	private static GateWayClientHelper instance = null;
@@ -113,7 +113,7 @@ public class GateWayClientHelper {
 		List<Object> values = new ArrayList<>();
 		values.add(HunterConstants.STATUS_PENDING);
 		values.add(taskId);
-		HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class).executeUpdate(lockQ, values);
+		HunterDaoFactory.getObject(HunterJDBCExecutor.class).executeUpdate(lockQ, values);
 	}
 	
 	public boolean isTaskLocked(Task task){
@@ -642,7 +642,7 @@ public class GateWayClientHelper {
 	
 	public Map<String,String> createImgFilesForAttachmentId(List<Long> attachmentIds){
 		Map<String,String> filesMap = new HashMap<>();
-		MessageAttachmentBeanDao attachmentBeanDao = HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class);
+		MessageAttachmentBeanDao attachmentBeanDao = HunterDaoFactory.getObject(MessageAttachmentBeanDao.class);
 		List<MessageAttachmentBean> attachmentBeans = attachmentBeanDao.getAttachmentBeanByIds(attachmentIds);
 		try {
 			for(MessageAttachmentBean attachmentBean : attachmentBeans){
@@ -669,7 +669,7 @@ public class GateWayClientHelper {
 		EmailMessage emailMessage = (EmailMessage)task.getTaskMessage();
 		
 		/* Clear the message attachment metadata first. So no duplicates are created. */
-		HunterJDBCExecutor jdbcExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor jdbcExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		String msgMsgQuery = "SELECT count(d.M_DATA_ID) FROM MSG_MSG_ATTCHMNT_MT_DATA d WHERE  d.MSG_ID = ?";
 		String deleteMsgMsgSql = "DELETE FROM MSG_MSG_ATTCHMNT_MT_DATA WHERE MSG_ID = ?";
 		String deleteMsgSql = "DELETE FROM MSG_ATTCHMNT_MT_DATA WHERE MSG_ID = ?";
@@ -703,7 +703,7 @@ public class GateWayClientHelper {
 		HunterEmailTemplateBean templateBean = HunterCacheUtil.getInstance().getEmailTemplateBean(templateName);
 		List<Long> messageAttachmentIds = getMessageAttachmentIds(task);
 		Map<String,String> filesMap = createImgFilesForAttachmentId(messageAttachmentIds);
-		MessageAttachmentBeanDao attachmentBeanDao = HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class);
+		MessageAttachmentBeanDao attachmentBeanDao = HunterDaoFactory.getObject(MessageAttachmentBeanDao.class);
 		List<MessageAttachmentBean> attachmentBeans = attachmentBeanDao.getAttachmentBeanByIds(messageAttachmentIds); 
 		Map<String,String> attachments = templateBean.getAttachments();
 		Map<String,String> attachmentLocsMap = getAttachmentLocsMap(task);
@@ -759,7 +759,7 @@ public class GateWayClientHelper {
 		if( !emailMessage.getMessageAttachmentMetadata().isEmpty() ){
 			attachmentMetadatas.addAll(emailMessage.getMessageAttachmentMetadata());
 			task.setTaskMessage(emailMessage);
-			TaskDao taskDao = HunterDaoFactory.getInstance().getDaoObject(TaskDao.class);
+			TaskDao taskDao = HunterDaoFactory.getObject(TaskDao.class);
 			taskDao.update(task);
 		}
 		
@@ -849,7 +849,7 @@ public class GateWayClientHelper {
 		
 		String messageAttachment = emailMessage.getMessageAttachments();
 		Map<String,String> replacedNmes = new HashMap<>();
-		MessageAttachmentBeanDao attachmentBeanDao = HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class);
+		MessageAttachmentBeanDao attachmentBeanDao = HunterDaoFactory.getObject(MessageAttachmentBeanDao.class);
 		HunterEmailTemplateBean emailTemplateBean = HunterCacheUtil.getInstance().getEmailTemplateBean(emailMessage.getEmailTemplateName());
 		Map<String,String> attachmentsMap = emailTemplateBean.getAttachments();
 		
@@ -885,9 +885,9 @@ public class GateWayClientHelper {
 		String templateName = emailMessage.getEmailTemplateName();
 		Map<String,String> orgnlAttchmntMap = getAttachmentsLocsMapForEmailMessage(emailMessage);
 		Map<String,String> returnMap = new HashMap<>();
-		MessageAttachmentBeanJson messageAttachmentBeanJson = HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class).getAttachmentBeanJsonById(attchmentId);
+		MessageAttachmentBeanJson messageAttachmentBeanJson = HunterDaoFactory.getObject(MessageAttachmentBeanDao.class).getAttachmentBeanJsonById(attchmentId);
 		String UIName = getMessageAttachmentUIName(messageAttachmentBeanJson);
-		MessageDao messageDao = HunterDaoFactory.getInstance().getDaoObject(MessageDao.class);
+		MessageDao messageDao = HunterDaoFactory.getObject(MessageDao.class);
 		String key = getEmailTemplateAttachmentKeyByName(templateName, templateAttachmentName);
 		
 		/* Just edit it if it exists */

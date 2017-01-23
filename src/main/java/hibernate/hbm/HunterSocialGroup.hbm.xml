@@ -26,8 +26,11 @@
 		<property name="status" column="STS"  type="java.lang.String" not-null="true" length="20"  />  
 		<property name="suspended" column="SSPNDD"  type="org.hibernate.type.YesNoType" />
 		<property name="suspensionDescription" column="SSPNDSN_DESC"  type="java.lang.String"  length="2000" />
+		<property name="delStatus" column="DEL_STS"  type="java.lang.String" not-null="true" length="20"  />
+		<property name="processData" column="PCSS_DATA" type="blob" /> 
 		
 		<many-to-one name="socialRegion" column="SCL_RGN_ID" class="com.techmaster.hunter.obj.beans.HunterSocialRegion" not-null="true" />
+		<many-to-one name="defaultSocialApp" column="DFLT_SCL_APP" class="com.techmaster.hunter.obj.beans.HunterSocialApp" not-null="true" />
 		 
 		<component name="auditInfo">
 			<property name="cretDate" column="CRET_DATE"  type="java.util.Date"  not-null="true"/>

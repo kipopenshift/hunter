@@ -35,6 +35,9 @@ public class HunterSocialGroupJson {
 	private String regionCoordinates;
 	private String regionAssignedTo;
 	
+	private Long socialAppId;
+	private String socialAppName;
+	
 	private String cretDate;
 	private String createdBy;
 	private String lastUpdate;
@@ -238,6 +241,18 @@ public class HunterSocialGroupJson {
 	public void setVerified(boolean verified) {
 		this.verified = verified;
 	}
+	public Long getSocialAppId() {
+		return socialAppId;
+	}
+	public void setSocialAppId(Long socialAppId) {
+		this.socialAppId = socialAppId;
+	}
+	public String getSocialAppName() {
+		return socialAppName;
+	}
+	public void setSocialAppName(String socialAppName) {
+		this.socialAppName = socialAppName;
+	}
 	
 	@Override
 	public int hashCode() {
@@ -307,6 +322,8 @@ public class HunterSocialGroupJson {
 				+ ", regionCountryName=" + regionCountryName
 				+ ", regionCountyName=" + regionCountyName
 				+ ", status=" + status
+				+ ", socialAppName=" + socialAppName
+				+ ", socialAppId=" + socialAppId
 				+ ", regionConsName=" + regionConsName + ", regionWardName="
 				+ regionWardName + ", regionCoordinates=" + regionCoordinates
 				+ ", regionAssignedTo=" + regionAssignedTo + ", cretDate="

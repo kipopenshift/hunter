@@ -9,8 +9,8 @@
 			<generator class="increment" />
 		</id>
 		
-		<property name="roleName" column="RL_NAM" type="java.lang.String" length="20"  not-null="true" />
-		<property name="roleShortName" column="RL_SHRT_NAM" type="java.lang.String" length="50"  not-null="true" />
+		<property name="roleName" column="RL_NAM" type="java.lang.String" length="100"  not-null="true" />
+		<property name="roleShortName" column="RL_SHRT_NAM" type="java.lang.String" length="100"  not-null="true" />
 		<property name="roleLevel" column="RL_LVL" type="java.lang.Integer"  not-null="true"  />
 		<property name="roleDesc" column="RL_DESC" type="java.lang.String" length="4000"  not-null="false"   /> 
 		

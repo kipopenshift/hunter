@@ -41,10 +41,13 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 		if(id == null || id.trim().equalsIgnoreCase("")) 
 			throw new IllegalArgumentException("Id provided is null or empty >> " + id); 
 		
-		String query = HunterUtility.getQueryForSqlId(id),
-			   desc = HunterUtility.getQueryDescForSqlId(id);
-		logger.debug("Description :  " + desc); 
+		String 
+		query = HunterUtility.getQueryForSqlId(id),
+		desc = HunterUtility.getQueryDescForSqlId(id);
+		
+		logger.debug("\n Description :  " + desc + "\n");  
 		logger.debug("Retrieved query for id = " + id + " \n" + query);
+		
 		return query;
 	}
 

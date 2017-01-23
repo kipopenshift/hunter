@@ -1,3 +1,5 @@
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
+
 $("document").ready(function(){
 	
 	var TaskProcessManager = kendo.Class.extend({
@@ -61,13 +63,13 @@ $("document").ready(function(){
 				if(data.status != null && data.status == 'Success'){
 					var task = hunterAdminClientUserVM.getSelectedTaskBean();
 					task.set("taskDeliveryStatus", "Pending"); 
-					var msg = 'Task passed validations <img src="http://localhost:8080/Hunter/static/resources/images/tick.png" width="15px" height="15px"   />';
+					var msg = 'Task passed validations <img src="' + baseUrl + 'static/resources/images/tick.png" width="15px" height="15px"   />';
 					this.styleForSuccess("taskValidationResults", msg);
 					this.validateProcessWidget.value(100);
-					$("#taskProcessValidationTd").html('Validating &nbsp;&nbsp;<img src="http://localhost:8080/Hunter/static/resources/images/tick.png" width="15px" height="15px"  />');
+					$("#taskProcessValidationTd").html('Validating &nbsp;&nbsp;<img src="' + baseUrl + 'static/resources/images/tick.png" width="15px" height="15px"  />');
 					this.processTask();
 				}else{
-					$("#taskProcessValidationTd").html('Validating &nbsp;&nbsp;<img src="http://localhost:8080/Hunter/static/resources/images/x-button.png" width="15px" height="15px"  />');
+					$("#taskProcessValidationTd").html('Validating &nbsp;&nbsp;<img src="' + baseUrl + 'static/resources/images/x-button.png" width="15px" height="15px"  />');
 					var msg = this.replaceCommasInMsg(data.message);
 					this.styleForError("taskValidationResults", msg);
 					this.validateProcessWidget.value(100);
@@ -77,11 +79,11 @@ $("document").ready(function(){
 			}else if(type == "process"){
 				this.processTaskProgBar.value(100);
 				if(data.status != null && data.status == 'Success'){
-					var msg = 'Task successfully submitted for processing <img src="http://localhost:8080/Hunter/static/resources/images/tick.png" width="15px" height="15px"   />';
+					var msg = 'Task successfully submitted for processing <img src="' + baseUrl + 'static/resources/images/tick.png" width="15px" height="15px"   />';
 					this.styleForSuccess("processTaskProgressMessages", msg);
-					$("#taskProcessProcessTd").html('Processing <img src="http://localhost:8080/Hunter/static/resources/images/tick.png" width="15px" height="15px"  />');
+					$("#taskProcessProcessTd").html('Processing <img src="' + baseUrl + 'static/resources/images/tick.png" width="15px" height="15px"  />');
 				}else{
-					$("#taskProcessProcessTd").html('Processing <img src="http://localhost:8080/Hunter/static/resources/images/x-button.png" width="15px" height="15px"  />');
+					$("#taskProcessProcessTd").html('Processing <img src="' + baseUrl + 'static/resources/images/x-button.png" width="15px" height="15px"  />');
 					var msg = this.replaceCommasInMsg(data.message);
 					this.styleForError("taskValidationResults", msg);
 				}
@@ -97,7 +99,7 @@ $("document").ready(function(){
 			var type = params["type"];
 			var ajaxParams = $.parseJSON(JSON.stringify(this.defaultRequestParam));
 			ajaxParams["data"] = JSON.stringify({"selTaskId":hunterAdminClientUserVM.get("selTaskId")});
-			ajaxParams["url"] = HunterConstants.HUNTER_BASE_URL+this.urlMapping[type];
+			ajaxParams["url"] = baseUrl +this.urlMapping[type];
 			var this_ = this;
 			$.ajax(ajaxParams).done(function(data) {
 				this_.afterAjaxFunction(type, data);

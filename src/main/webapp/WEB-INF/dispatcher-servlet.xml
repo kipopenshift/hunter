@@ -49,7 +49,7 @@
         <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
         <property name="url" value="jdbc:oracle:thin:@localhost:1521:orcl"/>
         <property name="username" value="system"/>
-        <property name="password" value="Never.1900"/>
+        <property name="password" value="hunter?,1900"/>
     </bean> 
     
     <!-- This is for json -->

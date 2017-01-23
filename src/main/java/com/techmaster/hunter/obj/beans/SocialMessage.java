@@ -13,9 +13,12 @@ public class SocialMessage extends Message  {
 	private String socialPost;
 	private String socialPostType;
 	private String originalFileFormat;
+	private String socialPostAction;
+	private boolean useRemoteMedia;
 
 	private HunterSocialMedia socialMedia;
 	private Set<HunterSocialGroup> hunterSocialGroups = new HashSet<HunterSocialGroup>();
+	private HunterSocialApp defaultSocialApp = new HunterSocialApp();
 	
 	
 	public String getSocialPostType() {
@@ -72,7 +75,24 @@ public class SocialMessage extends Message  {
 	public void setExternalId(String externalId) {
 		this.externalId = externalId;
 	}
-	
+	public HunterSocialApp getDefaultSocialApp() {
+		return defaultSocialApp;
+	}
+	public void setDefaultSocialApp(HunterSocialApp defaultSocialApp) {
+		this.defaultSocialApp = defaultSocialApp;
+	}
+	public String getSocialPostAction() {
+		return socialPostAction;
+	}
+	public void setSocialPostAction(String socialPostAction) {
+		this.socialPostAction = socialPostAction;
+	}
+	public boolean isUseRemoteMedia() {
+		return useRemoteMedia;
+	}
+	public void setUseRemoteMedia(boolean useRemoteMedia) {
+		this.useRemoteMedia = useRemoteMedia;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -153,6 +173,9 @@ public class SocialMessage extends Message  {
 				+ ", socialMedia=" + socialMedia
 				+ ", externalId=" + externalId
 				+ ", socialPostType=" + socialPostType
+				+ ", defaultSocialApp=" + defaultSocialApp
+				+ ", socialPostAction=" + socialPostAction
+				+ ", useRemoteMedia=" + useRemoteMedia
 				+ ", hunterSocialGroups=" + hunterSocialGroups + "]";
 	}
 	

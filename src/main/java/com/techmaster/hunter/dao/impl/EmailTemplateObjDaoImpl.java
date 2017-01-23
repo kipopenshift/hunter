@@ -29,7 +29,7 @@ public class EmailTemplateObjDaoImpl implements EmailTemplateObjDao{
 	public EmailTemplateObj getTemplateObjById(Long templateId) {
 		logger.debug("Getting template object by ID : " + templateId);
 		EmailTemplateObj emailTemplateObj = HunterHibernateHelper.getEntityById(templateId, EmailTemplateObj.class);
-		logger.debug("Done retrieving template object : " + emailTemplateObj);
+		logger.debug("Done retrieving template object : " + emailTemplateObj.getTemplateName());
 		return emailTemplateObj;
 	}
 
@@ -63,7 +63,7 @@ public class EmailTemplateObjDaoImpl implements EmailTemplateObjDao{
 	public List<EmailTemplateObjJson> getAllEmailTemplateObjJsons() {
 		logger.debug("Getting all template object jsons...");
 		List<EmailTemplateObjJson> emailTemplateObjs = new ArrayList<EmailTemplateObjJson>();
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		String query = hunterJDBCExecutor.getQueryForSqlId("getAllEmailTemplateObjJsons");
 		List<Map<String, Object>> rowListMap = hunterJDBCExecutor.executeQueryRowMap(query, null);
 		if( HunterUtility.isCollectionNotEmpty(rowListMap) ){
@@ -86,7 +86,7 @@ public class EmailTemplateObjDaoImpl implements EmailTemplateObjDao{
 	@Override
 	public EmailTemplateObjJson getEmailTemplateJsonById(Long templateId) {
 		logger.debug("Retrieving email template json from id : " + templateId); 
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		String query = hunterJDBCExecutor.getQueryForSqlId("getEmailTemplateObjJsonForId");
 		List<Object> values = new ArrayList<>();
 		values.add(templateId);

@@ -37,7 +37,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	private static Long maxAddressId;
 	private static Long maxCreditCardId;
 	
-	private static HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+	private static HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 	
 	static{
 		maxAddressId = hunterAddressDao.getNextAddressId() - 1;
@@ -313,7 +313,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	@Override
 	public String validateAndDeleteById(Long userId) {
 		StringBuilder taskErrors = null; 
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		if(hunterJDBCExecutor == null){
 			logger.debug("HunterJDBCExecutor is null!!"); 
 		}
@@ -372,7 +372,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 		logger.debug("Loading users who are clients..."); 
 		
 		List<HunterUserJson> hunterUserJsons = new ArrayList<>();
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		String  query = hunterJDBCExecutor.getQueryForSqlId("getAllClientsDetails");
 		List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, null);
 		

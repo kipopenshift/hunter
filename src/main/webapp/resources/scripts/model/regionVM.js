@@ -1,4 +1,6 @@
 
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
+
 var taskRegionVM = kendo.observable({
 	
 	isCountryDropdownEnabled : true, 
@@ -41,7 +43,7 @@ var taskRegionVM = kendo.observable({
         serverFiltering: true,
         transport: {
        	 read:  {
-      	      url: "http://localhost:8080/Hunter/region/action/countries/read",
+      	      url: baseUrl + "region/action/countries/read",
       	      dataType: "json",
       	      method: "POST"
        	 }
@@ -58,7 +60,7 @@ var taskRegionVM = kendo.observable({
         transport: {
        	 read:  {
       	      url: function(){
-      	    	  var url =  "http://localhost:8080/Hunter/region/action/counties/read/" + taskRegionVM.get("selCountry");
+      	    	  var url =  baseUrl + "region/action/counties/read/" + taskRegionVM.get("selCountry");
       	    	  console.log("CountyDS URL >> " + url);
       	    	  return url;
       	      }, 
@@ -78,7 +80,7 @@ var taskRegionVM = kendo.observable({
         transport: {
        	 read:  {
       	      url: function(){
-      	    	  var url = "http://localhost:8080/Hunter/region/action/constituencies/read/" + taskRegionVM.get("selCounty");
+      	    	  var url = baseUrl + "region/action/constituencies/read/" + taskRegionVM.get("selCounty");
       	    	  console.log("ConstituencyDS URL >> " + url);
       	    	  return url;
       	      },
@@ -98,7 +100,7 @@ var taskRegionVM = kendo.observable({
         transport: {
        	 read:  {
       	      url: function(){
-      	    	  var url = "http://localhost:8080/Hunter/region/action/constituencyWards/read/" + taskRegionVM.get("selConstituency");
+      	    	  var url = baseUrl + "region/action/constituencyWards/read/" + taskRegionVM.get("selConstituency");
       	    	  console.log("ConstituencyWardDS URL >> " + url);
     	    	  return url;
       	      },

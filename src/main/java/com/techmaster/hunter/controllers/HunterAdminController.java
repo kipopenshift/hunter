@@ -104,7 +104,7 @@ public class HunterAdminController extends HunterBaseController{
 	}
 	
 	private String loadEmailTemplateObjTemplates_(Long templateId){
-		EmailTemplateObjDao emailTemplateObjDao = HunterDaoFactory.getInstance().getDaoObject(EmailTemplateObjDao.class);
+		EmailTemplateObjDao emailTemplateObjDao = HunterDaoFactory.getObject(EmailTemplateObjDao.class);
 		EmailTemplateObj emailTemplateObj = emailTemplateObjDao.getTemplateObjById(templateId);
 		String metadata = HunterUtility.getBlobStr( emailTemplateObj.getDocumentMetadata() );
 		metadata = metadata == null || metadata.trim().equalsIgnoreCase("") ? HunterCacheUtil.getInstance().getDefaultEmailTemplate() : metadata; 
@@ -124,7 +124,7 @@ public class HunterAdminController extends HunterBaseController{
 	public @ResponseBody String changeEmailTemplateObjStatus(HttpServletRequest request, @RequestBody Map<String,Object> params){
 		String toStatus = HunterUtility.getStringOrNullOfObj( params.get("toStatus") ); 
 		Long templateId = HunterUtility.getLongFromObject( params.get("templateId") );
-		EmailTemplateObjDao templateObjDao = HunterDaoFactory.getInstance().getDaoObject(EmailTemplateObjDao.class);
+		EmailTemplateObjDao templateObjDao = HunterDaoFactory.getObject(EmailTemplateObjDao.class);
 		EmailTemplateObj emailTemplateObj = templateObjDao.getTemplateObjById(templateId);
 		emailTemplateObj.setStatus( toStatus ); 
 		templateObjDao.updateEmailTemplateObj(emailTemplateObj); 
@@ -136,7 +136,7 @@ public class HunterAdminController extends HunterBaseController{
 	@Consumes("application/json") 
 	@RequestMapping(value="/action/emailTemplateObj/saveTemplateFile/{templateId}", method=RequestMethod.POST)
 	public @ResponseBody String saveEmailTemplateObjFile(@PathVariable("templateId") Long templateId, @RequestBody Map<String,Object> requestParams){
-		EmailTemplateObjDao emailTemplateObjDao = HunterDaoFactory.getInstance().getDaoObject(EmailTemplateObjDao.class);
+		EmailTemplateObjDao emailTemplateObjDao = HunterDaoFactory.getObject(EmailTemplateObjDao.class);
 		EmailTemplateObj emailTemplateObj = emailTemplateObjDao.getTemplateObjById(templateId);
 		emailTemplateObj.setXmlTemplates( HunterUtility.getStringBlob( HunterUtility.getStringOrNullOfObj( requestParams.get("content") ) ) );
 		emailTemplateObjDao.updateEmailTemplateObj(emailTemplateObj); 
@@ -147,7 +147,7 @@ public class HunterAdminController extends HunterBaseController{
 	@Consumes("application/json") 
 	@RequestMapping(value="/action/emailTemplateObj/saveTemplateMetaDataFile/{templateId}", method=RequestMethod.POST)
 	public @ResponseBody String saveEmailTemplateMetaDataFile(@PathVariable("templateId") Long templateId, @RequestBody Map<String,Object> requestParams){
-		EmailTemplateObjDao emailTemplateObjDao = HunterDaoFactory.getInstance().getDaoObject(EmailTemplateObjDao.class);
+		EmailTemplateObjDao emailTemplateObjDao = HunterDaoFactory.getObject(EmailTemplateObjDao.class);
 		EmailTemplateObj emailTemplateObj = emailTemplateObjDao.getTemplateObjById(templateId);
 		emailTemplateObj.setDocumentMetadata( HunterUtility.getStringBlob( HunterUtility.getStringOrNullOfObj( requestParams.get("content") )));
 		emailTemplateObjDao.updateEmailTemplateObj(emailTemplateObj); 
@@ -156,7 +156,7 @@ public class HunterAdminController extends HunterBaseController{
 	
 	
 	private String getEmailTemplateHtmlForId(Long templateId){
-		EmailTemplateObjDao emailTemplateObjDao = HunterDaoFactory.getInstance().getDaoObject(EmailTemplateObjDao.class);
+		EmailTemplateObjDao emailTemplateObjDao = HunterDaoFactory.getObject(EmailTemplateObjDao.class);
 		EmailTemplateObj emailTemplateObj = emailTemplateObjDao.getTemplateObjById(templateId);
 		String html = HunterUtility.getBlobStr( emailTemplateObj.getXmlTemplates() );
 		html = html == null ? "<div>Default Content</div>" : html;
@@ -197,7 +197,7 @@ public class HunterAdminController extends HunterBaseController{
 	@Produces("application/json")
 	@RequestMapping(value="/action/emailTemplateObj/read", method=RequestMethod.POST)
 	public @ResponseBody List<EmailTemplateObjJson> getAllEmailTemplateObj(){
-		EmailTemplateObjDao templateObjDao = HunterDaoFactory.getInstance().getDaoObject(EmailTemplateObjDao.class);
+		EmailTemplateObjDao templateObjDao = HunterDaoFactory.getObject(EmailTemplateObjDao.class);
 		List<EmailTemplateObjJson> emailTemplateObjJsons = templateObjDao.getAllEmailTemplateObjJsons();
 		return emailTemplateObjJsons;
 	}	
@@ -207,7 +207,7 @@ public class HunterAdminController extends HunterBaseController{
 	@RequestMapping(value="/action/emailTemplateObj/delete", method=RequestMethod.POST)
 	public @ResponseBody String deleteEmailTemplateObj(@RequestBody Map<String,Object> map){
 		Long templateId = HunterUtility.getLongFromObject(map.get("templateId")); 
-		EmailTemplateObjDao templateObjDao = HunterDaoFactory.getInstance().getDaoObject(EmailTemplateObjDao.class);
+		EmailTemplateObjDao templateObjDao = HunterDaoFactory.getObject(EmailTemplateObjDao.class);
 		EmailTemplateObj templateObj = templateObjDao.getTemplateObjById(templateId);
 		String results = templateObjDao.deleteEmailTemplateObj(templateObj);
 		results = results == null ? HunterUtility.setJSONObjectForSuccess(null, "Template successfully deleted").toString() : HunterUtility.setJSONObjectForFailure(null, results).toString();
@@ -392,7 +392,7 @@ public class HunterAdminController extends HunterBaseController{
 	
 	@RequestMapping(value="/action/fieldProfile", method=RequestMethod.GET)
 	public String goToFieldProfile(HttpServletResponse response){
-		HunterRawReceiverUserDao userDao = HunterDaoFactory.getInstance().getDaoObject(HunterRawReceiverUserDao.class);
+		HunterRawReceiverUserDao userDao = HunterDaoFactory.getObject(HunterRawReceiverUserDao.class);
 		HunterRawReceiverUser rawReceiverUser = userDao.getRawUserByUserName(getUserName());
 		if(rawReceiverUser == null){
 			return "views/fieldProfileNotFound";
@@ -491,7 +491,7 @@ public class HunterAdminController extends HunterBaseController{
 	@Produces("application/json")
 	@Consumes("application/json") 
 	public List<MessageAttachmentBeanJson> getMessageAttachments(){
-		MessageAttachmentBeanDao messageAttachmentBeanDao = HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class);
+		MessageAttachmentBeanDao messageAttachmentBeanDao = HunterDaoFactory.getObject(MessageAttachmentBeanDao.class);
 		return messageAttachmentBeanDao.getAllAttachmentBeansJson();
 	}
 	
@@ -544,7 +544,7 @@ public class HunterAdminController extends HunterBaseController{
 				
 			}
 			
-			HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class).createMessageAttachmentBean(messageAttachmentBean);
+			HunterDaoFactory.getObject(MessageAttachmentBeanDao.class).createMessageAttachmentBean(messageAttachmentBean);
 			
 			logger.debug("Finished extracting image from request!");
 			
@@ -585,7 +585,7 @@ public class HunterAdminController extends HunterBaseController{
 			json = HunterUtility.setJSONObjectForFailure(json, message);
 		}else{
 			logger.debug("No message ");
-			MessageAttachmentBeanDao msgAttmntBnDao = HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class);
+			MessageAttachmentBeanDao msgAttmntBnDao = HunterDaoFactory.getObject(MessageAttachmentBeanDao.class);
 			msgAttmntBnDao.deleteMessageAttachmentBeanById(msgAttachmentId);
 			json = HunterUtility.setJSONObjectForSuccess(json, "Message attachment deleted successfully");
 		}
@@ -600,8 +600,8 @@ public class HunterAdminController extends HunterBaseController{
 		
 		JSONObject jsonObject = new JSONObject();
 		String[] taskIdsArray = null;
-		TaskManager taskManager = HunterDaoFactory.getInstance().getDaoObject(TaskManager.class); 
-		TaskHistoryDao taskHistoryDao = HunterDaoFactory.getInstance().getDaoObject(TaskHistoryDao.class);
+		TaskManager taskManager = HunterDaoFactory.getObject(TaskManager.class); 
+		TaskHistoryDao taskHistoryDao = HunterDaoFactory.getObject(TaskHistoryDao.class);
 		
 		try{
 			
@@ -619,7 +619,7 @@ public class HunterAdminController extends HunterBaseController{
 				}
 			}
 			
-			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 			String updateQuery = hunterJDBCExecutor.getQueryForSqlId("uncompleteTask");
 			updateQuery = updateQuery.replaceAll("\\?", taskIds);
 			hunterJDBCExecutor.executeUpdate(updateQuery, null);
@@ -684,7 +684,7 @@ public class HunterAdminController extends HunterBaseController{
 	public @ResponseBody List<RawUsersDropdownJson> getAvailableRawReceiverUsers(HttpServletRequest request){
 		
 		List<RawUsersDropdownJson> usersDropdownJsons = new ArrayList<>();
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		String query = hunterJDBCExecutor.getQueryForSqlId("getAvailableRawReceiverUsers");
 		Map<Integer, List<Object>> rowListMap = hunterJDBCExecutor.executeQueryRowList(query, null);
 		
@@ -712,7 +712,12 @@ public class HunterAdminController extends HunterBaseController{
 		List<RegionJsonForDropdowns> regionJsons = new ArrayList<>();
 		String regionLevel = HunterUtility.getStringOrNullOfObj( params.get("regionLevel") );
 		Long regionId = HunterUtility.getLongFromObject( params.get("forRegionId") );
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject( HunterJDBCExecutor.class );
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject( HunterJDBCExecutor.class );
+		
+		/* currentMode is utilized only for social regions while editing it. 
+		 * It just couldn't work on client side so we came here :( 
+		 */
+		String currentMode = HunterUtility.getStringOrNullOfObj(params.get("currentFetchType"));
 		
 		String query = null;
 		List<Map<String, Object>> rowMapList = null;
@@ -734,7 +739,15 @@ public class HunterAdminController extends HunterBaseController{
 					regionJson.setRegionName( HunterUtility.getStringOrNullOfObj( rowMap.get("CNTRY_NAM") ) ); 
 					regionJsons.add(regionJson); 
 				}
+				
+				if( currentMode != null ){
+					RegionJsonForDropdowns regionJson = new RegionJsonForDropdowns();
+					regionJson.setRegionId(0L);
+					regionJson.setRegionName(currentMode + "=" + HunterConstants.RECEIVER_LEVEL_COUNTRY);
+					regionJsons.add(regionJson); 
+				}
 			}
+			
 			
 			break;
 			
@@ -748,6 +761,13 @@ public class HunterAdminController extends HunterBaseController{
 					RegionJsonForDropdowns regionJson = new RegionJsonForDropdowns();
 					regionJson.setRegionId( HunterUtility.getLongFromObject( rowMap.get("COUNTYID") ) );
 					regionJson.setRegionName( HunterUtility.getStringOrNullOfObj( rowMap.get("COUNTYNAME") ) ); 
+					regionJsons.add(regionJson); 
+				}
+				
+				if( currentMode != null ){
+					RegionJsonForDropdowns regionJson = new RegionJsonForDropdowns();
+					regionJson.setRegionId(0L);
+					regionJson.setRegionName(currentMode + "=" + HunterConstants.RECEIVER_LEVEL_COUNTY); 
 					regionJsons.add(regionJson); 
 				}
 			}
@@ -766,6 +786,13 @@ public class HunterAdminController extends HunterBaseController{
 					regionJson.setRegionName( HunterUtility.getStringOrNullOfObj( rowMap.get("CONSTITUENCY_NAME") ) ); 
 					regionJsons.add(regionJson); 
 				}
+				
+				if( currentMode != null ){
+					RegionJsonForDropdowns regionJson = new RegionJsonForDropdowns();
+					regionJson.setRegionId(0L);
+					regionJson.setRegionName(currentMode + "=" + HunterConstants.RECEIVER_LEVEL_CONSITUENCY); 
+					regionJsons.add(regionJson); 
+				}
 			}
 			
 			break;
@@ -780,6 +807,13 @@ public class HunterAdminController extends HunterBaseController{
 					RegionJsonForDropdowns regionJson = new RegionJsonForDropdowns();
 					regionJson.setRegionId( HunterUtility.getLongFromObject( rowMap.get("WARD_ID") ) );
 					regionJson.setRegionName( HunterUtility.getStringOrNullOfObj( rowMap.get("WRD_NAME") ) ); 
+					regionJsons.add(regionJson); 
+				}
+				
+				if( currentMode != null ){
+					RegionJsonForDropdowns regionJson = new RegionJsonForDropdowns();
+					regionJson.setRegionId(0L);
+					regionJson.setRegionName(currentMode + "=" + HunterConstants.RECEIVER_LEVEL_WARD); 
 					regionJsons.add(regionJson); 
 				}
 			}

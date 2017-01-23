@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 
@@ -39,15 +40,23 @@ import com.techmaster.hunter.enums.TaskHistoryEventEnum;
 import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.gateway.beans.GateWayClientHelper;
 import com.techmaster.hunter.json.MessageAttachmentBeanJson;
+import com.techmaster.hunter.json.SocialMessageJson;
+import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.EmailMessage;
+import com.techmaster.hunter.obj.beans.HunterDaoList;
 import com.techmaster.hunter.obj.beans.HunterEmailTemplateBean;
-import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
+import com.techmaster.hunter.obj.beans.HunterSocialApp;
+import com.techmaster.hunter.obj.beans.HunterSocialGroup;
+import com.techmaster.hunter.obj.beans.HunterSocialMedia;
 import com.techmaster.hunter.obj.beans.Message;
 import com.techmaster.hunter.obj.beans.ServiceProvider;
+import com.techmaster.hunter.obj.beans.SocialMessage;
 import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.obj.beans.TextMessage;
+import com.techmaster.hunter.social.HunterSocialHelper;
 import com.techmaster.hunter.task.TaskManager;
+import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterUtility;
 
 @Controller
@@ -55,8 +64,6 @@ import com.techmaster.hunter.util.HunterUtility;
 public class MessageConstroller extends HunterBaseController implements ServletContextAware{
 	
 	@Autowired private ServiceProviderDao serviceProviderDao;
-	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
-	@Autowired private HunterJacksonMapper hunterJacksonMapper;
 	@Autowired private TaskManager taskManager;
 	@Autowired private TaskDao taskDao;
 	@Autowired private MessageDao messageDao;
@@ -367,7 +374,7 @@ public class MessageConstroller extends HunterBaseController implements ServletC
 	public void getReadyEmailBody(@PathVariable("taskId") Long taskId, HttpServletResponse response, HttpServletRequest request){
 		
 		
-		String prevLoc = servletContext.getRealPath(File.separator) + "resources"+ File.separator + "tempPrevs";;
+		String prevLoc = servletContext.getRealPath(File.separator) + "resources"+ File.separator + "tempPrevs";
 		String staticPrevLoc = HunterUtility.getRequestBaseURL(request) + "/Hunter/static/resources/tempPrevs";
 		
 		Task task = taskDao.getTaskById(taskId);
@@ -404,7 +411,7 @@ public class MessageConstroller extends HunterBaseController implements ServletC
 	@ResponseBody
 	public List<MessageAttachmentBeanJson> getMessageAttachmentsRecords(){
 		HunterUtility.threadSleepFor(1000); 
-		MessageAttachmentBeanDao messageAttachmentBeanDao = HunterDaoFactory.getInstance().getDaoObject(MessageAttachmentBeanDao.class);
+		MessageAttachmentBeanDao messageAttachmentBeanDao = HunterDaoFactory.getObject(MessageAttachmentBeanDao.class);
 		return messageAttachmentBeanDao.getAllAttachmentBeansJson();
 	}
 	
@@ -441,6 +448,87 @@ public class MessageConstroller extends HunterBaseController implements ServletC
 		logger.debug("Returning : " + jsonObject); 
 		return jsonObject.toString();
 	}
+	
+	@RequestMapping(value="/action/tskMsg/social/createOrUpdateSocialMsg", method = RequestMethod.POST )
+	@Produces("application/html")
+	@Consumes("application/json") 
+	public @ResponseBody String createOrUpdateSocialMessage(@RequestBody SocialMessageJson socialMessageJson, HttpServletRequest request){
+		
+		SocialMessage socialMessage = HunterHibernateHelper.getEntityById(socialMessageJson.getSocialMsgId(), SocialMessage.class);
+		AuditInfo auditInfo 		= getAuditInfo();
+		boolean update 				= false;
+		
+		if( socialMessage != null ){
+			update = true;
+		}else{
+			socialMessage = new SocialMessage();
+			socialMessage.setCretDate(auditInfo.getCretDate());
+			socialMessage.setCreatedBy(auditInfo.getCreatedBy()); 
+		}
+		
+		socialMessage.setLastUpdate(auditInfo.getLastUpdate()); 
+		socialMessage.setLastUpdatedBy(auditInfo.getLastUpdatedBy()); 
+		
+		socialMessage.setSocialMsgId(socialMessageJson.getSocialMsgId());
+		socialMessage.setMsgId(socialMessageJson.getSocialMsgId()); 
+		socialMessage.getLastUpdatedBy();
+		
+		socialMessage.setExternalId(socialMessageJson.getExternalId());
+		socialMessage.setMediaType(socialMessageJson.getMediaType());
+		socialMessage.setDescription(socialMessageJson.getDescription());
+		socialMessage.setSocialPost(socialMessageJson.getSocialPost());
+		socialMessage.setSocialPostType(socialMessageJson.getSocialPostType());
+		socialMessage.setSocialPostAction(socialMessageJson.getSocialPostAction()); 
+		
+		
+		
+		Long defaultSclAppId = socialMessageJson.getDefaultSocialAppId();
+		HunterSocialApp socialApp = defaultSclAppId == null ? null : HunterHibernateHelper.getEntityById(defaultSclAppId, HunterSocialApp.class);
+		socialMessage.setDefaultSocialApp(socialApp);
+		
+		Long [] socialGroupIds = socialMessageJson.getHunterSocialGroupsIds();
+		socialMessage.getHunterSocialGroups().clear();
+		
+		for(Long groupId : socialGroupIds){
+			HunterSocialGroup hunterSocialGroup = HunterHibernateHelper.getEntityById(groupId, HunterSocialGroup.class);
+			socialMessage.getHunterSocialGroups().add(hunterSocialGroup);
+		}
+		
+		HttpSession session = HunterUtility.getSessionForRequest(request);
+		HunterSocialMedia socialMedia = (HunterSocialMedia)session.getAttribute(HunterConstants.SOCIAL_MEDIA_IN_USER_SESSION);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class); 
+		
+		if( socialMedia != null && !socialMessageJson.isUseRemoteMedia() ){
+			
+			String delete = "DELETE FROM HNTR_SCL_MDA WHERE MDA_ID = ?";
+			List<Object> values = HunterDaoList.list(socialMessage.getMsgId()).toList();
+			hunterJDBCExecutor.executeUpdate(delete, values);
+			
+			socialMessage.setSocialMedia(socialMedia);
+			socialMedia.setMediaId(socialMessage.getMsgId()); 
+			socialMedia.setAuditInfo(HunterUtility.getAuditInfoForSclMsg(socialMessage)); 
+			
+			String cdetails = hunterJDBCExecutor.getQueryForSqlId("getTaskHunterClientDetails");
+			List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(cdetails, values);
+			String clientName = HunterUtility.getStringOrNullOfObj(HunterUtility.isCollectionNotEmpty(rowMapList) ? rowMapList.get(0).get("USR_NAM") : null); 
+			socialMedia.setClientName(clientName);
+			
+			socialMessage.setUseRemoteMedia( false );
+			
+		}else if( socialMessageJson.isUseRemoteMedia() && HunterUtility.notNullNotEmpty(socialMessageJson.getRemoteURL()) ){  
+			socialMessage.setUseRemoteMedia( socialMessageJson.isUseRemoteMedia() );
+			HunterSocialMedia defltSclMda = HunterSocialHelper.getInstance().createDfltRmtSclMda(socialMessageJson.getRemoteURL(), auditInfo, socialMessage.getMsgId());
+			socialMessage.setSocialMedia(defltSclMda);;
+		}
+		
+		if( update ){
+			messageDao.updateMessage(socialMessage);
+		}else{
+			messageDao.insertMessage(socialMessage);
+		}
+		return HunterUtility.setJSONObjectForSuccess(null, "Successfully saved changes!").toString();
+	}
+	
 
 	
 }

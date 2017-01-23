@@ -1,5 +1,7 @@
-var kendoWindow;
-var kendoKipHelperInstance;
+var 
+kendoWindow,
+kendoKipHelperInstance,
+baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
 
 
 var ItemGroupModel = kendo.data.TreeListModel.define({
@@ -76,11 +78,11 @@ var ItemGroupModel = kendo.data.TreeListModel.define({
 		 var id = this.get("id");
 		 var parent = this.get("parentId");
 		  if(code.trim() === "G" && parent == null )
-			  return "<span >" + '<img src="http://localhost:8080/Kendo/static/resources/images/itemGroup.png" alt="'+ code +'" height="10" width="10">&nbsp;' + id + '</span>';
+			  return "<span >" + '<img src="' + baseUrl + 'static/resources/images/itemGroup.png" alt="'+ code +'" height="10" width="10">&nbsp;' + id + '</span>';
 		  else if(code.trim() === "C"){
-			  return "<span >" + '<img src="http://localhost:8080/Kendo/static/resources/images/itemClass.png" alt="'+ code +'" height="10" width="10">&nbsp;' + id + '</span>';
+			  return "<span >" + '<img src="' + baseUrl + 'static/resources/images/itemClass.png" alt="'+ code +'" height="10" width="10">&nbsp;' + id + '</span>';
 		  }else if(code.trim() === "G" && parent != null) {
-			  return "<span >" + '<img src="http://localhost:8080/Kendo/static/resources/images/itemGroup.png" alt="'+ code +'" height="10" width="10">&nbsp;' + id + '</span>';
+			  return "<span >" + '<img src="' + baseUrl + 'static/resources/images/itemGroup.png" alt="'+ code +'" height="10" width="10">&nbsp;' + id + '</span>';
 		  }
 	 },
 	 getAddChildClasTemplate : function(){

@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.types.HunterClientDao;
-import com.techmaster.hunter.dao.types.HunterUserDao;
 import com.techmaster.hunter.obj.beans.HunterClient;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -31,7 +30,6 @@ import com.techmaster.hunter.util.HunterUtility;
 public class ClientController extends HunterBaseController{
 	
 	@Autowired private HunterClientDao hunterClientDao;
-	@Autowired private HunterUserDao hunterUserDao;
 	private Logger logger = Logger.getLogger(ClientController.class);
 	
 	@RequestMapping(value="/action/read", method = RequestMethod.GET)
@@ -119,9 +117,9 @@ public class ClientController extends HunterBaseController{
 			String paramNames = HunterUtility.getParamNamesAsStringsFrmRqst(request);
 			logger.debug("param names " + paramNames); 
 			
-			Long clientId = HunterUtility.getLongFromObject(request.getParameter("clientId"));  
-			Float budget = Float.parseFloat(request.getParameter("clientTotalBudget").toString());  
-			boolean isReceiver = Boolean.parseBoolean(request.getParameter("receiver").toString()); 
+			Long clientId 		= HunterUtility.getLongFromObject(request.getParameter("clientId"));  
+			Float budget 		= Float.parseFloat(request.getParameter("clientTotalBudget").toString());  
+			boolean isReceiver 	= Boolean.parseBoolean(request.getParameter("receiver").toString()); 
 
 			logger.debug("editHunterClientDetails . Client id = " + clientId);
 			

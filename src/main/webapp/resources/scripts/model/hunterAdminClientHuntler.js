@@ -1,9 +1,26 @@
 
-var kendoKipHelperInstance;
-var hunterWindow;
+var 
+kendoKipHelperInstance,
+hunterWindow;
+
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
 
 registerNavigation("Hunter", "Tasks"); 
 
+
+var SocialGroupModel = kendo.data.Model.define({
+    id: "groupId", 
+    fields: {
+    	"groupId" 	: { type: "number" },
+        "groupName"	: { type: "string" },
+        "status"	: { type: "string" },
+        "regionName": { type: "string" },
+        "socialType": { type: "string" }
+    },
+    getRemoveButton : function(){
+    	return kendoKipHelperInstance.createDeleteButton(false,"hunterAdminClientUserVM.onClickRemoveSocialGrp("+ this.get("groupId") +")"); 
+    }
+});
 
 var ReceiverGroupModel = kendo.data.Model.define({
 	id:"groupId",
@@ -63,13 +80,13 @@ var ReceiverGroupModel = kendo.data.Model.define({
 var ReceiverGroupDS = new kendo.data.DataSource({
 	  transport: {
 	    read:  {
-	      url: "http://localhost:8080/Hunter/messageReceiver/action/group/read",
+	      url: baseUrl + "messageReceiver/action/group/read",
 	      dataType: "json",
 	      contentType:"application/json",
 	      method: "POST"
 	    },
 	    create: {
-	        url: "http://localhost:8080/Hunter/messageReceiver/action/group/create",
+	        url: baseUrl + "messageReceiver/action/group/create",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST",
@@ -78,7 +95,7 @@ var ReceiverGroupDS = new kendo.data.DataSource({
 	         }
 	    },
 	    destroy: {
-	        url: "http://localhost:8080/Hunter/messageReceiver/action/group/destroy",
+	        url: baseUrl + "messageReceiver/action/group/destroy",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
@@ -330,13 +347,13 @@ var hunterUserModel = kendo.data.Model.define({
 var hunterClientDS = new kendo.data.DataSource({
 	  transport: {
 	    read:  {
-	      url: "http://localhost:8080/Hunter/client/action/read",
+	      url: baseUrl + "client/action/read",
 	      dataType: "json",
 	      contentType:"application/json",
 	      method: "POST"
 	    },
 	    create: {
-	        url: "http://localhost:8080/Hunter/client/action/create",
+	        url: baseUrl + "client/action/create",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST",
@@ -345,13 +362,13 @@ var hunterClientDS = new kendo.data.DataSource({
 	         }
 	    },
 	    update: {
-	        url: "http://localhost:8080/Hunter/client/action/update",
+	        url: baseUrl + "client/action/update",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
 	    },
 	    destroy: {
-	        url: "http://localhost:8080/Hunter/client/action/destroy",
+	        url: baseUrl + "client/action/destroy",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
@@ -420,7 +437,7 @@ var serviceProviderDS = new kendo.data.DataSource({
 	  sort: { field: "cretDate", dir: "desc" },
 	  transport: {
 	    read:  {
-	      url: "http://localhost:8080/Hunter/message/action/providers/read",
+	      url: baseUrl + "message/action/providers/read",
 	      dataType: "json",
 	      accept: "application/json",
 	      contentType:"application/json; charset=utf-8",
@@ -428,7 +445,7 @@ var serviceProviderDS = new kendo.data.DataSource({
 	      method: "POST"
 	    },
 	    create: {
-	        url: "http://localhost:8080/Hunter/message/action/providers/create",
+	        url: baseUrl + "message/action/providers/create",
 	        dataType: "json",
 	        Accept: "application/json",
 	        contentType:"application/json",
@@ -438,13 +455,13 @@ var serviceProviderDS = new kendo.data.DataSource({
 	         }
 	    },
 	    update: {
-	        url: "http://localhost:8080/Hunter/message/action/providers/update",
+	        url: baseUrl + "message/action/providers/update",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
 	    },
 	    destroy: {
-	        url: "http://localhost:8080/Hunter/message/action/providers/destroy",
+	        url: baseUrl + "message/action/providers/destroy",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
@@ -530,7 +547,7 @@ var hunterUserDS = new kendo.data.DataSource({
 	  sort: { field: "cretDate", dir: "desc" },
 	  transport: {
 	    read:  {
-	      url: "http://localhost:8080/Hunter/hunteruser/action/read/post",
+	      url: baseUrl + "hunteruser/action/read/post",
 	      dataType: "json",
 	      accept: "application/json",
 	      contentType:"application/json; charset=utf-8",
@@ -538,7 +555,7 @@ var hunterUserDS = new kendo.data.DataSource({
 	      method: "POST"
 	    },
 	    create: {
-	        url: "http://localhost:8080/Hunter/hunteruser/action/create",
+	        url: baseUrl + "hunteruser/action/create",
 	        dataType: "json",
 	        Accept: "application/json",
 	        contentType:"application/json",
@@ -548,13 +565,13 @@ var hunterUserDS = new kendo.data.DataSource({
 	         }
 	    },
 	    update: {
-	        url: "http://localhost:8080/Hunter/hunteruser/action/update",
+	        url: baseUrl + "hunteruser/action/update",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
 	    },
 	    destroy: {
-	        url: "http://localhost:8080/Hunter/hunteruser/action/destroy",
+	        url: baseUrl + "hunteruser/action/destroy",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
@@ -873,6 +890,7 @@ var hunterAdminClientUserVM = kendo.observable({
 	tabStripWidget : null,
 	taskTypeDs : null,
 	taskProcessManager : null,
+	socialProcessManager : null,
 	
 	taskRegionsOpen : true,
 	taskGroupsOpen : false,
@@ -907,6 +925,7 @@ var hunterAdminClientUserVM = kendo.observable({
 	hunterTaskHistoryGrid : null,
 	createTextMessageManager : null,
 	createSocialMessageManager : null,
+	fbProcessorInstance : null,
 	
 	
 	
@@ -940,6 +959,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		this.createTaskTypesDS();
 		this.loadExistentEmailTemplates();
 		console.log("hunterAdminClientUserVM successfully initialized!!");
+		this.sclMsgInit();
 	},
 	newGetHunterUserCheckBox : function(userId){
 		alert(userId);
@@ -951,7 +971,7 @@ var hunterAdminClientUserVM = kendo.observable({
 	    read:  {
 	      url: function(){
 	    	  var taskId = hunterAdminClientUserVM.get("selTaskId");
-	    	  var url = HunterConstants.HUNTER_BASE_URL + "/task/action/task/history/getForTask/" + taskId;
+	    	  var url = baseUrl + "task/action/task/history/getForTask/" + taskId;
 	    	  return url;
 	      },
 	      dataType: "json",
@@ -1147,7 +1167,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		}*/
 		var userIdData = {"userId":userId};
 		$.ajax({
-			url: "http://localhost:8080/Hunter/client/action/getClientForUserId",
+			url: baseUrl + "client/action/getClientForUserId",
 		      data : userIdData,
 		      method: "POST"
 		}).done(function(data) {
@@ -1211,7 +1231,7 @@ var hunterAdminClientUserVM = kendo.observable({
 	ajaxSaveClientDetails : function(clientDetails){
 		console.log("making ajax request to update client >> " + JSON.stringify(clientDetails));
 		$.ajax({
-			url: "http://localhost:8080/Hunter/client/action/editHunterClient",
+			url: baseUrl + "client/action/editHunterClient",
 		      data : clientDetails,
 		      method: "POST"
 			}).done(function(data) {
@@ -1277,12 +1297,12 @@ var hunterAdminClientUserVM = kendo.observable({
 			  pageSize: 20,
 			  transport: {
 				    read:  {
-				      url: "http://localhost:8080/Hunter/task/action/read/getTasksForClientId/" + clientId,
+				      url: baseUrl + "task/action/read/getTasksForClientId/" + clientId,
 				      dataType: "json",
 				      method: "POST"
 				    },
 				    create: {
-				        url: "http://localhost:8080/Hunter/task/action/create/createTaskForClientId",
+				        url: baseUrl + "task/action/create/createTaskForClientId",
 				        dataType: "json", 
 				        contentType:"application/json",
 				        processData : false,
@@ -1292,13 +1312,13 @@ var hunterAdminClientUserVM = kendo.observable({
 				         }
 				    },
 				    update: {
-				        url: "http://localhost:8080/Hunter/task/action/update/updateTaskForClientId",
+				        url: baseUrl + "task/action/update/updateTaskForClientId",
 				        dataType: "json", 
 				        contentType:"application/json",
 				        method:"POST"
 				    },
 				    destroy: {
-				        url: "http://localhost:8080/Hunter/task/action/destroy/destroyTaskForClientId",
+				        url: baseUrl + "task/action/destroy/destroyTaskForClientId",
 				        dataType: "json", 
 				        contentType:"application/json",
 				        method:"POST"
@@ -1432,7 +1452,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		
 	},
 	updateStatusForSelectedTask : function(keyStr){
-		var url = HunterConstants.HUNTER_BASE_URL + "/task/action/task/changeStatus";
+		var url = baseUrl + "task/action/task/changeStatus";
 		var components = keyStr.split(":::");
 		var toStatus = components[0];
 		var id = components[1];
@@ -1457,7 +1477,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		}
 	},
 	fetchUniqueCountForTaskId : function(taskId){
-		var url = HunterConstants.HUNTER_BASE_URL + "/messageReceiver/action/taskReceivers/getAllCounts/" + taskId;
+		var url = baseUrl + "messageReceiver/action/taskReceivers/getAllCounts/" + taskId;
 		kendoKipHelperInstance.ajaxPostData(null, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterFetchUniqueCountForTaskId");
 	},
 	afterFetchUniqueCountForTaskId : function(data){
@@ -1526,7 +1546,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		var selConstituencyWard = this.get("selConstituencyWard");
 		var model = {"selCountry":selCountry, "selState":selState, "selCounty":selCounty, "selConstituency" : selConstituency, "selConstituencyWard" : selConstituencyWard, "selTaskId" : selTaskId };
 		var json =  JSON.stringify(model);
-		kendoKipHelperInstance.ajaxPostData(json, "application/json", "json", "POST", HunterConstants.HUNTER_BASE_URL+"/region/action/task/regions/addTotask", "hunterAdminClientUserVM.afterSaveCurrentEditRegion"); 
+		kendoKipHelperInstance.ajaxPostData(json, "application/json", "json", "POST", baseUrl+"/region/action/task/regions/addTotask", "hunterAdminClientUserVM.afterSaveCurrentEditRegion"); 
 		console.log("Successfully added regions to task!!!");
 	},
 	afterSaveCurrentEditRegion : function(data){
@@ -1616,7 +1636,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		kendoKipHelperInstance.showWindowWithOnClose(html,"Task Process Progress");
 		kendo.ui.progress($("#processedTaskTxtMsgLoadIcon"), true);
 		setTimeout(function(){ 
-			 var url = HunterConstants.HUNTER_BASE_URL + "/message/action/tskMsg/getPrcssTxtMssgeDtls/" + id;
+			 var url = baseUrl + "message/action/tskMsg/getPrcssTxtMssgeDtls/" + id;
 			 kendoKipHelperInstance.ajaxPostDataForJsonResponseWthCllbck(null, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterFetchTaskTxtMsgDetails", "kendoKipHelperInstance.closeWindowWithOnClose");
 		 }, 500);
 		return r;
@@ -1675,7 +1695,7 @@ var hunterAdminClientUserVM = kendo.observable({
 			hunterAdminClientUserVM.showPopupForProcessedTaskSocialMsg(id);
 			return;
 		}else if((lifeStatus == "Draft" || lifeStatus == "Approved" || lifeStatus == "Review") &&  (msgType.toLowerCase() == "social") ){
-			this.get("createSocialMessageManager").execute(); 
+			hunterAdminClientUserVM.showPopupForSocialMessage();
 			return;
 		}
 		
@@ -1837,7 +1857,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		console.log("Selected task Id : " + taskId); 
 
 		$.ajax({
-			url: "http://localhost:8080/Hunter/message/action/tskMsg/create/" + taskId,
+			url: baseUrl + "message/action/tskMsg/create/" + taskId,
 		      data : data,
 		      method: "POST",
 		      contentType : "applicaiton/json",
@@ -1887,18 +1907,13 @@ var hunterAdminClientUserVM = kendo.observable({
 		$("#taskProcessWorkerContainer").html($("#taskProcessJobNoDataFoundTemplate").html());
 		 kendo.ui.progress($("#taskProcessJobLoadingIcon"), true);
 		 setTimeout(function(){ 
-			 var url = HunterConstants.HUNTER_BASE_URL + "/task/action/task/process/results/" + taskId;
+			 var url = baseUrl + "task/action/task/process/results/" + taskId;
 			 kendoKipHelperInstance.ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterFetchingTaskProcessJobResults");
 		 }, 800);
 	},
 	showPopupForProcessTask : function(taskId){
 		this.set("selTaskId", taskId);
 		var desc = this.get("hunterClientTaskGrid").dataSource.get(taskId).get("description");
-		/*
-		var model = this.get("hunterClientTaskGrid").dataSource.get(taskId);
-		var data  = JSON.stringify(model);
-		var url = "http://localhost:8080/Hunter/task/action/processTask/" + taskId;
-		kendoKipHelperInstance.ajaxPostDataForJsonResponse(data, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterProcessTask");*/
 		var html = $("#processTaskProgressPopupTemplate").html();
 		kendoKipHelperInstance.showWindowWithOnClose(html,"Task Process Progress");
 		$("#taskProcessPopupTaskName").html(desc);
@@ -1912,7 +1927,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		/*
 		var model = this.get("hunterClientTaskGrid").dataSource.get(taskId);
 		var data  = JSON.stringify(model);
-		var url = "http://localhost:8080/Hunter/task/action/processTask/" + taskId;
+		var url = baseUrl + "task/action/processTask/" + taskId;
 		kendoKipHelperInstance.ajaxPostDataForJsonResponse(data, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterProcessTask");*/
 		var html = $("#processTaskProgressPopupTemplate").html();
 		kendoKipHelperInstance.showWindowWithOnClose(html,"Task Process Progress");
@@ -1932,6 +1947,17 @@ var hunterAdminClientUserVM = kendo.observable({
 		ds.read();
 	},
 	unhideProcessTaskSection : function(){
+		
+		var
+		taskName = this.getSelectedTaskBean().get("taskName"), 
+		taskType = hunterAdminClientUserVM.getSelTaskMsgType();
+		taskId	 = this.getSelectedTaskId();
+		
+		if( taskType === 'Social' ){
+			hunterAdminClientUserVM.get("socialProcessManager").execute(taskId, taskType, taskName);
+			return;
+		} 
+		
 		$("#taskProcessPrompPopup").fadeOut(50);
 		$("#processTaskProgressPopup").closest(".k-window").animate({"top": "20%","left": "38%"},200,function(){
 			$("#processTaskProgressPopup").toggle(800,function(){
@@ -2011,7 +2037,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		var taskId = this.get("selTaskId");
 		var data = {"newOwner" : userId, "taskName" : taskName,"taskDescription" : taskDesc, "taskId" : taskId};
 		data = JSON.stringify(data);
-		var url = HunterConstants.HUNTER_BASE_URL + "/task/action/task/clone";
+		var url = baseUrl + "task/action/task/clone";
 		kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterCloneTask");
 	},
 	afterCloneTask : function(data){
@@ -2055,7 +2081,7 @@ var hunterAdminClientUserVM = kendo.observable({
 	},
 	loadCloneTaskNewUserData : function(data){
 		if(data != null && data === "LOAD_CLONE_USERS"){
-			var url = HunterConstants.HUNTER_BASE_URL + "/hunteruser/action/client/getAllClientsDetails";
+			var url = baseUrl + "hunteruser/action/client/getAllClientsDetails";
 			kendoKipHelperInstance.ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url , "hunterAdminClientUserVM.loadCloneTaskNewUserData");
 		}else{
 			data = $.parseJSON(data);
@@ -2448,12 +2474,12 @@ var hunterAdminClientUserVM = kendo.observable({
 		  transport: {
 		    read:  {
 		      url: function(){
-		    	  var baseUrl = "http://localhost:8080/Hunter/task/action/tskGrp/read/";
+		    	  var base = baseUrl + "task/action/tskGrp/read/";
 		    	  var taskid = hunterAdminClientUserVM.get("selTaskId");
 		    	  if(taskid == null){
 		    		  taskid = 0;
 		    	  }
-		    	  var url = baseUrl + taskid;
+		    	  var url = base + taskid;
 		    	  console.log("Receiver group read url for task : " + url);
 		    	  return url;
 		      },
@@ -2463,9 +2489,9 @@ var hunterAdminClientUserVM = kendo.observable({
 		    },
 		    create: {
 		        url : function(){
-			    	  var baseUrl = "http://localhost:8080/Hunter/task/action/tskGrp/create/";
+			    	  var base = baseUrl + "task/action/tskGrp/create/";
 			    	  var taskid = hunterAdminClientUserVM.get("selTaskId");
-			    	  var url = baseUrl + taskid;
+			    	  var url = base + taskid;
 			    	  console.log("Receiver group create url for task : " + url);
 			    	  return url;
 			      },
@@ -2478,9 +2504,9 @@ var hunterAdminClientUserVM = kendo.observable({
 		    },
 		    destroy: {
 		    	 url : function(){
-			    	  var baseUrl = "http://localhost:8080/Hunter/task/action/tskGrp/destroy/";
+			    	  var base = baseUrl + "task/action/tskGrp/destroy/";
 			    	  var taskid = hunterAdminClientUserVM.get("selTaskId");
-			    	  var url = baseUrl + taskid;
+			    	  var url = base + taskid;
 			    	  console.log("Receiver group destroy url for task : " + url);
 			    	  return url;
 			      },
@@ -2552,7 +2578,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		var taskId = this.get("selTaskId");
 		var selTaskGroup = this.get("taskGroupDropDownSelVal");
 		var data = [{"taskId" : taskId, "groupId" : selTaskGroup}];
-		var url = HunterConstants.HUNTER_BASE_URL + "/task/action/tskGrp/create";
+		var url = baseUrl + "task/action/tskGrp/create";
 		data = JSON.stringify(data);
 		console.log("Loading group dropdown data...");
 		kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterAddingGroupToTask");
@@ -2575,7 +2601,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		}		
 	},
 	loadGroupDropdown : function(taskId){
-		var url = HunterConstants.HUNTER_BASE_URL + "/messageReceiver/action/group/dropDown/" + taskId;
+		var url = baseUrl + "messageReceiver/action/group/dropDown/" + taskId;
 		console.log("Loading group dropdown data...");
 		kendoKipHelperInstance.ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterLoadingGroupDropdown");
 		console.log("Successfully loaded group dropdown data!!");
@@ -2594,7 +2620,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		var data = [{"taskId" : taskId, "groupId" : id}];
 		data = JSON.stringify(data);
 		$.ajax({
-			url: HunterConstants.HUNTER_BASE_URL + "/task/action/tskGrp/destroy",
+			url: baseUrl + "task/action/tskGrp/destroy",
 		    method: "POST",
 		    data : data,
 		    dataType : "json", 
@@ -2666,7 +2692,7 @@ var hunterAdminClientUserVM = kendo.observable({
         serverFiltering: true,
         transport: {
        	 read:  {
-      	      url: "http://localhost:8080/Hunter/region/action/countries/read",
+      	      url: baseUrl + "region/action/countries/read",
       	      dataType: "json",
       	      method: "POST"
        	 }
@@ -2683,7 +2709,7 @@ var hunterAdminClientUserVM = kendo.observable({
         transport: {
        	 read:  {
       	      url: function(){
-      	    	  var url =  "http://localhost:8080/Hunter/region/action/counties/read/" + hunterAdminClientUserVM.get("selCountry");
+      	    	  var url =  baseUrl + "region/action/counties/read/" + hunterAdminClientUserVM.get("selCountry");
       	    	  console.log("CountyDS URL >> " + url);
       	    	  return url;
       	      }, 
@@ -2703,7 +2729,7 @@ var hunterAdminClientUserVM = kendo.observable({
         transport: {
        	 read:  {
       	      url: function(){
-      	    	  var url = "http://localhost:8080/Hunter/region/action/constituencies/read/" + hunterAdminClientUserVM.get("selCounty");
+      	    	  var url = baseUrl + "region/action/constituencies/read/" + hunterAdminClientUserVM.get("selCounty");
       	    	  console.log("ConstituencyDS URL >> " + url);
       	    	  return url;
       	      },
@@ -2723,7 +2749,7 @@ var hunterAdminClientUserVM = kendo.observable({
         transport: {
        	 read:  {
       	      url: function(){
-      	    	  var url = "http://localhost:8080/Hunter/region/action/constituencyWards/read/" + hunterAdminClientUserVM.get("selConstituency");
+      	    	  var url = baseUrl + "region/action/constituencyWards/read/" + hunterAdminClientUserVM.get("selConstituency");
       	    	  console.log("ConstituencyWardDS URL >> " + url);
     	    	  return url;
       	      },
@@ -2843,7 +2869,7 @@ var hunterAdminClientUserVM = kendo.observable({
         transport: {
 	       	read:  {
 	      	      url: function(){
-	      	    	  var url = "http://localhost:8080/Hunter/region/action/task/regions/read/" + hunterAdminClientUserVM.getSelectedTaskId();
+	      	    	  var url = baseUrl + "region/action/task/regions/read/" + hunterAdminClientUserVM.getSelectedTaskId();
 	      	    	  console.log("Selected task region URL >> " + url);
 	    	    	  return url;
 	      	      },
@@ -2854,7 +2880,7 @@ var hunterAdminClientUserVM = kendo.observable({
 	       		url : function(){
 	       			var taskId = hunterAdminClientUserVM.getSelectedTaskId();
 	       			if(taskId == null) tskId = "0";
-	       			var url = "http://localhost:8080/Hunter/region/action/task/regions/delete/" + taskId;
+	       			var url = baseUrl + "region/action/task/regions/delete/" + taskId;
 	       			return url;
 	       		},
 	       		dataType: "json", 
@@ -2898,7 +2924,7 @@ var hunterAdminClientUserVM = kendo.observable({
 	deleteSelectedTaskRegion : function(regionId){
 		kendoKipHelperInstance.closeHelperKendoWindow();
 		var taskId = this.get("selTaskId");
-		var url = HunterConstants.HUNTER_BASE_URL+"/region/action/task/regions/delete/requestBody";
+		var url = baseUrl+"/region/action/task/regions/delete/requestBody";
 		var data = {"regionId" : regionId, "taskId" : taskId};
 		data = JSON.stringify(data);
 		kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST", url , "hunterAdminClientUserVM.afterDeleteSelectedTaskRegion");
@@ -2925,7 +2951,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		if(taskId == null) taskId = 0;
 		console.log("Loading unique count for task Id : " + taskId);
 		$.ajax({
-			url: "http://localhost:8080/Hunter/region/action/task/regions/receivers/uniqueCount/" + taskId,
+			url: baseUrl + "region/action/task/regions/receivers/uniqueCount/" + taskId,
 			dataType : "json",
 			method: "POST"
 		}).done(function(data) {
@@ -3019,7 +3045,7 @@ var hunterAdminClientUserVM = kendo.observable({
     	return name;
     },
 	loadExistentEmailTemplates : function(){
-		var url = HunterConstants.HUNTER_BASE_URL + "/message/action/tskMsg/email/getAllTemplateNames";
+		var url = baseUrl + "message/action/tskMsg/email/getAllTemplateNames";
 		kendoKipHelperInstance.ajaxPostDataForJsonResponse(null, "application/json", "json", "POST",url,"hunterAdminClientUserVM.afterFetchingAllTemplateNames" );
 	},
 	afterFetchingAllTemplateNames : function(data){
@@ -3066,7 +3092,7 @@ var hunterAdminClientUserVM = kendo.observable({
     			"emailSubject" : this.get("emailSubject")
     	};
     	data = JSON.stringify(data);
-    	var url = HunterConstants.HUNTER_BASE_URL + "/message/action/tskMsg/email/createOrUpdate";
+    	var url = baseUrl + "message/action/tskMsg/email/createOrUpdate";
     	kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST",url,"hunterAdminClientUserVM.afterSaveEmailMsgConfigs" );
     },
     afterSaveEmailMsgConfigs : function(data){
@@ -3091,7 +3117,7 @@ var hunterAdminClientUserVM = kendo.observable({
     loadForName : function(templateName){
     	this.updateTemplateNameTitle(templateName);
     	templateName = templateName.replace(/ /g, '+');
-    	var url = HunterConstants.HUNTER_BASE_URL + "/message/action/tskMsg/email/getEmailTemplateForName/" + templateName;
+    	var url = baseUrl + "message/action/tskMsg/email/getEmailTemplateForName/" + templateName;
     	$( "#allHunterEmailTemplates" ).load( url , function(data) {
     		console.log("...............................Loaded..................................................");
     		var replaced = hunterAdminClientUserVM.sanitizeString(data);
@@ -3115,7 +3141,7 @@ var hunterAdminClientUserVM = kendo.observable({
     displayAllCurrentTemplates : function(){
     	var templateName = this.getNextTemplateName();
     	templateName = templateName.replace(/ /g, '+');
-    	var url = HunterConstants.HUNTER_BASE_URL + "/message/action/tskMsg/email/getEmailTemplateForName/" + templateName;
+    	var url = baseUrl + "message/action/tskMsg/email/getEmailTemplateForName/" + templateName;
     	$( "#allHunterEmailTemplates" ).load( url , function() {
     		console.log("...............................Loaded..................................................");
     		var contents = $("#allHunterEmailTemplates").html();
@@ -3162,7 +3188,7 @@ var hunterAdminClientUserVM = kendo.observable({
     	kendoKipHelperInstance.showPopupWithNoButtons("Delete Email Confirmation", content);
     },
     reloadMessageAttachmentContainer : function(){
-    	$("#messageAttachmentsContainer").html("<img src='http://localhost:8080/Hunter/static/resources/images/refreshing_spinner_new.gif' style='margin-left:47%;margin-top:10%;' width='50px' height='50px'   />");
+    	$("#messageAttachmentsContainer").html("<img src='"+ baseUrl +"static/resources/images/refreshing_spinner_new.gif' style='margin-left:47%;margin-top:10%;' width='50px' height='50px'   />");
     	setTimeout(function(){
     		hunterAdminClientUserVM.loadMessageAttachmentsContainer();
     	}, 1500);
@@ -3276,7 +3302,7 @@ var hunterAdminClientUserVM = kendo.observable({
     },
     deleteSelectedEmailMsg : function(msgId){
     	kendoKipHelperInstance.closeHelperKendoWindow();
-    	var url = HunterConstants.HUNTER_BASE_URL + "/message/action/tskMsg/email/deleteEmail/" + this.get("selTaskId");
+    	var url = baseUrl + "message/action/tskMsg/email/deleteEmail/" + this.get("selTaskId");
     	kendoKipHelperInstance.ajaxPostData(null, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterDeletingEmailMsg");
     },
     afterDeletingEmailMsg : function(data){
@@ -3337,7 +3363,7 @@ var hunterAdminClientUserVM = kendo.observable({
     },
     refreshElemeAttributes : function(){
     	var msgId = this.getSelectedTaskBean().get("taskMessage")["msgId"]; 
-    	var url = HunterConstants.HUNTER_BASE_URL + "/message/action/email/getRefreshValues/" + msgId;
+    	var url = baseUrl + "message/action/email/getRefreshValues/" + msgId;
     	kendoKipHelperInstance.ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterGettingRefreshValues");
     },
     afterGettingRefreshValues : function(data){
@@ -3389,7 +3415,514 @@ var hunterAdminClientUserVM = kendo.observable({
     validateSubject : function(){
     	var subject = this.get("emailSubject");
     	return subject != null && subject.length > 0;
-    }
+    },
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /* :::::::::::::::::::::::::::::::::        THIS PARRT IS FOR SOCIAL MESSAGE ONLY          ::::::::::::::::::::::::::::::::::::::::: */
+    
+    currentProcessJobId : null,
+    backupRemoteURL : null,
+    isVisible : true,
+    isSocialMsgPrevOpen : true,
+	selMsgSocialGroupDS : new kendo.data.DataSource({
+		schema: {
+		    model: SocialGroupModel
+		},
+		transport : {
+			read:  {
+				 url: function(){
+			    	  var 
+			    	  selMsgId = hunterAdminClientUserVM.get("selSocialMsgId") == null ? "0" : hunterAdminClientUserVM.get("selSocialMsgId")+"",
+			    	  url = HunterConstants.getHunterBaseURL("social/action/msg/selGroups/read/" + selMsgId);
+			    	  console.log( url );
+			    	  return url;
+			      },
+			      data : function(){
+			    	if( hunterAdminClientUserVM != null ){
+			    		var array = hunterAdminClientUserVM.get("selSocialMsgBean").hunterSocialGroupsIds;
+			    		 return {"groupIds" : JSON.stringify(array)};
+			    	}
+			    	return null;
+			      },
+			      dataType: "json",
+			      contentType:"application/json",
+			      method: "POST"
+			}
+		}
+	}),
+	isVisible : true,
+	
+	selSocialMsgBean	: 
+	{
+		externalId			 : null,
+		socialMsgId 		  : null, 
+		mediaType			  : null,
+		socialPostType		  : null,
+		hunterSocialGroupsIds : [],
+		description			  : null,
+		socialPost			  : null,
+		originalFileFormat 	  : null,
+		socialMediaId		  : null,
+		defaultSocialAppId	  : null,
+		remoteURL			  : null,
+		useRemoteMedia		  : null
+	},
+	
+	medialTypes		: HunterConstants.SOCIAL_MEDIA_TYPS_ARRAY,
+	socialPostTypes : HunterConstants.SOCIAL_POST_ARRAY,
+	
+	selectedSocialGroups 	  : [],
+	socialApps				  : [],
+	postActionTypes			  : 
+		   [
+		      {	text:"Post To Group", 	 value:"Post To Group"},
+	          {	text:"Post As Group", 	 value:"Post As Group"},
+	          {	text:"Post To Timeline", value:"Post To Timeline"}
+	       ],
+	availableSocialGroupsGrid : null,
+	
+	showPopupForSocialMessage : function(){
+		
+		this.resetSocialMessage();
+		
+		var 
+		taskId 	= this.get("selTaskId"),
+		task 	= this.getSelectedTaskBean(),
+		message = task.get("taskMessage"),
+		content = $("#createSocialMessagePopupTemplate").html(),
+		groupIds = hunterAdminClientUserVM.extrctSelSclMsgSclGrpsIds(message);
+
+		this.get("selSocialMsgBean").socialMsgId  = taskId;
+		this.set("selSocialMsgId",taskId);
+		
+		if( message != null ){
+			var sclMsgTemp = 
+			{
+				externalId			  : message.externalId,
+				socialMsgId 		  : message.socialMsgId, 
+				mediaType			  : message.mediaType,
+				socialPostType		  : message.socialPostType,
+				hunterSocialGroupsIds : groupIds,
+				description			  : message.description,
+				socialPost			  : message.socialPost,
+				originalFileFormat 	  : message.originalFileFormat,
+				socialMediaId		  : message.socialMediaId,
+				socialPostAction	  : message.socialPostAction,
+				useRemoteMedia		  : message.useRemoteMedia,
+				remoteURL			  : message.socialMedia != null ? message.socialMedia.remoteURL : null,
+				defaultSocialAppId	  : message == null ? null : message.defaultSocialApp == null ? null : message.defaultSocialApp.appId
+			};
+			this.set("selSocialMsgBean", sclMsgTemp);
+		}
+		
+		kendoKipHelperInstance.showWindowWithOnClose(content, "Social Message");
+		kendo.bind($("#createNewSocialMessageContainer"), hunterAdminClientUserVM);
+		this.loadSocialMessageMedia();
+		
+	},
+	saveRemoteURLAndPreview : function(){
+		var 
+		selBean = this.get("selSocialMsgBean"),
+		isRemote = selBean.useRemoteMedia;
+		url = this.get("selSocialMsgBean").remoteURL;
+		if( url == null || url.trim() === '' ){
+			kendoKipHelperInstance.showErrorNotification('Remote url is required!!');
+			$("#createMediaFromURL").css({'background-color':'#FFC0CD'}); 
+			return;
+		}else{
+			$("#createMediaFromURL").css({'background-color':'#FFFFFF'});
+		}
+		
+		if( isRemote && url !== this.get("backupRemoteURL") ){
+			alert( "It's different, will set useRemoteURL " );
+			selBean.useRemoteMedia 	= true;
+		}
+		
+		this.prepareStageForTemplate("crtsSclMsgPreviewImage");
+		$("#createSclMsgImgPreviewImg").attr('src', url);
+	},
+	loadSocialMessageMedia : function(){
+		var url = HunterConstants.getHunterBaseURL("social/action/msg/getSclMsgMediaURL/" + this.get("selSocialMsgId") );
+		kendoKipHelperInstance.ajaxPostData(null, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterLoadingSocialMessageMedia");
+	},
+	afterLoadingSocialMessageMedia : function(data){
+		
+		data = $.parseJSON(data);
+		
+		var 
+		src     = data["src"],
+		status  = data["status"],
+		message = data["message"];
+		
+		if( status == null || ( status === 'Failed' && message === 'No Image Found' ) ){
+			this.sclMsgLoadMediaDecide();
+			this.set("isSocialMsgPrevOpen", false);
+		}else{
+			this.get("selSocialMsgBean").remoteURL = src;
+			this.sclMsgLoadImagePreview();
+			this.set("isSocialMsgPrevOpen", true);
+		}
+		
+	},
+	cleanSclMsgStagingArea : function(){
+		var stage = $("#sclMsgSocialMediaStagingArea");
+		kendo.destroy(stage);
+		stage.html('');
+	},
+	sclMsgLoadMediaDecide : function(){
+		this.prepareStageForTemplate("crtsSclMsgDecideTemplate");
+	},
+	sclMsgLoadImagePreview : function(){
+		var url = this.get("selSocialMsgBean").remoteURL;
+		if( url == null || url.trim() === '' ){
+			kendoKipHelperInstance.showErrorNotification('No image created. Please create!');
+			this.sclMsgLoadMediaDecide();
+		}else{
+			this.prepareStageForTemplate("crtsSclMsgPreviewImage");
+			$("#createSclMsgImgPreviewImg").attr("src", url);
+		}
+	},
+	prepareStageForTemplate : function(tempName){
+		this.cleanSclMsgStagingArea();
+		var html = $("#"+tempName).html();
+		$("#sclMsgSocialMediaStagingArea").html( html );
+		kendo.bind( $("#sclMsgSocialMediaStagingArea"), hunterAdminClientUserVM );
+	},
+	extrctSelSclMsgSclGrpsIds : function(messageBean){
+		
+		if( messageBean == null ) return [];
+		
+		var 
+		sclGrpJson 		= messageBean.hunterSocialGroups,
+		sclGrpIdsArray 	= [];
+		if( sclGrpJson != null && sclGrpJson.length > 0 ){
+			var len = sclGrpJson.length;
+			for(var i=0; i<len ; i++){
+				var 
+				socialGroup = sclGrpJson[i],
+				groupId = socialGroup["groupId"];
+				sclGrpIdsArray.push(groupId);
+			}
+		}
+		hunterAdminClientUserVM.set("selectedSocialGroups", sclGrpIdsArray);
+		return sclGrpIdsArray;
+	},
+	submitSocialMsgChanges : function(){
+		kendo.ui.progress($("#createNewSocialMessageContainer"), true);
+		setTimeout(function(){
+			var bean = hunterAdminClientUserVM.get("selSocialMsgBean");
+			bean.socialMsgId = hunterAdminClientUserVM.get("selTaskId");
+			var
+			data = JSON.stringify(bean);
+			url  = HunterConstants.getHunterBaseURL("message/action/tskMsg/social/createOrUpdateSocialMsg");
+			kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterSubmittingSocialMsgChanges");
+		}, 1000);
+	},
+	afterSubmittingSocialMsgChanges : function(data){
+		this.closeCreateSocialMsgWindow();
+		data = jQuery.parseJSON(data);
+		var status = data["status"];
+		var message = data["message"];
+		if(status == "Failed"){
+			message = replaceAll(message, ",", "</br>");  
+			kendoKipHelperInstance.showErrorNotification(message);
+		}else if(status === "Success"){ 
+			kendoKipHelperInstance.showSuccessNotification(message);
+			var ds = hunterAdminClientUserVM.get("hunterClientTaskGrid").dataSource;
+			ds.read();
+		}
+	},
+	addSelSclGrpsToSclMsg : function(){
+		this.get("selSocialMsgBean").hunterSocialGroupsIds = this.get("selectedSocialGroups"); 
+		this.closeAvailableSocialGroups();
+	},
+	submitSelSclGrps : function(){
+		alert(JSON.stringify(addedGroups));
+	},
+	resetSocialMessage : function(){
+		var sclMsgReset = 
+		{
+			externalId			 : null,
+			socialMsgId 		  : null, 
+			mediaType			  : null,
+			socialPostType		  : null,
+			hunterSocialGroupsIds : [],
+			description			  : null,
+			socialPost			  : null,
+			originalFileFormat 	  : null,
+			socialMediaId		  : null,
+			defaultSocialAppId	  : null,
+			socialPostAction	  : null,
+			remoteURL			  : null,
+			useRemoteMedia		  : false
+		};
+		this.set("selSocialMsgBean", sclMsgReset);
+	},
+	addToSelectedSocialGroups : function(groupId){
+		var 
+		array 	  = hunterAdminClientUserVM.get("selectedSocialGroups"),
+		tempArray = [];
+		found	  = false;
+		
+		if( array.length == 0 ){
+			tempArray.push(groupId);
+		}else{
+			for(var i=0; i<array.length; i++){
+				var id = array[i];
+				if( id+"" !== groupId+"" ){
+					tempArray.push(id);
+				}else{
+					found = true;
+				}
+			}
+			if( !found ){
+				tempArray.push(groupId);
+			}
+		}
+		hunterAdminClientUserVM.set("selectedSocialGroups",  tempArray );
+	},
+	sclMsgInit : function(){
+		this.sclMsgAfterInit();
+	},
+	sclMsgAfterInit : function(){
+		this.loadSocialApps();
+	},
+	loadSocialApps : function(){
+		var url = HunterConstants.getHunterBaseURL("social/action/apps/dropdowns");
+		kendoKipHelperInstance.ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterGettingSocialApps");
+	},
+	afterGettingSocialApps : function(data){
+		data = $.parseJSON(data);
+		hunterAdminClientUserVM.set("socialApps", data);
+	},
+	onMouseOverAddSocialGroup : function(){
+		$("#createSocialMsgAddSocialGroups").css({"background-color":"#CEECF2"});
+	},
+	onMouseOutAddSocialGroup : function(){
+		$("#createSocialMsgAddSocialGroups").css({"background-color":"#D9F4F9"});
+	},
+	closeAvailableSocialGroups : function(){
+		$("#selSocialGroupGrid").removeClass("hidden");
+		$("#sclMsgAvailableSclGrps").addClass("hidden");
+		this.get("selMsgSocialGroupDS").read();
+	},
+	onClickRemoveSocialGrp : function(id){
+		var delete_ = confirm("Are you sure you want to delete?");
+		var selGroups = hunterAdminClientUserVM.get("selSocialMsgBean").hunterSocialGroupsIds;
+		var index = selGroups.indexOf(id);
+		selGroups.splice( index, 1 );
+		if( delete_ ){
+			var 
+			data = JSON.stringify({"groupId":id, "messageId" : hunterAdminClientUserVM.get("selSocialMsgId")});
+			url	 = HunterConstants.getHunterBaseURL("social/action/msg/removeSocialGrp");
+			kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterRemovingSocialGroupFromMsg");
+		}else{
+			console.log("Exiting...");
+		}
+	},
+	afterRemovingSocialGroupFromMsg : function(data){
+		data = jQuery.parseJSON(data);
+		var status = data["status"];
+		var message = data["message"];
+		if(status == "Failed"){
+			message = replaceAll(message, ",", "</br>");  
+			alert(message);
+		}else if(status === "Success"){
+			console.log(message);
+			$("#selSocialGroupGrid").data("kendoGrid").dataSource.read();
+			$("#sclMsgAvailableSclGrps").data("kendoGrid").dataSource.read();
+		}
+	},
+	showAvailableSocialGroups : function(){
+		
+		$("#selSocialGroupGrid").addClass("hidden");
+		$("#sclMsgAvailableSclGrps").removeClass("hidden");
+		
+		var grid_ = this.get("availableSocialGroupsGrid");
+		
+		if( grid_ != null ){
+			kendo.destroy($("#sclMsgavailableGrpsGrid"));
+			$("#sclMsgavailableGrpsGrid").html("");
+		}
+		
+		
+		
+		var grid = $("#sclMsgavailableGrpsGrid").kendoGrid({
+			dataSource : new kendo.data.DataSource({
+				schema: {
+				    model: SocialGroupModel
+				},
+				transport : {
+					read:  {
+					      url: function(){
+					    	  selMsgId = hunterAdminClientUserVM.get("selSocialMsgId") == null ? "0" : hunterAdminClientUserVM.get("selSocialMsgId")+"",
+					    	  url = HunterConstants.getHunterBaseURL("social/action/msg/availGroups/read/" + selMsgId);
+					    	  console.log( url );
+					    	  return url;
+					      },
+					      data : function(){
+					    	if( hunterAdminClientUserVM != null ){
+					    		var array = hunterAdminClientUserVM.get("selSocialMsgBean").hunterSocialGroupsIds;
+					    		 return {"groupIds" : JSON.stringify(array)};
+					    	}
+					    	return null;
+					      },
+					      dataType: "json",
+					      contentType:"application/json",
+					      method: "POST"
+					}
+				}
+			}),
+			toolbar : kendo.template($("#availSclGrpsToolBar").html()),
+			height: 380,
+			pageable: {
+                refresh: true,
+                pageSizes: true,
+                buttonCount: 5
+            },
+            columns: 
+                [
+					 { 
+						 'field':'','title':'',
+	            		  headerTemplate: '<label>Select</label>', 
+	            		  template: '<center><input onClick="hunterAdminClientUserVM.addToSelectedSocialGroups(#=groupId#)" type="checkbox"  /></center>', 'width':'70px' 
+					 },
+	                {
+	                    field: "groupName",
+	                    title: "Group Name"
+	                },
+	                {
+	                    field: "status",
+	                    title: "Status"
+	                }, 
+	                {
+	                    field: "socialType",
+	                    title: "Social Type"
+	                }
+                ]
+		}).data("kendoGrid"); 
+		this.set("availableSocialGroupsGrid", grid);
+	},
+	onSelectSocialMsgUpload : function(){
+		console.log("Social msg upload selected");
+	},
+	onCompleteSocialMsgUpload : function(){
+		console.log("Completed upload!"); 
+		hunterAdminClientUserVM.get("selSocialMsgBean").useRemoteMedia = false;
+	},
+	onErrorSocialMsgUpload : function(e){
+		console.log("Error occurred!");
+		hunterAdminClientUserVM.get("selSocialMsgBean").useRemoteMedia = false;
+	},
+	onSuccessSocialMsgUpload : function(e){
+		console.log("Success upload!");
+		this.get("selSocialMsgBean").useRemoteMedia = false;
+		this.loadSocialMessageMedia();
+	},
+	deleteSelectedImg : function(){
+		var 
+		selMsg = this.getSelectedTaskId(),
+		url	   = HunterConstants.getHunterBaseURL("social/action/msg/deleteImg"),
+		data   = JSON.stringify({"selMsg":selMsg});
+		kendo.ui.progress($("#createNewSocialMessageContainer"), true);
+		kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterDeletingSelImg");
+	},
+	afterDeletingSelImg : function(data){
+		kendo.ui.progress($("#createNewSocialMessageContainer"), false);
+		data = jQuery.parseJSON(data);
+		var status = data["status"];
+		var message = data["message"];
+		if(status == "Failed"){
+			message = replaceAll(message, ",", "</br>");  
+			kendoKipHelperInstance.showSimplePopup("Error deleting selected image!","<span style='color:red;' >" + message + "</span>");
+		}else if(status === "Success"){ 
+			kendoKipHelperInstance.showSuccessNotification("Successfully deleted selected media!");
+			hunterAdminClientUserVM.loadSocialMessageMedia();
+			var tskGridDs = this.get("hunterClientTaskGrid").dataSource;
+			tskGridDs.read();
+		}
+	},
+	closeCreateSclMediaOptions : function(){
+		$('#createImageFromURLDiv').addClass('hidden');
+		$('#socialPostUploadImageDiv').addClass('hidden');
+		$("#createSclMsgImgPreview").removeClass('hidden');
+		$("#dcdHwTCrtSclMsgMda").addClass('hidden');
+	},
+	openCreateSclmediaOption : function(){
+		this.sclMsgLoadMediaDecide();
+	},
+	openOrCloseSocialMsgPrev : function(){
+		var isOpen = this.get("isSocialMsgPrevOpen");
+		if( isOpen ){
+			this.set("isSocialMsgPrevOpen", false);
+			this.sclMsgLoadMediaDecide();
+			$("#imageSceneLable").text("Preview Image");
+		}else{
+			this.sclMsgLoadImagePreview();
+			this.set("isSocialMsgPrevOpen", true);
+			$("#imageSceneLable").text("Upload Image");
+			
+		}
+	},
+	showHowToCreateMedia : function(this_){
+		var valName = $(this_).attr('data-value');
+		if( valName === 'uploadImage' ){
+			this.prepareStageForTemplate("crtsSclMsgUploadTemplate");
+		}else{
+			var backupURL = this.get("selSocialMsgBean").remoteURL;
+			this.set("backupRemoteURL",backupURL);
+			this.prepareStageForTemplate("crtsSclMsgFromURLTemplate");
+		}
+	},
+	readURL : function (input) {
+		var 
+		target=$("#createSclMsgImgPreviewImg");
+		
+		if (input.files && input.files[0]) {
+	        var reader = new FileReader();
+	        reader.onload = function (e) {
+	            $( target ).attr('src', e.target.result);
+	        };
+	        reader.readAsDataURL(input.files[0]);
+	    }
+	},
+	closeCreateSocialMsgWindow : function(){
+		this.resetSocialMessage();
+		kendoKipHelperInstance.closeWindowWithOnClose();
+	}
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 	
 	
 });
@@ -3397,6 +3930,8 @@ var hunterAdminClientUserVM = kendo.observable({
 
 
 
-
+function getSocialMsToolBarTemplate(){
+	return '<button onClick="hunterAdminClientUserVM.showAvailableSocialGroups()" style="float:left;background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);" class="k-button" ><span class="k-icon k-i-plus" ></span>Add Social Group</button>';
+}
 
 

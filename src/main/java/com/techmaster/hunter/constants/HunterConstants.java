@@ -10,6 +10,8 @@ public class HunterConstants {
 	public static final String HUNTER_ADMIN_PSSWRD = "hunterAdmin.1900";
 	public static final String HUNTER_ADMIN_EMAIL_USER_NAM = "techmaster.hunter.mail@gmail.com";
 	public static final String HUNTER_ADMIN_EMAIL_PSSWRD = "hunter.admin.1900";
+	public static final String HUNTER_TWITTER_PSSWRD = "techmaster.hunter.admin.1990";
+	public static final String HUNTER_FB_PSSWRD = "techmaster.hunter.admin.1990";
 	public static final String HUNTER_SYSTEM_USER_NAME = "hunterSystem";
 	
 	// Methods
@@ -276,6 +278,12 @@ public class HunterConstants {
 	public static final String SOCIAL_POST_TYPE_IMAGE = "Post Image";
 	public static final String SOCIAL_POST_TYPE_VIDEO = "Post Video";
 	public static final String SOCIAL_POST_TYPE_AUDIO = "Post Audio";
+	
+	public static final String SOCIAL_POST_ACTION_TO_GROUP 	  = "Post To Group";
+	public static final String SOCIAL_POST_ACTION_AS_GROUP 	  = "Post As Group";
+	public static final String SOCIAL_POST_ACTION_TO_TIMELINE = "Post To Timeline";
+	
+	public static final String SOCIAL_MEDIA_IN_USER_SESSION = "socialMediaInUserSession";
 	
 }
 

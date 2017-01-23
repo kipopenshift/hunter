@@ -40,7 +40,28 @@
  	.button{
  		
  	}
+ 	#spinnerTable{
+ 		font-size:16px;
+ 		margin-top:20%;
+ 		margin-left:auto;
+ 		margin-right:auto;
+ 	}
  </style>
+ 
+ <script type="text/javascript">
+    var 
+    baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/",
+    spinnerUrl = baseUrl + "static/resources/images/refreshing_spinner_new.gif";
+ 	$("document").ready(function(){
+ 		$("#loginSpinnerImg").attr('src', spinnerUrl);
+ 		$("#hunterLoginForm").bind("submit", function(){
+ 			$(".errorBlock").css({'display':'none'});
+ 			$("#loginCover").css({'display':'none'});
+ 			$("#spinnerTable").css({'display':''}); 
+ 		});
+ 	});
+ 	
+ </script>
  
  </head>
  <body>
@@ -52,7 +73,7 @@
 		</div>
 	</c:if>
  
-<div id="loginCover">
+<div id="loginCover" >
 	
 	<form id="hunterLoginForm" method="POST" action="<c:url value='${pageContext.request.contextPath}/j_spring_security_check'/>" >
 		<table>
@@ -77,6 +98,14 @@
 	</form>
 	
 </div>
+
+	<table id="spinnerTable" style="display:none;" >
+		<tr>
+			<td style="font-size:16px;" >Please wait...</td>
+			<td><img id="loginSpinnerImg" width="30px" height="30px" src=""></td>
+		</tr>
+	</table>
+
 
 </body>
 </html>

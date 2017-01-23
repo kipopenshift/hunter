@@ -1,4 +1,6 @@
  
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
+
 var hunterUserAddressesModel = kendo.data.Model.define({
 	id:"id",
 	fields : {
@@ -156,7 +158,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		var userId = this.get("selUserId");
 		var data = {"userId" : userId, "userRoleId":id};
 		data = JSON.stringify(data);
-		var url = HunterConstants.HUNTER_BASE_URL + "/admin/action/user/roles/remove";
+		var url = baseUrl + "/admin/action/user/roles/remove";
 		kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterDeletingUserRoleFromUser");
 	},
 	afterDeletingUserRoleFromUser : function(data){
@@ -208,7 +210,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		var data = {"userId" : this.get("selUserId"), "userRoleId" : value};
 		data = JSON.stringify(data);
 		console.log(data);
-		var url = HunterConstants.HUNTER_BASE_URL + "/admin/action/user/roles/add";
+		var url = baseUrl + "/admin/action/user/roles/add";
 		kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterAddingRoleToUser");
 	},
 	afterAddingRoleToUser : function(data){
@@ -231,7 +233,7 @@ var hunterAdminClientUserVM = kendo.observable({
 	fetchSelUserRoles : function(){
 		var selUserId = this.get("selUserId"); 
 		selUserId = selUserId == null ? "0" : selUserId;
-		var url = HunterConstants.HUNTER_BASE_URL + "/admin/action/user/roles/get/" + selUserId;
+		var url = baseUrl + "/admin/action/user/roles/get/" + selUserId;
 		kendoKipHelperInstance.ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterFetchingSelectedUserRoles");
 	},
 	afterFetchingSelectedUserRoles : function(data){
@@ -251,7 +253,7 @@ var hunterAdminClientUserVM = kendo.observable({
 		return html;
 	},
 	populateUserRoles : function(){
-		var url = HunterConstants.HUNTER_BASE_URL + "/admin/action/user/roles/getAll";
+		var url = baseUrl + "/admin/action/user/roles/getAll";
 		kendoKipHelperInstance.ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterFetchingAllUserRoles");
 	},
 	afterFetchingAllUserRoles : function(data){
@@ -298,7 +300,7 @@ var hunterAdminClientUserVM = kendo.observable({
 	ajaxDeleteSelectedUser : function(id){
 		console.log(id);
 		kendoKipHelperInstance.closeHelperKendoWindow();
-		var url = HunterConstants.HUNTER_BASE_URL + "/admin/action/user/destroy";
+		var url = baseUrl + "/admin/action/user/destroy";
 		var data = {"userId" : id};
 		data = JSON.stringify(data);
 		kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST", url, "hunterAdminClientUserVM.afterDeletingSelectedUser");
@@ -318,25 +320,25 @@ var hunterAdminClientUserVM = kendo.observable({
 	hunterUserDS : new kendo.data.DataSource({
 		  transport: {
 		    read:  {
-		      url: "http://localhost:8080/Hunter/admin/action/user/read",
+		      url: baseUrl + "admin/action/user/read",
 		      dataType: "json",
 		      contentType:"application/json",
 		      method: "POST"
 		    },
 		    create: {
-		        url: "http://localhost:8080/Hunter/admin/action/user/create",
+		        url: baseUrl + "admin/action/user/create",
 		        dataType: "json", 
 		        contentType:"application/json",
 		        method:"POST"
 		    },
 		    update: {
-		        url: "http://localhost:8080/Hunter/admin/action/user/update",
+		        url: baseUrl + "admin/action/user/update",
 		        dataType: "json", 
 		        contentType:"application/json",
 		        method:"POST"
 		    },
 		    destroy: {
-		        url: "http://localhost:8080/Hunter/admin/action/user/destroy",
+		        url: baseUrl + "admin/action/user/destroy",
 		        dataType: "json", 
 		        contentType:"application/json",
 		        method:"POST"

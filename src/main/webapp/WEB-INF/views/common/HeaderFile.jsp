@@ -103,7 +103,7 @@ function registerNavigation(parent, child){
 		}
 
 		function navigate(url){
-			window.location.href = HunterConstants.HUNTER_BASE_URL + url;
+			window.location.href = baseUrl + url;
 		}
 		
 	});

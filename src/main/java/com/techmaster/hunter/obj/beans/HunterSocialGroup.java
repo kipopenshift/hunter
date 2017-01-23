@@ -1,5 +1,6 @@
 package com.techmaster.hunter.obj.beans;
 
+import java.sql.Blob;
 import java.util.Date;
 
 import com.techmaster.hunter.constants.HunterConstants;
@@ -26,8 +27,11 @@ public class HunterSocialGroup {
 	private boolean active;
 	private boolean suspended;
 	private String suspensionDescription;
+	private String delStatus = HunterConstants.STATUS_CONCEPTUAL;
+	private Blob processData;
 	
 	private HunterSocialRegion socialRegion;
+	private HunterSocialApp defaultSocialApp;
 	
 	public String getStatus() {
 		return status;
@@ -59,7 +63,6 @@ public class HunterSocialGroup {
 	public void setSuspensionDescription(String suspensionDescription) {
 		this.suspensionDescription = suspensionDescription;
 	}
-
 	public Long getGroupId() {
 		return groupId;
 	}
@@ -151,7 +154,24 @@ public class HunterSocialGroup {
 	public void setAcquiredFromFullName(String acquiredFromFullName) {
 		this.acquiredFromFullName = acquiredFromFullName;
 	}
-	
+	public HunterSocialApp getDefaultSocialApp() {
+		return defaultSocialApp;
+	}
+	public void setDefaultSocialApp(HunterSocialApp defaultSocialApp) {
+		this.defaultSocialApp = defaultSocialApp;
+	}
+	public String getDelStatus() {
+		return delStatus;
+	}
+	public void setDelStatus(String delStatus) {
+		this.delStatus = delStatus;
+	}
+	public Blob getProcessData() {
+		return processData;
+	}
+	public void setProcessData(Blob processData) {
+		this.processData = processData;
+	}
 	
 	@Override
 	public int hashCode() {
@@ -212,9 +232,12 @@ public class HunterSocialGroup {
 				+ ", auditInfo=" + auditInfo + ", active=" + active
 				+ ", suspended=" + suspended + ", status=" + status
 				+ ", externalId=" + externalId
-				+ ", existent=" + existent 
+				+ ", existent=" + existent
+				+ ", delStatus=" + delStatus 
+				+ ", processData=" + HunterUtility.getBlobStr(processData)  
 				+ ", verifiedBy=" + verifiedBy
-				+ ", acquired=" + acquired 
+				+ ", acquired=" + acquired
+				+ ", defaultSocialApp=" + defaultSocialApp 
 				+ ", verifiedDate=" + HunterUtility.formatDate(verifiedDate, HunterConstants.DATE_FORMAT_STRING)
 				+ ", suspensionDescription=" + suspensionDescription + "]";
 	}

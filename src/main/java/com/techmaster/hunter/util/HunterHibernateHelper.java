@@ -42,6 +42,11 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		}
 	}
 	
+	public static Session getSession(){
+		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		return sessionFactory.openSession();
+	}
+	
 	public static void rollBack(Transaction trans){
 		if(trans != null && trans.isActive())
 			trans.rollback();

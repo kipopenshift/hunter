@@ -338,7 +338,7 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 
 	@Override
 	public String getBase64PhotoForUser(String userName) {
-		HunterUser user = HunterDaoFactory.getInstance().getDaoObject(HunterUserDao.class).getUserByUserName(userName);
+		HunterUser user = HunterDaoFactory.getObject(HunterUserDao.class).getUserByUserName(userName);
 		Blob userPhoto = user.getUserProfPhoto() != null ? user.getUserProfPhoto().getPhotoBlob() : null;
 		byte[] bytes = null;
 		
@@ -420,8 +420,8 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 	public List<HunterMessageReceiver> createHntrMsgReceiversForRawReceivers(String rawReceiverIds, AuditInfo auditInfo) {
 		
 		List<HunterMessageReceiver> hunterMessageReceivers = new ArrayList<>();
-		HunterMessageReceiverDao msgReceiverDao = HunterDaoFactory.getInstance().getDaoObject(HunterMessageReceiverDao.class);
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterMessageReceiverDao msgReceiverDao = HunterDaoFactory.getObject(HunterMessageReceiverDao.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		Map<String,Object> params = new HashMap<>();
 		params.put(":receiverIds", rawReceiverIds);
 		String query = hunterJDBCExecutor.getReplacedAllColonedParamsQuery("getJoinedHntrMsgRcvrsAndRawRcvrs", params);

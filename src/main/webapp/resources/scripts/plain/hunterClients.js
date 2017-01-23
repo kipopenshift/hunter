@@ -1,6 +1,7 @@
 
 var kendoKipHelperInstance = null;
 registerNavigation("My Hunter", "Hunter Clients"); 
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
 
 var hunterClientsModel = kendo.data.Model.define({
 	id:"clientId",
@@ -82,7 +83,7 @@ var hunterClientVM = kendo.observable({
 		var userId = this.get("selUserId");
 		var data = {"userId" : userId, "userRoleId":id};
 		data = JSON.stringify(data);
-		var url = HunterConstants.HUNTER_BASE_URL + "/admin/action/clients/delete";
+		var url = baseUrl + "/admin/action/clients/delete";
 		kendoKipHelperInstance.ajaxPostData(data, "application/json", "json", "POST", url, "hunterClientVM.afterDeleteHunterClient");
 	},
 	afterDeleteHunterClient : function(data){
@@ -99,25 +100,25 @@ var hunterClientVM = kendo.observable({
 	hunterClientsDS : new kendo.data.DataSource({
 		  transport: {
 		    read:  {
-		      url: "http://localhost:8080/Hunter/admin/action/clients/read",
+		      url: baseUrl + "admin/action/clients/read",
 		      dataType: "json",
 		      contentType:"application/json",
 		      method: "POST"
 		    },
 		    create: {
-		        url: "http://localhost:8080/Hunter/admin/action/clients/create",
+		        url: baseUrl + "admin/action/clients/create",
 		        dataType: "json", 
 		        contentType:"application/json",
 		        method:"POST"
 		    },
 		    update: {
-		        url: "http://localhost:8080/Hunter/admin/action/clients/update",
+		        url: baseUrl + "admin/action/clients/update",
 		        dataType: "json", 
 		        contentType:"application/json",
 		        method:"POST"
 		    },
 		    destroy: {
-		        url: "http://localhost:8080/Hunter/admin/action/clients/destroy",
+		        url: baseUrl + "admin/action/clients/destroy",
 		        dataType: "json", 
 		        contentType:"application/json",
 		        method:"POST"

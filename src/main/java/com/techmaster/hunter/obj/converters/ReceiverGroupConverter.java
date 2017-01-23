@@ -61,7 +61,7 @@ public class ReceiverGroupConverter {
 	public List<ReceiverGroupJson> getAllReceiverGroupJsons(){
 		logger.debug("Retrieving all receiver group details..."); 
 		List<ReceiverGroupJson> receiverGroups = new ArrayList<>();
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		String query = hunterJDBCExecutor.getQueryForSqlId("getAllGroupsDetails");
 		logger.debug("Executing query : " + query); 
 		List<Map<String, Object>>  rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, null);

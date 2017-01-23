@@ -205,3 +205,44 @@ body{
 	height:10px;
 }
 
+.socialMessageErrorMsgs {
+	height:30px;
+	border-bottom:1px solid #BAD4DB;;
+	color:#C40000;
+	font-family:Courier New, Courier, New Times Roman, sans serif;
+	font-size:16px;
+}
+
+.processSocialTskHeader {
+	text-align:left;
+	margin:0px;
+	color:#00040E;
+	font-size: 20px;
+	border-bottom:2px solid #BFDBE5;
+	font-weight: bold;
+	border-collapse: collapse;
+	background-color: #D7E9F2;
+	height:35px;
+}
+
+#processSocialGroupTable tbody td{
+	border-collapse: collapse;
+	border-bottom:1px solid #D2ECF2;
+}
+
+
+.sclMsgMediaMeans{
+  background-color:rgb(232,243,250);
+  width:94%;
+  height:40px;
+  border-radius:5px;
+  display:block;
+  padding-top:18px;
+  font-size:18px;
+  text-align:center;
+  border:1px solid rgb(192,209,220);
+  margin:auto;
+}
+.sclMsgMediaMeans:hover{
+  background-color : rgb(193, 231, 242);
+}

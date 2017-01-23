@@ -64,7 +64,7 @@ public class TaskScheduledUpdaterJob extends TimerTask {
 				taskStatus = HunterConstants.STATUS_FAILED;
 			}
 			logger.debug("Updating task delivery status : " + taskStatus);
-			TaskDao taskDao = HunterDaoFactory.getInstance().getDaoObject(TaskDao.class);
+			TaskDao taskDao = HunterDaoFactory.getObject(TaskDao.class);
 			taskDao.updateTaskStatus(taskId, HunterConstants.STATUS_PROCESSED, auditInfo.getLastUpdatedBy());
 			taskDao.updateTaskDelStatus(taskId, taskStatus, auditInfo.getLastUpdatedBy());
 			logger.debug("Canceling timer...");
@@ -88,7 +88,7 @@ public class TaskScheduledUpdaterJob extends TimerTask {
 		List<Object> values = new ArrayList<>();
 		values.add(taskId);
 		logger.debug("Executing query : " + query); 
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		Map<Integer, List<Object>> rowMapList = hunterJDBCExecutor.executeQueryRowList(query, values);
 		String msgType = null;
 		if (rowMapList != null && !rowMapList.isEmpty()) {

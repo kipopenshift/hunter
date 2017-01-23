@@ -123,7 +123,7 @@ public class UserRoleDaoImpl implements UserRoleDao{
 		logger.debug("Validating deletion of the userRole : " + userRole);
 		// No user should be using this role.
 		// No role should be deleted if it's used to validate task events.
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		String query = hunterJDBCExecutor.getQueryForSqlId("getAllUsersWithRoleId");
 		List<Object> values = new ArrayList<>();
 		values.add(userRole.getRoleId());

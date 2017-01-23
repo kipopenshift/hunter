@@ -99,7 +99,7 @@ public class HunterClientConverter {
 	}
 	
 	private HunterJDBCExecutor getHunterJDBCExec(){
-		return HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		return HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 	}
 
 }

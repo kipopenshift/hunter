@@ -34,9 +34,9 @@ public class RawReceiverExtractor extends AbstractExcelExtractor<HunterRawReceiv
 	
 	public final String[] validHeaders = new String[]{"TYPE","CONTACT","FIRST NAME","LAST NAME","COUNTRY","COUNTY","CONSTITUENCY","WARD"};
 	private Logger logger = Logger.getLogger(HunterMsgReceiverExtractor.class);
-	private HunterRawReceiverDao hunterRawReceiverDao = HunterDaoFactory.getInstance().getDaoObject(HunterRawReceiverDao.class);
-	private HunterImportBeanDao hunterImportBeanDao = HunterDaoFactory.getInstance().getDaoObject(HunterImportBeanDao.class);
-	private RawReceiverService rawReceiverService = HunterDaoFactory.getInstance().getDaoObject(RawReceiverService.class);
+	private HunterRawReceiverDao hunterRawReceiverDao = HunterDaoFactory.getObject(HunterRawReceiverDao.class);
+	private HunterImportBeanDao hunterImportBeanDao = HunterDaoFactory.getObject(HunterImportBeanDao.class);
+	private RawReceiverService rawReceiverService = HunterDaoFactory.getObject(RawReceiverService.class);
 	
 
 	private String[] surfaceErrors = null;

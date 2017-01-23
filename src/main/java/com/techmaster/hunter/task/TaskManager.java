@@ -1,5 +1,6 @@
 package com.techmaster.hunter.task;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public interface TaskManager {
 	public abstract GateWayClientService getClientForTask(Task task);
 	public abstract Map<String, Object>  processTask(Task task, AuditInfo auditInfo);
 	public abstract List<GateWayMessage> getUnSuccessfulMessagesForTask(Task task);
-	public abstract Task cloneTask(Task task, String newOwner,String taskName, String taskDescription, AuditInfo auditInfo);
+	public abstract Task cloneTask(Task task, String newOwner,String taskName, String taskDescription, AuditInfo auditInfo)  throws IllegalAccessException, InvocationTargetException;
 	public abstract TextMessage cloneTextMessage(TextMessage textMessage);
 	public abstract EmailMessage cloneEmailMessage(EmailMessage emailMessage);
 	public abstract TextMessage convertTextMessage(String json);

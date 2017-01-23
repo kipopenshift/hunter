@@ -93,7 +93,7 @@ public class RawReceiverController extends HunterBaseController{
 			reqBody = HunterUtility.getRequestBodyAsString(request);
 			data = new JSONObject(reqBody);
 			String update = "UPDATE HNTR_RW_RCVR rc SET rc.VRYFD = ( CASE WHEN rc.VRYFD = 'N' THEN 'Y' ELSE 'N' END ), rc.VRYFD_BY = ? WHERE rc.RW_RCVR_ID IN (:RW_RCVR_ID)";
-			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 			StringBuilder receiverIds = new StringBuilder();
 			for(int i=0; i<data.length(); i++){
 				receiverIds.append(data.get(i+""));
@@ -166,7 +166,7 @@ public class RawReceiverController extends HunterBaseController{
 		
 		List<HunterRawReceiverJson> rawReceiverJsons = new ArrayList<>();
 		PagedHunterRawReceiverJson pagedHunterRawReceiverJson = new PagedHunterRawReceiverJson() ;
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		List<Object> values = new ArrayList<>();
 		
 		/* Return paged receivers if default date is selected. Order by creation date */
@@ -180,7 +180,7 @@ public class RawReceiverController extends HunterBaseController{
 			values.add(pageSize);
 			
 			List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(defQuery, values);
-			RawReceiverService rawReceiverService = HunterDaoFactory.getInstance().getDaoObject(RawReceiverService.class);
+			RawReceiverService rawReceiverService = HunterDaoFactory.getObject(RawReceiverService.class);
 			rawReceiverJsons = rawReceiverService.getRawReceiverJsonForDbMap(rowMapList);
 			
 			pagedHunterRawReceiverJson.setData(rawReceiverJsons);;
@@ -248,7 +248,7 @@ public class RawReceiverController extends HunterBaseController{
 		values.add(pageSize);
 		
 		List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(baseQuery, values);
-		RawReceiverService rawReceiverService = HunterDaoFactory.getInstance().getDaoObject(RawReceiverService.class);
+		RawReceiverService rawReceiverService = HunterDaoFactory.getObject(RawReceiverService.class);
 		rawReceiverJsons = rawReceiverService.getRawReceiverJsonForDbMap(rowMapList);
 		
 		pagedHunterRawReceiverJson.setData(rawReceiverJsons);;
@@ -312,7 +312,7 @@ public class RawReceiverController extends HunterBaseController{
 			if(rawReceiverId != null && rawReceiverId.get("rawReceiverId") != null){
 				Long receiverId  = Long.parseLong(rawReceiverId.get("rawReceiverId") + ""); 
 				hunterRawReceiverDao.deleteHunterRawReceiverById(receiverId);  
-				HunterDaoFactory.getInstance().getDaoObject(RawReceiverService.class).updateRawReceiverCountsForUser(getUserName());
+				HunterDaoFactory.getObject(RawReceiverService.class).updateRawReceiverCountsForUser(getUserName());
 				HunterUtility.setJSONObjectForSuccess(json, "Successfully deleted contact!");
 			}else{
 				HunterUtility.setJSONObjectForFailure(json, "This receiver has not receiver Id.");
@@ -346,7 +346,7 @@ public class RawReceiverController extends HunterBaseController{
 	@RequestMapping(value="/action/read/rawReceiverUser", method=RequestMethod.POST)
 	public @ResponseBody Map<String,Object> getRawReceiverUserDetails(){
 		HunterUtility.threadSleepFor(500); 
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		String query = hunterJDBCExecutor.getQueryForSqlId("getRawReceiverUserData");
 		List<Object> values = new ArrayList<>();
 		values.add(getUserName());

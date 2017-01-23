@@ -1,3 +1,4 @@
+
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -71,12 +72,17 @@
 </head>
 <body>
 
+<h2 style='100%;text-align:center;margin : 0 auto;margin-top:10%;color:green;font-size:22px;'>Sucess</h2>
 
-<div id="hunterCircularHomeWidget" style="width:200px;height:200px;margin : 0  auto;margin-top:15%; border:1px solid #BCDEEC; background-color:#E5F5FC;border-radius:100%;" >
+<div id="hunterCircularHomeWidget" style="width:200px;height:200px;margin : 0  auto;margin-top:5%; border:1px solid #BCDEEC; background-color:#E5F5FC;border-radius:100%;" >
 	<img id='hunterCircularHomeWidgetImg' src="http://www.happydaycatering.com/wp-content/uploads/2012/03/Earth-icon.png" style="width:200px;height:200px;" >
 </div>
 
-<h2 style='100%;text-align:center;margin : 0 auto;margin-top:10px;	text-shadow: 1px 1px gray'><a id="hunterNavA" style="text-decoration:none;" href="http://localhost:8080/Hunter/hunter/login/after" >Tech Masters Services</a><sup>@</sup></h2>
+<h2 style='100%;text-align:center;margin : 0 auto;margin-top:10px;	text-shadow: 1px 1px gray'><a id="hunterNavA" style="text-decoration:none;" href="" >Tech Masters Services</a><sup>@</sup></h2>
+
+
+
+
 
 
 </body>

@@ -15,6 +15,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
+import com.techmaster.hunter.util.HunterUtility;
+
 
 public class HunterAuthenticationProvider implements AuthenticationProvider {
 	
@@ -30,7 +32,7 @@ public class HunterAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		
+		HunterUtility.threadSleepFor(1200); 
 		String name = authentication.getName();
         String password = authentication.getCredentials().toString(); 
         logger.debug("Starting authentication process for user ( " + name + " )"); 
@@ -52,7 +54,13 @@ public class HunterAuthenticationProvider implements AuthenticationProvider {
         	logger.debug(message);
         	throw new LockedException(message); 
         }else if(!blocked && results.get("REM_COUNT") != null && !refRoles.isEmpty()) {
-        	String message = error + "<br/>Remaining failed attempts ( <span style='font-size:16px;color:red;'  > " + results.get("REM_COUNT") + "</span> )";
+        	int remCount = Integer.valueOf(results.get("REM_COUNT") + "");
+        	String message = error;
+        	if( remCount == 0 ){
+        		message = message + "<br/>This is your last failed login attemp!</span> )";
+        	}else{
+        		message = message + "<br/>Remaining failed attempts ( <span style='font-size:16px;color:red;'  > " + results.get("REM_COUNT") + "</span> )";
+        	}
         	logger.debug(message);
         	throw new BadCredentialsException(message);
         }

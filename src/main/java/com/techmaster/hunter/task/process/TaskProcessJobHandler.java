@@ -174,16 +174,16 @@ public class TaskProcessJobHandler {
 		setProcessJobContext(processJob,jobContextParams);
 		processJob.setAuditInfo(auditInfo);
 		processJob = saveOrUpdateProcessJob(processJob);
-		synchProcessJobs.put(processJobKey, processJob);
+		if( processJobKey != null )
+			synchProcessJobs.put(processJobKey, processJob);
+		else{
+			processJob.setDocBlob(HunterUtility.getStringBlob(processJob.getXmlService().toString()));
+			saveOrUpdateProcessJob(processJob);
+		}
 		return processJob;
 	}
 	
-	public synchronized void addTaskProcessWorker(String workerName, String processJobKey, Map<String, String> values){
-		
-		TaskProcessJob processJob = getTaskProcessJobForKey(processJobKey);
-		if(processJob  == null){
-			throw new HunterRunTimeException("Task process cannot be found with the key : " + processJobKey);
-		}
+	public void setWorkerXMLService (TaskProcessJob processJob, String workerName, Map<String, String> values){
 		
 		XMLService xmlService = processJob.getXmlService();
 		
@@ -245,7 +245,23 @@ public class TaskProcessJobHandler {
 		
 		xmlService.addElement("workers", worker, 0); 
 		processJob.setXmlService(xmlService); 
-		saveOrUpdateProcessJob(processJob);
+		
+	}
+	
+	
+	public TaskProcessJob addWorkerToProcessJob(TaskProcessJob processJob, boolean saveOrUpdate, String workerName, Map<String, String> values){
+		setWorkerXMLService(processJob, workerName, values); 
+		if( saveOrUpdate )
+			saveOrUpdateProcessJob(processJob);
+		return processJob;
+	}
+	
+	public synchronized void addTaskProcessWorker(String workerName, String processJobKey, Map<String, String> values){
+		TaskProcessJob processJob = getTaskProcessJobForKey(processJobKey);
+		if(processJob  == null){
+			throw new HunterRunTimeException("Task process cannot be found with the key : " + processJobKey);
+		}
+		addWorkerToProcessJob(processJob, true, workerName, values);
 	}
 	
 	public static void main(String[] args) {

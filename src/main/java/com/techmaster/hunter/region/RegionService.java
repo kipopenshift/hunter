@@ -7,7 +7,6 @@ import org.json.JSONArray;
 
 import com.techmaster.hunter.json.PagedHunterMessageReceiverJson;
 import com.techmaster.hunter.json.ReceiverRegionJson;
-import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
 import com.techmaster.hunter.obj.beans.ReceiverGroupReceiver;
 import com.techmaster.hunter.obj.beans.ReceiverRegion;
 

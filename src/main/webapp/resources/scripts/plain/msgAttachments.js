@@ -1,4 +1,6 @@
 
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
+
 var MessageAttchementModel = kendo.data.Model.define({
 	id:"beanId",
 	fields : {
@@ -59,13 +61,13 @@ function getMessageAttachmentToolBar(){
 var MessageAttachmentDS = new kendo.data.DataSource({
 	  transport: {
 	    read:  {
-	      url: "http://localhost:8080/Hunter/admin/action/messageAttachments/read",
+	      url: baseUrl + "admin/action/messageAttachments/read",
 	      dataType: "json",
 	      contentType:"application/json",
 	      method: "POST"
 	    },
 	    create: {
-	        url: "http://localhost:8080/Hunter/admin/action/messageAttachments/create",
+	        url: baseUrl + "admin/action/messageAttachments/create",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST",
@@ -74,13 +76,13 @@ var MessageAttachmentDS = new kendo.data.DataSource({
 	         }
 	    },
 	    destroy: {
-	        url: "http://localhost:8080/Hunter/admin/action/messageAttachments/delete",
+	        url: baseUrl + "admin/action/messageAttachments/delete",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
 	    },
 	    update: {
-	        url: "http://localhost:8080/Hunter/admin/action/messageAttachments/edit",
+	        url: baseUrl + "admin/action/messageAttachments/edit",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"

@@ -128,12 +128,12 @@ var ValidateRawReceiverVM = kendo.observable({
 	unSelectDefaultDateCheckBox : function(this_){
 		
 		var 
-		checked = $(this_).prop("checked"),
+		checked 	= $(this_).prop("checked"),
 		dataRefName = $(this_).attr("data-ref-name");
 		
-		if( dataRefName === 'dateRange' ) ValidateRawReceiverVM.set("isDateChecked", checked);
-		if( dataRefName === 'regionData' ) ValidateRawReceiverVM.set("isRegionChecked", checked);
-		if( dataRefName === 'rawUser' ) ValidateRawReceiverVM.set("isUserChecked", checked);
+		if( dataRefName === 'dateRange' ) 	ValidateRawReceiverVM.set("isDateChecked", checked);
+		if( dataRefName === 'regionData' ) 	ValidateRawReceiverVM.set("isRegionChecked", checked);
+		if( dataRefName === 'rawUser' ) 	ValidateRawReceiverVM.set("isUserChecked", checked);
 		
 		if( checked ){
 			ValidateRawReceiverVM.set("isDefaultDateSelected", false);

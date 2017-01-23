@@ -55,7 +55,7 @@ public class TaskProcessJobConverter {
 		values.add(srlzdTskPrcssJbObjsFilLoc);
 		values.add(taskId);
 		
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject( HunterJDBCExecutor.class );
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject( HunterJDBCExecutor.class );
 		int rowsAffected  = hunterJDBCExecutor.executeUpdate(query, values);
 		logger.debug("Updating task file location. Row affected = " + rowsAffected); 
 		
@@ -94,7 +94,7 @@ public class TaskProcessJobConverter {
 		List<Object> values = new ArrayList<>();
 		values.add(taskId);
 		
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject( HunterJDBCExecutor.class );
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject( HunterJDBCExecutor.class );
 		String srlzdTskPrcssJbObjsFilLoc = HunterUtility.getStringOrNullOfObj( hunterJDBCExecutor.executeQueryForOneReturn(query, values) );
 		
 		if( srlzdTskPrcssJbObjsFilLoc == null ){

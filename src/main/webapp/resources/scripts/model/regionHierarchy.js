@@ -3,7 +3,7 @@ registerNavigation("Regions", "Region Hierarchies");
 
 var kendoWindow;
 var kendoKipHelperInstance;
-
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
 
 var RegionHierarchyModel = kendo.data.TreeListModel.define({
 	id:"id",
@@ -95,7 +95,7 @@ var RegionHierarchyTreeListDS = new kendo.data.TreeListDataSource({
 	transport: {
 	    read:  {
 	      url: function(){
-	    	  var url =  "http://localhost:8080/Hunter/region/action/regions/hierarchies/action/read/post" + getSelCountry();
+	    	  var url =  baseUrl + "region/action/regions/hierarchies/action/read/post" + getSelCountry();
 	    	  console.log("URL >> " + url);
 	    	  return url;
 	      },
@@ -103,7 +103,7 @@ var RegionHierarchyTreeListDS = new kendo.data.TreeListDataSource({
 	      method: "POST"
 	    },
 	    create: {
-	        url: "http://localhost:8080/Hunter/region/action/regions/hierarchies/action/create",
+	        url: baseUrl + "region/action/regions/hierarchies/action/create",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST",
@@ -112,13 +112,13 @@ var RegionHierarchyTreeListDS = new kendo.data.TreeListDataSource({
 	         }
 	    },
 	    update: {
-	        url: "http://localhost:8080/Hunter/region/action/regions/hierarchies/action/update",
+	        url: baseUrl + "region/action/regions/hierarchies/action/update",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
 	    },
 	    destroy: {
-	        url: "http://localhost:8080/Hunter/region/action/regions/hierarchies/action/destroy",
+	        url: baseUrl + "region/action/regions/hierarchies/action/destroy",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
@@ -159,7 +159,7 @@ var RegionHierarchyVM = kendo.observable({
         serverFiltering: true,
         transport: {
        	 read:  {
-      	      url: "http://localhost:8080/Hunter/region/action/countries/read",
+      	      url: baseUrl + "region/action/countries/read",
       	      dataType: "json",
       	      method: "POST"
        	 }
@@ -264,7 +264,7 @@ var RegionHierarchyVM = kendo.observable({
 		data["regionId"] = regionId;
 		
 		data = JSON.stringify(data);
-		var url = HunterConstants.HUNTER_BASE_URL + "/region/action/hierarchies/edit";
+		var url = baseUrl + "/region/action/hierarchies/edit";
 		$("#editRegionHierIconHolder").css({"display" : ""}); 
 		kendo.ui.progress($("#editRegionHierIconHolder"), true);
 		kendoKipHelperInstance.ajaxPostDataForJsonResponse(data, "application/json", "json", "POST", url , "RegionHierarchyVM.afterEditSelRegion");
@@ -312,8 +312,8 @@ var RegionHierarchyVM = kendo.observable({
 		this.displayUploadWindow();
 		$("#hunterHierarchyFiles").kendoUpload({
 			async:{ 
-				saveUrl: 'http://localhost:8080/Hunter/messageReceiver/action/import/receivers/post/save', 
-  			  	removeUrl: 'http://localhost:8080/Hunter/messageReceiver/action/import/receivers/post/save', 
+				saveUrl: baseUrl + 'messageReceiver/action/import/receivers/post/save', 
+  			  	removeUrl: baseUrl + 'messageReceiver/action/import/receivers/post/save', 
   			  	autoUpload: true 
   			},
   			 error : RegionHierarchyVM.onKendoUploadError,

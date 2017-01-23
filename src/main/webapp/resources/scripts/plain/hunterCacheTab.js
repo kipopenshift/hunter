@@ -1,5 +1,6 @@
 
 var selCacheData = {};
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
 
 $("document").ready(function(){
 	
@@ -31,7 +32,7 @@ $("document").ready(function(){
 function placeProgressIcon(){
 	var iconStage = "<div id='hunterCacheProgIcon' style='width:200px;height:200px;margin-top:-15%;position:relative;margin-left:45%;background-color:#F3F9FC;'></div>";
 	$("#hunterCacheFunctions").append(iconStage);
-	$("#hunterCacheProgIcon").html('<img src="http://localhost:8080/Hunter/static/resources/images/refreshing_spinner_new.gif" width="100px" height="100px" style="margin-left:50px;margin-top:50px;"   />');
+	$("#hunterCacheProgIcon").html('<img src="' + baseUrl + 'static/resources/images/refreshing_spinner_new.gif" width="100px" height="100px" style="margin-left:50px;margin-top:50px;"   />');
 	$("#hunterCacheProgIcon").append("<h2 style='text-align:center;with:200%;color:#4B557C;' >Refreshing...</h2>");
 	disableButtonsAndInputs();
 }

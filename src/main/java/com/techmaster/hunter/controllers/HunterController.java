@@ -59,7 +59,7 @@ public class HunterController extends HunterBaseController{
 				}
 				
 				//if the user has not been registered as row user and is raw user, turn them away
-				HunterRawReceiverUserDao rawReceiverUserDao = HunterDaoFactory.getInstance().getDaoObject(HunterRawReceiverUserDao.class);
+				HunterRawReceiverUserDao rawReceiverUserDao = HunterDaoFactory.getObject(HunterRawReceiverUserDao.class);
 				HunterRawReceiverUser rawReceiver = rawReceiverUserDao.getRawUserByUserName(getUserName()); 
 				if(rawReceiver == null){
 					return "views/fieldProfileNotFound";
@@ -102,7 +102,7 @@ public class HunterController extends HunterBaseController{
 				}
 				
 				//if the user has not been registered as row user and is raw user, turn them away
-				HunterRawReceiverUserDao rawReceiverUserDao = HunterDaoFactory.getInstance().getDaoObject(HunterRawReceiverUserDao.class);
+				HunterRawReceiverUserDao rawReceiverUserDao = HunterDaoFactory.getObject(HunterRawReceiverUserDao.class);
 				HunterRawReceiverUser rawReceiver = rawReceiverUserDao.getRawUserByUserName(getUserName()); 
 				if(rawReceiver == null){
 					return "views/fieldProfileNotFound";

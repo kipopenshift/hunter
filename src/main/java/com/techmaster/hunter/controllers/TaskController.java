@@ -1,6 +1,7 @@
 package com.techmaster.hunter.controllers;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,13 +25,10 @@ import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.UIMessageConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
-import com.techmaster.hunter.dao.types.HunterClientDao;
-import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.ReceiverGroupDao;
 import com.techmaster.hunter.dao.types.ServiceProviderDao;
 import com.techmaster.hunter.dao.types.TaskDao;
 import com.techmaster.hunter.dao.types.TaskHistoryDao;
-import com.techmaster.hunter.email.HunterEmailManager;
 import com.techmaster.hunter.enums.HunterUserRolesEnums;
 import com.techmaster.hunter.enums.TaskHistoryEventEnum;
 import com.techmaster.hunter.gateway.beans.GateWayClientService;
@@ -38,14 +36,15 @@ import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.json.TaskProcessJobJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
+import com.techmaster.hunter.obj.beans.HunterSocialMedia;
 import com.techmaster.hunter.obj.beans.Message;
 import com.techmaster.hunter.obj.beans.ServiceProvider;
+import com.techmaster.hunter.obj.beans.SocialMessage;
 import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.obj.beans.TextMessage;
 import com.techmaster.hunter.obj.converters.TaskConverter;
 import com.techmaster.hunter.obj.converters.TaskProcessJobConverter;
-import com.techmaster.hunter.region.RegionService;
 import com.techmaster.hunter.task.TaskManager;
 import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
@@ -57,12 +56,8 @@ public class TaskController extends HunterBaseController{
 	@Autowired private TaskDao taskDao;
 	@Autowired private HunterJacksonMapper hunterJacksonMapper;
 	@Autowired private TaskManager taskManager;
-	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
-	@Autowired private HunterEmailManager hunterEmailManager;
 	@Autowired private TaskHistoryDao taskHistoryDao;
-	@Autowired private HunterClientDao hunterClientDao;
 	@Autowired private ReceiverGroupDao receiverGroupDao;
-	@Autowired private RegionService regionService;
 	
 	private static final Logger logger = HunterLogFactory.getLog(TaskController.class);
 
@@ -72,6 +67,8 @@ public class TaskController extends HunterBaseController{
 	@ResponseBody
 	public List<Task> getTaskForClientId(@PathVariable Long clientId) {
 		
+		String baseDir = System.getProperty("catalina.base");
+		logger.debug(baseDir); 
 		List<Task> tasks = taskDao.getTaskForClientId(clientId);
 		logger.debug("Returning Tasks for client >> " + tasks);
 		return tasks;
@@ -97,7 +94,7 @@ public class TaskController extends HunterBaseController{
 			TaskHistory taskHistory = taskManager.getNewTaskHistoryForEventName(taskId, TaskHistoryEventEnum.CLONE.getEventName(), getUserName());
 			
 			// check if that name is already used.
-			String taskNamesStr = HunterDaoFactory.getInstance().getDaoObject(TaskDao.class).getCmmSprtdTskNamsFrUsrNam(newUserName);  
+			String taskNamesStr = HunterDaoFactory.getObject(TaskDao.class).getCmmSprtdTskNamsFrUsrNam(newUserName);  
 			if(taskNamesStr != null){
 				String[] taskNames = taskNamesStr.split(","); 
 				for(String tskName : taskNames){
@@ -115,9 +112,29 @@ public class TaskController extends HunterBaseController{
 			
 			Task task = taskDao.getTaskById(taskId);
 			AuditInfo auditInfo = HunterUtility.getAuditInfoFromRequestForNow(null, getUserName()); 
+			
 			Task copy = taskManager.cloneTask(task, newUserName, taskName, taskDescription, auditInfo);
+			
+			Message message = copy.getTaskMessage();
+			SocialMessage socialMessage = null;
+			HunterSocialMedia socialMedia = null;
+			
+			if( message instanceof SocialMessage ){
+				socialMessage = ((SocialMessage)copy.getTaskMessage());
+				socialMedia = socialMessage.getSocialMedia();
+				socialMessage.setSocialMedia(null); 
+			}
+			
 			logger.debug(copy); 
 			taskDao.insertTask(copy);
+			
+			if( copy.getTskMsgType().equals(HunterConstants.TASK_TYPE_SOCIAL) ){
+				logger.debug("Resetting social media id for social message..."); 
+				socialMedia.setMediaId(copy.getTaskId()); 
+				socialMessage.setSocialMedia(socialMedia); 
+				task.setTaskMessage(socialMessage);
+				taskDao.update(copy); 
+			}
 			
 			taskManager.setTaskHistoryStatusAndMessage(taskHistory,HunterConstants.STATUS_SUCCESS,"Successfully cloned task. New task ( " + copy.getTaskId() + " ) for new user ( " + newUserName + " )");  
 			taskHistoryDao.insertTaskHistory(taskHistory);
@@ -129,6 +146,12 @@ public class TaskController extends HunterBaseController{
 			e.printStackTrace();
 			return HunterUtility.setJSONObjectForFailure(messages, "Application error occurred!").toString();
 		} catch (IOException e) {
+			e.printStackTrace();
+			return HunterUtility.setJSONObjectForFailure(messages, "Application error occurred!").toString();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+			return HunterUtility.setJSONObjectForFailure(messages, "Application error occurred!").toString();
+		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 			return HunterUtility.setJSONObjectForFailure(messages, "Application error occurred!").toString();
 		}
@@ -401,7 +424,7 @@ public class TaskController extends HunterBaseController{
 		msg.setMsgOwner(taskOwner);
 		
 		//Default service provider is safaricom
-		ServiceProvider provider = HunterDaoFactory.getInstance().getDaoObject(ServiceProviderDao.class).getServiceProviderByName("Safaricom");  
+		ServiceProvider provider = HunterDaoFactory.getObject(ServiceProviderDao.class).getServiceProviderByName("Safaricom");  
 		msg.setProvider(provider); 
 		Task task = taskDao.getTaskById(taskId);
 		task.setTaskMessage(msg); 

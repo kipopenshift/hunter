@@ -1,9 +1,12 @@
 package com.techmaster.hunter.social;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -16,14 +19,21 @@ import org.w3c.dom.NodeList;
 import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.HunterURLConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
+import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.json.HunterSocialAppJson;
 import com.techmaster.hunter.json.HunterSocialGroupJson;
 import com.techmaster.hunter.json.HunterSocialRegionJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
+import com.techmaster.hunter.obj.beans.HunterDaoList;
 import com.techmaster.hunter.obj.beans.HunterSocialApp;
 import com.techmaster.hunter.obj.beans.HunterSocialGroup;
+import com.techmaster.hunter.obj.beans.HunterSocialMedia;
 import com.techmaster.hunter.obj.beans.HunterSocialRegion;
+import com.techmaster.hunter.obj.beans.SocialMessage;
+import com.techmaster.hunter.obj.beans.TaskProcessJob;
+import com.techmaster.hunter.task.process.TaskProcessJobHandler;
 import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterUtility;
 import com.techmaster.hunter.xml.XMLService;
@@ -45,6 +55,14 @@ public class HunterSocialHelper {
 
 	public static HunterSocialHelper getInstance(){
 		return instance;
+	}
+	
+	public Map<String,Object> getSclMsgRmtDetails(Long msgId){
+		List<Object> values = new HunterDaoList().add(msgId).toList();
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
+		String query = hunterJDBCExecutor.getQueryForSqlId("getSocialMsgRemteDetails");
+		List<Map<String,Object>> rowtMapList = hunterJDBCExecutor.executeQueryRowMap(query, values);
+		return HunterUtility.isCollectionNotEmpty(rowtMapList) ?  rowtMapList.get(0) : new HashMap<String, Object>();
 	}
 	
 	public XMLService getSocialAppConfig(HunterSocialApp socialApp){
@@ -86,11 +104,83 @@ public class HunterSocialHelper {
 		return socialAppJsons;
 	}
 	
+	public XMLService setNewSocialAppConfig(HunterSocialApp socialApp, boolean update){
+		XMLService xmlService = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.HUNTER_SOCIAL_APP_CONFIG_PATH);
+		socialApp.setAppConfigs(HunterUtility.getStringBlob(xmlService.toString()));
+		if( update ){
+			HunterHibernateHelper.updateEntity(socialApp); 
+		}
+		return xmlService;
+	}
+	
 	public HunterSocialApp createHunterSocialApp(HunterSocialApp socialApp){
 		logger.debug("creating social app..." + socialApp); 
 		HunterHibernateHelper.saveEntity(socialApp);
 		logger.debug("Successfully created social app " + socialApp); 
 		return socialApp;
+	}
+	
+	public HunterSocialAppJson createOrUpdateSocialAppFromJson (HunterSocialAppJson hunterSocialAppJson, AuditInfo auditInfo){
+		
+		logger.debug("Creating or updating social app ( " + hunterSocialAppJson +" )"); 
+		boolean updateApp = hunterSocialAppJson.getAppId() != 0 && hunterSocialAppJson.getAppId() != null;
+		HunterSocialApp socialApp = new HunterSocialApp();
+		
+		if( updateApp ){
+			socialApp = HunterHibernateHelper.getEntityById(hunterSocialAppJson.getAppId(), HunterSocialApp.class);
+			auditInfo.setCreatedBy(socialApp.getAuditInfo().getCreatedBy());
+			auditInfo.setCretDate(socialApp.getAuditInfo().getCretDate());
+		}
+		
+		socialApp.setAppConfigs(null);
+		socialApp.setAppDesc(hunterSocialAppJson.getAppDesc()); 
+		socialApp.setAppName(hunterSocialAppJson.getAppName());
+		socialApp.setAuditInfo(auditInfo); 
+		socialApp.setExtrnlId(hunterSocialAppJson.getExtrnlId()); 
+		socialApp.setSocialType(hunterSocialAppJson.getSocialType()); 
+		socialApp.setExtrnalPassCode(hunterSocialAppJson.getExtrnalPassCode()); 
+		HunterSocialHelper.getInstance().createHunterSocialApp(socialApp);
+		
+		if( updateApp ){
+			logger.debug("Updating ( " + socialApp +" )"); 
+			HunterHibernateHelper.updateEntity(socialApp);
+		}else{
+			logger.debug("Creating ( " + socialApp +" )"); 
+			HunterHibernateHelper.saveEntity(socialApp);
+		}
+		
+		hunterSocialAppJson.setAppId(socialApp.getAppId());
+		
+		return hunterSocialAppJson;
+	}
+	
+	public String validateAndDeleteSocialApp(Long appId){
+		
+		logger.debug("Trying to delete social app of app ID ( "+ appId +" )");
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
+		String query = hunterJDBCExecutor.getQueryForSqlId("getSocialGroupsUsingSocialAppId"); 
+		List<Object> values = new ArrayList<>();
+		values.add(appId);
+		List<Map<String, Object>> rowMapsList = hunterJDBCExecutor.executeQueryRowMap(query,values );
+		StringBuilder builder = new StringBuilder();
+		if( HunterUtility.isCollectionNotEmpty(rowMapsList) ){
+			int counter = 1;
+			for(Map<String, Object> rowMap : rowMapsList){
+				String groupName = HunterUtility.getStringOrNullOfObj(rowMap.get("GRP_NAM"));
+				builder.append("( ").append(counter).append(" ) ").append(groupName).append(",");
+				counter++;
+			}
+			String bstr = builder.toString();
+			if( bstr.contains(",") ){
+				bstr = bstr.substring(0, bstr.length() - 1 );
+			}
+			logger.debug("Cannot delete social region since it is being used by social groups : " + bstr);
+			return bstr;
+		}else{
+			HunterHibernateHelper.deleteEntityByLongId(appId, HunterSocialApp.class); 
+			return null;
+		}
+		
 	}
 	
 	public HunterSocialApp updateHunterSocialApp(HunterSocialApp socialApp){
@@ -152,6 +242,8 @@ public class HunterSocialHelper {
 			auditInfo.setCretDate(socialGroup.getAuditInfo().getCretDate()); 
 		}
 		
+		HunterSocialApp defaultSocialApp = HunterHibernateHelper.getEntityById(socialGroupJson.getSocialAppId(), HunterSocialApp.class);
+		
 		socialGroup.setSocialRegion(socialRegion);
 		socialGroup.setAcquired(socialGroupJson.isAcquired());
 		socialGroup.setAcquiredFromFullName(socialGroupJson.getAcquiredFromFullName());
@@ -168,7 +260,8 @@ public class HunterSocialHelper {
 		socialGroup.setSocialType(socialGroupJson.getSocialType()); 
 		socialGroup.setSuspended(socialGroupJson.isSuspended()); 
 		socialGroup.setSuspensionDescription(socialGroupJson.getSuspensionDescription()); 
-		socialGroup.setVerifiedBy(socialGroupJson.getVerifiedBy()); 
+		socialGroup.setVerifiedBy(socialGroupJson.getVerifiedBy());
+		socialGroup.setDefaultSocialApp(defaultSocialApp); 
 		
 		String verifiedDate = socialGroupJson.getVerifiedDate();
 		socialGroup.setVerifiedDate(verifiedDate == null ? null : HunterUtility.parseDate( verifiedDate, HunterConstants.DATE_FORMAT_STRING )); 
@@ -201,15 +294,15 @@ public class HunterSocialHelper {
 		regionsIds.put(HunterConstants.RECEIVER_LEVEL_CONSITUENCY, socialRegion.getConsId());
 		regionsIds.put(HunterConstants.RECEIVER_LEVEL_WARD, socialRegion.getWardId());
 		
-		Map<Long,String> country = HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_COUNTRY, regionsIds);
-		Map<Long,String> county = HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_COUNTY, regionsIds);
-		Map<Long,String> constituency = HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_CONSITUENCY, regionsIds);
-		Map<Long,String> ward = HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_WARD, regionsIds);
+		Map<Long,String> country	  = socialRegion.getCountryId() == null ? new HashMap<Long,String>() : HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_COUNTRY, regionsIds);
+		Map<Long,String> county 	  = socialRegion.getCountyId() 	== null ? new HashMap<Long,String>() : HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_COUNTY, regionsIds);
+		Map<Long,String> constituency = socialRegion.getConsId() 	== null ? new HashMap<Long,String>() : HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_CONSITUENCY, regionsIds);
+		Map<Long,String> ward 		  = socialRegion.getWardId() 	== null ? new HashMap<Long,String>() : HunterCacheUtil.getInstance().getNameIdForId(HunterConstants.RECEIVER_LEVEL_WARD, regionsIds);
 		
-		String countryName = country.get(regionsIds.get(HunterConstants.RECEIVER_LEVEL_COUNTRY)); 
-		String countyName = county.get(regionsIds.get(HunterConstants.RECEIVER_LEVEL_COUNTY));
+		String countryName 		= country.get(regionsIds.get(HunterConstants.RECEIVER_LEVEL_COUNTRY)); 
+		String countyName 		= county.get(regionsIds.get(HunterConstants.RECEIVER_LEVEL_COUNTY));
 		String constituencyName = constituency.get(regionsIds.get(HunterConstants.RECEIVER_LEVEL_CONSITUENCY));
-		String wardName = ward.get(regionsIds.get(HunterConstants.RECEIVER_LEVEL_WARD));
+		String wardName 		= ward.get(regionsIds.get(HunterConstants.RECEIVER_LEVEL_WARD));
 		
 		regionNames.put(HunterConstants.RECEIVER_LEVEL_COUNTRY, countryName);
 		regionNames.put(HunterConstants.RECEIVER_LEVEL_COUNTY, countyName);
@@ -220,19 +313,14 @@ public class HunterSocialHelper {
 		
 		return regionNames;
 	}
-
-	public List<HunterSocialGroupJson> getAllSocialGroupsJsons(){
-		
-		logger.debug("Getting all social group jsons..." ); 
-		
-		List<HunterSocialGroup> socialGroups = HunterHibernateHelper.getAllEntities(HunterSocialGroup.class);
-		List<HunterSocialGroupJson> socialGroupJsons = new ArrayList<HunterSocialGroupJson>();
-		
+	
+	public List<HunterSocialGroupJson> convertSocialGroupToSocialGroupJson(List<HunterSocialGroup> socialGroups){
+		List<HunterSocialGroupJson> socialGroupJsons = new ArrayList<>();
 		if( HunterUtility.isCollectionNotEmpty(socialGroups) ){
-			
 			for(HunterSocialGroup socialGroup : socialGroups){
 				
 				HunterSocialGroupJson socialGroupJson = new HunterSocialGroupJson();
+				
 				socialGroupJson.setAcquired(socialGroup.isAcquired()); 
 				socialGroupJson.setAcquiredFromFullName(socialGroup.getAcquiredFromFullName());
 				socialGroupJson.setActive(socialGroup.isActive());
@@ -250,7 +338,9 @@ public class HunterSocialHelper {
 				socialGroupJson.setSuspensionDescription(socialGroup.getSuspensionDescription());
 				socialGroupJson.setVerifiedBy(socialGroup.getVerifiedBy());
 				socialGroupJson.setVerifiedDate(HunterUtility.formatDate(socialGroup.getVerifiedDate(), HunterConstants.DATE_FORMAT_STRING));  
-				socialGroupJson.setStatus(socialGroup.getStatus()); 
+				socialGroupJson.setStatus(socialGroup.getStatus());
+				socialGroupJson.setSocialAppId(socialGroup.getDefaultSocialApp() != null ? socialGroup.getDefaultSocialApp().getAppId() : null);
+				socialGroupJson.setSocialAppName(socialGroup.getDefaultSocialApp() != null ? socialGroup.getDefaultSocialApp().getAppName() : null); 
 				
 				socialGroupJson.setCreatedBy(socialGroup.getAuditInfo().getCreatedBy());
 				socialGroupJson.setCretDate(HunterUtility.formatDate(socialGroup.getAuditInfo().getCretDate(), HunterConstants.DATE_FORMAT_STRING));
@@ -284,9 +374,14 @@ public class HunterSocialHelper {
 				
 			}
 		}
-		
+		return socialGroupJsons;
+	}
+
+	public List<HunterSocialGroupJson> getAllSocialGroupsJsons(){
+		logger.debug("Getting all social group jsons..." ); 
+		List<HunterSocialGroup> socialGroups = HunterHibernateHelper.getAllEntities(HunterSocialGroup.class);
+		List<HunterSocialGroupJson> socialGroupJsons = convertSocialGroupToSocialGroupJson(socialGroups);
 		logger.debug("Returning groups. Size ( "+ socialGroupJsons.size() +" )" ); 
-		
 		return socialGroupJsons;
 	}
 	
@@ -355,7 +450,8 @@ public class HunterSocialHelper {
 		socialRegion.setPopulation(socialRegionJson.getPopulation()); 
 		socialRegion.setRegionDesc(socialRegionJson.getRegionDesc());
 		socialRegion.setRegionId(socialRegionJson.getRegionId());
-		socialRegion.setRegionName(socialRegionJson.getRegionName()); 
+		socialRegion.setRegionName(socialRegionJson.getRegionName());
+		socialRegion.setCoordinates( HunterUtility.getStringBlob( socialRegionJson.getCoordinates() ) );  
 		socialRegion.setWardId(socialRegionJson.getWardId()); 
 		
 		logger.debug("Successfully converted the json. Resultant social region : " + socialRegion); 
@@ -371,10 +467,146 @@ public class HunterSocialHelper {
 		return socialRegion;
 	}
 	
+	public String validateAndDeleteSocialRegion(Long regionId) {
+		logger.debug("Trying to delete social region of region ID ( "+ regionId +" )");
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
+		String query = hunterJDBCExecutor.getQueryForSqlId("getSocialGroupsUsingSocialRegionId"); 
+		List<Object> values = new ArrayList<>();
+		values.add(regionId);
+		List<Map<String, Object>> rowMapsList = hunterJDBCExecutor.executeQueryRowMap(query,values );
+		StringBuilder builder = new StringBuilder();
+		if( HunterUtility.isCollectionNotEmpty(rowMapsList) ){
+			int counter = 1;
+			for(Map<String, Object> rowMap : rowMapsList){
+				String groupName = HunterUtility.getStringOrNullOfObj(rowMap.get("GRP_NAM"));
+				builder.append("( ").append(counter).append(" ) ").append(groupName).append(",");
+				counter++;
+			}
+			String bstr = builder.toString();
+			if( bstr.contains(",") ){
+				bstr = bstr.substring(0, bstr.length() - 1 );
+			}
+			logger.debug("Cannot delete social region since it is being used by social groups : " + bstr);
+			return bstr;
+		}else{
+			hunterJDBCExecutor.executeUpdate("DELETE FROM HNTR_SCL_RGN r WHERE r.RGN_ID = ?", values);
+			return null;
+		}
+	}
 	
+	public HunterSocialMedia createDfltRmtSclMda(String remoteURL, AuditInfo  auditInfo, Long mId){
+		
+		HunterSocialMedia socialMedia = new HunterSocialMedia();
+		socialMedia.setAuditInfo(auditInfo);
+		socialMedia.setChannelType(null); 
+		socialMedia.setByteSize(0); 
+		socialMedia.setClientName("admin");  
+		socialMedia.setDstrbtnDrctns(null);
+		socialMedia.setDurationInSecs(0); 
+		socialMedia.setFileFormat(null); 
+		
+		String 
+		fileSlash 	= remoteURL.contains("\\") ? "\\" : "/",
+		orgnlFlNam 	= remoteURL.substring( remoteURL.lastIndexOf(fileSlash) + 1, remoteURL.length()  ),
+        suffix 		= orgnlFlNam.substring(orgnlFlNam.lastIndexOf(".")+1, orgnlFlNam.length());
+        
+        socialMedia.setMediaSuffix(suffix); 
+        socialMedia.setHeight(0);
+        socialMedia.setHunterOwned(true); 
+        socialMedia.setLocalURL(remoteURL); 
+        socialMedia.setMediaData(null);
+        socialMedia.setMediaDescription(orgnlFlNam); 
+        socialMedia.setMediaName(orgnlFlNam); 
+        socialMedia.setMediaType(suffix); 
+        socialMedia.setMimeType(suffix); 
+        socialMedia.setOriginalFileName(orgnlFlNam);
+        socialMedia.setRemoteURL(remoteURL); 
+        socialMedia.setUserSpecs(" ");  
+        socialMedia.setMediaId(mId); 
+        socialMedia.setWidth(0); 
+		
+		return socialMedia;
+	}
 	
+	private List<Long> getSelMsgSocialGroupIds(Long msgId){
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
+		List<Long> groupIds = new ArrayList<>();
+		String query = "SELECT g.GP_ID FROM SCL_MSG_SCL_GRPS g WHERE g.MSG_ID = ?";
+		List<Object> values = new ArrayList<>();
+		values.add(msgId);
+		Map<Integer, List<Object>>  rowListMap = hunterJDBCExecutor.executeQueryRowList(query, values);
+		for(Map.Entry<Integer, List<Object>> entry : rowListMap.entrySet()){
+			List<Object> list = entry.getValue();
+			Long groupId = HunterUtility.getLongFromObject(list.get(0));
+			groupIds.add(groupId);
+		}
+		return groupIds;
+	}
+
+	public List<HunterSocialGroupJson> getAvailSocialMsgGroups(Long selMsgId) {
+		List<Long> selGroupIds = getSelMsgSocialGroupIds(selMsgId);
+		if( !HunterUtility.isCollectionNotEmpty(selGroupIds) ){
+			return getAllSocialGroupsJsons();
+		}
+		String commaSepGrpIds = HunterUtility.getCommaDelimitedStrings(selGroupIds);
+		String query = "FROM HunterSocialGroup g WHERE g.groupId NOT IN ("+ commaSepGrpIds +")";
+		List<HunterSocialGroup> socialGroups = HunterHibernateHelper.executeQueryForObjList(HunterSocialGroup.class, query);
+		return convertSocialGroupToSocialGroupJson(socialGroups);
+	}
 	
+	public List<HunterSocialGroupJson> getSelSocialMsgGroups(Long selMsgId) {
+		SocialMessage socialMessage = HunterHibernateHelper.getEntityById(selMsgId, SocialMessage.class);
+		Set<HunterSocialGroup> socialGroups = socialMessage != null ? socialMessage.getHunterSocialGroups() : new HashSet<HunterSocialGroup>();
+		List<HunterSocialGroup> socialGroup = new ArrayList<>();
+		socialGroup.addAll(socialGroups);
+		return convertSocialGroupToSocialGroupJson(socialGroup); 
+	}
 	
+	public Long getNewProcessJobIdForSclProcess(Long taskId, AuditInfo auditInfo){
+		String defltDate = HunterUtility.formatDate(new Date(), HunterConstants.DATE_FORMAT_STRING);
+		Map<String, String> contextParams = new HashMap<>();
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class); 
+		String query = hunterJDBCExecutor.getQueryForSqlId("getSclMsgCSVDiscintSocialType");
+		Object clients = hunterJDBCExecutor.executeQueryForOneReturn(query, new HunterDaoList().add(taskId).toList());
+		contextParams.put("genStatus", HunterConstants.STATUS_PARTIAL);
+		contextParams.put("numberOfWorkers", Integer.toString(0)); 
+		contextParams.put("totalMsgs", Integer.toString(0));
+		contextParams.put("clientName", HunterUtility.getStringOrNullOfObj(clients)); 
+		contextParams.put("genDuration", Integer.toString(0));
+		contextParams.put("startDate", defltDate); 
+		contextParams.put("endDate", defltDate);
+		TaskProcessJob processJob = TaskProcessJobHandler.getInstance().createNewTaskProcessJob(taskId, null, contextParams, auditInfo);
+		return processJob.getJobId();
+	}
+	
+	public synchronized TaskProcessJob getSocialProcessedJob(Long jobId){
+		String query = "FROM TaskProcessJob j WHERE j.jobId = " + jobId;
+		List<TaskProcessJob> processJobs  = HunterHibernateHelper.executeQueryForObjList(TaskProcessJob.class, query);
+		if( HunterUtility.isCollectionNotEmpty(processJobs) ){
+			TaskProcessJob processJob = processJobs.get(0); 
+			try {
+				XMLService xmlService = new XMLServiceImpl(new XMLTree(HunterUtility.getBlobStr(processJob.getDocBlob()), true));
+				processJob.setXmlService(xmlService);
+				return processJob;
+			} catch (HunterRunTimeException e) {
+				e.printStackTrace();
+			} catch (ParserConfigurationException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	public synchronized void updateProcessJob(TaskProcessJob processJob){
+		TaskProcessJobHandler.getInstance().saveOrUpdateProcessJob(processJob);
+	}
+	
+	public void addSocialProcessWorker(Long processJobId, boolean saveOrUpdate, String workerName, Map<String, String> values){
+		logger.debug("Adding new worker to process job with id : " + processJobId);
+		logger.debug("Worker values : " + HunterUtility.stringifyMap(values));  
+		TaskProcessJob processJob = getSocialProcessedJob(processJobId);
+		TaskProcessJobHandler.getInstance().addWorkerToProcessJob(processJob, saveOrUpdate, workerName, values);
+	}
 	
 	
 	

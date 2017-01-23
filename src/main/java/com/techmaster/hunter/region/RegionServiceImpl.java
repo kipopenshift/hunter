@@ -799,7 +799,7 @@ public class RegionServiceImpl extends AbstractRegionService {
 		int population = Integer.parseInt(params.get("population")+""); 
 		String regionCode = HunterUtility.getStringOrNullOfObj(params.get("regionCode")); 
 		String regionName = HunterUtility.getStringOrNullOfObj(params.get("regionName")); 
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		List<Object> values = new ArrayList<>();
 		
 		if(HunterConstants.RECEIVER_LEVEL_COUNTRY.equals(type)){ 
@@ -946,7 +946,7 @@ public class RegionServiceImpl extends AbstractRegionService {
 		pageCount = pageCount == 0 ? 100 : pageCount;
 		
 		List<PagedHunterMessageReceiverJson> pageHunterMessageReceiverJsons = new ArrayList<>();
-		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		String query = hunterJDBCExecutor.getQueryForSqlId("getPagedHunterMsgReceiversForRegions");
 		
 		int index1 = query.indexOf("|:");

@@ -1,5 +1,6 @@
 
 registerNavigation("Admin Main", "Email Template Object");
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
 
 var codeMirrorEditor = null;
 
@@ -82,13 +83,13 @@ var EmailTemplateObjModel = kendo.data.Model.define({
 var EmailTemplateObjDS = new kendo.data.DataSource({
 	  transport: {
 	    read:  {
-	      url: "http://localhost:8080/Hunter/admin/action/emailTemplateObj/read",
+	      url: baseUrl + "admin/action/emailTemplateObj/read",
 	      dataType: "json",
 	      contentType:"application/json",
 	      method: "POST"
 	    },
 	    create: {
-	        url: "http://localhost:8080/Hunter/admin/action/emailTemplateObj/create",
+	        url: baseUrl + "admin/action/emailTemplateObj/create",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST",
@@ -97,13 +98,13 @@ var EmailTemplateObjDS = new kendo.data.DataSource({
 	         }
 	    },
 	    destroy: {
-	        url: "http://localhost:8080/Hunter/admin/action/emailTemplateObj/delete",
+	        url: baseUrl + "admin/action/emailTemplateObj/delete",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
 	    },
 	    update: {
-	        url: "http://localhost:8080/Hunter/admin/action/emailTemplateObj/update",
+	        url: baseUrl + "admin/action/emailTemplateObj/update",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"

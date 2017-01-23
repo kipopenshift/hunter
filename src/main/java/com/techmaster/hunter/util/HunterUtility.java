@@ -73,6 +73,7 @@ import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.exception.HunterRemoteException;
 import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.obj.beans.AuditInfo;
+import com.techmaster.hunter.obj.beans.Message;
 import com.techmaster.hunter.xml.XMLService;
 import com.techmaster.hunter.xml.XMLServiceImpl;
 import com.techmaster.hunter.xml.XMLTree;
@@ -1087,6 +1088,19 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		return json;
 	}
 	
+	public static Map<String,Double> getRationedImgDimens(double maxHeight, double maxWidth, double height, double width){
+		Map<String,Double> dimensMap = new HashMap<>();
+		if( height > maxHeight || width > maxWidth ) {
+			double ratio = maxHeight > maxWidth ? maxWidth/maxHeight : maxHeight/maxWidth;
+			height *= ratio;
+			width  *= ratio;
+		}
+		dimensMap.put("height", height);
+		dimensMap.put("width", width);
+		return dimensMap;
+		
+	}
+	
 	public static String getWhrClsFrRcvrRgnTyp(String type, Map<String,String> regionNames){
 		   logger.debug("Fetching where clause for : " + HunterUtility.stringifyMap(regionNames)); 
 		   String where = 
@@ -1137,12 +1151,8 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	}
 	
 	public static void main(String[] args) {
-		Map<String,String> params = new HashMap<String, String>();
-		params.put(HunterConstants.RECEIVER_LEVEL_COUNTRY, "Kenya");
-		params.put(HunterConstants.RECEIVER_LEVEL_COUNTY, "Bomet");
-		params.put(HunterConstants.RECEIVER_LEVEL_CONSITUENCY, "Bomet Central");
-		String where = getWhrClsFrRcvrRgnTyp(HunterConstants.RECEIVER_LEVEL_VILLAGE, params);
-		System.out.println(where);  
+		Map<String,Double> dimens = getRationedImgDimens(60d, 40d, 45d, 55d);
+		logger.debug(HunterUtility.stringifyMap(dimens));  
 	}
 	
 	public static String getLevelNameOrType(String levelNameType, final String countryName, final String countyName, String consName, String wardName){
@@ -1183,6 +1193,16 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		append(wardName);
 		
 		throw new HunterRunTimeException("Inside get level name or type : Cannot mapped the request ( " + builder.toString()  +" )"); 
+	}
+	
+	
+	public static AuditInfo getAuditInfoForSclMsg(Message message){
+		AuditInfo auditInfo = new AuditInfo();
+		auditInfo.setCreatedBy(message.getCreatedBy());
+		auditInfo.setCretDate(message.getCretDate());
+		auditInfo.setLastUpdate(message.getLastUpdate());
+		auditInfo.setLastUpdatedBy(message.getLastUpdatedBy()); 
+		return auditInfo;
 	}
 	
 	

@@ -1,6 +1,8 @@
 
 var kendoLoginHelper = null;
 
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
+
 $("document").ready(function(){
 	/*$( "form#hunterLoginForm" ).submit(function( event ) { 
 		event.preventDefault(); 
@@ -36,7 +38,7 @@ function handleLogin(){
 		$("#hunterPasswordError").html(" ");
 	}
 	
-	var url = HunterConstants.HUNTER_BASE_URL + "/login/login/home/json";
+	var url = baseUrl + "/login/login/home/json";
 	
 	/*$("#loginCover").animate({top: '250px', opacity: '0.0'},1000, function(){
 		window.location.href = "http://localhost:8080/Hunter/hunter/login/after";
@@ -67,7 +69,7 @@ function handleLogin(){
 
 
 function navigate(where){
-	window.location.href = HunterConstants.HUNTER_BASE_URL + where;
+	window.location.href = baseUrl + where;
 }
 
 function replaceAll(orginalString, regex, replaceWith){
@@ -84,3 +86,5 @@ function contains(orginalString, regex){
 	var constains_ = index != -1;
 	return constains_;
 }
+
+

@@ -19,6 +19,8 @@ public class HunterSocialMedia {
 	private String originalFileName;
 	private String mimeType;
 	private String channelType;
+	private String remoteURL;
+	private String localURL;
 	private double durationInSecs;
 	private String mediaSuffix;
 	private int width;
@@ -140,6 +142,18 @@ public class HunterSocialMedia {
 	public void setHeight(int height) {
 		this.height = height;
 	}
+	public String getRemoteURL() {
+		return remoteURL;
+	}
+	public void setRemoteURL(String remoteURL) {
+		this.remoteURL = remoteURL;
+	}
+	public String getLocalURL() {
+		return localURL;
+	}
+	public void setLocalURL(String localURL) {
+		this.localURL = localURL;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -235,6 +249,7 @@ public class HunterSocialMedia {
 				+ mimeType + ", channelType=" + channelType
 				+ ", durationInSecs=" + durationInSecs + ", mediaSuffix="
 				+ mediaSuffix + ", width=" + width + ", height=" + height
+				+ ", remoteURL=" + remoteURL + ", localURL=" + localURL
 				+ ", auditInfo=" + auditInfo + "]";
 	}
 	

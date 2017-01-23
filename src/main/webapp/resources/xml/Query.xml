@@ -1,6 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xml>
 <queries>
+	<query id="getTaskHunterClientDetails">
+		<description>
+		    Returns the user id,first name, last name, user name.s
+		</description>
+		<statement>
+		  	SELECT 
+			  h.USR_ID,
+			  h.FRST_NAM,
+			  h.LST_NAM,
+			  h.USR_NAM
+			FROM 
+			  task t,
+			  HNTR_USR h,
+			  HNTR_CLINT c
+			WHERE t.HNTR_CLNT_ID = h.USR_ID
+			AND h.USR_ID         = c.HNTR_CLNT_ID
+			AND t.HNTR_CLNT_ID   = c.HNTR_CLNT_ID
+			AND t.TSK_ID         = ?
+		</statement>
+	</query>
 	<query id="updateTaskStatus">
 		<description>
 		   This updates the status of task for the given ID
@@ -1235,6 +1255,122 @@
 			    WHEN LOWER(t.TSK_MSG_TYP) = 'text' THEN 'TXT_MSG'
 			  END AS TSK_MSG_TYP
 			FROM task t WHERE t.TSK_ID in ( :tskIds )
+		</statement>
+	</query>
+	<query id="getAssignableHunterUsers">
+		<description>
+		    This gets hunter assignable users. For a user to be assignable, the user type should be 1000 and 
+		    the user role name should be 'HUNTR_ASSGNBL_USER_ROLE'
+		</description>
+		<statement>
+		  	SELECT 
+			  h.USR_NAM AS VAL, 
+			  ( h.FRST_NAM || ' ' || h.LST_NAM || '( ' || h.EMAIL ||' )' ) AS TXT
+			FROM HNTR_USR_RLS hu, HNTR_USR h, USER_ROLE ur
+			WHERE h.ACTIV = 'Y'
+			AND h.USR_ID = hu.USR_ID
+			AND ur.ROLE_ID = hu.ROLE_ID
+			AND h.USR_TYP = '1000'
+			AND ur.RL_NAM = 'HUNTR_ASSGNBL_USER_ROLE'
+		</statement>
+	</query>
+	<query id="getSocialGroupsUsingSocialRegionId">
+		<description>
+		    Gets group id and name for social groups using given social region id.
+		</description>
+		<statement>
+		  	SELECT 
+			  gp.GP_ID, 
+			  gp.GRP_NAM 
+			FROM  HNTR_SCL_GRP gp
+			WHERE gp.SCL_RGN_ID = ?
+		</statement>
+	</query>
+	<query id="getSocialGroupsUsingSocialAppId">
+		<description>
+		    Gets group id and name for social groups using given social app id.
+		</description>
+		<statement>
+		  	SELECT 
+			  gp.GP_ID, 
+			  gp.GRP_NAM 
+			FROM  HNTR_SCL_GRP gp
+			WHERE gp.DFLT_SCL_APP = ?
+		</statement>
+	</query>
+	<query id="getAllHunterMessagesForCache">
+		<description>
+		    Retrieves all hunter messages to be loaded to cache
+		</description>
+		<statement>
+		  	SELECT 
+			  RCVR_ID,
+			  RCVR_CNTCT,
+			  RCVR_TYP,
+			  RCVR_RGN_LVL,
+			  RCVR_BLCKD,
+			  ACTV,
+			  SCCSS_DEL_TMS,
+			  FAIL_DEL_TMS,
+			  CNTRY_NAM,
+			  STATE_NAM,
+			  CNTY_NAM,
+			  CONS_NAM,
+			  WRD_NAM,
+			  RCVR_RGN_LVL_NAM,
+			  TO_CHAR(CRET_DATE, 'yyyy-MM-dd HH:mm:ss')     AS CRET_DATE,
+			  TO_CHAR(LST_UPDT_DATE, 'yyyy-MM-dd HH:mm:ss') AS LST_UPDT_DATE,
+			  CRTD_BY,
+			  LST_UPDTD_BY,
+			  FRST_NAM,
+			  LST_NAM,
+			  GVN_BY_USR_NAM
+			FROM HNTR_MSG_RCVR
+		</statement>
+	</query>
+	<query id="getSocialMsgRemteDetails">
+		<description>
+		    Get remote url is social message use remote media.
+		</description>
+		<statement>
+		  	SELECT 
+			  DECODE( m.US_RMT_MDA, 'Y', 'true','false' ) AS US_RMT_URL,
+			  d.RMT_URL AS RMT_URL
+			FROM 
+			  SCL_MSG m,
+			  HNTR_SCL_MDA d
+			WHERE m.MSG_ID = ?
+			AND d.MDA_ID   = m.MSG_ID
+		</statement>
+	</query>
+	<query id="callGetLoginDataFunc">
+		<description>
+		    Calls get get_login_data func with the given user name.
+		</description>
+		<statement>
+		  	SELECT GET_USER_LOGIN_DATA(?) AS LGN_DATA FROM DUAL
+		</statement>
+	</query>
+	<query id="getSclMsgCSVDiscintSocialType">
+		<description>
+		    Retrieve distinct comma separated social types for a given social message
+		</description>
+		<statement>
+		  	WITH grps AS 
+			( 
+			SELECT DISTINCT 
+			  sg.SCL_TYP
+			FROM 
+			  SCL_MSG_SCL_GRPS mgsg,
+			  SCL_MSG mg,
+			  HNTR_SCL_GRP sg
+			WHERE mgsg.MSG_ID = mg.MSG_ID
+			AND mg.MSG_ID     = ?
+			AND mgsg.GP_ID    = sg.GP_ID
+			)
+			SELECT listagg(grps.SCL_TYP, ',') within GROUP (
+			ORDER BY grps.SCL_TYP) AS "SCL_TYPES"
+			FROM grps grps
 		</statement>
 	</query>
 </queries>

@@ -1,6 +1,7 @@
 package com.techmaster.hunter.task;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -18,11 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.UIMessageConstants;
-import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
-import com.techmaster.hunter.dao.types.HunterMessageReceiverDao;
 import com.techmaster.hunter.dao.types.MessageDao;
-import com.techmaster.hunter.dao.types.ReceiverRegionDao;
 import com.techmaster.hunter.dao.types.ServiceProviderDao;
 import com.techmaster.hunter.dao.types.TaskDao;
 import com.techmaster.hunter.enums.HunterUserRolesEnums;
@@ -38,9 +37,13 @@ import com.techmaster.hunter.obj.beans.EmailMessage;
 import com.techmaster.hunter.obj.beans.GateWayMessage;
 import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
 import com.techmaster.hunter.obj.beans.HunterMessageReceiver;
+import com.techmaster.hunter.obj.beans.HunterSocialApp;
+import com.techmaster.hunter.obj.beans.HunterSocialGroup;
+import com.techmaster.hunter.obj.beans.HunterSocialMedia;
 import com.techmaster.hunter.obj.beans.Message;
 import com.techmaster.hunter.obj.beans.ReceiverRegion;
 import com.techmaster.hunter.obj.beans.ServiceProvider;
+import com.techmaster.hunter.obj.beans.SocialMessage;
 import com.techmaster.hunter.obj.beans.Task;
 import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.obj.beans.TaskMessageReceiver;
@@ -54,15 +57,12 @@ public class TaskManagerImpl implements TaskManager{
 	
 	private static final Logger logger = Logger.getLogger(TaskManagerImpl.class);
 	
-	@Autowired private ReceiverRegionDao receiverRegionDao;
-	@Autowired private HunterMessageReceiverDao hunterMessageReceiverDao;
 	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
 	@Autowired private ServiceProviderDao serviceProviderDao;
 	@Autowired private RegionService regionService;
 	@Autowired private MessageDao messageDao;
 	@Autowired private HunterJacksonMapper hunterJacksonMapper;
 	@Autowired private TaskDao taskDao;
-	@Autowired private HunterDaoFactory hunterDaoFactory;
 	
 	@Override
 	public List<HunterMessageReceiver> getHntrMsgRcvrsFrmRgn(String countryName, String regionLevel, String regionLevelName, String contactType, boolean activeOnly) {
@@ -154,6 +154,10 @@ public class TaskManagerImpl implements TaskManager{
 	@Override
 	public List<String> validateTask(Task task) {
 		
+		if( task.getTskMsgType().equals(HunterConstants.TASK_TYPE_SOCIAL) ){
+			return validateForSocialTask(task, HunterConstants.STATUS_APPROVED, null);
+		}
+		
 		logger.debug("Starting task validation process"); 
 		List<String> errors = new ArrayList<String>();
 		if(task.getDesiredReceiverCount() < 1 ){
@@ -244,6 +248,104 @@ public class TaskManagerImpl implements TaskManager{
 		}
 		return hasApproveRole;
 	}
+	
+	public List<String> validateForSocialTask(Task task, String status, String userName){
+		
+		logger.debug("Validating status change to "+ status +" : " + task.getTaskId()); 
+		
+		List<String> results = new ArrayList<>();
+		SocialMessage socialMsg = (SocialMessage)task.getTaskMessage();
+		
+		/* For review and draft, always pass! */
+		if(status != null && !status.equals(HunterConstants.STATUS_APPROVED)){
+			logger.debug( "Social task passed validations since it's moving away from approved status" );
+			return results;
+		}
+		
+		
+		Set<HunterSocialGroup> socialGroups = socialMsg.getHunterSocialGroups();
+		HunterSocialApp socialApp = socialMsg.getDefaultSocialApp();
+		
+		if( socialMsg.getSocialPostType().equals(HunterConstants.SOCIAL_POST_TYPE_TEXT) && !HunterUtility.notNullNotEmpty(socialMsg.getSocialPost()) ){ 
+			results.add("Social message is of type text but no text is found");
+		}else if( socialMsg.getSocialPostType().equals(HunterConstants.SOCIAL_POST_TYPE_IMAGE) && socialMsg.getSocialMedia() == null ){
+			results.add("Social message is of type image but no image is found");
+		}else if( socialMsg.getSocialPostType().equals(HunterConstants.SOCIAL_POST_TYPE_AUDIO) && socialMsg.getSocialMedia() == null ){
+			results.add("Social message is of type audio but no audio is found");
+		}else if( socialMsg.getSocialPostType().equals(HunterConstants.SOCIAL_POST_TYPE_VIDEO) && socialMsg.getSocialMedia() == null ){
+			results.add("Social message is of type video but no video is found");
+		}else if(  (  socialMsg.getSocialPostType().equals(HunterConstants.SOCIAL_POST_TYPE_LINK_NEWS) || socialMsg.getSocialPostType().equals(HunterConstants.SOCIAL_POST_TYPE_LINK_OTHER)  )&& !( socialMsg.getSocialPost() != null && socialMsg.getSocialPost().startsWith("http")) ){ 
+			results.add("Social message is of type link but no valid link is found");
+		}
+		
+		if( socialMsg.getSocialPostType() == null )
+			results.add("Social post type must be is not set");
+		
+		boolean allGrpsApprvd = true;
+		
+		/* At least a social group of given social type must have have a social app */
+		
+		if( HunterUtility.isCollectionNotEmpty(socialGroups) ){
+			
+			Map<String, String> typesBank = new HashMap<>();
+			
+			for(HunterSocialGroup socialGroup : socialGroups){
+				if( allGrpsApprvd ){
+					allGrpsApprvd = socialGroup.getStatus().equals(HunterConstants.STATUS_APPROVED);
+				}
+				String type = socialGroup.getSocialType();
+				boolean 
+				found 		 = socialGroup.getDefaultSocialApp() != null,
+				alreadyFound = Boolean.valueOf(typesBank.get(type)); 
+				if( !alreadyFound ){
+					typesBank.put(type, Boolean.toString(found)); 
+				}
+			}
+			
+			StringBuilder unFound = new StringBuilder();
+			
+			/* Social message may have default APP too */
+			String msgType = socialApp  == null ? null : socialApp.getSocialType(); 
+			boolean alreadyFound = typesBank.get(msgType) != null && Boolean.valueOf(typesBank.get(msgType));
+			
+			if( !alreadyFound ){
+				typesBank.put(msgType, Boolean.TRUE.toString()); 
+			}
+			
+			
+			for(Map.Entry<String, String> entry : typesBank.entrySet()){
+				String type = entry.getKey();
+				boolean found = Boolean.valueOf(entry.getValue()); 
+				if( !found ){
+					boolean empty = unFound.length() == 0;
+					if( !empty ){
+						unFound.append(",");
+					}
+					unFound.append(type);
+				}
+			}
+			
+			if( unFound.length() != 0){
+				results.add("Default app not found for message or all groups of types( "+ unFound +" )");
+			}
+			
+		}else{
+			/* If there is are no social groups, check how it gets posted. 
+			 * If it's posted to a group, it has to have at least a group. 
+			 * */
+			if( !socialMsg.getSocialPostAction().equals(HunterConstants.SOCIAL_POST_ACTION_TO_TIMELINE) ){
+				results.add("Post action(" + socialMsg.getSocialPostAction() + ") selected requires at least one social group!");
+			}
+		}
+		
+		
+		if( !allGrpsApprvd ){
+			results.add("Not all social groups are approved");
+		}
+		
+		logger.debug( HunterUtility.isCollectionNotEmpty(results) ? "Social task failed validation( "+ HunterUtility.stringifyList(results) +" )" : "social task passed validations!!"); 
+		return results;
+	}
 
 	@Override
 	public List<String> validateStatusChange(Long taskId, String status, String userName) {
@@ -251,6 +353,12 @@ public class TaskManagerImpl implements TaskManager{
 		logger.debug("Starting task status change validation process. Task Id = " + taskId + ". To status = " + status); 
 		
 		Task task = taskDao.getTaskById(taskId);
+		
+		if( task.getTskMsgType().equals(HunterConstants.TASK_TYPE_SOCIAL) ){
+			List<String> socialResults = validateForSocialTask(task, status, userName); 
+			return socialResults;
+		}
+		
 		Message message = task.getTaskMessage();
 		Set<ReceiverGroupJson> taskGroups = task.getTaskGroups();
 		List<String> errors = new ArrayList<>();
@@ -419,7 +527,7 @@ public class TaskManagerImpl implements TaskManager{
 	}
 
 	@Override
-	public Task cloneTask(Task task, String newOwner,String taskName, String taskDescription, AuditInfo auditInfo) {
+	public Task cloneTask(Task task, String newOwner,String taskName, String taskDescription, AuditInfo auditInfo) throws IllegalAccessException, InvocationTargetException {
 		
 		logger.debug("Starting task cloning process..."); 
 		
@@ -499,6 +607,20 @@ public class TaskManagerImpl implements TaskManager{
 			
 			
 			copy.setTaskMessage(copyEmailMessage);
+			
+		}else if (message instanceof SocialMessage){
+			
+			SocialMessage socialMessage = (SocialMessage)message;
+			SocialMessage copySocialMessage = cloneSocialMessage(socialMessage);
+			
+			copySocialMessage.setSocialPostAction(socialMessage.getSocialPostAction());
+			copySocialMessage.setCreatedBy(auditInfo.getCreatedBy());
+			copySocialMessage.setLastUpdate(auditInfo.getLastUpdate());
+			copySocialMessage.setLastUpdatedBy(auditInfo.getLastUpdatedBy());
+			copySocialMessage.setCretDate(auditInfo.getCretDate());
+			
+			
+			copy.setTaskMessage(copySocialMessage);
 			
 		} else {
 			
@@ -615,6 +737,53 @@ public class TaskManagerImpl implements TaskManager{
 		return copyEmailMessage;
 		
 	}
+	
+	public SocialMessage cloneSocialMessage(SocialMessage socialMessage) throws IllegalAccessException, InvocationTargetException {
+		
+		logger.debug("Cloning social message. Original copy : " + socialMessage);
+		
+		SocialMessage copySocialMessage = new SocialMessage();
+		
+		copySocialMessage.setActualReceivers(socialMessage.getActualReceivers());
+		copySocialMessage.setConfirmedReceivers(socialMessage.getConfirmedReceivers());
+		copySocialMessage.setCreatedBy(socialMessage.getCreatedBy());
+		copySocialMessage.setCretDate(socialMessage.getCretDate());
+		copySocialMessage.setDesiredReceivers(socialMessage.getDesiredReceivers());
+		copySocialMessage.setLastUpdate(socialMessage.getLastUpdate());
+		copySocialMessage.setLastUpdatedBy(socialMessage.getLastUpdatedBy());
+		copySocialMessage.setMsgDeliveryStatus(HunterConstants.STATUS_CONCEPTUAL);
+		copySocialMessage.setMsgOwner(socialMessage.getMsgOwner());
+		copySocialMessage.setMsgSendDate(null);
+		copySocialMessage.setMsgTaskType(socialMessage.getMsgTaskType());
+		copySocialMessage.setMsgText(socialMessage.getMsgText());
+		copySocialMessage.setProvider(socialMessage.getProvider());
+		copySocialMessage.setMsgLifeStatus(getCloneMsgLifeStatus(socialMessage.getMsgLifeStatus()));
+		copySocialMessage.setMsgSendDate(socialMessage.getMsgSendDate());
+		
+		copySocialMessage.setExternalId(socialMessage.getExternalId()); 
+		copySocialMessage.setMediaType(socialMessage.getMediaType()); 
+		copySocialMessage.setDescription(socialMessage.getDescription());
+		copySocialMessage.setSocialPost(socialMessage.getSocialPost());
+		copySocialMessage.setSocialPostType(socialMessage.getSocialPostType()); 
+		copySocialMessage.setOriginalFileFormat(socialMessage.getOriginalFileFormat());
+		copySocialMessage.setSocialMedia(socialMessage.getSocialMedia());
+		
+		copySocialMessage.setDefaultSocialApp(socialMessage.getDefaultSocialApp());
+		copySocialMessage.setHunterSocialGroups(socialMessage.getHunterSocialGroups()); 
+		
+		HunterSocialMedia copySocialMedia = new HunterSocialMedia();
+		HunterSocialMedia socialMedia 	  = socialMessage.getSocialMedia();
+		
+		BeanUtils.copyProperties(copySocialMedia, socialMedia);
+		copySocialMedia.setMediaId(null);  
+		
+		copySocialMessage.setSocialMedia(copySocialMedia);
+		
+		logger.debug("Cloning social message. The copy : " + copySocialMessage);
+		
+		return copySocialMessage;
+	}
+
 
 	private static void setDefaultMessageFields(Message message){
 		message.setActualReceivers(0);

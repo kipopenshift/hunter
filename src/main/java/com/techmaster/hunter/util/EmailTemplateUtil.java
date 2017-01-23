@@ -44,7 +44,7 @@ public class EmailTemplateUtil {
 		templateObjJson.setLastUpdate(HunterUtility.formatDate(auditInfo.getLastUpdate(), HunterConstants.DATE_FORMAT_STRING));
 		
 		logger.debug("Converting and email template object json to object: " + templateObjJson);
-		EmailTemplateObjDao emailTemplateObjDao = HunterDaoFactory.getInstance().getDaoObject(EmailTemplateObjDao.class);
+		EmailTemplateObjDao emailTemplateObjDao = HunterDaoFactory.getObject(EmailTemplateObjDao.class);
 		EmailTemplateObj templateObj = new EmailTemplateObj();
 		Long templateId = templateObjJson.getTemplateId();
 		String status = templateObjJson.getStatus();
@@ -85,7 +85,7 @@ public class EmailTemplateUtil {
 	public String validateTemplateDeletion(EmailTemplateObj emailTemplateObj) {
 		String message = "Email Template does not exist";
 		if( emailTemplateObj != null ){
-			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 			String query = hunterJDBCExecutor.getQueryForSqlId("getEmailMsgsThatUseTemplate");
 			List<Object> values = new ArrayList<>();
 			values.add(emailTemplateObj.getTemplateName());
@@ -105,7 +105,7 @@ public class EmailTemplateUtil {
 	
 	public Map<String,XMLService> getAccumulatedEmailTemplates(){
 		logger.debug("Getting accumulated email template xml services..."); 
-		EmailTemplateObjDao emailTemplateObjDao = HunterDaoFactory.getInstance().getDaoObject(EmailTemplateObjDao.class);
+		EmailTemplateObjDao emailTemplateObjDao = HunterDaoFactory.getObject(EmailTemplateObjDao.class);
 		List<EmailTemplateObj> emailTemplateObjs = emailTemplateObjDao.getAllTemplateObjs();
 		Map<String,XMLService> xmlServices = new HashMap<String, XMLService>(); 
 		XMLService metaService = null;
@@ -113,17 +113,23 @@ public class EmailTemplateUtil {
 			String templateName = emailTemplateObj.getTemplateName();
 			logger.debug("Processing email template for template name : " + templateName); 
 			String metaDataDoc = HunterUtility.getBlobStr( emailTemplateObj.getDocumentMetadata() );
-			String htmlDoc = HunterUtility.getBlobStr( emailTemplateObj.getXmlTemplates() );
-			metaService = HunterUtility.getXMLServiceForStringContent(metaDataDoc);
-			NodeList templatesList = metaService.getNodeListForPathUsingJavax("template[@name=\""+ templateName +"\"]");
-			if( templatesList != null && templatesList.getLength() != 0 ){
-				Node tempNode = templatesList.item(0);
-				Element element = metaService.getXmlTree().getDoc().createElement("content");
-				CDATASection cdata = metaService.getXmlTree().getDoc().createCDATASection( htmlDoc );
-				element.appendChild( cdata );
-				tempNode.appendChild(element);
+			if( HunterUtility.notNullNotEmpty(metaDataDoc) ){
+				String htmlDoc = HunterUtility.getBlobStr( emailTemplateObj.getXmlTemplates() );
+				metaService = HunterUtility.getXMLServiceForStringContent(metaDataDoc);
+				NodeList templatesList = metaService.getNodeListForPathUsingJavax("template[@name=\""+ templateName +"\"]");
+				if( templatesList != null && templatesList.getLength() != 0 ){
+					Node tempNode = templatesList.item(0);
+					Element element = metaService.getXmlTree().getDoc().createElement("content");
+					CDATASection cdata = metaService.getXmlTree().getDoc().createCDATASection( htmlDoc );
+					element.appendChild( cdata );
+					tempNode.appendChild(element);
+				}
+				xmlServices.put(templateName, metaService);
+			}else{
+				logger.warn("Warning warning!!!!!");
+				logger.warn("No template blob set for template name : " + emailTemplateObj.getTemplateName() + ". Setting null value to the map. Please check and delete and refresh case or fix the template object."); 
+				xmlServices.put(templateName, null);
 			}
-			xmlServices.put(templateName, metaService);
 			logger.debug("Successfully processed email template for template name : " + templateName); 
 		}
 		logger.debug("Successfully obtained accumulated email template xml services!");
@@ -136,9 +142,13 @@ public class EmailTemplateUtil {
 		Node baseRootEle = xmlService.getXmlTree().getDoc().getDocumentElement();
 		for(Map.Entry<String, XMLService> entry : xmlServices.entrySet()){
 			XMLService templateService = entry.getValue();
-			Node node = templateService.getXmlTree().getDoc().getDocumentElement();
-			Node node2 = xmlService.getXmlTree().getDoc().importNode(node, true);
-			baseRootEle.appendChild(node2);
+			if( templateService != null ){
+				Node node = templateService.getXmlTree().getDoc().getDocumentElement();
+				Node node2 = xmlService.getXmlTree().getDoc().importNode(node, true);
+				baseRootEle.appendChild(node2);
+			}else{
+				logger.warn("Warning warning!!!!!  No template service set for template name : " + entry.getKey()); 
+			}
 		}
 		logger.debug(xmlService);
 		logger.debug("Successfully merged email template xml services!");

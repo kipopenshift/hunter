@@ -22,6 +22,7 @@
 			{ 'field' : 'groupId', 		title : 'ID', 'width':'60px'		},
 			{ 'field' : 'groupName', 	title : 'Group Name'  				},
 			{ 'field' : 'regionName', 	title : 'Region Name'	     		},
+			{ 'field' : 'socialAppName', 	title : 'Default App'	     		},
 			{ 'field' : 'socialType', 	title : 'Type' 		},
 			{ 'field' : 'active',		title : 'Active','width':'100px' 	},
        		{ 'field' : 'regionCountryName', 	title : 'Country' 			},

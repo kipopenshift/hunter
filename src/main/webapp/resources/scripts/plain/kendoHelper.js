@@ -613,15 +613,22 @@ var kendoKipHelper = kendo.Class.extend({
 			func();
 		}, time);
 	},
+	confirmAndDoFunction : function(message, funcName){
+		var confirmed = confirm( message );
+		if( confirmed ){
+			var func = new Function(funcName+"()"); 
+			func();
+		}
+	},
 	showReceiversGridForRegionOrGroup : function(params ){
 		kendo.destroy( $("#selRegionMessgReceiverGrid") );
 		$("#selRegionMessgReceiverGrid").html('');
 		$("#selRegionMessgReceiverGrid").kendoGrid({
 			 pageable: {
-			    pageSize: 100,
-			    previousNext: true,
-			    refresh: true,
-			    itemsPerPage: "Contacts Per Page"
+			    pageSize	 : 100,
+			    previousNext : true,
+			    refresh		 : true,
+			    itemsPerPage : "Contacts Per Page"
 			  },
 			  columns : [
 		           	{"field":"index", "title":"Index", "width":"80px"}, 

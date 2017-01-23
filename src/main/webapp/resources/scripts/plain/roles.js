@@ -1,4 +1,6 @@
 
+var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
+
 var UserRoleModel = kendo.data.Model.define({
 	id:"roleId",
 	fields : {
@@ -33,13 +35,13 @@ var UserRoleModel = kendo.data.Model.define({
 var UserRoleDS = new kendo.data.DataSource({
 	  transport: {
 	    read:  {
-	      url: "http://localhost:8080/Hunter/admin/action/roles/read",
+	      url: baseUrl + "admin/action/roles/read",
 	      dataType: "json",
 	      contentType:"application/json",
 	      method: "POST"
 	    },
 	    create: {
-	        url: "http://localhost:8080/Hunter/admin/action/roles/create",
+	        url: baseUrl + "admin/action/roles/create",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST",
@@ -48,13 +50,13 @@ var UserRoleDS = new kendo.data.DataSource({
 	         }
 	    },
 	    destroy: {
-	        url: "http://localhost:8080/Hunter/admin/action/roles/delete",
+	        url: baseUrl + "admin/action/roles/delete",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"
 	    },
 	    update: {
-	        url: "http://localhost:8080/Hunter/admin/action/roles/edit",
+	        url: baseUrl + "admin/action/roles/edit",
 	        dataType: "json", 
 	        contentType:"application/json",
 	        method:"POST"

@@ -32,7 +32,7 @@ $("document").ready(function(){
 				$.parseJSON(str);
 				this.afterLoadingTaskMessageData(kendo.stringify(message));
 			}else{
-				var url = HunterConstants.HUNTER_BASE_URL + "/task/action/tskMsg/getDefault/" + taskBean.get("taskId");
+				var url = baseUrl + "/task/action/tskMsg/getDefault/" + taskBean.get("taskId");
 				var call = "newTxtMsgManagerInstance.afterLoadingTaskMessageData";
 				new kendoKipHelper().ajaxPostData(null, "application/json", "json", "POST", url , call);
 			}
@@ -129,7 +129,7 @@ $("document").ready(function(){
 			
 			var 
 			call = "newTxtMsgManagerInstance.afterLoadingOwners",
-			url = HunterConstants.HUNTER_BASE_URL + "/hunteruser/action/client/getAllClientsDetails";
+			url = baseUrl + "/hunteruser/action/client/getAllClientsDetails";
 			
 			new kendoKipHelper().ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url , call);
 		},
@@ -151,7 +151,7 @@ $("document").ready(function(){
 				color = 'green';
 				imgName = 'tick.png';
 			}
-			var html = '<span style="18px;color:'+ color +';font-weight:bold;" >'+ count +'</span>&nbsp;<img src="'+ HunterConstants.HUNTER_BASE_URL +'/static/resources/images/'+ imgName +'" width="12px" height="12px"   />';
+			var html = '<span style="18px;color:'+ color +';font-weight:bold;" >'+ count +'</span>&nbsp;<img src="'+ baseUrl +'/static/resources/images/'+ imgName +'" width="12px" height="12px"   />';
 			$("#newTxtMsgCharCount").html(html);
 			this.validateTxtMsg();
 		},
@@ -195,7 +195,7 @@ $("document").ready(function(){
 				taskId 		= taskBean.get("taskId"), 
 				userName 	= this.getOwnerUserNameForValue(msgOwner),
 				data 		= { "providerId":providerId,"msgText":msgText,"msgOwner":userName,"msgSts":msgSts,"taskId":taskId }, 
-				url 		= HunterConstants.HUNTER_BASE_URL + "/message/action/tskMsg/updateTxtMsg",
+				url 		= baseUrl + "/message/action/tskMsg/updateTxtMsg",
 				call 		= "newTxtMsgManagerInstance.afterSubmittingTxtMsgData",
 				callExc		= "newTxtMsgManagerInstance.closeTextMsgWindow";
 				data = JSON.stringify(data);

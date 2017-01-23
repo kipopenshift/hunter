@@ -67,6 +67,7 @@ public class XMLTree {
 				e.printStackTrace();
 			}
 		}else{
+			logger.debug("Path or xml string is null..."); 
 			throw new IllegalArgumentException("pathOrXmlString cannot be null!");
 		}
 	}

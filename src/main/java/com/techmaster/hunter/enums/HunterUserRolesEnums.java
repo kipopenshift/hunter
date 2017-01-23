@@ -8,7 +8,8 @@ public enum HunterUserRolesEnums {
 	ROLE_TASK_APPROVER("ROLE_TASK_APPROVER","Task Approver", 4),
 	ROLE_TASK_PROCESSOR("ROLE_TASK_PROCESSOR","Task Processor", 5),
 	HNTR_RW_MSG_RCVR_USR("ROLE_RAW_USER","Hunter Raw Message Receiver User", 6),
-	HUNTR_EML_TMPLT_ROLE("ROLE_EML_TMPLT_ROLE_USER","Hunter Email Template Role", 6);
+	HUNTR_EML_TMPLT_ROLE("ROLE_EML_TMPLT_ROLE_USER","Hunter Email Template Role", 7),
+	HUNTR_ASSGNBL_USER_ROLE("HUNTR_ASSGNBL_USER_ROLE","Hunter Assignable User Role", 8);
 	
 	private final String name;
 	private final String label;
@@ -31,7 +32,4 @@ public enum HunterUserRolesEnums {
 		return level;
 	}
 
-	
-	
-	
 }

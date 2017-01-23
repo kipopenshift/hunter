@@ -38,9 +38,9 @@ public class HunterMsgReceiverExtractor extends AbstractExcelExtractor<HunterMes
 	public static final String[] validHeaders = new String[]{"COUNTRY","STATE","COUNTY","CONSTITUENCY","WARD","CONTACT","RECEIVER TYPE","LEVEL","LEVEL NAME"};
 	private static Logger logger = Logger.getLogger(HunterMsgReceiverExtractor.class);
 
-	private static HunterMessageReceiverDao hunterMessageReceiverDao = HunterDaoFactory.getInstance().getDaoObject(HunterMessageReceiverDao.class);
-	private static HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
-	private static HunterImportBeanDao hunterImportBeanDao = HunterDaoFactory.getInstance().getDaoObject(HunterImportBeanDao.class);
+	private static HunterMessageReceiverDao hunterMessageReceiverDao = HunterDaoFactory.getObject(HunterMessageReceiverDao.class);
+	private static HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
+	private static HunterImportBeanDao hunterImportBeanDao = HunterDaoFactory.getObject(HunterImportBeanDao.class);
 	
 	private static Map<Integer, List<Object>> rowLists;
 	

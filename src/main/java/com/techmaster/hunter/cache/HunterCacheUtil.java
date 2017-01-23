@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -18,9 +18,10 @@ import org.w3c.dom.NodeList;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.HunterURLConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
-import com.techmaster.hunter.dao.types.HunterMessageReceiverDao;
+import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.ReceiverRegionDao;
 import com.techmaster.hunter.gateway.beans.GateWayClientHelper;
+import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.Constituency;
 import com.techmaster.hunter.obj.beans.ConstituencyWard;
 import com.techmaster.hunter.obj.beans.Country;
@@ -167,7 +168,7 @@ public class HunterCacheUtil {
 		logger.debug("Loading existent templates...");
 		String xPath = "//template/@*";
 		List<String> existentTemplates = new ArrayList<>();
-		NodeList nodeList = getInstance().getXMLService(HunterConstants.EMAIL_TEMPLATES_CACHED_SERVICE).getNodeListForPathUsingJavax(xPath); 
+		NodeList nodeList = getXMLService(HunterConstants.EMAIL_TEMPLATES_CACHED_SERVICE).getNodeListForPathUsingJavax(xPath); 
 		int length = nodeList.getLength();
 		logger.debug("Number of templates configured : " + length);
 		for( int i=0; i<length; i++) {
@@ -397,7 +398,7 @@ public class HunterCacheUtil {
 	}
 	
 	public void loadCountries(){
-		List<Country> countries = HunterDaoFactory.getInstance().getDaoObject(ReceiverRegionDao.class).getAllCountries(); 
+		List<Country> countries = HunterDaoFactory.getObject(ReceiverRegionDao.class).getAllCountries(); 
 		HunterCache.getInstance().put(HunterConstants.COUNTRIES, countries);
 	}
 	
@@ -414,7 +415,81 @@ public class HunterCacheUtil {
 	}
 	
 	public void loadReceivers(){
-		List<HunterMessageReceiver> hunterMessageReceivers_ = HunterDaoFactory.getInstance().getDaoObject(HunterMessageReceiverDao.class).getAllHunterMessageReceivers();
+		
+		logger.debug("Loading hunter message receivers into cache..."); 
+		
+		List<HunterMessageReceiver> hunterMessageReceivers_ = new ArrayList<>();
+		
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
+		String query = hunterJDBCExecutor.getQueryForSqlId("getAllHunterMessagesForCache");
+		List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, null);
+		
+		if( HunterUtility.isCollectionNotEmpty(rowMapList) ){
+			for(Map<String,Object> rowMap : rowMapList){
+				
+				boolean 
+				isBlocked = HunterUtility.getBooleanForYN(rowMap.get("RCVR_BLCKD")+""),
+				active 	  = HunterUtility.getBooleanForYN(rowMap.get("ACTV")+"");
+				
+				int
+				successDelTimes = Integer.valueOf( rowMap.get("SCCSS_DEL_TMS") == null ? "0" : rowMap.get("SCCSS_DEL_TMS").toString() ),
+				failedDelTimes = Integer.valueOf( rowMap.get("SCCSS_DEL_TMS") == null ? "0" : rowMap.get("SCCSS_DEL_TMS").toString() );
+				
+				Long 
+				receiverId = HunterUtility.getLongFromObject(rowMap.get("RCVR_ID")); 
+				
+				String 
+				type 		= HunterUtility.getStringOrNullOfObj(rowMap.get("RCVR_TYP")),
+				regonLevel 	= HunterUtility.getStringOrNullOfObj(rowMap.get("RCVR_RGN_LVL")),
+				countryName = HunterUtility.getStringOrNullOfObj(rowMap.get("CNTRY_NAM")),
+				countyName 	= HunterUtility.getStringOrNullOfObj(rowMap.get("CNTY_NAM")),
+				consName 	= HunterUtility.getStringOrNullOfObj(rowMap.get("CONS_NAM")),
+				wardName 	= HunterUtility.getStringOrNullOfObj(rowMap.get("WRD_NAM")),
+				stateName 	= HunterUtility.getStringOrNullOfObj(rowMap.get("STATE_NAM")),
+				
+				receiverContact = HunterUtility.getStringOrNullOfObj(rowMap.get("RCVR_CNTCT")),
+				regionLevelName = HunterUtility.getStringOrNullOfObj(rowMap.get("RCVR_RGN_LVL_NAM")),
+				cretDate 		= HunterUtility.getStringOrNullOfObj(rowMap.get("CRET_DATE")),
+				lastUpdatedOn 	= HunterUtility.getStringOrNullOfObj(rowMap.get("LST_UPDT_DATE")),
+				createdBy 		= HunterUtility.getStringOrNullOfObj(rowMap.get("CRTD_BY")),
+				lastUpdatedBy 	= HunterUtility.getStringOrNullOfObj(rowMap.get("LST_UPDTD_BY")),
+				firstName 		= HunterUtility.getStringOrNullOfObj(rowMap.get("FRST_NAM")),
+				lastName 		= HunterUtility.getStringOrNullOfObj(rowMap.get("LST_NAM")),
+				givenByUserName = HunterUtility.getStringOrNullOfObj(rowMap.get("GVN_BY_USR_NAM"));
+				
+				AuditInfo auditInfo = new AuditInfo();
+				auditInfo.setCreatedBy(createdBy);
+				auditInfo.setLastUpdatedBy(lastUpdatedBy);
+				auditInfo.setCretDate(HunterUtility.parseDate(cretDate, HunterConstants.DATE_FORMAT_STRING));
+				auditInfo.setLastUpdate(HunterUtility.parseDate(lastUpdatedOn, HunterConstants.DATE_FORMAT_STRING));
+				
+				
+				HunterMessageReceiver messageReceiver = new HunterMessageReceiver();
+				messageReceiver.setActive(active);
+				messageReceiver.setAuditInfo(auditInfo);;
+				messageReceiver.setBlocked(isBlocked);
+				messageReceiver.setConsName(consName);
+				messageReceiver.setCountryName(countryName);
+				messageReceiver.setCountyName(countyName);
+				messageReceiver.setFailDeliveryTimes(failedDelTimes);
+				messageReceiver.setFirstName(firstName);
+				messageReceiver.setGivenByUserName(givenByUserName);
+				messageReceiver.setLastName(lastName);
+				messageReceiver.setReceiverContact(receiverContact);
+				messageReceiver.setReceiverId(receiverId);
+				messageReceiver.setReceiverRegionLevel(regonLevel);
+				messageReceiver.setReceiverRegionLevelName(regionLevelName);
+				messageReceiver.setReceiverType(type);
+				messageReceiver.setStateName(stateName);
+				messageReceiver.setSuccessDeliveryTimes(successDelTimes);
+				messageReceiver.setConsWardName(wardName); 
+				
+				hunterMessageReceivers_.add(messageReceiver);
+			}
+		}else{
+			logger.warn("No hunter message receivers found!!"); 
+		}
+		logger.debug("Finished loading hunter message receivers. Size ( " + hunterMessageReceivers_.size() +" )" );
 		HunterCache.getInstance().put(HunterConstants.RECEIVERS, hunterMessageReceivers_);
 	}
 	

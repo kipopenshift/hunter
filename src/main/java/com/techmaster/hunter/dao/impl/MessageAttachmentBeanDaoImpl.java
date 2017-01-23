@@ -72,7 +72,7 @@ public class MessageAttachmentBeanDaoImpl implements MessageAttachmentBeanDao{
 	public List<MessageAttachmentBeanJson> getAllAttachmentBeansJson() {
 		 logger.debug("Getting all attachment beans jsons..."); 
 		 List<MessageAttachmentBeanJson> messageAttachmentBeanJsons = new ArrayList<MessageAttachmentBeanJson>();
-		 HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		 HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		 String query = hunterJDBCExecutor.getQueryForSqlId("getAllMessageAttachmentJson");
 		 List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, null);
 		 if( rowMapList != null && !rowMapList.isEmpty() ){
@@ -88,7 +88,7 @@ public class MessageAttachmentBeanDaoImpl implements MessageAttachmentBeanDao{
 	@Override
 	public MessageAttachmentBeanJson getAttachmentBeanJsonById(Long attachmentId) {
 		logger.debug("Getting all attachment bean json for id : " + attachmentId); 
-		 HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject(HunterJDBCExecutor.class);
+		 HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		 String query = hunterJDBCExecutor.getQueryForSqlId("getMessageAttachmentJsonForId");
 		 List<Object> values = new ArrayList<>();
 		 values.add(attachmentId);

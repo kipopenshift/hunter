@@ -6,6 +6,11 @@
 <script src="<c:url value='/static/resources/scripts/plain/createNewTextMessage.js'/>"></script>
 <script src="<c:url value='/static/resources/scripts/plain/createNewSocialMessage.js'/>"></script>
 
+
+
+<script src="<c:url value='/static/resources/scripts/plain/processSocialMsg.js'/>"></script>
+<script src="<c:url value='/static/resources/scripts/plain/hunterFacebookProcessor.js'/>"></script>
+
 <%-- <script src="<c:url value='/static/resources/scripts/model/regionVM.js'/>"></script> --%>
 
 <div id="hunterUserGrid" style="width:98%;margin-left:1%;border : 1px solid : #E2EFF2;border-radius:4px;margin-top:0%;margin-bottom:0.5%;" >
@@ -28,7 +33,7 @@
 		<div style="border:1px solid white;" id="taskGridHolder" >
       		
       		<div id="selectedUserClientTasks" style="width:100%;height:100%; border : 1px solid #9CD0E6; border-radius:4px;background=color:#FAFEFF;" >
-      			<h3 id="noDataH3ForHunterClientDetails"  style="color:#620B01;padding-left:2%;">To load user, please select user and click 'Load' button.</h3>
+      			<h3 id="noDataH3ForHunterClientDetails"  style="color:#620B01;padding-left:2%;">No tasks loaded.</h3>
       		</div>
       		
       		
@@ -1180,7 +1185,7 @@
 			</div>
 		</p>
 		<span class='cloneTaskWarningMessage' style="width:200px;" >A copy of <span id="cloneTaskNameLabel" style="font-weight:bold;font-size:14px;text-decoration: underline;" ></span> will be created.<br/>Are you sure?</span>
-		<table style="width:30%;margin-left:30%;margin-bottom:10px;" >
+		<table style="width:30%;margin-left:25%;margin-bottom:10px;" >
 			<tr>
 				<td><button id="startTaskClongingButton"  onClick="hunterAdminClientUserVM.processCloning()"  class="k-button" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:100px;" ><span class='k-icon k-i-tick' ></span><span id='startTaskClongingLabel' >Yes</span></button></td>
 				<td><button onClick="kendoKipHelperInstance.closeWindowWithOnClose()"  class="k-button" style="background-color:rgb(212,239,249);border : 1px solid rgb(120,186,210);width:100px;" ><span class='k-icon k-i-cancel' ></span>Cancel</button></td>
@@ -1331,6 +1336,8 @@ var processJobData =
 
 
 
+
+<script src="//connect.facebook.net/en_US/all.js&appId=1188666857860363" type="text/javascript"></script>
 
 </body>
 </html>

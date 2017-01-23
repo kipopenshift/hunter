@@ -563,7 +563,7 @@ public class RegionController extends HunterBaseController {
 			logger.debug("Fetching contacts for receiver group : " + groupId);
 			
 			/* groupId,msg_typ,pageNo,pageSize,pageNo,pageSize */
-			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getInstance().getDaoObject( HunterJDBCExecutor.class );
+			HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject( HunterJDBCExecutor.class );
 			String query =  hunterJDBCExecutor.getQueryForSqlId("getReceiverGroupContacts");
 			
 			List<Object> values = new ArrayList<>();
