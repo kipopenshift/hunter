@@ -107,8 +107,8 @@ public class TaskScheduledUpdaterJob extends TimerTask {
 			tableName = "EMAIL_MSG";
 			break;
 		default:
-			logger.debug("Message type not defined yet( "+ msgType +" ). Returning...");
-			return;
+			logger.debug("Message type not defined yet( "+ msgType +" ). Throwing exception...");
+			throw new IllegalArgumentException( "Table name(" + tableName + ") could not be found!!" );
 		}
 		XMLService xmlService  = TaskProcessJobHandler.getInstance().getTaskProcessJobForKey(processJobKey).getXmlService();
 		String sendDate = xmlService.getTextValue("//results/context/startDate");  

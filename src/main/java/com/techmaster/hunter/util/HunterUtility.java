@@ -680,7 +680,7 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		if(objects == null || objects.length == 0) return null;
 		StringBuilder builder = new StringBuilder();
 		if(objects.length == 1) {
-			return objects[0].toString();
+			return HunterUtility.getStringOrNullOfObj(objects[0].toString()); 
 		}else{
 			for(Object obj : objects){
 				String str = String.valueOf(obj);
