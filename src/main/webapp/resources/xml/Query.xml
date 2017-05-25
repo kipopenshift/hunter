@@ -1373,4 +1373,13 @@
 			FROM grps grps
 		</statement>
 	</query>
+	<query id="getAssignableRawUsersForDropdowns">
+		<description>
+		    Retrieves text value pairs for assignable rawreceiverusers.
+		</description>
+		<statement>
+		  	SELECT hu.USR_NAM AS VALUE,hu.FRST_NAM || ' ' || hu.LST_NAM || '(' || hu.EMAIL || ')' as TEXT FROM HNTR_RW_RCVR_USR u, HNTR_USR hu
+			WHERE hu.USR_ID = u.USR_ID
+		</statement>
+	</query>
 </queries>

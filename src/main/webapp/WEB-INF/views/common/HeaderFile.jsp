@@ -101,9 +101,16 @@ function registerNavigation(parent, child){
 				navigate("/social/action/socialApp/home"); 
 			}
 		}
+		
+
+		function getBaseURL(){
+			var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter";
+			return baseUrl;
+		}
 
 		function navigate(url){
-			window.location.href = baseUrl + url;
+			var url_ = getBaseURL() + url;
+			window.location.href = url_;
 		}
 		
 	});

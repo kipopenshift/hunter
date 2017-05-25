@@ -42,9 +42,10 @@ var kendoKipHelper = kendo.Class.extend({
 		$("#kendoWindowWithOnCloseFunc_wnd_title").html(value);
 	},
 	initNewNotification : function(){
-		var notif_ = $("#newNotification").data("kendoNotification");
-		if(notif_ == null){
-			$("#newNotification").kendoNotification({
+		var notificationElement = $("#newNotification"); 
+		var instance = this;
+		if( notificationElement.data("kendoNotification") == null){
+			instance.newNotification = notificationElement.kendoNotification({
 	            position: {
 	                pinned: true,
 	                top: 30,
@@ -63,11 +64,19 @@ var kendoKipHelper = kendo.Class.extend({
 	                template: $("#successTemplate").html()
 	            }]
 
-	        });
-			notif_ = $("#newNotification").data("kendoNotification");
-			this.newNotification = notif_;
+	        }).data("kendoNotification");
+			if( $("#newNotification").data("kendoNotification") == null ){
+				console.log( "newNotification is not set !!!!" );
+			}else{
+				console.log( "newNotification is now set !!!!" );
+			}
 		}
-		$(document).one("kendo:pageUnload", function(){ if (notification) { notification.hide(); } });
+		var newNotitication_ = this.newNotification;
+		$("document").one("kendo:pageUnload", function(){ 
+			if ( newNotitication_ ) {
+				newNotitication_.hide(); 
+			} 
+		});
 	},
 	showEmailNotification : function(title_, message_){
 		var this_not = this.newNotification;
@@ -513,7 +522,7 @@ var kendoKipHelper = kendo.Class.extend({
 		console.log("loading content from URL(" + url +")"); 
 		$.get(url, function(contents) {
 			  $('#' + elementId).append(contents);
-			  console.log("Successfully loaded contents from URL(" + url +")"); 
+			  console.log("Successfully loaded contents from URL(" + url +")");
 		});
 	},
 	/* 

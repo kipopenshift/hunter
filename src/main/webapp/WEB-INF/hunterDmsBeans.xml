@@ -83,11 +83,6 @@
 		</constructor-arg> 
 	</bean>
 	
-	<bean id="getUserLoginData" class="com.techmaster.hunter.dao.proc.FunctionHandler">
-		<constructor-arg name="jdbcTemplate" ref="jdbcTemplate" index="0" />
-		<constructor-arg name="funcNam" value="GET_USER_LOGIN_DATA" index="1" />
-	</bean>
-	
 	<bean id="get_msg_ids_usng_attchmnt_id" class="com.techmaster.hunter.dao.proc.ProcedureHandler">
 		<constructor-arg name="jdbcTemplate" ref="jdbcTemplate" index="0" />
 		<constructor-arg name="procName" value="get_msg_ids_usng_attchmnt_id" index="1" />

@@ -2,10 +2,12 @@ package com.techmaster.hunter.constants;
 
 public interface HunterURLConstants {
 	
-	public static final String RESOURCE_BASE_PATH = "C:\\Users\\hillangat\\programming\\workspaces\\Hunter\\Hunter\\Hunter\\src\\main\\webapp\\resources\\";
-	public static final String RESOURCE_BASE_IMAGES_PATH = "C:\\Users\\hillangat\\programming\\workspaces\\Hunter\\Hunter\\src\\main\\webapp\\resources\\images\\";
-	public static final String RESOURCE_BASE_XML_PATH = "C:\\Users\\hillangat\\programming\\workspaces\\Hunter\\Hunter\\src\\main\\webapp\\resources\\xml\\";
-	public static final String RESOURCE_BASE_WORKBOOK_PATH = "C:\\Users\\hillangat\\programming\\workspaces\\Hunter\\Hunter\\src\\main\\webapp\\resources\\workbooks\\";
+	public static final String COMPUTER_USER_BASE_URL = "C:\\Users\\hillangat\\git\\hunter\\";
+	
+	public static final String RESOURCE_BASE_PATH = COMPUTER_USER_BASE_URL + "src\\main\\webapp\\resources\\";
+	public static final String RESOURCE_BASE_IMAGES_PATH = COMPUTER_USER_BASE_URL + "src\\main\\webapp\\resources\\images\\";
+	public static final String RESOURCE_BASE_XML_PATH = COMPUTER_USER_BASE_URL + "src\\main\\webapp\\resources\\xml\\";
+	public static final String RESOURCE_BASE_WORKBOOK_PATH = COMPUTER_USER_BASE_URL + "src\\main\\webapp\\resources\\workbooks\\";
 	
 	public static final String HUNTER_CONFIG_XML_PATH = RESOURCE_BASE_XML_PATH + "\\ClientConfig.xml";
 	public static final String QRY_XML_FL_LOC_PATH = RESOURCE_BASE_XML_PATH + "Query.xml";

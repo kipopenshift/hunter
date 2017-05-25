@@ -21,12 +21,15 @@ import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.HunterURLConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
+import com.techmaster.hunter.dao.types.HunterRawReceiverUserDao;
 import com.techmaster.hunter.exception.HunterRunTimeException;
+import com.techmaster.hunter.json.HunterSelectValue;
 import com.techmaster.hunter.json.HunterSocialAppJson;
 import com.techmaster.hunter.json.HunterSocialGroupJson;
 import com.techmaster.hunter.json.HunterSocialRegionJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
-import com.techmaster.hunter.obj.beans.HunterDaoList;
+import com.techmaster.hunter.obj.beans.HunterRawReceiver;
+import com.techmaster.hunter.obj.beans.HunterRawReceiverUser;
 import com.techmaster.hunter.obj.beans.HunterSocialApp;
 import com.techmaster.hunter.obj.beans.HunterSocialGroup;
 import com.techmaster.hunter.obj.beans.HunterSocialMedia;
@@ -58,7 +61,8 @@ public class HunterSocialHelper {
 	}
 	
 	public Map<String,Object> getSclMsgRmtDetails(Long msgId){
-		List<Object> values = new HunterDaoList().add(msgId).toList();
+		List<Object> values = new ArrayList<>();
+		values.add(msgId);
 		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 		String query = hunterJDBCExecutor.getQueryForSqlId("getSocialMsgRemteDetails");
 		List<Map<String,Object>> rowtMapList = hunterJDBCExecutor.executeQueryRowMap(query, values);
@@ -124,12 +128,14 @@ public class HunterSocialHelper {
 		
 		logger.debug("Creating or updating social app ( " + hunterSocialAppJson +" )"); 
 		boolean updateApp = hunterSocialAppJson.getAppId() != 0 && hunterSocialAppJson.getAppId() != null;
-		HunterSocialApp socialApp = new HunterSocialApp();
+		HunterSocialApp socialApp = null;
 		
 		if( updateApp ){
 			socialApp = HunterHibernateHelper.getEntityById(hunterSocialAppJson.getAppId(), HunterSocialApp.class);
 			auditInfo.setCreatedBy(socialApp.getAuditInfo().getCreatedBy());
 			auditInfo.setCretDate(socialApp.getAuditInfo().getCretDate());
+		}else{
+			 socialApp = new HunterSocialApp();
 		}
 		
 		socialApp.setAppConfigs(null);
@@ -139,7 +145,6 @@ public class HunterSocialHelper {
 		socialApp.setExtrnlId(hunterSocialAppJson.getExtrnlId()); 
 		socialApp.setSocialType(hunterSocialAppJson.getSocialType()); 
 		socialApp.setExtrnalPassCode(hunterSocialAppJson.getExtrnalPassCode()); 
-		HunterSocialHelper.getInstance().createHunterSocialApp(socialApp);
 		
 		if( updateApp ){
 			logger.debug("Updating ( " + socialApp +" )"); 
@@ -229,7 +234,7 @@ public class HunterSocialHelper {
 		return null;
 	}
 	
-	public HunterSocialGroup createOrUpdateSocialGroup(HunterSocialGroupJson socialGroupJson, AuditInfo auditInfo){
+	public HunterSocialGroupJson createOrUpdateSocialGroup(HunterSocialGroupJson socialGroupJson, AuditInfo auditInfo){
 		
 		logger.debug("Converting json to social group : " + socialGroupJson); 
 		
@@ -276,7 +281,7 @@ public class HunterSocialHelper {
 			HunterHibernateHelper.saveEntity(socialGroup); 
 		}
 		
-		return socialGroup;
+		return socialGroupJson;
 	}
 	
 	private Map<String, String> getSocialRegionNames(HunterSocialRegion socialRegion){
@@ -567,7 +572,9 @@ public class HunterSocialHelper {
 		Map<String, String> contextParams = new HashMap<>();
 		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class); 
 		String query = hunterJDBCExecutor.getQueryForSqlId("getSclMsgCSVDiscintSocialType");
-		Object clients = hunterJDBCExecutor.executeQueryForOneReturn(query, new HunterDaoList().add(taskId).toList());
+		List<Object> values = new ArrayList<>();
+		values.add(taskId);
+		Object clients = hunterJDBCExecutor.executeQueryForOneReturn(query, values);
 		contextParams.put("genStatus", HunterConstants.STATUS_PARTIAL);
 		contextParams.put("numberOfWorkers", Integer.toString(0)); 
 		contextParams.put("totalMsgs", Integer.toString(0));
@@ -610,7 +617,21 @@ public class HunterSocialHelper {
 	
 	
 	
-	
+	public List<HunterSelectValue> getAssignableRawReceiverUsers(){
+		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getDaoObject(HunterJDBCExecutor.class);
+		String query = hunterJDBCExecutor.getQueryForSqlId("getAssignableRawUsersForDropdowns");
+		List<Map<String, Object>> rowMapList = hunterJDBCExecutor.executeQueryRowMap(query, null);
+		List<HunterSelectValue>  selects = new ArrayList<>();
+		if( HunterUtility.isCollectionNotEmpty(rowMapList) ){ 
+			for( Map<String, Object> rowMap : rowMapList ){
+				HunterSelectValue hunterSelectValue = new HunterSelectValue();
+				hunterSelectValue.setText(rowMap.get("TEXT").toString());
+				hunterSelectValue.setValue(rowMap.get("VALUE").toString());
+				selects.add(hunterSelectValue);
+			}
+		}
+		return selects;		
+	}
 	
 	
 	

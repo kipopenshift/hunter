@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -39,11 +40,11 @@ import com.techmaster.hunter.email.HunterEmailTemplateHandler;
 import com.techmaster.hunter.enums.TaskHistoryEventEnum;
 import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.gateway.beans.GateWayClientHelper;
+import com.techmaster.hunter.json.HunterSocialAppJson;
 import com.techmaster.hunter.json.MessageAttachmentBeanJson;
 import com.techmaster.hunter.json.SocialMessageJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.EmailMessage;
-import com.techmaster.hunter.obj.beans.HunterDaoList;
 import com.techmaster.hunter.obj.beans.HunterEmailTemplateBean;
 import com.techmaster.hunter.obj.beans.HunterSocialApp;
 import com.techmaster.hunter.obj.beans.HunterSocialGroup;
@@ -481,7 +482,6 @@ public class MessageConstroller extends HunterBaseController implements ServletC
 		socialMessage.setSocialPostAction(socialMessageJson.getSocialPostAction()); 
 		
 		
-		
 		Long defaultSclAppId = socialMessageJson.getDefaultSocialAppId();
 		HunterSocialApp socialApp = defaultSclAppId == null ? null : HunterHibernateHelper.getEntityById(defaultSclAppId, HunterSocialApp.class);
 		socialMessage.setDefaultSocialApp(socialApp);
@@ -501,7 +501,8 @@ public class MessageConstroller extends HunterBaseController implements ServletC
 		if( socialMedia != null && !socialMessageJson.isUseRemoteMedia() ){
 			
 			String delete = "DELETE FROM HNTR_SCL_MDA WHERE MDA_ID = ?";
-			List<Object> values = HunterDaoList.list(socialMessage.getMsgId()).toList();
+			List<Object> values = new ArrayList<>();
+			values.add(socialMessage.getMsgId());
 			hunterJDBCExecutor.executeUpdate(delete, values);
 			
 			socialMessage.setSocialMedia(socialMedia);
@@ -527,6 +528,14 @@ public class MessageConstroller extends HunterBaseController implements ServletC
 			messageDao.insertMessage(socialMessage);
 		}
 		return HunterUtility.setJSONObjectForSuccess(null, "Successfully saved changes!").toString();
+	}
+	
+	
+	@RequestMapping(value="/action/social/apps/dropdown", method = RequestMethod.POST )
+	@Produces("application/json") 
+	@ResponseBody
+	public List<HunterSocialAppJson> getSocialAppDropdownVals(){
+		return HunterSocialHelper.getInstance().getAllSocialAppsJsons();
 	}
 	
 

@@ -112,7 +112,7 @@ var ReceiverGroupDS = new kendo.data.DataSource({
 	        contentType:"application/json",
 	        method:"POST",
 	        success: function(result) {
-	            kendoKipHelperInstance.popupWarning('', JSON.stringify(result), "Success");
+	            //kendoKipHelperInstance.popupWarning('', JSON.stringify(result), "Success");
 	         }
 	    },
 	    update: {
@@ -211,7 +211,6 @@ var receiverGroupVM = kendo.observable({
 		console.log("Finished initializing receiver groups VM!");
 		this.afterInit();
 		var html = kendoKipHelperInstance.createSimpleTable(null,null);
-		kendoKipHelperInstance.showSimplePopup("Testing table",html);
 	},
 	afterInit : function(){
 		this.populateClientDetailsData();

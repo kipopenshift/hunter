@@ -68,8 +68,6 @@ public class RawReceiverController extends HunterBaseController{
 	@Autowired private HunterRawReceiverDao hunterRawReceiverDao;
 	@Autowired private HunterRawReceiverUserDao hunterRawReceiverUserDao;
 	@Autowired private RawReceiverService rawReceiverService;
-	@Autowired private RegionService regionService;
-	@Autowired private ProcedureHandler get_region_names_for_ids;
 	@Autowired private HunterUserDao hunterUserDao;
 	
 	
@@ -77,6 +75,17 @@ public class RawReceiverController extends HunterBaseController{
 	@ResponseBody
 	public String loginHome(){
 		return "access/login";
+	}
+	
+	@RequestMapping(value="/user/register", method=RequestMethod.POST)
+	@ResponseBody
+	public String registerRawReceiverUser(HttpServletRequest request){
+		
+		String 
+		firstName = request.getParameter("firstName"),
+		lastName  = request.getParameter("firstName");
+		
+		return "views/registerRawReceiverUser";
 	}
 	
 

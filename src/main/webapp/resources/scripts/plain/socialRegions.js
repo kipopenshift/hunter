@@ -402,6 +402,7 @@ var SocialRegionsVM = kendo.observable({
 	},
 	afterCreateSocialRegion : function(data){
 		kendoKipHelperInstance.closeWindowWithOnClose();
+		alert( data );
 		data = $.parseJSON(data);
     	if(data != null){
     		var status = data.status;
@@ -509,6 +510,7 @@ var SocialRegionsDS = new kendo.data.DataSource({
 
 
 $("document").ready(function(){
+	kendoKipHelperInstance.init();
 	SocialRegionsVM.init();
 });
 

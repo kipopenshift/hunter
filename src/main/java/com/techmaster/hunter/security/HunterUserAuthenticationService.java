@@ -2,7 +2,6 @@ package com.techmaster.hunter.security;
 
 import java.sql.Blob;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,7 +29,6 @@ import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterUserDao;
 import com.techmaster.hunter.exception.HunterRunTimeException;
-import com.techmaster.hunter.obj.beans.HunterDaoList;
 import com.techmaster.hunter.obj.beans.HunterUser;
 import com.techmaster.hunter.obj.beans.UserLoginBean;
 import com.techmaster.hunter.util.HunterHibernateHelper;
@@ -78,10 +76,11 @@ public class HunterUserAuthenticationService {
 	
 	public XMLService getLoginData(String userName){
 		XMLService xmlService = null;
-		HunterDaoList daoList = new HunterDaoList().add(userName);
+		List<Object> values = new ArrayList<>();
+		values.add(userName);
 		HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getDaoObject(HunterJDBCExecutor.class);
 	    String query = hunterJDBCExecutor.getQueryForSqlId("callGetLoginDataFunc");
-	    String result = HunterUtility.getStringOrNullOfObj(hunterJDBCExecutor.executeQueryForOneReturn(query, daoList.toList()));
+	    String result = HunterUtility.getStringOrNullOfObj(hunterJDBCExecutor.executeQueryForOneReturn(query, values));
 	    if( HunterUtility.notNullNotEmpty(result) ){
 	    	xmlService = HunterUtility.getXMLServiceForStringContent( "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" + result);
 	    }

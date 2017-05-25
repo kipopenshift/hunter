@@ -397,9 +397,10 @@ public class HunterCacheUtil {
 		return uiMessages.get(msgId+"_DESC");
 	}
 	
-	public void loadCountries(){
+	public List<Country> loadCountries(){
 		List<Country> countries = HunterDaoFactory.getObject(ReceiverRegionDao.class).getAllCountries(); 
 		HunterCache.getInstance().put(HunterConstants.COUNTRIES, countries);
+		return countries;
 	}
 	
 	public boolean isCountriesLoaded(){
@@ -409,9 +410,13 @@ public class HunterCacheUtil {
 	}
 	
 	public List<Country> getAllCountries(){
+		if( !isCountriesLoaded() ){
+			return loadCountries();
+		}
 		@SuppressWarnings("unchecked")
-		List<Country> countries = (List<Country> )HunterCache.getInstance().get(HunterConstants.COUNTRIES); 
+		List<Country> countries = (List<Country> )HunterCache.getInstance().get(HunterConstants.COUNTRIES);
 		return countries;
+		
 	}
 	
 	public void loadReceivers(){
