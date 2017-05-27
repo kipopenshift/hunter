@@ -60,6 +60,9 @@ public class RegionServiceImpl extends AbstractRegionService {
 		}
 		
 		logger.debug("Populating random receivers for country >> " + country);
+		
+		hunterMessageReceiverDao = hunterMessageReceiverDao == null ? hunterMessageReceiverDao = HunterDaoFactory.getDaoObject(HunterMessageReceiverDao.class) : hunterMessageReceiverDao;
+		
 		Long maxPhoneNum = hunterMessageReceiverDao.getMaxPhoneNumberForRnadomReceiverForCountry(country.getCountryName());
 		String code = country.getCountryCode();
 		
@@ -151,16 +154,16 @@ public class RegionServiceImpl extends AbstractRegionService {
 		}
 		
 		logger.debug("Populating random receivers for county >> " + rowMap.get("CNTY_NAM")); 
-		Long maxPhoneNum = hunterMessageReceiverDao.getMaxPhoneNumberForRnadomReceiverForCountry(rowMap.get("CNTRY_NAM").toString());
+		Long maxPhoneNum = hunterMessageReceiverDao.getMaxPhoneNumberForRnadomReceiverForCountry(rowMap.get("COUNTRYNAME").toString());
 		
-		String code = rowMap.get("CNTY_CDE") != null ? rowMap.get("CNTY_CDE").toString() : null;
+		String code = rowMap.get("COUNTYCODE") != null ? rowMap.get("COUNTYCODE").toString() : null;
 		
 		if(code == null){
-			code = rowMap.get("CNTRY_CODE") != null ? rowMap.get("CNTRY_CODE").toString() : null;
+			code = rowMap.get("COUNTRYCODE") != null ? rowMap.get("COUNTRYCODE").toString() : null;
 			logger.warn("County code is not set for county. Using country code to generate phone numbers >> country code ( " + code + " )");
 		}
 		
-		if(maxPhoneNum == null){
+		if(maxPhoneNum == null || maxPhoneNum == 0){
 			maxPhoneNum = HunterUtility.getLongFromObject(code + "700000001");
 			logger.debug("No phone number seed found for the country. Generated a seed >> " + maxPhoneNum); 
 		}else{
@@ -172,18 +175,20 @@ public class RegionServiceImpl extends AbstractRegionService {
 		for(int i=0; i< countyCount; i++){
 			HunterMessageReceiver hunterMessageReceiver = new HunterMessageReceiver();
 			hunterMessageReceiver.setActive(true);
-			hunterMessageReceiver.setAuditInfo(HunterUtility.getAuditInforForNow(new Date(), "hlangat01", new Date(), "hlangat01"));
+			hunterMessageReceiver.setAuditInfo(HunterUtility.getAuditInforForNow(new Date(), "admin", new Date(), "admin"));
 			hunterMessageReceiver.setBlocked(false);
-			hunterMessageReceiver.setCountryName(rowMap.get("CNTRY_NAM").toString());
-			hunterMessageReceiver.setCountyName(rowMap.get("CNTY_NAM").toString());
+			hunterMessageReceiver.setCountryName(rowMap.get("COUNTRYNAME").toString());
+			hunterMessageReceiver.setCountyName(rowMap.get("COUNTYNAME").toString());
 			hunterMessageReceiver.setFailDeliveryTimes(0);
 			hunterMessageReceiver.setReceiverContact(Long.toString(maxPhoneNum)); 
-			hunterMessageReceiver.setReceiverRegionLevelName(rowMap.get("CNTY_NAM").toString()); 
+			hunterMessageReceiver.setReceiverRegionLevelName(rowMap.get("COUNTYNAME").toString()); 
 			maxPhoneNum++;
 			hunterMessageReceiver.setReceiverRegionLevel(HunterConstants.RECEIVER_LEVEL_COUNTY); 
 			hunterMessageReceiver.setReceiverType(HunterConstants.RECEIVER_TYPE_TEXT); 
 			hunterMessageReceivers.add(hunterMessageReceiver);
 		}
+		
+		hunterMessageReceiverDao.insertHunterMessageReceivers(hunterMessageReceivers); 
 		
 		logger.debug("Successfully finished generating random receivers for county ( " + rowMap.get("CNTY_NAM") + " ) \n " + HunterUtility.stringifyList(hunterMessageReceivers));
 		

@@ -425,7 +425,11 @@ public class MessageConstroller extends HunterBaseController implements ServletC
 		Long msdId = HunterUtility.getLongFromObject(params.get("msgId"));
 		if( HunterUtility.notNullNotEmpty(msdId) ){  
 			EmailMessage emailMessage = (EmailMessage)messageDao.getMessageById(msdId);
-			data = GateWayClientHelper.getInstance().rplcMsgAttchmntKysWthNms(emailMessage);
+			try{
+				data = GateWayClientHelper.getInstance().rplcMsgAttchmntKysWthNms(emailMessage);
+			}catch (NullPointerException e) {
+				data = null;
+			}
 		}
 		data = data == null ? "NO DATA" : data;
 		return data;

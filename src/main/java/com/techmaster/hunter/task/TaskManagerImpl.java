@@ -560,7 +560,7 @@ public class TaskManagerImpl implements TaskManager{
 		copy.setTaskApprover(null); 
 		copy.setTaskBudget(task.getTaskBudget()); // make the budget zero first.
 		copy.setTaskCost(task.getTaskCost()); 
-		copy.setTaskDateline(null);
+		copy.setTaskDateline(HunterUtility.getFutureDate(HunterConstants.YEAR, HunterConstants.DEFAULT_NUMBER_OF_YEARS_TASK_IS_ACTIVE)); // get default date line.
 		copy.setTaskDeliveryStatus(HunterConstants.STATUS_CONCEPTUAL);
 		copy.setTaskLifeStatus(HunterConstants.STATUS_DRAFT);
 		copy.setTaskName(taskName);

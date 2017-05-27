@@ -231,7 +231,7 @@ public class TaskDaoImpl implements TaskDao{
 		List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{userName});
 		Map<Integer, List<Object>> rowMapList = hunterJDBCExecutor.executeQueryRowList(query, values);
 		List<Object> rowList = rowMapList == null ? new ArrayList<>() : rowMapList.get(1); 
-		String taskNames = rowList.isEmpty() ? null : rowList.get(0).toString();
+		String taskNames = rowList.isEmpty() ? null : rowList.get(0) != null ? rowList.get(0).toString() : null;
 		logger.debug("Task names : " + taskNames); 
 		return taskNames;
 	}

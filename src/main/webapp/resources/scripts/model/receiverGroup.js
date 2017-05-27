@@ -2,6 +2,8 @@
 registerNavigation("Groups", "Receiver Groups");
 
 var kendoKipHelperInstance = new kendoKipHelper();
+kendoKipHelperInstance.init();
+
 var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
 
 var ReceiverGroupModel = kendo.data.Model.define({

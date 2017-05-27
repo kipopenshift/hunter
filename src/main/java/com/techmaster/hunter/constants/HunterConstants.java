@@ -1,3 +1,4 @@
+
 package com.techmaster.hunter.constants;
 
 public class HunterConstants {
@@ -116,6 +117,14 @@ public class HunterConstants {
 	
 	// date 
 	public static final String DATE_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss";
+	
+	public static final String YEAR 	= "YEAR";
+	public static final String MONTH 	= "MONTH";
+	public static final String DAY 		= "DAY";
+	public static final String HOUR 	= "HOUR";
+	public static final String MINUTE 	= "MINUTE";
+	public static final String SECOND 	= "SECOND";
+	public static final String WEEK 	= "WEEK";
 	
 	
 	// Media types 
@@ -284,6 +293,8 @@ public class HunterConstants {
 	public static final String SOCIAL_POST_ACTION_TO_TIMELINE = "Post To Timeline";
 	
 	public static final String SOCIAL_MEDIA_IN_USER_SESSION = "socialMediaInUserSession";
+	
+	public static final int DEFAULT_NUMBER_OF_YEARS_TASK_IS_ACTIVE = 3;
 	
 }
 

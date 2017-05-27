@@ -1,7 +1,9 @@
 
 var 
-kendoKipHelperInstance,
-hunterWindow;
+kendoKipHelperInstance = new kendoKipHelper();
+kendoKipHelperInstance.init();
+
+var hunterWindow;
 
 var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
 
@@ -941,8 +943,6 @@ var hunterAdminClientUserVM = kendo.observable({
 	
 	beforeInit : function(){
 		console.log("before init...");
-		kendoKipHelperInstance = new kendoKipHelper();
-		kendoKipHelperInstance.init();
 		console.log("Preparing to initialized hunterAdminClientUserVM...");
 		this.prepareTabStrips();
 	},
@@ -3053,6 +3053,9 @@ var hunterAdminClientUserVM = kendo.observable({
 		for(var i=0; i<json.length;i++){
 			hunterAdminClientUserVM.get("existentTemplateNames").push(json[i]);
 		}
+		if( hunterAdminClientUserVM.get("existentTemplateNames").length == 0 ){
+			kendoKipHelperInstance.showErrorOrSuccessMsg(HunterConstants.STATUS_FAILED, "No email templates found!");
+		}
 	},
 	onChangeTaskEmailMsgSendDate : function(e){
 		
@@ -3140,6 +3143,10 @@ var hunterAdminClientUserVM = kendo.observable({
     },
     displayAllCurrentTemplates : function(){
     	var templateName = this.getNextTemplateName();
+    	if( templateName == null ){
+    		kendoKipHelperInstance.showErrorOrSuccessMsg(HunterConstants.STATUS_FAILED, "Template is null!!"); 
+    		return;
+    	}
     	templateName = templateName.replace(/ /g, '+');
     	var url = baseUrl + "message/action/tskMsg/email/getEmailTemplateForName/" + templateName;
     	$( "#allHunterEmailTemplates" ).load( url , function() {

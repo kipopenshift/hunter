@@ -1,6 +1,5 @@
 <%@include file="../common/HeaderFile.jsp"%>
 
-<script src="<c:url value='/static/resources/scripts/plain/kendoHelper.js'/>"></script>
 <script src="<c:url value='/static/resources/scripts/model/receiverGroup.js'/>"></script>
 
 <div id="receiverGroupVM" >

@@ -45,6 +45,7 @@ import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.obj.beans.TextMessage;
 import com.techmaster.hunter.obj.converters.TaskConverter;
 import com.techmaster.hunter.obj.converters.TaskProcessJobConverter;
+import com.techmaster.hunter.region.RegionService;
 import com.techmaster.hunter.task.TaskManager;
 import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
@@ -486,14 +487,21 @@ public class TaskController extends HunterBaseController{
 		String taskIdStr = HunterUtility.getStringOrNullFromJSONObj(requestBodyJson, "taskId");
 		String groupIdStr = HunterUtility.getStringOrNullFromJSONObj(requestBodyJson, "groupId");
 
-		if (!HunterUtility.notNullNotEmpty(taskIdStr)|| !HunterUtility.notNullNotEmpty(groupIdStr)) {
+		if (!HunterUtility.notNullNotEmpty(taskIdStr) || !HunterUtility.notNullNotEmpty(groupIdStr) || groupIdStr.equalsIgnoreCase("null") || taskIdStr.equalsIgnoreCase("null") ) {
 			json.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_FAILED);
 			json.put("Message", "Task or group id is invalid!");
 			return json.toString();
 		}
-
-		Long taskId = HunterUtility.getLongFromObject(requestBodyJson.getLong("taskId"));
-		Long groupId = HunterUtility.getLongFromObject(requestBodyJson.getLong("groupId"));
+		
+		Long taskId = HunterUtility.getLongOrNulFromJSONObj(requestBodyJson, "taskId");
+		Long groupId = HunterUtility.getLongOrNulFromJSONObj(requestBodyJson, "groupId");
+		
+		if( taskId == null || groupId == null ){
+			json.put(HunterConstants.STATUS_STRING, HunterConstants.STATUS_FAILED);
+			json.put("Message", "Task or group id is invalid!");
+			return json.toString();
+		}
+		
 		String groupName = receiverGroupDao.getGroupNameById(groupId);
 		String results = taskManager.addGroupToTask(groupId, taskId);
 		

@@ -34,8 +34,8 @@ var kendoKipHelper = kendo.Class.extend({
 		return input;
 	},
 	afterInit : function(){
-		this.initNewNotification();
 		this.initWindowWithOnClose();
+		this.initNewNotification();
 		console.log("KendoHelper helper initialized successfully!!");
 	},
 	setValueToWithOnCloseTitle : function(value){
@@ -66,9 +66,9 @@ var kendoKipHelper = kendo.Class.extend({
 
 	        }).data("kendoNotification");
 			if( $("#newNotification").data("kendoNotification") == null ){
-				console.log( "newNotification is not set !!!!" );
+				alert( "newNotification is not set !!!!" );
 			}else{
-				console.log( "newNotification is now set !!!!" );
+				alert( "newNotification is now set !!!!" );
 			}
 		}
 		var newNotitication_ = this.newNotification;

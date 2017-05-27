@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -1203,6 +1204,36 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		auditInfo.setLastUpdate(message.getLastUpdate());
 		auditInfo.setLastUpdatedBy(message.getLastUpdatedBy()); 
 		return auditInfo;
+	}
+	
+	public static Date getFutureDate( String type, int count ){
+		
+		if( type == null || count == 0){
+			return new Date();
+		}
+		
+		Calendar cal = Calendar.getInstance();
+		
+		if( type.equals( HunterConstants.YEAR ) ){
+			cal.add(Calendar.YEAR, count); // to get previous year add -1
+		}else if( type.equals( HunterConstants.MONTH ) ){
+			cal.add(Calendar.MONTH, count); // to get previous year add -1
+		}else if( type.equals( HunterConstants.DAY ) ){
+			cal.add(Calendar.DAY_OF_MONTH, count); // to get previous year add -1
+		}else if( type.equals( HunterConstants.WEEK ) ){
+			cal.add(Calendar.WEEK_OF_YEAR, count); // to get previous year add -1
+		}else if( type.equals( HunterConstants.HOUR ) ){
+			cal.add(Calendar.HOUR, count); // to get previous year add -1
+		}else if( type.equals( HunterConstants.MINUTE ) ){
+			cal.add(Calendar.MINUTE, count); // to get previous year add -1
+		}else if( type.equals( HunterConstants.SECOND ) ){
+			cal.add(Calendar.SECOND, count); // to get previous year add -1
+		}else{
+			throw new IllegalArgumentException( "Invalid future time type : " + type );
+		}
+		
+		Date futureDate = cal.getTime();
+		return futureDate;
 	}
 	
 	

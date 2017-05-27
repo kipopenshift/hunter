@@ -9,6 +9,7 @@ HunterConstants.MESSAGE_STRING = "message";
 HunterConstants.STATUS_STRING = "status";
 HunterConstants.STATUS_FAILED = "Failed";
 HunterConstants.STATUS_SUCCESS = "Success";
+
 HunterConstants.getBaseURL = function(loc) {
     return location.protocol + "//" + location.hostname +
        (location.port && ":" + location.port) + "/" + loc;

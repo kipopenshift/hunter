@@ -18,7 +18,7 @@ public interface HunterURLConstants {
 	public static final String EMAIL_CONFIGS__LOCL_PATH = RESOURCE_BASE_XML_PATH + "emailConfigs.xml";
 	public static final String TASK_PROCESS_JOBS_TEMPLATE = RESOURCE_BASE_XML_PATH + "tskPcssJobTemplate.xml";
 	public static final String OZEKI_TEST_RSPONSE_XML_LOCL_PATH = RESOURCE_BASE_XML_PATH + "ozekiTestResponse.xml";
-	public static final String RESOURCE_TEMPL_FOLDER = "C:\\Users\\hillangat\\programming\\workspaces\\Hunter\\Hunter\\src\\main\\webapp\\resources\\tempFolder";
+	public static final String RESOURCE_TEMPL_FOLDER = COMPUTER_USER_BASE_URL + "src\\main\\webapp\\resources\\tempFolder";
 	public static final String POST_LOGIN_URL = "http://localhost:8080/Hunter/hunter/login/after";
 	public static final String TESTING_ATTCHMENT_PATH = RESOURCE_BASE_PATH + "\\Notes\\testing_attachment.txt";
 	public static final String LOGIN_DATA_SEE_XML  = RESOURCE_BASE_XML_PATH +  "loginDataSeed.xml";
