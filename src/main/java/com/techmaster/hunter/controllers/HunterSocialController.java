@@ -118,10 +118,14 @@ public class HunterSocialController extends HunterBaseController{
 	
 	@Produces("application/json")
 	@Consumes("application/json")
-	@RequestMapping(value="/action/regions/destroy", method = RequestMethod.POST)
+	@RequestMapping(value="/action/regions/delete", method = RequestMethod.POST)
 	@ResponseBody
-	public String deleteSocialRegions( @RequestBody HunterSocialRegionJson hunterSocialRegionJson ){
-		String message = HunterSocialHelper.getInstance().validateAndDeleteSocialRegion(hunterSocialRegionJson.getRegionId());
+	public String deleteSocialRegions( @RequestBody Map<String, String> socialRegionId ){
+		Long regionId = HunterUtility.getLongFromObject(socialRegionId.get("regionId")); 
+		if( regionId == null || regionId == 0 ){
+			return HunterUtility.setJSONObjectForFailure(null, "Region id("+ regionId +") is invalid").toString();
+		}
+		String message = HunterSocialHelper.getInstance().validateAndDeleteSocialRegion(regionId);
 		if( message == null){
 			return HunterUtility.setJSONObjectForSuccess(null, "Successfully deleted social region").toString();
 		}else{
@@ -133,17 +137,20 @@ public class HunterSocialController extends HunterBaseController{
 	@Consumes("application/json")
 	@RequestMapping(value="/action/regions/createOrUpdate", method = RequestMethod.POST)
 	@ResponseBody
-	public HunterSocialRegionJson updateSocialRegions( @RequestBody HunterSocialRegionJson hunterSocialRegionJson ){
-		HunterSocialHelper.getInstance().createOrUpdateSocialRegion(hunterSocialRegionJson, getAuditInfo());
-		return hunterSocialRegionJson;
+	public String updateSocialRegions( @RequestBody HunterSocialRegionJson hunterSocialRegionJson ){
+		HunterSocialRegion socialRegion = HunterSocialHelper.getInstance().createOrUpdateSocialRegion(hunterSocialRegionJson, getAuditInfo());
+		if( socialRegion != null && hunterSocialRegionJson.getRegionId() >0  ){
+			return HunterUtility.setJSONObjectForSuccess(null, "Successfully updated social region").toString();
+		}else{
+			return HunterUtility.setJSONObjectForFailure(null, "Social region update failed!").toString(); 
+		}
 	}
 	
 	
 	@Produces("application/json")
-	@Consumes("application/json")
 	@RequestMapping(value="/action/region/getAssignableHunterUsers", method = RequestMethod.POST)
 	@ResponseBody
-	public List<HunterSelectValue> getAssignableHunterUsers( @RequestBody HunterSocialRegionJson hunterSocialRegionJson ){
+	public List<HunterSelectValue> getAssignableHunterUsers( ){
 		return HunterSocialHelper.getInstance().getAssignableRawReceiverUsers();
 	}
 	

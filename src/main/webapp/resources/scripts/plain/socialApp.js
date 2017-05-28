@@ -2,7 +2,9 @@
 
 var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
 registerNavigation("Groups", "Social Apps");
+
 var kendoKipHelperInstance = new kendoKipHelper();
+kendoKipHelperInstance.init();
 
 
 var SocialAppModel = kendo.data.Model.define({

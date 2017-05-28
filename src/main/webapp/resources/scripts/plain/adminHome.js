@@ -1,5 +1,7 @@
  
 var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
+kendoKipHelperInstance = new kendoKipHelper();
+kendoKipHelperInstance.init();
 
 var hunterUserAddressesModel = kendo.data.Model.define({
 	id:"id",
@@ -138,8 +140,6 @@ var hunterAdminClientUserVM = kendo.observable({
 		this.afterInit();
 	},
 	afterInit : function(){
-		kendoKipHelperInstance = new kendoKipHelper();
-		kendoKipHelperInstance.init();
 		//this.createUserTabstrips();
 		this.populateUserRoles();
 		console.log("Finished initialization of hunter admin VM!!"); 

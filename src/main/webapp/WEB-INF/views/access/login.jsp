@@ -101,8 +101,10 @@
 
 	<table id="spinnerTable" style="display:none;" >
 		<tr>
-			<td style="font-size:16px;" >Please wait...</td>
-			<td><img id="loginSpinnerImg" width="30px" height="30px" src=""></td>
+			<td style="width:60px;text-align:center;" ><img id="loginSpinnerImg" width="30px" height="30px" src=""></td>
+		</tr>
+		<tr>
+			<td style="font-size:16px;width:100px;text-align:center;" >Please wait...</td>
 		</tr>
 	</table>
 

@@ -98,9 +98,9 @@ var SocialRegionsVM = kendo.observable({
 	constituencies	: [],
 	wards      		: [{regionId : 1,regionName:"Chesoen"},{regionId : 2,regionName:"Kapkoros"}],
 	
-	SocialRegionsDS_ : null,
-	isEverVisible : true,
-	selSocialRegionId : 0,
+	SocialRegionsDS_ 	: null,
+	isEverVisible 		: true,
+	selSocialRegionId 	: 0,
 	selSocialRegionTemp : null,
 	selSocialRegion	: {
 		"regionId"			:0,		"regionName"		:null,	"regionDesc"		:null, "population"			:0,
@@ -402,7 +402,6 @@ var SocialRegionsVM = kendo.observable({
 	},
 	afterCreateSocialRegion : function(data){
 		kendoKipHelperInstance.closeWindowWithOnClose();
-		alert( data );
 		data = $.parseJSON(data);
     	if(data != null){
     		var status = data.status;

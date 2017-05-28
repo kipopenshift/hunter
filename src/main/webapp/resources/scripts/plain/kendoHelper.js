@@ -20,7 +20,9 @@ var kendoKipHelper = kendo.Class.extend({
 	},
 	loadTemplate : function(){
 		$.get('/Hunter/static/resources/uiTemplates/kendoHelperTemplate.html', function(templates) {
-			  $('body').append(templates);
+			/* Some times it gets added multiple times for some reason. Remove existent before adding again. */
+			$('#kendoHelperTemplateCover').remove();
+			$('body').append(templates);
 		});
 	},
 	init : function(){
@@ -65,11 +67,6 @@ var kendoKipHelper = kendo.Class.extend({
 	            }]
 
 	        }).data("kendoNotification");
-			if( $("#newNotification").data("kendoNotification") == null ){
-				alert( "newNotification is not set !!!!" );
-			}else{
-				alert( "newNotification is now set !!!!" );
-			}
 		}
 		var newNotitication_ = this.newNotification;
 		$("document").one("kendo:pageUnload", function(){ 

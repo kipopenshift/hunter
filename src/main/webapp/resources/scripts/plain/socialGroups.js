@@ -2,6 +2,7 @@
 registerNavigation("Groups", "Social Groups");
 
 var kendoKipHelperInstance = new kendoKipHelper();
+kendoKipHelperInstance.init();
 
 var SocialGroupModel = kendo.data.Model.define({
 	id:"groupId",
@@ -204,7 +205,6 @@ var SocialGroupsVM = kendo.observable({
 		
 	},
 	beforeInit : function(){
-		kendoKipHelperInstance.init();
 		this.set("SocialGroupsDS_",SocialGroupsDS);
 		this.set("selSocialGroupTemp",this.get("selSocialGroup")); 
 		console.log("Getting ready to load receiver groups...");

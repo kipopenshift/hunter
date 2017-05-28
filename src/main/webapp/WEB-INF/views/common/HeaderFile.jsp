@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="<c:url value='/static/resources/css/fancyCss.css'/>">
  --%>
  <script src="<c:url value='/static/resources/scripts/plain/kendoHelper.js'/>"></script>
+ 
  <script src="<c:url value='/static/resources/scripts/plain/hunter.js'/>"></script>
  <script src="<c:url value='/static/resources/scripts/plain/hunterConstants.js'/>"></script>
  <link rel="stylesheet" href="<c:url value='/static/resources/css/hunter.css'/>">
@@ -44,6 +45,7 @@
 <script type="text/javascript">
 
 function registerNavigation(parent, child){
+	
 	$("#currLocPar").html(parent);
 	$("#currLocChld").html(child);
 }
@@ -57,6 +59,7 @@ function registerNavigation(parent, child){
 		function openSubMenu() {
 			$(this).find('ul').css('visibility', 'visible');
 		};
+		
 		function closeSubMenu() {
 			$(this).find('ul').css('visibility', 'hidden');	
 		};

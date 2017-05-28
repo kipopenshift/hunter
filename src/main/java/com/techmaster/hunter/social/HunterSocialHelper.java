@@ -21,15 +21,12 @@ import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.HunterURLConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
-import com.techmaster.hunter.dao.types.HunterRawReceiverUserDao;
 import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.json.HunterSelectValue;
 import com.techmaster.hunter.json.HunterSocialAppJson;
 import com.techmaster.hunter.json.HunterSocialGroupJson;
 import com.techmaster.hunter.json.HunterSocialRegionJson;
 import com.techmaster.hunter.obj.beans.AuditInfo;
-import com.techmaster.hunter.obj.beans.HunterRawReceiver;
-import com.techmaster.hunter.obj.beans.HunterRawReceiverUser;
 import com.techmaster.hunter.obj.beans.HunterSocialApp;
 import com.techmaster.hunter.obj.beans.HunterSocialGroup;
 import com.techmaster.hunter.obj.beans.HunterSocialMedia;
@@ -391,49 +388,52 @@ public class HunterSocialHelper {
 	}
 	
 	
+	public HunterSocialRegionJson getSocialRegionJSONForRegion( HunterSocialRegion socialRegion ){
+		
+		Map<String,String> regionNames = getSocialRegionNames(socialRegion);
+		HunterSocialRegionJson socialRegionJson = new HunterSocialRegionJson();
+		
+		
+		String 
+		countryName 		= regionNames.get(HunterConstants.RECEIVER_LEVEL_COUNTRY), 
+		countyName 			= regionNames.get(HunterConstants.RECEIVER_LEVEL_COUNTY),
+		constituencyName 	= regionNames.get(HunterConstants.RECEIVER_LEVEL_CONSITUENCY),
+		wardName 			= regionNames.get(HunterConstants.RECEIVER_LEVEL_WARD);
+		
+		socialRegionJson.setCountryName(countryName);
+		socialRegionJson.setCountyName(countyName);
+		socialRegionJson.setWardName(wardName);
+		socialRegionJson.setConsName(constituencyName);
+		
+		socialRegionJson.setCountryId(socialRegion.getCountryId());
+		socialRegionJson.setCountyId(socialRegion.getCountyId()); 
+		socialRegionJson.setConsId(socialRegion.getConsId()); 
+		socialRegionJson.setWardId(socialRegion.getWardId()); 
+		
+		socialRegionJson.setPopulation(socialRegion.getPopulation());
+		socialRegionJson.setAssignedTo(socialRegion.getAssignedTo());
+		socialRegionJson.setCoordinates(HunterUtility.getBlobStr(socialRegion.getCoordinates())); 
+		socialRegionJson.setRegionDesc(socialRegion.getRegionDesc());
+		socialRegionJson.setRegionId(socialRegion.getRegionId());
+		socialRegionJson.setRegionName(socialRegion.getRegionName());
+		socialRegionJson.setPopulation(socialRegion.getPopulation());
+		
+		socialRegionJson.setCreatedBy(socialRegion.getAuditInfo().getCreatedBy());
+		socialRegionJson.setCretDate(HunterUtility.formatDate(socialRegion.getAuditInfo().getCretDate(), HunterConstants.DATE_FORMAT_STRING));
+		socialRegionJson.setLastUpdate(HunterUtility.formatDate(socialRegion.getAuditInfo().getLastUpdate(), HunterConstants.DATE_FORMAT_STRING));
+		socialRegionJson.setLastUpdatedBy(socialRegion.getAuditInfo().getLastUpdatedBy());
+		
+		return socialRegionJson;
+	}
+	
 	
 	public List<HunterSocialRegionJson> getAllSocialRegionsJsons(){
-		
 		List<HunterSocialRegion> socialRegions = HunterHibernateHelper.getAllEntities(HunterSocialRegion.class);
 		List<HunterSocialRegionJson> socialRegionJsons = new ArrayList<>();
-		
 		for(HunterSocialRegion socialRegion : socialRegions){
-			
-			Map<String,String> regionNames = getSocialRegionNames(socialRegion);
-			HunterSocialRegionJson socialRegionJson = new HunterSocialRegionJson();
-			
-			String 
-			countryName 		= regionNames.get(HunterConstants.RECEIVER_LEVEL_COUNTRY), 
-			countyName 			= regionNames.get(HunterConstants.RECEIVER_LEVEL_COUNTY),
-			constituencyName 	= regionNames.get(HunterConstants.RECEIVER_LEVEL_CONSITUENCY),
-			wardName 			= regionNames.get(HunterConstants.RECEIVER_LEVEL_WARD);
-			
-			socialRegionJson.setCountryName(countryName);
-			socialRegionJson.setCountyName(countyName);
-			socialRegionJson.setWardName(wardName);
-			socialRegionJson.setConsName(constituencyName);
-			
-			socialRegionJson.setCountryId(socialRegion.getCountryId());
-			socialRegionJson.setCountyId(socialRegion.getCountyId()); 
-			socialRegionJson.setConsId(socialRegion.getConsId()); 
-			socialRegionJson.setWardId(socialRegion.getWardId()); 
-			
-			socialRegionJson.setPopulation(socialRegion.getPopulation());
-			socialRegionJson.setAssignedTo(socialRegion.getAssignedTo());
-			socialRegionJson.setCoordinates(HunterUtility.getBlobStr(socialRegion.getCoordinates())); 
-			socialRegionJson.setRegionDesc(socialRegion.getRegionDesc());
-			socialRegionJson.setRegionId(socialRegion.getRegionId());
-			socialRegionJson.setRegionName(socialRegion.getRegionName());
-			socialRegionJson.setPopulation(socialRegion.getPopulation());
-			
-			socialRegionJson.setCreatedBy(socialRegion.getAuditInfo().getCreatedBy());
-			socialRegionJson.setCretDate(HunterUtility.formatDate(socialRegion.getAuditInfo().getCretDate(), HunterConstants.DATE_FORMAT_STRING));
-			socialRegionJson.setLastUpdate(HunterUtility.formatDate(socialRegion.getAuditInfo().getLastUpdate(), HunterConstants.DATE_FORMAT_STRING));
-			socialRegionJson.setLastUpdatedBy(socialRegion.getAuditInfo().getLastUpdatedBy());
-			
+			HunterSocialRegionJson socialRegionJson = getSocialRegionJSONForRegion(socialRegion);
 			socialRegionJsons.add(socialRegionJson);
 		}
-		
 		return socialRegionJsons;
 	}
 
@@ -463,10 +463,11 @@ public class HunterSocialHelper {
 		
 		if( socialRegionJson.getRegionId() != null &&  socialRegionJson.getRegionId() != 0){
 			logger.debug("Updating the social region...");
-			HunterHibernateHelper.updateEntity(socialRegion); 
+			HunterHibernateHelper.updateEntity(socialRegion);
 		}else{
 			logger.debug("Creating the social region...");
-			HunterHibernateHelper.saveEntity(socialRegion); 
+			HunterHibernateHelper.saveEntity(socialRegion);
+			socialRegionJson.setRegionId(socialRegion.getRegionId());
 		}
 		
 		return socialRegion;
@@ -631,6 +632,11 @@ public class HunterSocialHelper {
 			}
 		}
 		return selects;		
+	}
+
+	public HunterSocialRegionJson getSocialRegionJsonForId(Long regionId) {
+		HunterSocialRegionJson regionJson = getSocialRegionJSONForRegion(HunterHibernateHelper.getEntityById(regionId, HunterSocialRegion.class));
+		return regionJson;
 	}
 	
 	

@@ -1,6 +1,5 @@
 <%@include file="../common/HeaderFile.jsp"%>
 
-<script src="<c:url value='/static/resources/scripts/plain/kendoHelper.js'/>"></script>
 <script src="<c:url value='/static/resources/scripts/model/hunterAdminClientHuntler.js'/>"></script>
 <script src="<c:url value='/static/resources/scripts/model/taskProcessProgress.js'/>"></script>
 <script src="<c:url value='/static/resources/scripts/plain/createNewTextMessage.js'/>"></script>

@@ -1,5 +1,4 @@
 
-var kendoLoginHelper = null;
 
 var baseUrl = location.protocol + "//" + location.hostname + (location.port && ":" + location.port) +  "/Hunter/";
 
@@ -8,7 +7,6 @@ $("document").ready(function(){
 		event.preventDefault(); 
 		handleLogin(); 
 	});*/
-	kendoLoginHelper = new kendoKipHelper();
 });
 
 
@@ -62,7 +60,7 @@ function handleLogin(){
 	}).fail(function (data){
 		var error = data.statusText + "(" + data.status + ")";
 		console.log(error);
-		kendoLoginHelper.popupWarning(error, "FAILED");
+		alert( "Error : " + error );
 	});
 	  
 }

@@ -35,7 +35,7 @@ $("document").ready(function(){
 			}else{
 				var url = baseUrl + "/task/action/tskMsg/getDefault/" + taskBean.get("taskId");
 				var call = "newTxtMsgManagerInstance.afterLoadingTaskMessageData";
-				new kendoKipHelper().ajaxPostData(null, "application/json", "json", "POST", url , call);
+				kendoKipHelperInstance.ajaxPostData(null, "application/json", "json", "POST", url , call);
 			}
 		},
 		afterLoadingTaskMessageData : function(message){
@@ -139,7 +139,7 @@ $("document").ready(function(){
 		loadUsersData : function(){
 			var call = "newTxtMsgManagerInstance.afterLoadingOwners";
 			var url = baseUrl + "/hunteruser/action/client/getAllClientsDetails";
-			new kendoKipHelper().ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url , call);
+			kendoKipHelperInstance.ajaxPostDataForJsonResponse(null, "application/json", "json", "POST", url , call);
 		},
 		afterLoadingOwners : function(data){
 			createTxtMsgOwnersData = $.parseJSON(data);
@@ -208,7 +208,7 @@ $("document").ready(function(){
 				callExc		= "newTxtMsgManagerInstance.closeTextMsgWindow";
 				data = JSON.stringify(data);
 				
-				new kendoKipHelper().ajaxPostDataWithCall(data, "application/json", "json", "POST", url , call,callExc);
+				kendoKipHelperInstance.ajaxPostDataWithCall(data, "application/json", "json", "POST", url , call,callExc);
 			}
 		},
 		afterSubmittingTxtMsgData : function(data){
