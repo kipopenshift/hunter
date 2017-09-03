@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
+import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -86,6 +87,7 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 			conn.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			throw new HunterRunTimeException(e.getMessage());
 		}finally{
 			HunterHibernateHelper.closeConnection(conn);
 		}
