@@ -13,7 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -68,7 +68,7 @@ public class HunterAuthenticationProvider implements AuthenticationProvider {
         if(error == null){
             if(refRoles != null && !refRoles.isEmpty()){
             	for(String role : refRoles){
-            		grantedAuths.add(new GrantedAuthorityImpl(role));
+            		grantedAuths.add(new SimpleGrantedAuthority (role));
             	}
             }else{
             	error = "No permissions granted! Please contact Hunter Security administrator.";
