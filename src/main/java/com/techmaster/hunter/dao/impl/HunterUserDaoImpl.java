@@ -12,7 +12,11 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.techmaster.hunter.constants.HunterDaoConstants;
 import com.techmaster.hunter.dao.types.HunterAddressDao;
 import com.techmaster.hunter.dao.types.HunterCreditCardDao;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
@@ -28,9 +32,12 @@ import com.techmaster.hunter.util.HunterSessionFactory;
 import com.techmaster.hunter.util.HunterUtility;
 
 public class HunterUserDaoImpl implements HunterUserDao{
-
-	private static HunterCreditCardDao hunterCreditCardDao = new HunterCreditCardDaoImpl();
-	private static HunterAddressDao hunterAddressDao = new HunterAddressDaoImpl();
+	
+	@Autowired HunterSessionFactory hunterSessionFactory;
+	@Autowired HunterHibernateHelper hunterHibernateHelper;
+	@Autowired private HunterMessageDaoHelper hunterMessageDaoHelper;
+	@Autowired private HunterAddressDao hunterAddressDao;
+	@Autowired private HunterCreditCardDao hunterCreditCardDao;
 	//private Logger logger = Logger.getLogger(getClass());
 	
 	private static Long maxAddressId;
@@ -39,10 +46,15 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	private static HunterJDBCExecutor hunterJDBCExecutor = HunterDaoFactory.getObject(HunterJDBCExecutor.class);
 
 	
-	static{
-		maxAddressId = hunterAddressDao.getNextAddressId() - 1;
-		maxCreditCardId = hunterCreditCardDao.getNextCreditCardId() - 1;
+	
+	public HunterUserDaoImpl() {
+		super();
+		if( hunterAddressDao != null && hunterCreditCardDao != null ){
+			maxAddressId = hunterAddressDao.getNextAddressId() - 1;
+			maxCreditCardId = hunterCreditCardDao.getNextCreditCardId() - 1;
+		}
 	}
+
 	
 	public void refreshAllMaxIds(){
 		maxAddressId = hunterAddressDao.getNextAddressId() - 1;
@@ -53,10 +65,10 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	public void insertHunterUser(HunterUser user) {
 		
 
-		HunterMessageDaoHelper.refreshMapAndCurrentIds();
+		hunterMessageDaoHelper.refreshMapAndCurrentIds();
 		refreshAllMaxIds();
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -110,7 +122,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	@Override
 	public void insertHunterUsers(List<HunterUser> hunterUsers) {
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -132,7 +144,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 
 	@Override
 	public void deleteHunterUserById(Long userId) {
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		try {
@@ -155,7 +167,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 
 	@Override
 	public void deleteHunterUser(HunterUser user) {
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -177,7 +189,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 
 	@Override
 	public HunterUser getHunterUserById(Long id) {
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		HunterUser user = null;
@@ -201,7 +213,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	@Override
 	public List<HunterUser> getAllUsers() {
 		//logger.debug("Loading all users...");
-		List<HunterUser> users = HunterHibernateHelper.getAllEntities(HunterUser.class);
+		List<HunterUser> users = hunterHibernateHelper.getAllEntities(HunterUser.class);
 		//logger.debug("Finished loading all users! Size ( " + users.size() + " )");
 		return users;
 	}
@@ -214,7 +226,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 		Transaction trans = null;
 		
 		try {
-			SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+			SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 			session = sessionFactory.openSession();
 			trans = session.beginTransaction();
 			session.update(update);
@@ -234,7 +246,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	public HunterUser getUserByUserName(String userName){
 		//logger.debug("Fetching user of user name (" + userName + ")");  
 		String query = "FROM HunterUser h WHERE h.userName = '" + userName + "'";
-		List<HunterUser> hunterUsers = HunterHibernateHelper.executeQueryForObjList(HunterUser.class, query);
+		List<HunterUser> hunterUsers = hunterHibernateHelper.executeQueryForObjList(HunterUser.class, query);
 		//logger.debug("Successfully obtained user. Size of list : " + hunterUsers.size());
 		// this assumes that userName is a unique field.
 		return hunterUsers.isEmpty() ? null : hunterUsers.get(0);
@@ -244,7 +256,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	@Override
 	public Long getNextUserId() {
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -354,7 +366,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	public List<UserLoginBean> getUserLoginBeanByUserName(String userName) {
 		String query = "SELECT h.userLoginBean FROM HunterUser h WHERE h.userName = '" + userName + "'";
 		//logger.debug("Executing query : " + query); 
-		List<UserLoginBean> userLoginBeans = HunterHibernateHelper.executeQueryForObjList(UserLoginBean.class, query);
+		List<UserLoginBean> userLoginBeans = hunterHibernateHelper.executeQueryForObjList(UserLoginBean.class, query);
 		//logger.debug("Obtained user login bean : " + HunterUtility.stringifyList(userLoginBeans)); 
 		return userLoginBeans;
 	}
@@ -362,7 +374,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 	@Override
 	public void updateUserLoginBean(UserLoginBean userLoginBean) {
 		//logger.debug("Updating user login bean : " + userLoginBean); 
-		HunterHibernateHelper.updateEntity(userLoginBean);
+		hunterHibernateHelper.updateEntity(userLoginBean);
 		//logger.debug("Successfully updated user login bean!"); 
 	}
 
@@ -400,6 +412,32 @@ public class HunterUserDaoImpl implements HunterUserDao{
 		//logger.debug("Finished loading users who are clients..."); 
 		return hunterUserJsons;
 		 
+	}
+
+
+	@Override
+	public String getClientsForAngularUI() {
+		HunterJDBCExecutor executor = HunterDaoFactory.getDaoObject(HunterJDBCExecutor.class);
+		String query = executor.getQueryForSqlId(HunterDaoConstants.GET_CLIENTS_FOR_ANGULAR_QUERY);
+		Map<Integer, List<Object>> rowListMap = executor.executeQueryRowList(query, null);
+		JSONArray clients = new JSONArray();
+		for( Map.Entry<Integer, List<Object>> entry : rowListMap.entrySet() ){
+			List<Object> rowList = entry.getValue();
+			JSONObject clientRow = new JSONObject();			
+			clientRow.put("clientId", rowList.get(0));
+			clientRow.put("firstName", rowList.get(1));
+			clientRow.put("lastName", rowList.get(2));
+			clientRow.put("email", rowList.get(3));
+			clientRow.put("userName", rowList.get(4));
+			clientRow.put("receiver", HunterUtility.getBooleanForYN(rowList.get(5).toString()));
+			clientRow.put("clientTotalBudget", rowList.get(6));
+			clientRow.put("createdDate", rowList.get(7));
+			clientRow.put("createdBy", rowList.get(8));
+			clientRow.put("lastUpdatedBy", rowList.get(9));
+			clientRow.put("updatedOn", rowList.get(10));
+			clients.put(clientRow);
+		}
+		return clients.toString();
 	}
 	
 	

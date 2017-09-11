@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.techmaster.hunter.obj.beans.AudioMessage;
 import com.techmaster.hunter.obj.beans.EmailMessage;
@@ -29,13 +30,17 @@ public class HunterMessageDaoHelper {
 	
 	private static Logger LOGGER = HunterLogFactory.getLog(HunterMessageDaoHelper.class);
 	
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
 	
-	static{
-		refreshMaxMessageIdMap();
-		refreshCurrentMaxMessageIds();
+	
+	public HunterMessageDaoHelper(){
+		if( hunterHibernateHelper != null ){
+			refreshMaxMessageIdMap();
+			refreshCurrentMaxMessageIds();
+		}
 	}
 	
-	public static void refreshMaxMessageIdMap(){
+	public void refreshMaxMessageIdMap(){
 		
 		LOGGER.debug("populating max message id map"); 
 		
@@ -74,16 +79,16 @@ public class HunterMessageDaoHelper {
 	}
 	
 	
-	public static Long getNextMessageId(Class<?> clss) { 
+	public Long getNextMessageId(Class<?> clss) { 
 		if(clss == null) throw new IllegalArgumentException("Class for which the id is sought is required. clss >> " + clss);  
-		Long nextId = HunterHibernateHelper.getMaxEntityIdAsNumber(clss, Long.class, "msgId");
+		Long nextId = hunterHibernateHelper.getMaxEntityIdAsNumber(clss, Long.class, "msgId");
 		nextId = nextId == null ? 1 : nextId + 1;
 		HunterLogFactory.getLog(HunterMessageDaoHelper.class).debug("Obtained next hunter address id >> " + nextId); 
 		return nextId;
 	}
 	
 	
-	public static void refreshMapAndCurrentIds(){ 
+	public void refreshMapAndCurrentIds(){ 
 		refreshMaxMessageIdMap();
 		refreshCurrentMaxMessageIds();
 	}

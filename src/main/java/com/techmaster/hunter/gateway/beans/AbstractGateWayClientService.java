@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -32,6 +33,8 @@ import com.techmaster.hunter.xml.XMLService;
 public abstract class AbstractGateWayClientService implements GateWayClientService {
 	
 	private Logger logger = Logger.getLogger(getClass());
+	
+	@Autowired private HunterSessionFactory hunterSessionFactory;
 	
 	public void addErrorsAndStatusToResultMap(Map<String, Object> results,List<String> taskProcessErrors, String taskProcessStatus){
 		results.put(TASK_PROCESS_ERRORS, taskProcessErrors);
@@ -58,7 +61,7 @@ public abstract class AbstractGateWayClientService implements GateWayClientServi
 		Session session = null;
 		Transaction trans = null;
 		try {
-			session = HunterSessionFactory.getSessionFactory().openSession();
+			session = hunterSessionFactory.getSessionFactory().openSession();
 			trans = session.beginTransaction();
 			int i = 0;
 			for ( GateWayMessage message : messages ) {

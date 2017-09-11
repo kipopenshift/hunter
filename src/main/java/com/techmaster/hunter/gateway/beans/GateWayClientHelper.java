@@ -30,6 +30,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -74,6 +75,8 @@ public class GateWayClientHelper {
 	private HunterJacksonMapper hunterJacksonMapper = HunterDaoFactory.getObject(HunterJacksonMapper.class);;
 	private MessageDao messageDao = HunterDaoFactory.getObject(MessageDao.class);
 	private TaskDao taskDao = HunterDaoFactory.getObject(TaskDao.class);
+	private HunterHibernateHelper hunterHibernateHelper = HunterDaoFactory.getObject(HunterHibernateHelper.class);
+	
 	
 	
 	private static GateWayClientHelper instance = null;
@@ -283,7 +286,7 @@ public class GateWayClientHelper {
 
 			logger.debug("Replaced query : " + copy);
 			
-			List<HunterMessageReceiver> hntrMsgRcvrs = HunterHibernateHelper.executeQueryForObjList(HunterMessageReceiver.class, copy);
+			List<HunterMessageReceiver> hntrMsgRcvrs = hunterHibernateHelper.executeQueryForObjList(HunterMessageReceiver.class, copy);
 			hunterMessageReceivers.addAll(hntrMsgRcvrs);
 			
 			logger.debug("Receivers count for query : " + hntrMsgRcvrs.size()); 
@@ -352,7 +355,7 @@ public class GateWayClientHelper {
 		logger.debug("Storing messages in hibernate..."); 
 		List<Object> msgList = new ArrayList<>();
 		msgList.addAll(messages);
-		HunterHibernateHelper.saveOrUpdateEntities(msgList); 
+		hunterHibernateHelper.saveOrUpdateEntities(msgList); 
 		logger.debug("Done storing messages in hibernate!");  
 		return messages;
 	}

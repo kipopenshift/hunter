@@ -29,25 +29,27 @@ public class HunterMessageReceiverDaoImpl implements HunterMessageReceiverDao{
 	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
 	@Autowired private ProcedureHandler GET_RGN_LVL_NMS_FOR_CNTIES;
 	@Autowired private RegionService regionService;
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
+	@Autowired private HunterSessionFactory hunterSessionFactory;
 
 	@Override
 	public void insertHunterMessageReceiver( HunterMessageReceiver hunterMessageReceiver) {
 		logger.debug("Inserting receiver...");
-		HunterHibernateHelper.saveEntity(hunterMessageReceiver);
+		hunterHibernateHelper.saveEntity(hunterMessageReceiver);
 		logger.debug("Finished inserting receiver!"); 
 	}
 
 	@Override
 	public void insertHunterMessageReceivers(List<HunterMessageReceiver> hunterMessageReceivers) {
 		logger.debug("Inserting list of receivers...");
-		HunterHibernateHelper.saveEntities(hunterMessageReceivers);
+		hunterHibernateHelper.saveEntities(hunterMessageReceivers);
 		logger.debug("Finished inserting receivers!!"); 
 	}
 
 	@Override
 	public HunterMessageReceiver getHunterMessageReceiverById(Long id) {
 		logger.debug("Getting receiver by id ( " + id + " )"); 
-		HunterMessageReceiver hunterMessageReceiver = HunterHibernateHelper.getEntityById(id, HunterMessageReceiver.class);
+		HunterMessageReceiver hunterMessageReceiver = hunterHibernateHelper.getEntityById(id, HunterMessageReceiver.class);
 		logger.debug("Finished getting receiver by id >> " + hunterMessageReceiver);
 		return hunterMessageReceiver;
 		
@@ -56,7 +58,7 @@ public class HunterMessageReceiverDaoImpl implements HunterMessageReceiverDao{
 	@Override
 	public List<HunterMessageReceiver> getAllHunterMessageReceivers() {
 		logger.debug("Pulling up all message receivers...");
-		List<HunterMessageReceiver> hunterMessageReceivers = HunterHibernateHelper.getAllEntities(HunterMessageReceiver.class);
+		List<HunterMessageReceiver> hunterMessageReceivers = hunterHibernateHelper.getAllEntities(HunterMessageReceiver.class);
 		logger.debug("Finished getting all hunter message receivers size (" + hunterMessageReceivers.size() + " )");
 		return hunterMessageReceivers;
 	}
@@ -64,7 +66,7 @@ public class HunterMessageReceiverDaoImpl implements HunterMessageReceiverDao{
 	@Override
 	public void updateHunterMessageReceiver(HunterMessageReceiver hunterMessageReceiver) {
 		logger.debug("Updating hunter message receiver >> " + hunterMessageReceiver);
-		HunterHibernateHelper.updateEntity(hunterMessageReceiver);
+		hunterHibernateHelper.updateEntity(hunterMessageReceiver);
 		logger.debug("Finished updating hunterMessageReceiver!"); 
 	}
 
@@ -100,7 +102,7 @@ public class HunterMessageReceiverDaoImpl implements HunterMessageReceiverDao{
 		}
 		String query = "FROM HunterMessageReceiver h WHERE h.countryName = '" + countryName + "'";
 		logger.debug("Executing query : " + query); 
-		hunterMessageReceivers = HunterHibernateHelper.executeQueryForObjList(HunterMessageReceiver.class, query);
+		hunterMessageReceivers = hunterHibernateHelper.executeQueryForObjList(HunterMessageReceiver.class, query);
 		logger.debug("Successfully obtained receivers for country : " + countryName); 
 		return hunterMessageReceivers;
 	}
@@ -147,7 +149,7 @@ public class HunterMessageReceiverDaoImpl implements HunterMessageReceiverDao{
 		String query = "FROM HunterMessageReceiver h WHERE h.countryName = '" + countryName + "' AND h.receiverRegionLevel != 'Country' AND h.receiverRegionLevelName IN (" + quoted + ")" ;
 		logger.debug("Executing query : " + query); 
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		
 		try {
@@ -194,7 +196,7 @@ public class HunterMessageReceiverDaoImpl implements HunterMessageReceiverDao{
 		
 		
 		String hunterMessageQuery = "FROM HunterMessageReceiver h WHERE h.countryName = '" + countryName + "' AND h.receiverRegionLevel NOT IN ( 'Country', 'County' ) AND h.receiverRegionLevelName IN (" + quotedWards + ")" ;
-		List<HunterMessageReceiver> hunterMessageReceivers = HunterHibernateHelper.executeQueryForObjList(HunterMessageReceiver.class, hunterMessageQuery);
+		List<HunterMessageReceiver> hunterMessageReceivers = hunterHibernateHelper.executeQueryForObjList(HunterMessageReceiver.class, hunterMessageQuery);
 		
 		return hunterMessageReceivers;
 		
@@ -234,7 +236,7 @@ public class HunterMessageReceiverDaoImpl implements HunterMessageReceiverDao{
 		values.put(":receiverType", HunterUtility.singleQuote(HunterConstants.RECEIVER_TYPE_TEXT));
 		values.put(":active", "true"); 
 		
-		List<HunterMessageReceiver>  hunterMessageReceivers = HunterHibernateHelper.replaceQueryAndExecuteForList(HunterMessageReceiver.class, query, values);
+		List<HunterMessageReceiver>  hunterMessageReceivers = hunterHibernateHelper.replaceQueryAndExecuteForList(HunterMessageReceiver.class, query, values);
 		
 		
 		return hunterMessageReceivers;

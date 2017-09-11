@@ -17,6 +17,7 @@ public class ReceiverGroupJsonDaoImpl implements ReceiverGroupJsonDao {
 	
 	private Logger logger = Logger.getLogger(ReceiverRegionDaoImpl.class);
 	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
 
 	@Override
 	public void insertReceiverGroup(ReceiverGroupJson receiverGroup) {
@@ -34,14 +35,14 @@ public class ReceiverGroupJsonDaoImpl implements ReceiverGroupJsonDao {
 			receiverGroup.setLastName(lastName);
 			break;
 		}
-		HunterHibernateHelper.saveEntity(receiverGroup);
+		hunterHibernateHelper.saveEntity(receiverGroup);
 		logger.debug("Finished inserting receiver group!"); 
 	}
 
 	@Override
 	public ReceiverGroupJson getReceiverGroupById(Long groupId) {
 		logger.debug("Getting receiver group json by Id : " + groupId); 
-		ReceiverGroupJson group = HunterHibernateHelper.getEntityById(groupId, ReceiverGroupJson.class);
+		ReceiverGroupJson group = hunterHibernateHelper.getEntityById(groupId, ReceiverGroupJson.class);
 		logger.debug("Finished getting receiver group json by id : " + group); 
 		return group;
 	}
@@ -49,7 +50,7 @@ public class ReceiverGroupJsonDaoImpl implements ReceiverGroupJsonDao {
 	@Override
 	public List<ReceiverGroupJson> getAllReceiverGroups() {
 		logger.debug("Getting all receiver group jsons"); 
-		List<ReceiverGroupJson> groups = HunterHibernateHelper.getAllEntities(ReceiverGroupJson.class);
+		List<ReceiverGroupJson> groups = hunterHibernateHelper.getAllEntities(ReceiverGroupJson.class);
 		logger.debug("Finished getting all receiver group jsons ( " + groups.size() + " )");  
 		return groups;
 	}
@@ -58,7 +59,7 @@ public class ReceiverGroupJsonDaoImpl implements ReceiverGroupJsonDao {
 	public List<ReceiverGroupJson> getAllRcvrGrpForUsrNam(String userName) {
 		String query = "FROM ReceiverGroupJson r WHERE r.ownerUserName = '" + userName + "'";
 		logger.debug("Executing query : " + query); 
-		List<ReceiverGroupJson> groups = HunterHibernateHelper.executeQueryForObjList(ReceiverGroupJson.class, query);
+		List<ReceiverGroupJson> groups = hunterHibernateHelper.executeQueryForObjList(ReceiverGroupJson.class, query);
 		logger.debug("Finished getting receiver group jsons by user name ( " + groups.size() + " )");
 		return groups;
 	}
@@ -85,7 +86,7 @@ public class ReceiverGroupJsonDaoImpl implements ReceiverGroupJsonDao {
 			return message;
 		}
 		logger.debug("Deleting receiver group...");
-		HunterHibernateHelper.deleteEntity(receiverGroup);
+		hunterHibernateHelper.deleteEntity(receiverGroup);
 		logger.debug("Finished deleting group");
 		return null;
 	}
@@ -93,14 +94,14 @@ public class ReceiverGroupJsonDaoImpl implements ReceiverGroupJsonDao {
 	@Override
 	public void updateGroup(ReceiverGroupJson update) {
 		logger.debug("Upadting receiver group : " + update);		 
-		HunterHibernateHelper.updateEntity(update);
+		hunterHibernateHelper.updateEntity(update);
 		logger.debug("Finished updating receiver group!"); 		
 	}
 
 	@Override
 	public List<ReceiverGroupJson> getAllGrouspJson() {
 		logger.debug("Fetching all groups..."); 
-		List<ReceiverGroupJson> receiverGroups = HunterHibernateHelper.getAllEntities(ReceiverGroupJson.class);
+		List<ReceiverGroupJson> receiverGroups = hunterHibernateHelper.getAllEntities(ReceiverGroupJson.class);
 		logger.debug("Done fetching grous. Size( " + receiverGroups.size() + " )");
 		return receiverGroups;
 	}

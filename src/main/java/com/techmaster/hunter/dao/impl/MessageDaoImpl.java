@@ -17,11 +17,12 @@ public class MessageDaoImpl implements MessageDao{
 	
 	Logger logger = Logger.getLogger(getClass());
 	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
 
 	@Override
 	public void insertMessage(Message message) {
 		logger.debug("Inserting message...");
-		HunterHibernateHelper.saveEntity(message);
+		hunterHibernateHelper.saveEntity(message);
 		logger.debug("Done inserting message!!"); 
 		
 	}
@@ -29,29 +30,29 @@ public class MessageDaoImpl implements MessageDao{
 	@Override
 	public void insertMessages(List<Message> messages) {
 		logger.debug("Inserting messages...");
-		HunterHibernateHelper.saveEntities(messages);
+		hunterHibernateHelper.saveEntities(messages);
 		logger.debug("Done inserting messages!!"); 
 	}
 
 	@Override
 	public void deleteMessage(Message message) {
 		logger.debug("Deleting messages...");
-		HunterHibernateHelper.deleteEntity(message); 
+		hunterHibernateHelper.deleteEntity(message); 
 		logger.debug("Done deleting messages!!"); 
 	}
 
 	@Override
 	public void deleteMessageById(Long msgId) {
 		logger.debug("Deleting message with msgId = " + msgId);
-		Message message = HunterHibernateHelper.getEntityById(msgId, Message.class);
-		HunterHibernateHelper.deleteEntity(message); 
+		Message message = hunterHibernateHelper.getEntityById(msgId, Message.class);
+		hunterHibernateHelper.deleteEntity(message); 
 		logger.debug("Done deleting message!!"); 
 	}
 
 	@Override
 	public Message getMessageById(Long msgId) {
 		logger.debug("Fetching message for msgId : " + msgId);
-		Message message = HunterHibernateHelper.getEntityById(msgId, Message.class);
+		Message message = hunterHibernateHelper.getEntityById(msgId, Message.class);
 		logger.debug("Successfully obtained message : " + message);
 		return message;
 	}
@@ -59,7 +60,7 @@ public class MessageDaoImpl implements MessageDao{
 	@Override
 	public List<Message> getAllMessages() {
 		logger.debug("Getting all messages...");
-		List<Message> messages = HunterHibernateHelper.getAllEntities(Message.class);
+		List<Message> messages = hunterHibernateHelper.getAllEntities(Message.class);
 		logger.debug("Obtained messages. Size ( " + messages.size() + " )");
 		return messages;
 	}
@@ -67,14 +68,14 @@ public class MessageDaoImpl implements MessageDao{
 	@Override
 	public void updateMessage(Message update) {
 		logger.debug("Updating message");
-		HunterHibernateHelper.updateEntity(update);
+		hunterHibernateHelper.updateEntity(update);
 		logger.debug("Successfully updated message : " + update);
 	}
 
 	@Override
 	public Long getNextMessageId(Class<?> clss) { 
 		logger.debug("Fetching next message id..."); 
-		Long max = HunterHibernateHelper.getMaxEntityIdAsNumber(clss, Long.class,"msgId");
+		Long max = hunterHibernateHelper.getMaxEntityIdAsNumber(clss, Long.class,"msgId");
 		max = max == null ? 1 : max + 1;
 		logger.debug("Successfully obtained max id for entity : " + clss.getSimpleName() + " : Max Id = " + max);
 		return max;
@@ -84,7 +85,7 @@ public class MessageDaoImpl implements MessageDao{
 	@Override
 	public void updateTaskMsgLifeStatus(Long taskId, String msgLifeStatus) {
 		logger.debug("Updating msg status :  "+ msgLifeStatus);
-		Message message = HunterHibernateHelper.getEntityById(taskId, Message.class);
+		Message message = hunterHibernateHelper.getEntityById(taskId, Message.class);
 		message.setMsgLifeStatus(msgLifeStatus); 
 		logger.debug("Successfully updated task message life status!" );
 	}
@@ -92,7 +93,7 @@ public class MessageDaoImpl implements MessageDao{
 	@Override
 	public void updateTaskMsgDelStatus(Long taskId, String msgDelStatus) {
 		logger.debug("Updating msg status :  "+ msgDelStatus);
-		Message message = HunterHibernateHelper.getEntityById(taskId, Message.class);
+		Message message = hunterHibernateHelper.getEntityById(taskId, Message.class);
 		message.setMsgDeliveryStatus(msgDelStatus); 
 		logger.debug("Successfully updated task message delivery status!" );
 	}

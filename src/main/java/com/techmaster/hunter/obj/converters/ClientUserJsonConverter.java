@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.json.ClientUserJson;
 import com.techmaster.hunter.obj.beans.HunterClient;
 import com.techmaster.hunter.util.HunterHibernateHelper;
@@ -59,7 +60,7 @@ public class ClientUserJsonConverter {
 		userJson.setLastUpdatedBy(lastUpdatedBy); 
 		userJson.setLastName(lastName); 
 		
-		HunterClient client = HunterHibernateHelper.getEntityById(userId, HunterClient.class);
+		HunterClient client = HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(userId, HunterClient.class);
 		
 		if(client != null){
 			userJson.setHasClient(true); 

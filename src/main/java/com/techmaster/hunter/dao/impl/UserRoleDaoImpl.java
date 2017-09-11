@@ -22,18 +22,20 @@ public class UserRoleDaoImpl implements UserRoleDao{
 	
 	Logger logger = Logger.getLogger(getClass());
 	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
+	@Autowired private HunterSessionFactory hunterSessionFactory;
 	
 	@Override
 	public void insertUserRole(UserRole userRole) {
 		logger.debug("Saving user role : " + userRole);
-		HunterHibernateHelper.saveEntity(userRole); 
+		hunterHibernateHelper.saveEntity(userRole); 
 		logger.debug("Don saving user role!"); 
 	}
 
 	@Override
 	public UserRole getUserRoleById(Long roleId) {
 		logger.debug("Getting user role by id : " + roleId);
-		UserRole userRole = HunterHibernateHelper.getEntityById(roleId, UserRole.class);
+		UserRole userRole = hunterHibernateHelper.getEntityById(roleId, UserRole.class);
 		logger.debug("Retrieved user role : " + userRole);  
 		return userRole;
 	}
@@ -41,7 +43,7 @@ public class UserRoleDaoImpl implements UserRoleDao{
 	@Override
 	public List<UserRole> getAllUserRole() {
 		logger.debug("Fetching all user roles...");
-		List<UserRole> userRoles = HunterHibernateHelper.getAllEntities(UserRole.class);
+		List<UserRole> userRoles = hunterHibernateHelper.getAllEntities(UserRole.class);
 		logger.debug("Retrieved all : " + HunterUtility.stringifyList(userRoles));  
 		return userRoles;
 	}
@@ -93,7 +95,7 @@ public class UserRoleDaoImpl implements UserRoleDao{
 		Session session = null;
 		try {
 			logger.debug("Quering for roles..."); 
-			session = HunterSessionFactory.getSessionFactory().openSession();
+			session = hunterSessionFactory.getSessionFactory().openSession();
 			Query query = session.createQuery(rolesQuery);
 			List<?> list = query.list();
 			for(Object obj : list){
@@ -104,7 +106,7 @@ public class UserRoleDaoImpl implements UserRoleDao{
 		} catch (HibernateException e) {
 			e.printStackTrace();
 		}finally{
-			HunterHibernateHelper.closeSession(session);
+			hunterHibernateHelper.closeSession(session);
 		}
 		logger.debug("Finished fetching role for the user : " + userRoles); 
 		return userRoles;
@@ -113,7 +115,7 @@ public class UserRoleDaoImpl implements UserRoleDao{
 	@Override
 	public void editUserRole(UserRole userRole) {
 		logger.debug("Updating userRole : " + userRole);
-		HunterHibernateHelper.updateEntity(userRole);
+		hunterHibernateHelper.updateEntity(userRole);
 		logger.debug("Successfully finished updating userRole : " + userRole);
 	}
 
@@ -158,7 +160,7 @@ public class UserRoleDaoImpl implements UserRoleDao{
 		}
 		
 		if(message.toString().trim().length() == 0){
-			HunterHibernateHelper.deleteEntity(userRole);
+			hunterHibernateHelper.deleteEntity(userRole);
 		}
 		
 		logger.debug("Finished deleting userRole : " + userRole);
@@ -172,7 +174,7 @@ public class UserRoleDaoImpl implements UserRoleDao{
 		if(!userRole.getRoleName().startsWith("ROLE_")){
 			userRole.setRoleName("ROLE_" + userRole.getRoleName()); 
 		}
-		HunterHibernateHelper.saveEntity(userRole);
+		hunterHibernateHelper.saveEntity(userRole);
 		logger.debug("Finished creating userRole : " + userRole);		
 	}
 

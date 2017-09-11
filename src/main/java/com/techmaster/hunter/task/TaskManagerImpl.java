@@ -51,6 +51,7 @@ import com.techmaster.hunter.obj.beans.TextMessage;
 import com.techmaster.hunter.region.RegionService;
 import com.techmaster.hunter.task.process.TaskProcessSubmitter;
 import com.techmaster.hunter.util.HunterHibernateHelper;
+import com.techmaster.hunter.util.HunterSessionFactory;
 import com.techmaster.hunter.util.HunterUtility;
 
 public class TaskManagerImpl implements TaskManager{
@@ -63,6 +64,7 @@ public class TaskManagerImpl implements TaskManager{
 	@Autowired private MessageDao messageDao;
 	@Autowired private HunterJacksonMapper hunterJacksonMapper;
 	@Autowired private TaskDao taskDao;
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
 	
 	@Override
 	public List<HunterMessageReceiver> getHntrMsgRcvrsFrmRgn(String countryName, String regionLevel, String regionLevelName, String contactType, boolean activeOnly) {
@@ -76,7 +78,7 @@ public class TaskManagerImpl implements TaskManager{
 		values.put(":receiverType", HunterUtility.singleQuote(contactType));
 		values.put(":active", active); 
 		
-		List<HunterMessageReceiver> hunterMessageReceivers = HunterHibernateHelper.replaceQueryAndExecuteForList(HunterMessageReceiver.class, query, values);
+		List<HunterMessageReceiver> hunterMessageReceivers = hunterHibernateHelper.replaceQueryAndExecuteForList(HunterMessageReceiver.class, query, values);
 		logger.debug("Finished fetting Hunter Message Reiceivers! Size( " + hunterMessageReceivers.size() + " )" );
 		
 		
@@ -457,7 +459,7 @@ public class TaskManagerImpl implements TaskManager{
 
 	@Override
 	public Message getTaskIdMessage(Long taskId) {
-		Message message = HunterHibernateHelper.getEntityById(taskId, Message.class);
+		Message message = hunterHibernateHelper.getEntityById(taskId, Message.class);
 		return message;
 	}
 	
@@ -522,7 +524,7 @@ public class TaskManagerImpl implements TaskManager{
 						"' AND g.status != '" + HunterConstants.STATUS_PROCESSED + "'" +
 						" AND g.status != '" + HunterConstants.STATUS_SUCCESS + "'";
 		logger.debug("Executing query : " + query); 
-		List<GateWayMessage> gateWayMessages = HunterHibernateHelper.executeQueryForObjList(GateWayMessage.class, query);
+		List<GateWayMessage> gateWayMessages = hunterHibernateHelper.executeQueryForObjList(GateWayMessage.class, query);
 		return gateWayMessages;
 	}
 
@@ -547,7 +549,7 @@ public class TaskManagerImpl implements TaskManager{
 		Long clientId = HunterUtility.getLongFromObject(results.get(1).get(2));
 		logger.debug("Obtained client id : " + clientId); 
 		
-		Long nextTaskId = HunterHibernateHelper.getMaxEntityIdAsNumber(Task.class, Long.class, "taskId");
+		Long nextTaskId = hunterHibernateHelper.getMaxEntityIdAsNumber(Task.class, Long.class, "taskId");
 		nextTaskId = nextTaskId == null ? 1 : (nextTaskId+1);
 		
 		Task copy = new Task();

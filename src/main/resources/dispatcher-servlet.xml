@@ -5,13 +5,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
         http://www.springframework.org/schema/beans     
-        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
         http://www.springframework.org/schema/mvc 
-        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
         http://www.springframework.org/schema/context 
-        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
         http://www.springframework.org/schema/security/
-        http://www.springframework.org/schema/security/spring-security.xsd">
+        http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
 	<import resource="/application.xml" />
 	<import resource="/hunterDmsBeans.xml" />
@@ -26,9 +26,11 @@
 		<property name="basename" value="messages" />
 	</bean>
 	
+	 <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+	
 	<bean id="hunterJDBCExecutor" class="com.techmaster.hunter.dao.impl.HunterJDBCExecutorImpl">
         <constructor-arg index="0"> 
-			<ref bean="jdbcTemplate" />
+			<ref local="jdbcTemplate" />
 		</constructor-arg>
 	</bean>
 	
@@ -39,7 +41,7 @@
 	
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
 		<constructor-arg>
-			<ref bean="dataSource" />
+			<ref local="dataSource" />
 		</constructor-arg>
 	</bean>
 	
@@ -50,17 +52,28 @@
         <property name="password" value="kiplangat1990"/>
     </bean> 
     
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+	    <property name="dataSource" ref="dataSource" />
+	    <property name="configLocation" value="classpath:hibernate/hibernate/hibernate.cfg.xml" />
+	</bean>
+	
+	<bean name="hunterSessionFactory" class="com.techmaster.hunter.util.HunterSessionFactory" factory-method="getInstance" >
+		<property name="sessionFactory" ref="sessionFactory" ></property>
+	</bean>
+		
+    
     <!-- This is for json -->
     
     <bean id="jacksonMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
         <property name="objectMapper">
-            <ref bean="hunterJacksonMapper" />
+            <ref local="hunterJacksonMapper" />
         </property>
     </bean>
+    
 	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
 		<property name="messageConverters">
 			<list>
-				<ref bean="jacksonMessageConverter" />
+				<ref local="jacksonMessageConverter" />
 			</list>
 		</property>
 		<property name="order" value="0" />
@@ -99,18 +112,18 @@
 	</bean>
 	
 	<!-- This is for statically injecting DAO beans to HunterMsgReceiverExtractor -->
-	<bean name="methodInvokingFactoryBean" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+	<!-- <bean name="methodInvokingFactoryBean" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="com.techmaster.hunter.imports.extractors.HunterMsgReceiverExtractor.staticInjectDaos"/>
         <property name="arguments">
             <list>
                 <ref bean="hunterMessageReceiverDao"/>
-                <ref bean="hunterJDBCExecutor"/>
+                <ref local="hunterJDBCExecutor"/>
                 <ref bean="hunterImportBeanDao"/>
             </list>
        </property>
-	</bean>
+	</bean> -->
 	<!-- This is for statically injecting DAO beans to RegionCache -->
-	<bean name="methodInvokingFactoryBean2" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+<!-- 	<bean name="methodInvokingFactoryBean2" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="com.techmaster.hunter.region.RegionCache.setReceiverRegionDao"/>
         <property name="arguments">
             <list>
@@ -118,37 +131,47 @@
                 <ref bean="hunterMessageReceiverDao"/>
             </list>
        </property>
-	</bean>
-	
-	
-	
-	
-	<bean name="methodInvokingFactoryBean4" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="com.techmaster.hunter.dao.impl.HunterUserDaoImpl.wireUpExecutor"/>
+	</bean> -->
+	<!-- 
+	<bean name="methodInvokingFactoryBean3" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.techmaster.hunter.gateway.beans.GateWayClientHelper.wiredUpStaticFields"/>
         <property name="arguments">
             <list>
+                <ref bean="regionService"/>
                 <ref bean="hunterJDBCExecutor"/>
+                <ref bean="taskDao"/>
+                <ref bean="hunterJacksonMapper"/>
+                <ref bean="messageDao"/>
+            </list>
+       </property>
+	</bean> -->
+	
+	
+	<bean name="methodInvokingFactoryBean6" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.techmaster.hunter.email.HunterBusinessEmailService.injectStaticBeans"/>
+        <property name="arguments">
+            <list>
+                <ref bean="javaMailSender"/>
             </list>
        </property>
 	</bean>
 	
+	<bean name="methodInvokingFactoryBean7" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.techmaster.hunter.imports.extractors.GroupReceiversExtractor.injectStatisDAOs"/>
+        <property name="arguments">
+            <list>
+                <ref bean="hunterJDBCExecutor"/>
+                <ref bean="hunterImportBeanDao"/>
+                <ref bean="receiverGroupDao"/>
+                <ref bean="receiverGroupReceiverDao"/>
+            </list>
+       </property>
+	</bean>
 	
     <!--   <context:property-placeholder location="jdbc.properties"/>     -->
     
 	<mvc:resources mapping="/static/**" location="/" />
-	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
-	
-	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-     <property name="favorPathExtension" value="false" />
-     <property name="favorParameter" value="true" />
-     <property name="mediaTypes" >
-          <value>
-               json=application/json
-               xml=application/xml
-          </value>
-     </property>
-	</bean>
-	
+	<mvc:annotation-driven />
 	<mvc:default-servlet-handler /> <!-- Added this default thing because it was failing. -->
 	
 	<context:component-scan base-package="com.techmaster.hunter.controllers" />

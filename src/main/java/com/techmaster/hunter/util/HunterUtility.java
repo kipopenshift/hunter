@@ -13,6 +13,9 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -1234,6 +1237,22 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		
 		Date futureDate = cal.getTime();
 		return futureDate;
+	}
+	
+	public static String convertFileToString( String location ){
+		try {
+			final String EoL = System.getProperty("line.separator");
+			List<String> lines = Files.readAllLines(Paths.get(location),Charset.defaultCharset());
+			StringBuilder sb = new StringBuilder();
+			for (String line : lines) {
+			    sb.append(line).append(EoL);
+			}
+			final String content = sb.toString();
+			return content;
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new HunterRunTimeException(e.getMessage());
+		}
 	}
 	
 	

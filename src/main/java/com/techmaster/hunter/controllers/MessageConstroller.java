@@ -69,6 +69,7 @@ public class MessageConstroller extends HunterBaseController implements ServletC
 	@Autowired private TaskDao taskDao;
 	@Autowired private MessageDao messageDao;
 	@Autowired private TaskHistoryDao taskHistoryDao;
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
 	
 	private ServletContext servletContext;
 	private Logger logger = Logger.getLogger(MessageConstroller.class);
@@ -459,7 +460,7 @@ public class MessageConstroller extends HunterBaseController implements ServletC
 	@Consumes("application/json") 
 	public @ResponseBody String createOrUpdateSocialMessage(@RequestBody SocialMessageJson socialMessageJson, HttpServletRequest request){
 		
-		SocialMessage socialMessage = HunterHibernateHelper.getEntityById(socialMessageJson.getSocialMsgId(), SocialMessage.class);
+		SocialMessage socialMessage = hunterHibernateHelper.getEntityById(socialMessageJson.getSocialMsgId(), SocialMessage.class);
 		AuditInfo auditInfo 		= getAuditInfo();
 		boolean update 				= false;
 		
@@ -487,14 +488,14 @@ public class MessageConstroller extends HunterBaseController implements ServletC
 		
 		
 		Long defaultSclAppId = socialMessageJson.getDefaultSocialAppId();
-		HunterSocialApp socialApp = defaultSclAppId == null ? null : HunterHibernateHelper.getEntityById(defaultSclAppId, HunterSocialApp.class);
+		HunterSocialApp socialApp = defaultSclAppId == null ? null : hunterHibernateHelper.getEntityById(defaultSclAppId, HunterSocialApp.class);
 		socialMessage.setDefaultSocialApp(socialApp);
 		
 		Long [] socialGroupIds = socialMessageJson.getHunterSocialGroupsIds();
 		socialMessage.getHunterSocialGroups().clear();
 		
 		for(Long groupId : socialGroupIds){
-			HunterSocialGroup hunterSocialGroup = HunterHibernateHelper.getEntityById(groupId, HunterSocialGroup.class);
+			HunterSocialGroup hunterSocialGroup = hunterHibernateHelper.getEntityById(groupId, HunterSocialGroup.class);
 			socialMessage.getHunterSocialGroups().add(hunterSocialGroup);
 		}
 		

@@ -135,7 +135,7 @@ public class RawReceiverServiceImpl implements RawReceiverService {
 	public List<HunterRawReceiver> getAllRawReceiversForUser(HunterRawReceiverUser hunterRawReceiverUser) {
 		String query = "FROM HunterRawReceiver r WHERE r.givenByUserName = '" + hunterRawReceiverUser.getRawUserName() + "'";
 		logger.debug("Executing query : " + query); 
-		List<HunterRawReceiver> list = HunterHibernateHelper.executeQueryForObjList(HunterRawReceiver.class, query);
+		List<HunterRawReceiver> list =  HunterDaoFactory.getObject(HunterHibernateHelper.class).executeQueryForObjList(HunterRawReceiver.class, query);
 		if(list != null && !list.isEmpty()){
 			logger.debug("Setting region ids for raw receivers..."); 
 			for(HunterRawReceiver rawReceiver : list){

@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,13 +30,15 @@ import com.techmaster.hunter.util.HunterUtility;
 @RequestMapping(value="/social")
 public class HunterSocialController extends HunterBaseController{
 	
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
+	
 
 	@Produces("application/json") 
 	@RequestMapping(value="/action/apps/dropdowns", method = RequestMethod.POST)
 	@ResponseBody
 	public List<HunterSelectValue> getAllAPPsKeyVals(){
 		List<HunterSelectValue> pairs = new ArrayList<HunterSelectValue>();
-		List<HunterSocialApp> socialApps = HunterHibernateHelper.getAllEntities(HunterSocialApp.class);
+		List<HunterSocialApp> socialApps = hunterHibernateHelper.getAllEntities(HunterSocialApp.class);
 		for(int i=0; i<socialApps.size(); i++){
 			HunterSelectValue pair = new HunterSelectValue();
 			pair.setText(socialApps.get(i).getAppName());
@@ -176,7 +179,7 @@ public class HunterSocialController extends HunterBaseController{
 	@RequestMapping(value = "/action/regions/readSelVal", method = RequestMethod.POST)
 	public @ResponseBody List<HunterSelectValue> readAllSocialRegions(){ 
 		List<HunterSelectValue> selectValues = new ArrayList<HunterSelectValue>();
-		List<HunterSocialRegion> socialRegions = HunterHibernateHelper.getAllEntities(HunterSocialRegion.class);
+		List<HunterSocialRegion> socialRegions = hunterHibernateHelper.getAllEntities(HunterSocialRegion.class);
 		if( HunterUtility.isCollectionNotEmpty(socialRegions)){
 			for(HunterSocialRegion socialRegion : socialRegions){
 				HunterSelectValue selectValue = new HunterSelectValue();

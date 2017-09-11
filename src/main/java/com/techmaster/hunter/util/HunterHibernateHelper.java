@@ -15,35 +15,18 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class HunterHibernateHelper {
 
 	
 private static final Logger logger = Logger.getLogger(HunterHibernateHelper.class);
+
+	@Autowired
+   	private HunterSessionFactory hunterSessionFactory;
 	
-	public static void setUpTheSession(SessionFactory sessionFatory,Session session, Transaction trans ){
-		try {
-			sessionFatory = HunterSessionFactory.getSessionFactory();
-			session = sessionFatory.openSession();
-			trans = session.beginTransaction();
-		} catch (HibernateException e) {
-			e.printStackTrace();
-			logger.error("HibernateUtil could not set up the session for the transaction!");
-		}
-	}
-	
-	public static void setUpTheSession(SessionFactory sessionFatory,Session session){
-		try {
-			sessionFatory = HunterSessionFactory.getSessionFactory();
-			session = sessionFatory.openSession();
-		} catch (HibernateException e) {
-			e.printStackTrace();
-			logger.error("HibernateUtil could not set up the session for the transaction!");
-		}
-	}
-	
-	public static Session getSession(){
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+	public Session getSession(){
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		return sessionFactory.openSession();
 	}
 	
@@ -67,11 +50,10 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T getMaxEntityIdAsNumber	(Class<?> clzz, Class<T> idType, String fieldName){
+	public <T> T getMaxEntityIdAsNumber	(Class<?> clzz, Class<T> idType, String fieldName){
 		
 		T t = null;
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -79,7 +61,7 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		
 		try {
 			
-			session = sessionFactory.openSession();
+			session = hunterSessionFactory.getSessionFactory().openSession();
 			trans = session.beginTransaction();
 			Criteria criteria = session.createCriteria(clzz).setProjection(Projections.max(fieldName));
 			t = (T)criteria.uniqueResult();
@@ -99,9 +81,9 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		
 	}
 	
-	public static void saveEntity(Object obj){
+	public void saveEntity(Object obj){
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -127,9 +109,9 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		}
 	}
 	
-	public static void saveOrUpdateEntity(Object obj){
+	public void saveOrUpdateEntity(Object obj){
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -155,9 +137,9 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		}
 	}
 	
-	public static void saveOrUpdateEntities(List<?> objects){
+	public void saveOrUpdateEntities(List<?> objects){
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -188,9 +170,9 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		}
 	}
 	
-	public static void uppdateEntities(List<?> objs){
+	public void uppdateEntities(List<?> objs){
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -218,9 +200,9 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		}
 	}
 	
-	public static void saveEntities(List<?> objs){
+	public void saveEntities(List<?> objs){
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -258,9 +240,9 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 	
 	
 	
-	public static void updateEntity(Object obj){
+	public void updateEntity(Object obj){
 
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -286,14 +268,14 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		}
 	}
 	
-	public static void updateEntitities(List<?> objects){
+	public void updateEntitities(List<?> objects){
 		
 		if(objects == null || objects.isEmpty()){
 			logger.debug("Empty or null list. Returning..."); 
 			return;
 		}
 
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -321,7 +303,7 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		}
 	}
 	
-	public static void deleteEntityByLongId(Long id, Class<?> clazz){
+	public void deleteEntityByLongId(Long id, Class<?> clazz){
 		Object obj = getEntityById(id, clazz);
 		if( obj != null ){
 			logger.debug("Entity with id ( "+ id +" ) found. Deleting the entity...");
@@ -331,11 +313,11 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		}
 	}
 	
-	public static void deleteEntity(Object obj){
+	public void deleteEntity(Object obj){
 		
 		if( obj == null ) return;
 
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -362,9 +344,9 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T getEntityById(Long id, Class<T> clazz){
+	public <T> T getEntityById(Long id, Class<T> clazz){
 
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		T t = null;
 		
@@ -402,10 +384,10 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 	 * @param readyQuery
 	 * @return
 	 */
-	public static <T> List<T> executeQueryForObjList(Class<T> clzz, String readyQuery){
+	public <T> List<T> executeQueryForObjList(Class<T> clzz, String readyQuery){
 		
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -446,9 +428,9 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 	
 	
 	@SuppressWarnings("unchecked")
-	public static <T> List<T> getAllEntities(Class<T> clazz){
+	public <T> List<T> getAllEntities(Class<T> clazz){
 
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		List<T> entities = new ArrayList<>();
 		
@@ -482,7 +464,7 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		return entities;
 	}
 	
-	public static <T> List<T> replaceQueryAndExecuteForList(Class<T> clazz, String query, Map<?, ?> values){
+	public <T> List<T> replaceQueryAndExecuteForList(Class<T> clazz, String query, Map<?, ?> values){
 		logger.debug("Query before replacement >> \n" + query); 
 		for(Entry<?, ?> entry : values.entrySet()){
 			Object key = entry.getKey();
@@ -494,9 +476,9 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		return ts;
 	}
 	
-	public static void executeVoidTransctnlReadyQuery(String query){
+	public void executeVoidTransctnlReadyQuery(String query){
 		logger.debug("Executing hibernate query : " + query); 
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -520,13 +502,13 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 		return simpleName;
 	}
 	
-	public static List<?>  executeQueryForListWithParams(String queryStr, Map<String, Object> params) {
+	public List<?>  executeQueryForListWithParams(String queryStr, Map<String, Object> params) {
 		logger.debug("Executing query : " + queryStr);
 		logger.debug("With params : " + HunterUtility.stringifyMap(params)); 
 		Session session = null;
 		List<?> list = null;
 		try {
-			session = HunterSessionFactory.getSessionFactory().openSession();
+			session = hunterSessionFactory.getSessionFactory().openSession();
 			Query query = session.createQuery(queryStr);
 			query.setProperties(params);
 			list = query.list();
@@ -541,8 +523,15 @@ private static final Logger logger = Logger.getLogger(HunterHibernateHelper.clas
 	}
 	
 	
-	
-	public static void main(String[] args) {
+	public HunterSessionFactory getHunterSessionFactory() {
+		return hunterSessionFactory;
+	}
+
+	public void setHunterSessionFactory(HunterSessionFactory hunterSessionFactory) {
+		this.hunterSessionFactory = hunterSessionFactory;
+	}
+
+	public void main(String[] args) {
 		
 		/*String query = "FROM Task t WHERE t.taskId <= '16'"; 
 		List<Task> tasks = executeQueryForObjList(Task.class, query); 

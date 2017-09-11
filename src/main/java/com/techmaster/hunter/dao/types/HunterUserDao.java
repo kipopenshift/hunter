@@ -27,6 +27,7 @@ public interface HunterUserDao {
 	
 	public List<UserLoginBean> getUserLoginBeanByUserName(String userName);
 	public void updateUserLoginBean(UserLoginBean userLoginBean);
+	public String getClientsForAngularUI();
 	
 	
 

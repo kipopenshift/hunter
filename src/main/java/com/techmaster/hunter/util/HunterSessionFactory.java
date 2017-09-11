@@ -1,24 +1,50 @@
 package com.techmaster.hunter.util;
 
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
+
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 
 public class HunterSessionFactory {
 
 	private static org.hibernate.SessionFactory sessionFactory;
+	private static HunterSessionFactory hunterSessionFactory;
 	
-	static {
-		if(sessionFactory == null){
-			Configuration configuration = new Configuration().configure("hibernate/hibernate/hibernate.cfg.xml");
-			StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().
-			applySettings(configuration.getProperties());
-			sessionFactory = configuration.buildSessionFactory(builder.build());
-		}
+	
+	private HunterSessionFactory() {
+		super();
 	}
 	
-	
-	public static org.hibernate.SessionFactory getSessionFactory(){
+
+	public org.hibernate.SessionFactory getSessionFactory(){
 		return sessionFactory;
 	}
+	
+	public static HunterSessionFactory getInstance(){
+		if( hunterSessionFactory == null ){			
+			synchronized (HunterDaoFactory.class) {
+				hunterSessionFactory = new HunterSessionFactory();
+			}
+		}
+		return hunterSessionFactory;
+	}
+
+
+	public void setSessionFactory(org.hibernate.SessionFactory sessionFactory) {
+		HunterSessionFactory.sessionFactory = sessionFactory;
+	}
+
+
+	public static HunterSessionFactory getHunterSessionFactory() {
+		return hunterSessionFactory;
+	}
+
+
+	public static void setHunterSessionFactory(HunterSessionFactory hunterSessionFactory) {
+		HunterSessionFactory.hunterSessionFactory = hunterSessionFactory;
+	}
+	
+	
+	
+	
+	
 	
 }

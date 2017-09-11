@@ -20,16 +20,17 @@ public class MessageAttachmentBeanDaoImpl implements MessageAttachmentBeanDao{
 	
 	private Logger logger = Logger.getLogger(getClass());
 	@Autowired private ProcedureHandler get_generated_cid;
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
 
 	@Override
 	public void createMessageAttachmentBean(MessageAttachmentBean attachmentBean) {
 		logger.debug("Creating message attachment..."); 
-		HunterHibernateHelper.saveEntity(attachmentBean);
+		hunterHibernateHelper.saveEntity(attachmentBean);
 		Map<String,Object> executeParams = new HashMap<String, Object>();
 		executeParams.put("bean_id", attachmentBean.getBeanId());
 		Map<String, Object> execute = get_generated_cid.execute(executeParams);
 		attachmentBean.setCid(HunterUtility.getStringOrNullOfObj(execute.get("p_bean_cid")));
-		HunterHibernateHelper.updateEntity(attachmentBean);
+		hunterHibernateHelper.updateEntity(attachmentBean);
 		logger.debug(HunterUtility.stringifyMap(execute));
 		logger.debug("Done creating message attachment!!");
 	}
@@ -37,7 +38,7 @@ public class MessageAttachmentBeanDaoImpl implements MessageAttachmentBeanDao{
 	@Override
 	public MessageAttachmentBean getAttachmentBeanById(Long beanId) {
 		logger.debug("Creating message attachment..."); 
-		MessageAttachmentBean messageAttachmentBean = HunterHibernateHelper.getEntityById(beanId, MessageAttachmentBean.class);
+		MessageAttachmentBean messageAttachmentBean = hunterHibernateHelper.getEntityById(beanId, MessageAttachmentBean.class);
 		logger.debug("Done creating message attachment!!");
 		return messageAttachmentBean;
 	}
@@ -45,7 +46,7 @@ public class MessageAttachmentBeanDaoImpl implements MessageAttachmentBeanDao{
 	@Override
 	public List<MessageAttachmentBean> getAllAttachmentBeans() {
 		logger.debug("Getting all attchment beans..."); 
-		List<MessageAttachmentBean> messageAttachmentBeans = HunterHibernateHelper.getAllEntities(MessageAttachmentBean.class);
+		List<MessageAttachmentBean> messageAttachmentBeans = hunterHibernateHelper.getAllEntities(MessageAttachmentBean.class);
 		logger.debug("Don getting all attachment beans. Size("+ messageAttachmentBeans.size() +")");
 		return messageAttachmentBeans;
 	}
@@ -107,15 +108,15 @@ public class MessageAttachmentBeanDaoImpl implements MessageAttachmentBeanDao{
 	@Override
 	public void deleteMessageAttachmentBeanById(Long beanId) {
 		logger.debug("Deleting message attachment bean id!"); 
-		MessageAttachmentBean messageAttachmentBean = HunterHibernateHelper.getEntityById(beanId, MessageAttachmentBean.class);
-		HunterHibernateHelper.deleteEntity(messageAttachmentBean);
+		MessageAttachmentBean messageAttachmentBean = hunterHibernateHelper.getEntityById(beanId, MessageAttachmentBean.class);
+		hunterHibernateHelper.deleteEntity(messageAttachmentBean);
 		logger.debug("Successfully deleted message attachment for bean id : " + beanId); 
 	}
 
 	@Override
 	public void deleteMessageAttachmentBean(MessageAttachmentBean attachmentBean) {
 		logger.debug("Deleting message attachment"); 
-		HunterHibernateHelper.deleteEntity(attachmentBean);
+		hunterHibernateHelper.deleteEntity(attachmentBean);
 		logger.debug("Successfully deleted message attachment");
 	}
 
@@ -124,7 +125,7 @@ public class MessageAttachmentBeanDaoImpl implements MessageAttachmentBeanDao{
 		String commaSeprtd = HunterUtility.getCommaDelimitedStrings(attachmentIds);
 		String readyQuery = "FROM MessageAttachmentBean m WHERE m.beanId IN ( " + commaSeprtd + " )";
 		logger.debug("Executing query : " + readyQuery); 
-		List<MessageAttachmentBean> attachmentBeans = HunterHibernateHelper.executeQueryForObjList(MessageAttachmentBean.class, readyQuery);
+		List<MessageAttachmentBean> attachmentBeans = hunterHibernateHelper.executeQueryForObjList(MessageAttachmentBean.class, readyQuery);
 		logger.debug("Loaded attachment beans, size = " + attachmentBeans.size());
 		return attachmentBeans;
 	}

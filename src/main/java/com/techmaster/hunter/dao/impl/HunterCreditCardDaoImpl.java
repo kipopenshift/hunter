@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.techmaster.hunter.dao.types.HunterCreditCardDao;
 import com.techmaster.hunter.obj.beans.HunterCreditCard;
@@ -12,6 +13,8 @@ import com.techmaster.hunter.util.HunterHibernateHelper;
 public class HunterCreditCardDaoImpl implements HunterCreditCardDao{
 	
 	Logger logger = Logger.getLogger(getClass());
+	
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
 
 	@Override
 	public void insertCreditCard(HunterCreditCard creditCard) {
@@ -19,14 +22,14 @@ public class HunterCreditCardDaoImpl implements HunterCreditCardDao{
 		ArrayList<HunterCreditCard> creditCards = new ArrayList<>();
 		creditCards.add(creditCard);
 		checkAndSetId(creditCards); 
-		HunterHibernateHelper.saveEntity(creditCard);
+		hunterHibernateHelper.saveEntity(creditCard);
 		logger.debug("Done creating credit card!"); 
 	}
 
 	@Override
 	public HunterCreditCard getCreditCardById(Long id) {
 		logger.debug("Retrieving credit card for it : "+ id);
-		HunterCreditCard creditCard = HunterHibernateHelper.getEntityById(id, HunterCreditCard.class);
+		HunterCreditCard creditCard = hunterHibernateHelper.getEntityById(id, HunterCreditCard.class);
 		logger.debug("Successfully obtained credit card!!");
 		return creditCard;
 	}
@@ -34,14 +37,14 @@ public class HunterCreditCardDaoImpl implements HunterCreditCardDao{
 	@Override
 	public void deleteCreditCard(HunterCreditCard creditCard) {
 		logger.debug("Deleting credit card of id : " + creditCard);
-		HunterHibernateHelper.deleteEntity(creditCard);
+		hunterHibernateHelper.deleteEntity(creditCard);
 		logger.debug("Successfully deleted credit card!!"); 
 	}
 
 	@Override
 	public List<HunterCreditCard> getAllCreditCards() {
 		logger.debug("Getting all credit cards..."); 
-		List<HunterCreditCard> allCreditCards = HunterHibernateHelper.getAllEntities(HunterCreditCard.class);
+		List<HunterCreditCard> allCreditCards = hunterHibernateHelper.getAllEntities(HunterCreditCard.class);
 		logger.debug("Done retrieving all credit cards. Size ( " + allCreditCards.size() + " )");  
 		return allCreditCards;
 	}
@@ -49,7 +52,7 @@ public class HunterCreditCardDaoImpl implements HunterCreditCardDao{
 	@Override
 	public void deleteCreditCardById(Long id) {
 		logger.debug("Loading creadit card for deletion : " + id);
-		HunterCreditCard creditCard = HunterHibernateHelper.getEntityById(id, HunterCreditCard.class);
+		HunterCreditCard creditCard = hunterHibernateHelper.getEntityById(id, HunterCreditCard.class);
 		logger.debug("Successfully loaded credit card for deletion!");
 		deleteCreditCard(creditCard); 
 	}
@@ -57,7 +60,7 @@ public class HunterCreditCardDaoImpl implements HunterCreditCardDao{
 	@Override
 	public void updateCreditCard(HunterCreditCard update) {
 		logger.debug("Updating credit card of id " + update.getCardId());
-		HunterHibernateHelper.updateEntity(update); 
+		hunterHibernateHelper.updateEntity(update); 
 		logger.debug("Done updating credit card!!"); 		
 	}
 
@@ -65,13 +68,13 @@ public class HunterCreditCardDaoImpl implements HunterCreditCardDao{
 	public void insertCreditCards(List<HunterCreditCard> creditCards) {
 		logger.debug("Inserting credit cards. Size ( " + creditCards + " )"); 
 		checkAndSetId(creditCards); 
-		HunterHibernateHelper.saveEntities(creditCards);
+		hunterHibernateHelper.saveEntities(creditCards);
 		logger.debug("Successfully inserted credit cards.");
 	}
 
 	@Override
 	public Long getNextCreditCardId() {
-		Long maxId = HunterHibernateHelper.getMaxEntityIdAsNumber(HunterCreditCard.class, Long.class, "cardId");
+		Long maxId = hunterHibernateHelper.getMaxEntityIdAsNumber(HunterCreditCard.class, Long.class, "cardId");
 		maxId = maxId == null ? 0 : maxId;
 		maxId++;
 		logger.debug("Obtained next hunter credit card id >> " + maxId); 
