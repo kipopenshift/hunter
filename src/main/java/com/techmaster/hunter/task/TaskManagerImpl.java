@@ -238,17 +238,15 @@ public class TaskManagerImpl implements TaskManager{
 		String query = hunterJDBCExecutor.getQueryForSqlId("getUserRoleDetails");
 		List<Object> values = hunterJDBCExecutor.getValuesList(new Object[]{userName,userName});
 		Map<Integer, List<Object>> rowMapList = hunterJDBCExecutor.executeQueryRowList(query, values);
-		boolean hasApproveRole = false;
 		if(rowMapList != null && !rowMapList.isEmpty()){
 			for(Map.Entry<Integer, List<Object>> entry : rowMapList.entrySet()){
 				List<Object> role = entry.getValue();
 				String inRoleName = role.get(2).toString(); 
-				hasApproveRole = roleName.equals(inRoleName); 
-				if(hasApproveRole)
-					break;
+				if( roleName.equals(inRoleName) )
+					return true;
 			}
 		}
-		return hasApproveRole;
+		return false;
 	}
 	
 	public List<String> validateForSocialTask(Task task, String status, String userName){

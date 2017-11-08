@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.HunterDaoConstants;
 import com.techmaster.hunter.dao.types.HunterAddressDao;
 import com.techmaster.hunter.dao.types.HunterCreditCardDao;
@@ -431,13 +432,13 @@ public class HunterUserDaoImpl implements HunterUserDao{
 			clientRow.put("userName", rowList.get(4));
 			clientRow.put("receiver", HunterUtility.getBooleanForYN(rowList.get(5).toString()));
 			clientRow.put("clientTotalBudget", rowList.get(6));
-			clientRow.put("createdDate", rowList.get(7));
+			clientRow.put("cretDate", rowList.get(7));
 			clientRow.put("createdBy", rowList.get(8));
-			clientRow.put("lastUpdatedBy", rowList.get(9));
-			clientRow.put("updatedOn", rowList.get(10));
+			clientRow.put("updatedOn", rowList.get(9));
+			clientRow.put("lastUpdatedBy", rowList.get(10));			
 			clients.put(clientRow);
 		}
-		return clients.toString();
+		return HunterUtility.getServerResponse("Successful", HunterConstants.STATUS_SUCCESS, clients).toString();
 	}
 	
 	

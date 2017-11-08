@@ -16,5 +16,26 @@ public class TestingController extends HunterBaseController{
 	public String getNewTextMsgView(){
 		return "templates/taskTesting"; 
 	}
+	
+	@RequestMapping(value="bootstrap/home" )
+	public String jQueryUIHome(){
+		return "bootstrap/home"; 
+	}
+	
+	@RequestMapping(value="bootstrap/login" )
+	public String login(){
+		return "bootstrap/login"; 
+	}
+	
+	@RequestMapping(value="bootstrap/demo" )
+	public String demo(){
+		return "bootstrap/demo"; 
+	}
+	
+	@RequestMapping(value="bootstrap/dataTable" )
+	public String dataTable(){
+		return "bootstrap/dataTable"; 
+	}
+
 
 }

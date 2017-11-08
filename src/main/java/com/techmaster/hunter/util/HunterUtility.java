@@ -1255,6 +1255,35 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		}
 	}
 	
+	public static JSONObject getServerResponse( String message, String status, JSONObject data ){			
+		return getMessageAndStatus(message, status, null, data);
+	}
+	
+	public static JSONObject getServerResponse( String message, String status, JSONArray data ){			
+		return getMessageAndStatus(message, status, data, null);
+	}
+	
+	public static JSONObject getMessageAndStatus( String message, String status, JSONArray array, JSONObject jsonObject ){
+		JSONObject response = new JSONObject();
+		response.put("message", message);
+		response.put("status", status);
+		response.put("data",null == array ? jsonObject : array);
+		return response;
+	}
+	
+	public static JSONObject getServerError( String message ){
+		JSONObject json = null;
+		return getServerResponse(message, HunterConstants.STATUS_FAILED, json);
+	}
+	
+	public static JSONObject getServerSuccess( String message ){
+		JSONObject json = null;
+		return getServerResponse(message, HunterConstants.STATUS_SUCCESS, json);
+	}
+	
+	
+	
+	
 	
 }
 

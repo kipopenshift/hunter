@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.HunterURLConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
+import com.techmaster.hunter.dao.types.HunterClientDao;
 import com.techmaster.hunter.dao.types.HunterUserDao;
+import com.techmaster.hunter.obj.beans.HunterClient;
 import com.techmaster.hunter.util.HunterUtility;
 
 
@@ -42,11 +44,52 @@ public class RestfulServicesController {
 	@Produces("application/json") 
 	@Consumes("application/json")
 	public @ResponseBody String getClientsForAngularUI( @RequestBody Map<String, String> params, HttpServletResponse response ){
-		try{			
+		try{
+			HunterUtility.threadSleepFor(2000);
 			HunterUserDao userDao = HunterDaoFactory.getDaoObject(HunterUserDao.class);	
 			return userDao.getClientsForAngularUI();
 		}catch (Exception e) {
-			return HunterUtility.setJSONObjectForFailure(null, "Error occurred while getting clients").toString();
+			e.printStackTrace();
+			return HunterUtility.getServerError("Error occurred while getting clients").toString(); 
+		}
+	}
+	
+	@RequestMapping(value="client/action/angular/update", method = RequestMethod.POST)
+	@Produces("application/json") 
+	@Consumes("application/json")
+	public @ResponseBody String updateClientsForAngularUI( @RequestBody Map<String, String> params, HttpServletResponse response ){
+		try{
+			return HunterUtility.getServerSuccess("Successfully updated client").toString();
+		}catch (Exception e) {
+			e.printStackTrace();
+			return HunterUtility.getServerError("Error occurred while getting clients").toString(); 
+		}
+	}
+	
+	@RequestMapping(value="client/action/angular/create", method = RequestMethod.POST)
+	@Produces("application/json") 
+	@Consumes("application/json")
+	public @ResponseBody String createClientsForAngularUI( @RequestBody Map<String, String> params, HttpServletResponse response ){
+		try{			
+			HunterClientDao clientDao = HunterDaoFactory.getDaoObject(HunterClientDao.class);
+			Long nextId = clientDao.nextClientId();
+			HunterClient client = new HunterClient();			
+			client.setClientId(nextId);
+			client.setFirstName(params.get("firstName"));
+			client.setLastName(params.get("firstName")); 
+			client.setEmail(params.get("email"));
+			client.setUserName(params.get("userName"));
+			client.setClientTotalBudget(Float.parseFloat(params.get("clientTotalBudget")));
+			client.setCreatedBy(params.get("createdBy"));
+			client.setCretDate(HunterUtility.parseDate(params.get("cretDate"), HunterConstants.DATE_FORMAT_STRING));
+			client.setLastUpdate(HunterUtility.parseDate(params.get("updatedOn"), HunterConstants.DATE_FORMAT_STRING)); 
+			client.setLastUpdatedBy(params.get("lastUpdatedBy"));
+			client.setReceiver(Boolean.parseBoolean(params.get("receiver")));			
+			clientDao.insertHunterClient(client); 
+			return HunterUtility.getServerSuccess("Successfully updated client").toString();
+		}catch (Exception e) {
+			e.printStackTrace();
+			return HunterUtility.getServerError("Error occurred while getting clients").toString(); 
 		}
 	}
 	
@@ -56,12 +99,14 @@ public class RestfulServicesController {
 	@Consumes("application/json")
 	public @ResponseBody String getWorkflowTree( @RequestBody Map<String, String> params, HttpServletResponse response ){
 		try{
+			HunterUtility.threadSleepFor(2000);
 			String xmlLoc = HunterURLConstants.RESOURCE_BASE_PATH + "jsons\\workflow_trees.json";			
 			JSONObject trees = new JSONObject(HunterUtility.convertFileToString(xmlLoc));
 			JSONArray jsonArray = trees.getJSONArray("trees");
-			return jsonArray.toString();
+			return HunterUtility.getServerResponse(HunterConstants.STATUS_SUCCESS, HunterConstants.STATUS_SUCCESS, jsonArray).toString();
 		}catch (Exception e) {
-			return HunterUtility.setJSONObjectForFailure(null, "Error occurred while getting workflow trees").toString();
+			e.printStackTrace();
+			return HunterUtility.getServerError("Error occurred while getting workflow trees").toString();
 		}
 	}
 	

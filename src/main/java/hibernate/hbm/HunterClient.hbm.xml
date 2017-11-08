@@ -11,6 +11,11 @@
 		
 		<property name="clientTotalBudget" column="CLNT_TL_BDGT" type="java.lang.Float" length="4000" />
 		<property name="receiver" column="IS_RCVR" type="org.hibernate.type.YesNoType" />
+		
+		<property name="firstName" column="FRST_NAM" type="java.lang.String" not-null="true"/>
+		<property name="lastName" column="LST_NAM" type="java.lang.String" not-null="true" />
+		<property name="userName" column="USR_NAM" type="java.lang.String" not-null="true" />
+		<property name="email" column="EMAIL" type="java.lang.String" not-null="true" />		
 		<one-to-one name="user" class="com.techmaster.hunter.obj.beans.HunterUser" cascade="save-update"></one-to-one>
 		
 		<property name="cretDate" column="CRET_DATE"  type="java.util.Date"  not-null="true"/>

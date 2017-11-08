@@ -114,7 +114,7 @@ public class GateWayClientHelper {
 		}
 		String lockQ = "UPDATE TASK t SET t.TSK_DEL_STS = ? WHERE t.TSK_ID = ?";
 		List<Object> values = new ArrayList<>();
-		values.add(HunterConstants.STATUS_PENDING);
+		values.add( status );
 		values.add(taskId);
 		HunterDaoFactory.getObject(HunterJDBCExecutor.class).executeUpdate(lockQ, values);
 	}

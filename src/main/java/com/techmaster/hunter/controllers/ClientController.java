@@ -32,7 +32,6 @@ import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterClientDao;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.obj.beans.HunterClient;
-import com.techmaster.hunter.obj.beans.HunterJacksonMapper;
 import com.techmaster.hunter.util.HunterUtility;
 
 @CrossOrigin( origins=HunterConstants.ALLOWED_CORS_ORIGINS, maxAge=3600 )
