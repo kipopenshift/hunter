@@ -16,5 +16,15 @@ public class TestingController extends HunterBaseController{
 	public String getNewTextMsgView(){
 		return "templates/taskTesting"; 
 	}
+	
+	@RequestMapping(value="/bootstrap/solar" )
+	public String solarDemo(){
+		return "bootstrap/solarDemo"; 
+	}
+	
+	@RequestMapping(value="/bootstrap/login" )
+	public String login(){
+		return "bootstrap/login"; 
+	}
 
 }

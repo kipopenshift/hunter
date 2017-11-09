@@ -3,28 +3,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Baraka Weather</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<!-- Add jQuery library -->
-	<script type="text/javascript" src="<c:url value='/static/resources/fancybox/lib/jquery-1.10.1.min.js'/>"></script>
-	<!-- Add mousewheel plugin (this is optional) -->
-	<script type="text/javascript" src="<c:url value='/static/resources/fancybox/lib/jquery.mousewheel-3.0.6.pack.js'/>"></script>
-	<!-- Add fancyBox main JS and CSS files -->
-	<script type="text/javascript" src="<c:url value='/static/resources/fancybox/source/jquery.fancybox.js?v=2.1.5'/>"></script>
-	<link rel="stylesheet" type="text/css" href="<c:url value='/static/resources/fancybox/source/jquery.fancybox.css?v=2.1.5'/>" media="screen" />
-	<!-- Add Button helper (this is optional) -->
-	<link rel="stylesheet" type="text/css" href="<c:url value='/static/resources/fancybox/source/helpers/jquery.fancybox-buttons.css?v=1.0.5'/>" />
-	<script type="text/javascript" src="<c:url value='/static/resources/fancybox/source/helpers/jquery.fancybox-buttons.js?v=1.0.5'/>"></script>
-	<!-- Add Thumbnail helper (this is optional) -->
-	<link rel="stylesheet" type="text/css" href="<c:url value='/static/resources/fancybox/source/helpers/jquery.fancybox-thumbs.css?v=1.0.7'/>" />
-	<script type="text/javascript" src="<c:url value='/static/resources/fancybox/source/helpers/jquery.fancybox-thumbs.js?v=1.0.7'/>"></script>
-	<!-- Add Media helper (this is optional) -->
-	<script type="text/javascript" src="<c:url value='/static/resources/fancybox/source/helpers/jquery.fancybox-media.js?v=1.0.6'/>"></script>
+	<title>Fancy Jquery</title>
 	
-	<script type="text/javascript" src="<c:url value='/static/resources/scripts/baraka.js'/>"></script>
-	<script type="text/javascript" src="<c:url value='/static/resources/scripts/fancyBindings.js'/>"></script>
-	<script type="text/javascript" src="<c:url value='/static/resources/scripts/fancyScript.js'/>"></script>
-	<link rel="stylesheet" type="text/css" href="<c:url value='/static/resources/css/fancyCss.css'/>"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	
+	<!-- Add jQuery library -->
+	<script type="text/javascript" src="<c:url value='/static/resources/fancybox-2.1.7/lib/jquery-1.10.2.min.js'/>"></script>
+	
+	<!-- Add mousewheel plugin (this is optional) -->
+	<script type="text/javascript" src="<c:url value='/static/resources/fancybox-2.1.7/lib/jquery.mousewheel.pack.js'/>"></script>
+	
+	<!-- Add fancyBox main JS and CSS files -->
+	<script type="text/javascript" src="<c:url value='/static/resources/fancybox-2.1.7/source/jquery.fancybox.js'/>"></script>
+	
+	<link rel="stylesheet" type="text/css" href="<c:url value='/static/resources/fancybox-2.1.7/source/jquery.fancybox.css'/>" media="screen" />
+	
+	<!-- Add Button helper (this is optional) -->
+	<link rel="stylesheet" type="text/css" href="<c:url value='/static/resources/fancybox-2.1.7/source/helpers/jquery.fancybox-buttons.css'/>" />
+	<script type="text/javascript" src="<c:url value='/static/resources/fancybox-2.1.7/source/helpers/jquery.fancybox-buttons.js'/>"></script>
+	
+	<!-- Add Thumbnail helper (this is optional) -->
+	<link rel="stylesheet" type="text/css" href="<c:url value='/static/resources/fancybox-2.1.7/source/helpers/jquery.fancybox-thumbs.css'/>" />
+	<script type="text/javascript" src="<c:url value='/static/resources/fancybox-2.1.7/source/helpers/jquery.fancybox-thumbs.js'/>"></script>
+	
+	<!-- Add Media helper (this is optional) -->
+	<script type="text/javascript" src="<c:url value='/static/resources/fancybox-2.1.7/source/helpers/jquery.fancybox-media.js'/>"></script>
+	
+	
 	
 	<!--  For videos -->
 	<script src="http://www.youtube.com/player_api"></script>
@@ -37,11 +42,14 @@
 <link rel="stylesheet" href="http://cdn.kendostatic.com/2014.3.1316/styles/kendo.dataviz.default.min.css">
 <link rel="stylesheet" href="http://cdn.kendostatic.com/2014.3.1316/styles/kendo.mobile.all.min.css">
 <!-- <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script> -->
+
 <script src="http://cdn.kendostatic.com/2014.3.1316/js/kendo.all.min.js"></script>
 
 
+
+
+
 <script type="text/javascript">
-	
 	
 //Fires when the player's state changes.
 function onPlayerStateChange(event) {
@@ -264,51 +272,5 @@ function onYouTubePlayerAPIReady() {
 <body>
 
 <!-- Don't worry about this error, whoever includes this should end the div tag -->
-	<div id="fancyCover"> 
 
-	<div id="topDiv">
-		<div id="divInTopDiv" >
-			<table style="width:60%; margin-left:20%;height:100%;">
-				<tr style="width:100%;height:100%;">
-					<td></td>
-					<td><span id="barakaName">BARAKA MARKET</span></td>
-					<td>
-						<input type="text" placeholder="Search Item" id="fancySearchInput" /><br>
-					</td>
-				</tr>
-			</table>
-		</div>
-	</div>
 	
-	<div id="linkDiv">
-		<table id="linkTable">
-			<tr id="linkTr">
-				<td class="menuNamesClass" id="barakaMenuName" >Baraka</td>
-				<td class="menuNamesClass" id="personalCareMenuName" >Personal Care</td>
-				<td class="menuNamesClass" id="computerMenuName" >Computers</td>
-				<td class="menuNamesClass" id="booksMenuName" >Books</td>
-				<td class="menuNamesClass" id="electronicsMenuName" >Electronics</td>
-				<td class="menuNamesClass" id="barakaJobsMenuName" >Baraka Jobs</td>
-			</tr>
-		</table>
-	</div>
-	
-	<div id="fancyPopupDiv">
-		<table style="width:100%;text-align: center;">
-			<tr  style="width:100%;height:30px;">
-				<td style="border-bottom:1px solid #DEF0E2;width:100%;" class="fancyMenuRealLinksTd" id="barakaJobsMenuName_kendo_tree">Kendo Tree</td>
-			</tr>
-			<tr  style="width:100%;height:30px;"  class="fancyMenuRealLinksTd" >
-				<td style="border-bottom:1px solid #DEF0E2;width:100%;"  class="fancyMenuRealLinksTd" id="barakaJobsMenuName_kendo_ui" >Kendo UI</td>
-			</tr>
-			<tr  style="width:100%;height:30px;">
-				<td  class="fancyMenuRealLinksTd" id="barakaJobsMenuName_apply">Apply</td>
-			</tr>
-			<tr  style="width:100%;height:30px;">
-				<td  class="fancyMenuRealLinksTd" id="barakaJobsMenuName_admin">Admin</td>
-			</tr>
-			<tr  style="width:100%;height:30px;">
-				<td  class="fancyMenuRealLinksTd" id="barakaJobsMenuName_createCommodity">Create Commodity</td>
-			</tr>
-		</table>
-	</div>

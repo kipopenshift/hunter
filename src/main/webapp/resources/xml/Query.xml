@@ -1382,4 +1382,18 @@
 			WHERE hu.USR_ID = u.USR_ID
 		</statement>
 	</query>
+	<query id="unblockUserByUserName">
+		<description>
+		    Unblocks user by user name and then clears that login data.
+		</description>
+		<statement>
+		  	UPDATE USR_LGN_BN l
+			SET 
+			  l.BLCKD       = 'N',
+			  l.FLD_LGN_CNT = 0,
+			  l.LGN_DATA    = NULL,
+			  l.LST_LGN_TM  = sysdate
+			WHERE l.USR_ID  = ( SELECT s.USR_ID FROM HNTR_USR s WHERE s.USR_NAM = ?) 
+		</statement>
+	</query>
 </queries>

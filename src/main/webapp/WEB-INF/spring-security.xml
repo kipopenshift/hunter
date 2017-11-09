@@ -6,7 +6,8 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
     http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
-	<http auto-config="true">
+	<http auto-config="true" >
+		
 		<intercept-url pattern="/hunter/login/page" filters="none" />
 		<intercept-url pattern="/hunter/login/logout" filters="none" />
 		<intercept-url pattern="/static/resources/**" filters="none" />
@@ -17,14 +18,19 @@
 		
 		<form-login login-page='/hunter/login/page' default-target-url="/hunter/home" authentication-failure-url="/hunter/login/page"  />
 		<logout logout-success-url="/hunter/login/logout" />
+		
 	</http>
+	
 	<beans:bean name="hunterUserAuthenticationService" class="com.techmaster.hunter.security.HunterUserAuthenticationService"  >
 		 <beans:property name="hunterJDBCExecutor" ref="hunterJDBCExecutor" />
 	</beans:bean>
+	
 	<beans:bean name="customAuthenticationProvider" class="com.techmaster.hunter.security.HunterAuthenticationProvider"  >
 		 <beans:property name="hunterUserAuthenticationService" ref="hunterUserAuthenticationService" />
 	</beans:bean>
+	
 	<authentication-manager>
 		 <authentication-provider ref="customAuthenticationProvider"/>
 	</authentication-manager>
+	
 </beans:beans>

@@ -91,6 +91,14 @@
         <desc>Task Message does not have service provider configured.</desc>
         <text>Task Message does not have service provider!</text>
     </message>
+    <message id="NOT_RECOGNIZED_CREDENTIALS" >
+        <desc>Login credentials not recognized.</desc>
+        <text>Credentials not recognized. Please try again or conduct your administrator</text>
+    </message>
+    <message id="USER_PASSWORD_MISMATCH" >
+        <desc>Invalid login password</desc>
+        <text>Wrong user name or password. Please try again.</text>
+    </message>
     
      
 </messages>

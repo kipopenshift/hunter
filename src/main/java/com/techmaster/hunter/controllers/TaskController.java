@@ -45,8 +45,8 @@ import com.techmaster.hunter.obj.beans.TaskHistory;
 import com.techmaster.hunter.obj.beans.TextMessage;
 import com.techmaster.hunter.obj.converters.TaskConverter;
 import com.techmaster.hunter.obj.converters.TaskProcessJobConverter;
-import com.techmaster.hunter.region.RegionService;
 import com.techmaster.hunter.task.TaskManager;
+import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterLogFactory;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -70,7 +70,7 @@ public class TaskController extends HunterBaseController{
 		
 		String baseDir = System.getProperty("catalina.base");
 		logger.debug(baseDir); 
-		List<Task> tasks = taskDao.getTaskForClientId(clientId);
+		List<Task> tasks = HunterHibernateHelper.getAllEntities(Task.class); //taskDao.getTaskForClientId(clientId);
 		logger.debug("Returning Tasks for client >> " + tasks);
 		return tasks;
 	}

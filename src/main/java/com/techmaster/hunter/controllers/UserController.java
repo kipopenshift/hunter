@@ -1,5 +1,6 @@
 package com.techmaster.hunter.controllers;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -11,17 +12,21 @@ import javax.ws.rs.Produces;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterClientDao;
+import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterUserDao;
 import com.techmaster.hunter.json.HunterClientsDetailsJson;
 import com.techmaster.hunter.json.HunterUserJson;
 import com.techmaster.hunter.obj.beans.HunterUser;
+import com.techmaster.hunter.util.HunterUtility;
 
 
 @Controller
@@ -111,6 +116,26 @@ public class UserController {
 	@ResponseBody public List<HunterClientsDetailsJson> getClientDetailsData(){
 		 List<HunterClientsDetailsJson> jsons = hunterClientDao.getAllHunterClientDetailsJson();
 		 return jsons;
+	}
+	
+	@RequestMapping(value="/action/user/unblock/{userName}", method=RequestMethod.GET )
+	@Produces("application/json")
+	@Consumes("application/json")
+	@ResponseBody public String unBlockUser( @PathVariable("userName") String userName ){
+		try{
+			HunterJDBCExecutor jdbcExecutor = HunterDaoFactory.getDaoObject(HunterJDBCExecutor.class);
+			 String query = jdbcExecutor.getQueryForSqlId("unblockUserByUserName");
+			 List<Object> values = new ArrayList<>();
+			 values.add(userName);
+			 int rows = jdbcExecutor.executeUpdate(query, values);
+			 if( rows == 0 ){
+				 return HunterUtility.setJSONObjectForFailure(null, "No user found for update!").toString();
+			 }else{
+				 return HunterUtility.setJSONObjectForSuccess(null, "Successfully updated user").toString();
+			 }
+		}catch(Exception e){
+			return HunterUtility.setJSONObjectForFailure(null, "Application error occurred while unblocking user").toString();
+		}
 	}
 	
 	

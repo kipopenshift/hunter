@@ -15,6 +15,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
+import com.techmaster.hunter.cache.HunterCacheUtil;
+import com.techmaster.hunter.constants.UIMessageConstants;
 import com.techmaster.hunter.util.HunterUtility;
 
 
@@ -32,7 +34,10 @@ public class HunterAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+		
+		/* 	Let the login spinner get to work :) 	*/
 		HunterUtility.threadSleepFor(1200); 
+		
 		String name = authentication.getName();
         String password = authentication.getCredentials().toString(); 
         logger.debug("Starting authentication process for user ( " + name + " )"); 
@@ -40,7 +45,7 @@ public class HunterAuthenticationProvider implements AuthenticationProvider {
         Map<String, Object> results = hunterUserAuthenticationService.authenthicate(name, password);
         String error = results != null && !results.isEmpty() ? results.get("ERROR") != null ? results.get("ERROR").toString() : null : null;
         
-        if(error != null && error.equals(HunterUserAuthenticationService.NOT_RECOGNIZED_CREDENTIALS)){
+        if(error != null && error.equals(HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.NOT_RECOGNIZED_CREDENTIALS))){
         	logger.debug(error); 
         	throw new BadCredentialsException(error);
         }

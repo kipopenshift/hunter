@@ -83,7 +83,7 @@
 
 
 
-
+<a href="http://localhost:8080/Hunter/jquery/home" style="margin-top:60%;">JQuery Home</a> 
 
 </body>
 </html> 

@@ -140,5 +140,19 @@ public class HunterController extends HunterBaseController{
 		return "access/postLogin";
 	}
 	
+	@RequestMapping(value="/fancy", method=RequestMethod.GET)
+	public String goToFancyPage(HttpServletRequest request, HttpServletResponse response){
+		return "views/fancyAdmin";
+	}
+	
+	@RequestMapping(value="/jqui", method=RequestMethod.GET)
+	public String goTojQueryUI(HttpServletRequest request, HttpServletResponse response){
+		return "views/fancyJqueryUIHeader";
+	}
+	
+	
+	
+	
+	
 
 }

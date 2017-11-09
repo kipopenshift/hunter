@@ -25,6 +25,7 @@ import org.w3c.dom.NodeList;
 
 import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.constants.UIMessageConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.dao.types.HunterUserDao;
@@ -48,8 +49,6 @@ public class HunterUserAuthenticationService {
 	public static final int MAX_USER_LOGIN_COUNT = 5;
 	private Logger logger = Logger.getLogger(getClass());
 	
-	public static final String NOT_RECOGNIZED_CREDENTIALS = "Credentials not recognized. Please try again or conduct your administrator";
-	public static final String USER_PASSWORD_MISMATCH = "Wrong user name or password. Please try again.";
 	
    /*
 		AccountStatusException, 
@@ -175,7 +174,7 @@ public class HunterUserAuthenticationService {
 		
 		//wrong user name.
 		if(xmlService == null){
-			params.put("ERROR", NOT_RECOGNIZED_CREDENTIALS);
+			params.put("ERROR", HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.NOT_RECOGNIZED_CREDENTIALS));
 			return params;
 		}
 		
@@ -216,7 +215,7 @@ public class HunterUserAuthenticationService {
 	}
 	
 	public void putParamsForBlockedUnBlocked(Map<String, Object> params, int newCount){
-		params.put("ERROR", USER_PASSWORD_MISMATCH);
+		params.put("ERROR", HunterCacheUtil.getInstance().getUIMsgTxtForMsgId(UIMessageConstants.USER_PASSWORD_MISMATCH));
 		params.put("BLOCKED", isLocked(newCount) + "" );  
 		params.put("COUNT", newCount);
 		params.put("REM_COUNT", isLocked(newCount) ? "0" : (MAX_USER_LOGIN_COUNT - newCount )+""); 
@@ -310,7 +309,7 @@ public class HunterUserAuthenticationService {
 		}
 			
  		
-		XMLService loginDataXML = HunterCacheUtil.getInstance().getXMLService(HunterConstants.LOGIN_DATA_SEE_XML);
+		XMLService loginDataXML = HunterCacheUtil.getInstance().getXMLService(HunterConstants.LOGIN_DATA_SEED_XML);
 		
 		String mainPath = "loginData/logins/login/";
 		loginDataXML.getNodeListForPathUsingJavax( mainPath + "date" ).item(0).setTextContent(loginDate); 
