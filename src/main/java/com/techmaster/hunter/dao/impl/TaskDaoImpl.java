@@ -31,6 +31,8 @@ public class TaskDaoImpl implements TaskDao{
 	private static final Logger logger = Logger.getLogger(TaskDaoImpl.class);
 	@Autowired HunterJDBCExecutor hunterJDBCExecutor;
 	@Autowired RegionService regionService;
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
+	@Autowired private HunterSessionFactory hunterSessionFactory;
 
 	
 	@Override
@@ -39,28 +41,28 @@ public class TaskDaoImpl implements TaskDao{
 		Long nextId = getNextTaskId();
 		logger.debug("Assigned next task id : " + nextId); 
 		task.setTaskId(nextId); 
-		HunterHibernateHelper.saveEntity(task);
+		hunterHibernateHelper.saveEntity(task);
 		logger.debug("Finished inserting task"); 
 	}
 
 	@Override
 	public void update(Task task) {
 		logger.debug("Upading task...");
-		HunterHibernateHelper.updateEntity(task);
+		hunterHibernateHelper.updateEntity(task);
 		logger.debug("Finished updating task!"); 
 	}
 
 	@Override
 	public void insertTasks(List<Task> tasks) {
 		logger.debug("Inserting list of tasks...");
-		HunterHibernateHelper.saveEntities(tasks);
+		hunterHibernateHelper.saveEntities(tasks);
 		logger.debug("Successfully finished inserting list of tasks."); 
 	}
 
 	@Override
 	public Task getTaskById(Long taskId) {
 		logger.debug("Loading task for given Id ( " + taskId + " )" );
-		Task task = HunterHibernateHelper.getEntityById(taskId, Task.class);
+		Task task = hunterHibernateHelper.getEntityById(taskId, Task.class);
 		logger.debug("Successfully loaded task by Id!"); 
 		return task;
 	}
@@ -70,7 +72,7 @@ public class TaskDaoImpl implements TaskDao{
 		logger.debug("fetching tasks for client user  name = " + userName);
 		String query = "SELECT u.userId FROM HunterClient h WHERE h.userName = '" + userName + "'";
 		logger.debug("Created query >> " + query);
-		List<HunterClient> clients = HunterHibernateHelper.executeQueryForObjList(HunterClient.class, query);
+		List<HunterClient> clients = hunterHibernateHelper.executeQueryForObjList(HunterClient.class, query);
 		HunterClient client = null;
 		if(clients != null && clients.size() > 0){
 			client = clients.get(0);
@@ -82,7 +84,7 @@ public class TaskDaoImpl implements TaskDao{
 		logger.debug("Otained user name for client Id >> " + clientId);
 		query = "FROM Task t WHERE t.clientId = '" + clientId + "'";
 		logger.debug("Created query >> " + query);
-		List<Task> tasks = HunterHibernateHelper.executeQueryForObjList(Task.class, query);
+		List<Task> tasks = hunterHibernateHelper.executeQueryForObjList(Task.class, query);
 		logger.debug("Successfully obtained tasks list for client user name. Size ( " + tasks == null ? 0 : tasks.size() + " )");
 		return tasks;
 	}
@@ -91,7 +93,7 @@ public class TaskDaoImpl implements TaskDao{
 	public Long getNextTaskId() {
 		
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = hunterSessionFactory.getSessionFactory();
 		Session session = null;
 		Transaction trans = null;
 		
@@ -106,13 +108,13 @@ public class TaskDaoImpl implements TaskDao{
 			
 			nextId = maxId == null ? 1 : (maxId + 1);
 			
-			HunterHibernateHelper.closeSession(session); 
+			hunterHibernateHelper.closeSession(session); 
 			
 		} catch (HibernateException e) {
-			HunterHibernateHelper.rollBack(trans); 
+			hunterHibernateHelper.rollBack(trans); 
 			e.printStackTrace();
 		}finally{
-			HunterHibernateHelper.closeSession(session); 	
+			hunterHibernateHelper.closeSession(session); 	
 		}
 		logger.debug("Obtained next hunter user id >> " + nextId); 
 		return nextId;
@@ -130,7 +132,7 @@ public class TaskDaoImpl implements TaskDao{
 	public List<Task> getTaskForClientId(Long clientId) {
 		logger.debug("Getting tasks for client : " + clientId); 
 		String query = "FROM Task t where t.clientId = '" + clientId + "'";
-		List<Task> clientTasks = HunterHibernateHelper.executeQueryForObjList(Task.class, query);
+		List<Task> clientTasks = hunterHibernateHelper.executeQueryForObjList(Task.class, query);
 		logger.debug("Finished fetching client tasks!!"); 
 		return clientTasks;
 	}
@@ -139,7 +141,7 @@ public class TaskDaoImpl implements TaskDao{
 	public void deleteTask(Task task) {
 		logger.debug("Deleting task >> " + task);
 		HunterDaoFactory.getObject(RegionService.class).removeAllRegionsForTask(task.getTaskId()); 
-		HunterHibernateHelper.deleteEntity(task); 
+		hunterHibernateHelper.deleteEntity(task); 
 		logger.debug("Finished deleting task!");
 	}
 

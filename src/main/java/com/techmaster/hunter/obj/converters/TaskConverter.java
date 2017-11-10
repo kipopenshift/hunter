@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.json.ReceiverGroupJson;
 import com.techmaster.hunter.obj.beans.EmailMessage;
 import com.techmaster.hunter.obj.beans.HunterSocialApp;
@@ -416,7 +417,7 @@ public class TaskConverter {
 		//socialMediaId 		  = HunterUtility.getStringOrNulFromJSONObj(msgJson, "socialMediaId"),
 		
 		if( socialMsgId != null ){
-			message = HunterHibernateHelper.getEntityById(socialMsgId, SocialMessage.class);
+			message =  HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(socialMsgId, SocialMessage.class);
 		}
 		
 		Set<HunterSocialGroup> hunterSocialGroups = new HashSet<HunterSocialGroup>();
@@ -425,13 +426,13 @@ public class TaskConverter {
 		if( groupIds != null && groupIds.length() > 0 ){
 			for (int i = 0; i < groupIds.length(); i++){
 				Long groupId = groupIds.getLong(i);
-				HunterSocialGroup socialGroup = HunterHibernateHelper.getEntityById(groupId, HunterSocialGroup.class);
+				HunterSocialGroup socialGroup =  HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(groupId, HunterSocialGroup.class);
 				hunterSocialGroups.add(socialGroup);
 			}
 			message.setHunterSocialGroups(hunterSocialGroups);
 		}
 		
-		HunterSocialApp socialApp = HunterHibernateHelper.getEntityById(HunterUtility.getLongFromObject(defaultSocialAppId), HunterSocialApp.class);
+		HunterSocialApp socialApp =  HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(HunterUtility.getLongFromObject(defaultSocialAppId), HunterSocialApp.class);
 		
 		message.setExternalId(externalId);
 		message.setMediaType(mediaType);

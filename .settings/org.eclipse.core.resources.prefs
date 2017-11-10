@@ -1,5 +1,13 @@
+=\=\=\=\=\=\=
+<<<<<<<=HEAD
+>>>>>>>=af44f69f03c6dc1cceae3310fd5a53c0d29f34a9
 eclipse.preferences.version=1
-encoding//src/main/webapp/WEB-INF/views/bootstrap/login.jsp=UTF-8
+encoding//src/main/java=UTF-8
+encoding//src/main/resources=UTF-8
+encoding//src/main/webapp/WEB-INF/views/bootstrap/home.jsp=UTF-8
 encoding//src/main/webapp/WEB-INF/views/bootstrap/solarDemo.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/views/jQUI/home.jsp=UTF-8
 encoding//src/main/webapp/WEB-INF/views/views/fieldProfile.jsp=UTF-8
 encoding//src/main/webapp/WEB-INF/views/views/validateRawReceivers.jsp=UTF-8
+encoding//src/test/java=UTF-8
+encoding/<project>=UTF-8

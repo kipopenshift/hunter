@@ -1,8 +1,8 @@
 <%@include file="//WEB-INF/views/common/JSTL_tags.jsp"%>
+
 <!DOCTYPE html>
 <html style="font-size:13px;" >
 <head>
-
 <meta charset="utf-8">
 
 <link rel="stylesheet" href="http://cdn.kendostatic.com/2015.3.930/styles/kendo.common.min.css">
@@ -76,6 +76,7 @@
 <div id="loginCover" >
 	
 	<form id="hunterLoginForm" method="POST" action="<c:url value='${pageContext.request.contextPath}/j_spring_security_check'/>" >
+		<sec:csrfInput />
 		<table>
 			<tr>
 				<td>User Name : </td>

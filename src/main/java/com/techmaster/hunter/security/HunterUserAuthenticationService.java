@@ -246,7 +246,7 @@ public class HunterUserAuthenticationService {
 	
 	public UserLoginBean getUserLoginBeanByUserName(String userName){
 		
-		SessionFactory sessionFactory = HunterSessionFactory.getSessionFactory();
+		SessionFactory sessionFactory = HunterDaoFactory.getDaoObject(HunterSessionFactory.class).getSessionFactory();
 		Session session = null;
 		Query query = null;
 		List<?> userLoginBeans = null;
@@ -325,7 +325,7 @@ public class HunterUserAuthenticationService {
 		if( loginData == null ){
 			logger.debug("Setting login data for the first time..."); 
 			userLoginBean.setLoginData( HunterUtility.getStringBlob( loginDataXML.toString() ) ); 
-			HunterHibernateHelper.updateEntity( userLoginBean );
+			HunterDaoFactory.getDaoObject(HunterHibernateHelper.class).updateEntity( userLoginBean ); 
 			return;
 		}
 		
@@ -343,7 +343,7 @@ public class HunterUserAuthenticationService {
 			e.printStackTrace();
 			userLoginBean.setLoginData( orinalDocBlob ); 
 		}finally {
-			HunterHibernateHelper.updateEntity( userLoginBean );
+			HunterDaoFactory.getDaoObject(HunterHibernateHelper.class).updateEntity( userLoginBean );
 		}
 		
 	}

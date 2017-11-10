@@ -18,18 +18,19 @@ public class HunterClientDaoImpl implements HunterClientDao{
 	
 	private final Logger logger = Logger.getLogger(getClass());
 	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
 
 	@Override
 	public void insertHunterClient(HunterClient client) {
 		logger.debug("Saving hunter client...");
-		HunterHibernateHelper.saveEntity(client);
+		hunterHibernateHelper.saveEntity(client);
 		logger.debug("Done saving hunter client!!");
 	}
 
 	@Override
 	public void insertHunterClients(List<HunterClient> hunterClients) {
 		logger.debug("Saving hunter clients..."); 
-		HunterHibernateHelper.saveEntities(hunterClients);
+		hunterHibernateHelper.saveEntities(hunterClients);
 		logger.debug("Done saving hunter clients!!");
 		
 	}
@@ -38,21 +39,21 @@ public class HunterClientDaoImpl implements HunterClientDao{
 	public void deleteHunterClientById(Long clientId) {
 		logger.debug("Deleting hunter client...");
 		HunterClient client = getHunterClientById(clientId);
-		HunterHibernateHelper.deleteEntity(client);
+		hunterHibernateHelper.deleteEntity(client);
 		logger.debug("Done deleting hunter client!!"); 
 	}
 
 	@Override
 	public void deleteHunterClient(HunterClient client) {
 		logger.debug("Deleting hunter client...");
-		HunterHibernateHelper.deleteEntity(client);
+		hunterHibernateHelper.deleteEntity(client);
 		logger.debug("Done deleting hunter client!!"); 
 	}
 
 	@Override
 	public HunterClient getHunterClientById(Long id) {
 		logger.debug("Getting hunter client by id >> " + id);
-		HunterClient client = HunterHibernateHelper.getEntityById(id, HunterClient.class);
+		HunterClient client = hunterHibernateHelper.getEntityById(id, HunterClient.class);
 		logger.debug("Loaded client >> " + client); 
 		logger.debug("Finished loading hunter client by Id!!");
 		return client;
@@ -61,7 +62,7 @@ public class HunterClientDaoImpl implements HunterClientDao{
 	@Override
 	public List<HunterClient> getAllclients() {
 		logger.debug("Fetching all clients...");
-		List<HunterClient> clients = HunterHibernateHelper.getAllEntities(HunterClient.class);
+		List<HunterClient> clients = hunterHibernateHelper.getAllEntities(HunterClient.class);
 		logger.debug("Successfully fetched clients. Size( " + clients.size() + " )");  
 		return clients;
 	}
@@ -69,14 +70,14 @@ public class HunterClientDaoImpl implements HunterClientDao{
 	@Override
 	public void updateClient(HunterClient update) {
 		logger.debug("Updating hunter client...");
-		HunterHibernateHelper.updateEntity(update); 
+		hunterHibernateHelper.updateEntity(update); 
 		logger.debug("Done updating hunter client!!");
 	}
 
 	@Override
 	public Long nextClientId() {
 		logger.debug("Getting next hunter client id...");
-		Long maxClientId = HunterHibernateHelper.getMaxEntityIdAsNumber(HunterClient.class, Long.class, "clientId");
+		Long maxClientId = hunterHibernateHelper.getMaxEntityIdAsNumber(HunterClient.class, Long.class, "clientId");
 		if(maxClientId == null)
 			maxClientId = 0L;
 		maxClientId++;
@@ -93,7 +94,7 @@ public class HunterClientDaoImpl implements HunterClientDao{
 	@Override
 	public HunterClient getHunterClientForUserId(Long userId) {
 		String query = "FROM HunterClient c WHERE c.clientId = " + userId;
-		List<HunterClient> clients = HunterHibernateHelper.executeQueryForObjList(HunterClient.class, query);
+		List<HunterClient> clients = hunterHibernateHelper.executeQueryForObjList(HunterClient.class, query);
 		HunterClient client = null;
 		if(clients.size() > 1){
 			logger.warn("Returned more than one client!!! Will return the first one!!");
@@ -107,7 +108,7 @@ public class HunterClientDaoImpl implements HunterClientDao{
 	@Override
 	public HunterClient editReceiverAndBudget(Long clientId, float budget, boolean isReceiver) {
 		logger.debug("Updating client id..."); 
-		HunterClient client = HunterHibernateHelper.getEntityById(clientId, HunterClient.class);
+		HunterClient client = hunterHibernateHelper.getEntityById(clientId, HunterClient.class);
 		if(client != null){
 			client.setClientTotalBudget(budget);
 			client.setReceiver(isReceiver);

@@ -32,6 +32,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	private static final Logger logger = HunterLogFactory.getLog(ReceiverRegionDaoImpl.class);
 	@Autowired private HunterJDBCExecutor hunterJDBCExecutor;
 	@Autowired private RegionService regionService;
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
 
 	
 	@Override
@@ -40,7 +41,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 		logger.debug("Inserting receiver region...");
 		Long maxId = getNextReceiverRegionId();
 		receiverRegion.setRegionId(maxId);
-		HunterHibernateHelper.saveEntity(receiverRegion);
+		hunterHibernateHelper.saveEntity(receiverRegion);
 		logger.debug("Finished inserting receiver region...");
 		
 	}
@@ -54,7 +55,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 			region.setRegionId(maxId);
 			maxId++;
 		}
-		HunterHibernateHelper.saveEntities(receiverRegions); 
+		hunterHibernateHelper.saveEntities(receiverRegions); 
 		logger.debug("Finished inserting receiver region...");
 		
 	}
@@ -63,7 +64,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public ReceiverRegion getReceiverRegionById(Long receiverId) {
 		
 		logger.debug("Getting getReceiverRegionById...");
-		ReceiverRegion receiverRegion = HunterHibernateHelper.getEntityById(receiverId, ReceiverRegion.class);
+		ReceiverRegion receiverRegion = hunterHibernateHelper.getEntityById(receiverId, ReceiverRegion.class);
 		logger.debug("Finished getReceiverRegionById");
 		return receiverRegion;
 	}
@@ -92,7 +93,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public List<ReceiverRegion> getAllReceiverRegions() {
 
 		logger.debug("Getting all states");
-		List<ReceiverRegion> receiverRegions = HunterHibernateHelper.getAllEntities(ReceiverRegion.class);
+		List<ReceiverRegion> receiverRegions = hunterHibernateHelper.getAllEntities(ReceiverRegion.class);
 		logger.debug("Finished fetching all states size(" + receiverRegions != null ? receiverRegions.size() : null +  ")");
 		return receiverRegions;
 
@@ -102,7 +103,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public void updateReceiverRegion(ReceiverRegion receiverRegion) {
 
 		logger.debug("updateReceiverRegion ...");
-		HunterHibernateHelper.updateEntity(receiverRegion); 
+		hunterHibernateHelper.updateEntity(receiverRegion); 
 		logger.debug("Finished updateReceiverRegion!");
 		
 		
@@ -112,8 +113,8 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public void deleteReceiverById(Long receiverId) {
 		
 		logger.debug("deleting receiver region of id >> " + receiverId);
-		ReceiverRegion receiverRegion = HunterHibernateHelper.getEntityById(receiverId, ReceiverRegion.class);
-		HunterHibernateHelper.deleteEntity(receiverRegion); 
+		ReceiverRegion receiverRegion = hunterHibernateHelper.getEntityById(receiverId, ReceiverRegion.class);
+		hunterHibernateHelper.deleteEntity(receiverRegion); 
 		logger.debug("Finished deleting receiver region !"); 
 		
 	}
@@ -122,7 +123,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public void deleteReceiverRegion(ReceiverRegion receiverRegion) {
 		
 		logger.debug("deleting receiver region....");
-		HunterHibernateHelper.deleteEntity(receiverRegion); 
+		hunterHibernateHelper.deleteEntity(receiverRegion); 
 		logger.debug("Finished deleting receiver region !"); 
 		
 	}
@@ -130,7 +131,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void insertCountry(Country country) {
 		logger.debug("Inserting country...");
-		HunterHibernateHelper.saveEntity(country);
+		hunterHibernateHelper.saveEntity(country);
 		logger.debug("Finished inserting country"); 
 		
 	}
@@ -138,7 +139,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void deleteCountry(Country country) {
 		logger.debug("Deleting countries");
-		HunterHibernateHelper.deleteEntity(country); 
+		hunterHibernateHelper.deleteEntity(country); 
 		logger.debug("Finished deleting country");
 		
 	}
@@ -146,7 +147,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public Country getCountryById(Long countryId) {
 		logger.debug("Getting country by Id");
-		Country country = HunterHibernateHelper.getEntityById(countryId, Country.class);
+		Country country = hunterHibernateHelper.getEntityById(countryId, Country.class);
 		logger.debug("Finished getting country by id");
 		return country;
 	}
@@ -155,7 +156,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public Country getCountryByName(String name) {
 		String query = "FROM Country c where c.countryName = '" + name + "'";
 		logger.debug("Fetcing country by name. Query >> " + query); 
-		List<Country> countries = HunterHibernateHelper.executeQueryForObjList(Country.class, "");
+		List<Country> countries = hunterHibernateHelper.executeQueryForObjList(Country.class, "");
 		Country country = countries.get(0);
 		logger.debug("Finished getting country by name >> " + country); 
 		return country;
@@ -165,7 +166,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public List<County> getCountyByNameAndCountryId(String countyName, Long countryId) {
 		String query = "From County c where c.countyName = '" + countyName + "' and c.countryId = '" + countryId + "'";
 		logger.debug("Executing query : " + query); 
-		List<County> counties = HunterHibernateHelper.executeQueryForObjList(County.class, query);
+		List<County> counties = hunterHibernateHelper.executeQueryForObjList(County.class, query);
 		logger.debug("Returned counties. Size( " + counties.size() + " )"); 
 		return counties;
 	}
@@ -173,7 +174,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public List<Country> getAllCountries() {
 		logger.debug("Getting all countries...");
-		List<Country> countries = HunterHibernateHelper.getAllEntities(Country.class);
+		List<Country> countries = hunterHibernateHelper.getAllEntities(Country.class);
 		logger.debug("Finished getting countries");
 		return countries;
 	}
@@ -199,7 +200,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void updateCountry(Country country) {
 		logger.debug("Updating country...");
-		HunterHibernateHelper.updateEntity(country); 
+		hunterHibernateHelper.updateEntity(country); 
 		logger.debug("Finished updating country");
 		
 	}
@@ -207,7 +208,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void insertCounty(County county) {
 		logger.debug("Inserting county...");
-		HunterHibernateHelper.saveEntity(county);
+		hunterHibernateHelper.saveEntity(county);
 		logger.debug("Finished inserting county!");
 		
 	}
@@ -215,7 +216,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void deleteCounty(County county) {
 		logger.debug("Deleting county");
-		HunterHibernateHelper.deleteEntity(county); 
+		hunterHibernateHelper.deleteEntity(county); 
 		logger.debug("Finished deleting county");
 		
 	}
@@ -223,7 +224,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public County getCountyById(Long countryId) {
 		logger.debug("Fetching county by id...");
-		County county = HunterHibernateHelper.getEntityById(countryId, County.class);
+		County county = hunterHibernateHelper.getEntityById(countryId, County.class);
 		logger.debug("Finished fetching county");
 		return county;
 	}
@@ -231,7 +232,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public List<County> getAllCounties() {
 		logger.debug("Fetching all counties...");
-		List<County> counties = HunterHibernateHelper.getAllEntities(County.class);
+		List<County> counties = hunterHibernateHelper.getAllEntities(County.class);
 		logger.debug("Finished fetching counties size(" + counties != null ? counties.size() : null +  ")");
 		return counties;
 	}
@@ -278,7 +279,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public List<County> getAllCountiesForCountryId(String countryId) {
 		logger.debug("Fetching counties for given country id [" + countryId +"]");
 		String query = "From Country c where c.countryId = '" + countryId + "'";
-		List<Country> countries = HunterHibernateHelper.executeQueryForObjList(Country.class, query);
+		List<Country> countries = hunterHibernateHelper.executeQueryForObjList(Country.class, query);
 		List<County> counties = new ArrayList<County>();
 		if(countries != null && countries.size() > 0 )
 			counties.addAll(countries.get(0).getCounties());
@@ -289,21 +290,21 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void updateCounty(County county) {
 		logger.debug("Upadting county");
-		HunterHibernateHelper.updateEntity(county); 
+		hunterHibernateHelper.updateEntity(county); 
 		logger.debug("Finished  updating county");
 	}
 
 	@Override
 	public void insertState(State state) {
 		logger.debug("Inserting state...");
-		HunterHibernateHelper.saveEntity(state); 
+		hunterHibernateHelper.saveEntity(state); 
 		logger.debug("Finished inserting state");
 	}
 
 	@Override
 	public void deleteState(State state) {
 		logger.debug("Deleting state...");
-		HunterHibernateHelper.deleteEntity(state);
+		hunterHibernateHelper.deleteEntity(state);
 		logger.debug("Finished deleting state");
 		
 	}
@@ -311,7 +312,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public State getStateById(Long countryId) {
 		logger.debug("Getting state by id");
-		State state = HunterHibernateHelper.getEntityById(countryId, State.class);
+		State state = hunterHibernateHelper.getEntityById(countryId, State.class);
 		logger.debug("Finished getting state by id"); 
 		return state;
 	}
@@ -319,7 +320,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public List<State> getAllStates() {
 		logger.debug("Getting all states");
-		List<State> states = HunterHibernateHelper.getAllEntities(State.class);
+		List<State> states = hunterHibernateHelper.getAllEntities(State.class);
 		logger.debug("Finished fetching all states size(" + states != null ? states.size() : null +  ")");
 		return states;
 	}
@@ -327,7 +328,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void updateState(State state) {
 		logger.debug("Updating state");
-		HunterHibernateHelper.updateEntity(state);
+		hunterHibernateHelper.updateEntity(state);
 		logger.debug("Finished updating state");
 		
 	}
@@ -335,21 +336,21 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void insertConstituency(Constituency constituency) {
 		logger.debug("Inserting constituency");
-		HunterHibernateHelper.saveEntity(constituency); 
+		hunterHibernateHelper.saveEntity(constituency); 
 		logger.debug("Finished inserting constituency");
 	}
 
 	@Override
 	public void deleteConstituency(Constituency constituency) {
 		logger.debug("Deleting constituency...");
-		HunterHibernateHelper.deleteEntity(constituency);	
+		hunterHibernateHelper.deleteEntity(constituency);	
 		logger.debug("Finished deleting constituency...");
 	}
 
 	@Override
 	public Constituency getConstituencyById(Long id) {
 		logger.debug("loading Constituency...");
-		Constituency constituency = HunterHibernateHelper.getEntityById(id, Constituency.class);
+		Constituency constituency = hunterHibernateHelper.getEntityById(id, Constituency.class);
 		logger.debug("Successfully loaded Constituency...");
 		return constituency;
 	}
@@ -389,7 +390,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public List<Constituency> getAllConstituencies() {
 		logger.debug("loading constituencies...");
-		List<Constituency> constituencies = HunterHibernateHelper.getAllEntities(Constituency.class);
+		List<Constituency> constituencies = hunterHibernateHelper.getAllEntities(Constituency.class);
 		logger.debug("Finished fetching constituencies size(" + constituencies != null ? constituencies.size() : null +  ")");
 		return constituencies;
 	}
@@ -398,7 +399,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public List<Constituency> getAllConstituenciesForCountyId(String countyId) {
 		logger.debug("Fetching constituencies for given county id [" + countyId +"]");
 		String query = "From County c where c.countyId = '" + countyId + "'";
-		List<County> counties = HunterHibernateHelper.executeQueryForObjList(County.class, query);
+		List<County> counties = hunterHibernateHelper.executeQueryForObjList(County.class, query);
 		List<Constituency> constituencies = new ArrayList<Constituency>();
 		if(counties != null && counties.size() > 0)
 			constituencies.addAll(counties.get(0).getConstituencies());
@@ -409,28 +410,28 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void updateConstituency(Constituency constituency) {
 		logger.debug("Updating constituency...");
-		HunterHibernateHelper.updateEntity(constituency);
+		hunterHibernateHelper.updateEntity(constituency);
 		logger.debug("Finished updating constituency..."); 
 	}
 
 	@Override
 	public void insertConstituencyWard(ConstituencyWard constituencyWard) {
 		logger.debug("Inserting constituencyWard");
-		HunterHibernateHelper.saveEntity(constituencyWard); 
+		hunterHibernateHelper.saveEntity(constituencyWard); 
 		logger.debug("Finished inserting constituencyWard");		
 	}
 
 	@Override
 	public void deleteConstituencyWard(ConstituencyWard constituencyWard) {
 		logger.debug("Deleting ConstituencyWard...");
-		HunterHibernateHelper.deleteEntity(constituencyWard);	
+		hunterHibernateHelper.deleteEntity(constituencyWard);	
 		logger.debug("Finished deleting ConstituencyWard...");		
 	}
 
 	@Override
 	public ConstituencyWard getConstituencyWardById(Long id) {
 		logger.debug("Fetching ConstituencyWard...");
-		ConstituencyWard constituencyWard = HunterHibernateHelper.getEntityById(id, ConstituencyWard.class);
+		ConstituencyWard constituencyWard = hunterHibernateHelper.getEntityById(id, ConstituencyWard.class);
 		logger.debug("Successfully loaded ConstituencyWard...");
 		return constituencyWard;
 	}
@@ -438,7 +439,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public List<ConstituencyWard> getAllConstituencyWards() {
 		logger.debug("gettingAllConstituencyWards...");
-		List<ConstituencyWard> constituencyWards = HunterHibernateHelper.getAllEntities(ConstituencyWard.class);
+		List<ConstituencyWard> constituencyWards = hunterHibernateHelper.getAllEntities(ConstituencyWard.class);
 		logger.debug("Finished gettingAllConstituencyWards size(" + constituencyWards != null ? constituencyWards.size() : null +  ")");
 		return constituencyWards;
 	}
@@ -447,7 +448,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public List<ConstituencyWard> getAllConstituencyWardsForConstituencyId(String constituencyId) {
 		logger.debug("Fetching constituencyWards for given constituency id [" + constituencyId +"]");
 		String query = "From Constituency c where c.cnsttncyId = '" + constituencyId + "'";
-		List<Constituency> constituencies = HunterHibernateHelper.executeQueryForObjList(Constituency.class, query);
+		List<Constituency> constituencies = hunterHibernateHelper.executeQueryForObjList(Constituency.class, query);
 		List<ConstituencyWard> constituencyWards = new ArrayList<ConstituencyWard>();
 		if(constituencies != null && constituencies.size() > 0)
 			constituencyWards.addAll(constituencies.get(0).getConstituencyWards());
@@ -490,14 +491,14 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void updateConstituencyWard(ConstituencyWard constituencyWard) {
 		logger.debug("Updating constituencyWard...");
-		HunterHibernateHelper.updateEntity(constituencyWard);
+		hunterHibernateHelper.updateEntity(constituencyWard);
 		logger.debug("Finished updating constituencyWard..."); 	
 	}
 
 	@Override
 	public Long getNextCountryId() {
 		logger.debug("Fetching next id for receiver country..."); 
-		Long maxId = HunterHibernateHelper.getMaxEntityIdAsNumber(Country.class, Long.class, "countryId");
+		Long maxId = hunterHibernateHelper.getMaxEntityIdAsNumber(Country.class, Long.class, "countryId");
 		maxId =  maxId == null ? 0 : (maxId++);
 		logger.debug("Successfully obtained next country id >> " + maxId);
 		return maxId;
@@ -506,7 +507,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public Long getNextCountyId() {
 		logger.debug("Fetching next id for country..."); 
-		Long maxId = HunterHibernateHelper.getMaxEntityIdAsNumber(Country.class, Long.class, "countryId");
+		Long maxId = hunterHibernateHelper.getMaxEntityIdAsNumber(Country.class, Long.class, "countryId");
 		maxId =  maxId == null ? 0 : (maxId++);
 		logger.debug("Successfully obtained next country id >> " + maxId);
 		return maxId;
@@ -515,7 +516,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public Long getNextConsituencyId() {
 		logger.debug("gettingNextConsituencyId..."); 
-		Long maxId = HunterHibernateHelper.getMaxEntityIdAsNumber(Constituency.class, Long.class, "cnsttncyId");
+		Long maxId = hunterHibernateHelper.getMaxEntityIdAsNumber(Constituency.class, Long.class, "cnsttncyId");
 		maxId =  maxId == null ? 0 : (maxId++);
 		logger.debug("Successfully obtained next Constituency id >> " + maxId);
 		return maxId;
@@ -524,7 +525,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public Long getNextConsituencyWardId() {
 		logger.debug("Fetching next id for ConsituencyWard..."); 
-		Long maxId = HunterHibernateHelper.getMaxEntityIdAsNumber(ConstituencyWard.class, Long.class, "wardId");
+		Long maxId = hunterHibernateHelper.getMaxEntityIdAsNumber(ConstituencyWard.class, Long.class, "wardId");
 		maxId =  maxId == null ? 0 : (maxId++);
 		logger.debug("Successfully obtained next ConsituencyWard id >> " + maxId);
 		return maxId;
@@ -534,7 +535,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public Long getNextReceiverRegionId() {
 		logger.debug("Fetching next id for receiver ReceiverRegion..."); 
-		Long maxId = HunterHibernateHelper.getMaxEntityIdAsNumber(ReceiverRegion.class, Long.class, "regionId");
+		Long maxId = hunterHibernateHelper.getMaxEntityIdAsNumber(ReceiverRegion.class, Long.class, "regionId");
 		maxId =  maxId == null ? 0 : (maxId+1);
 		logger.debug("Successfully obtained next ReceiverRegion id >> " + maxId);
 		return maxId;

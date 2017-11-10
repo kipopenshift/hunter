@@ -43,7 +43,7 @@ public class HunterController extends HunterBaseController{
 	@RequestMapping(value="/home", method=RequestMethod.GET)
 	public String home(){
 		
-		Collection<GrantedAuthority> grantedAuthorities = getAuthentication().getAuthorities();
+		Collection<? extends GrantedAuthority> grantedAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
 		List<GrantedAuthority> authList = new ArrayList<>();
 		authList.addAll(grantedAuthorities);
 		
@@ -86,7 +86,7 @@ public class HunterController extends HunterBaseController{
 	@RequestMapping(value="/login/after", method=RequestMethod.GET)
 	public String postLogin(){
 		
-		Collection<GrantedAuthority> grantedAuthorities = getAuthentication().getAuthorities();
+		Collection<? extends GrantedAuthority> grantedAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
 		List<GrantedAuthority> authList = new ArrayList<>();
 		authList.addAll(grantedAuthorities);
 		

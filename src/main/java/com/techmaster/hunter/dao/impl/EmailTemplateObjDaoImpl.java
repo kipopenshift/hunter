@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.techmaster.hunter.dao.types.EmailTemplateObjDao;
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
@@ -17,18 +18,20 @@ import com.techmaster.hunter.util.HunterUtility;
 public class EmailTemplateObjDaoImpl implements EmailTemplateObjDao{
 	
 	private Logger logger = Logger.getLogger(getClass());
+	
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
 
 	@Override
 	public void insertTemplateObj(EmailTemplateObj templateObj) {
 		logger.debug("Saving template object : " + templateObj);
-		HunterHibernateHelper.saveEntity(templateObj); 
+		hunterHibernateHelper.saveEntity(templateObj); 
 		logger.debug("Done saving template object");
 	}
 
 	@Override
 	public EmailTemplateObj getTemplateObjById(Long templateId) {
 		logger.debug("Getting template object by ID : " + templateId);
-		EmailTemplateObj emailTemplateObj = HunterHibernateHelper.getEntityById(templateId, EmailTemplateObj.class);
+		EmailTemplateObj emailTemplateObj = hunterHibernateHelper.getEntityById(templateId, EmailTemplateObj.class);
 		logger.debug("Done retrieving template object : " + emailTemplateObj.getTemplateName());
 		return emailTemplateObj;
 	}
@@ -36,7 +39,7 @@ public class EmailTemplateObjDaoImpl implements EmailTemplateObjDao{
 	@Override
 	public List<EmailTemplateObj> getAllTemplateObjs() {
 		logger.debug("Getting all template objects...");
-		List<EmailTemplateObj> emailTemplateObjs = HunterHibernateHelper.getAllEntities(EmailTemplateObj.class);
+		List<EmailTemplateObj> emailTemplateObjs = hunterHibernateHelper.getAllEntities(EmailTemplateObj.class);
 		logger.debug("Done getting all template objects. Size( "+ emailTemplateObjs == null ? 0 : emailTemplateObjs.size() +" )");
 		return emailTemplateObjs;
 	}
@@ -47,7 +50,7 @@ public class EmailTemplateObjDaoImpl implements EmailTemplateObjDao{
 		String results = EmailTemplateUtil.getInstance().validateTemplateDeletion(emailTemplateObj);
 		logger.debug(results); 
 		if( results == null ){
-			HunterHibernateHelper.deleteEntity(emailTemplateObj);
+			hunterHibernateHelper.deleteEntity(emailTemplateObj);
 		}
 		return results;
 	}
@@ -79,7 +82,7 @@ public class EmailTemplateObjDaoImpl implements EmailTemplateObjDao{
 	@Override
 	public void updateEmailTemplateObj(EmailTemplateObj emailTemplateObj) {
 		logger.debug("Updating template object...");
-		HunterHibernateHelper.updateEntity(emailTemplateObj); 
+		hunterHibernateHelper.updateEntity(emailTemplateObj); 
 		logger.debug("Updating template object");
 	}
 
@@ -114,7 +117,7 @@ public class EmailTemplateObjDaoImpl implements EmailTemplateObjDao{
 	public List<EmailTemplateObj> getApprovedTemplateObjs() {
 		logger.debug("Finished all approved template objects..."); 
 		String query = "FROM EmailTemplateObj e WHERE e.status = 'Approved'";
-		List<EmailTemplateObj> emailTemplateObjs = HunterHibernateHelper.executeQueryForObjList(EmailTemplateObj.class, query);
+		List<EmailTemplateObj> emailTemplateObjs = hunterHibernateHelper.executeQueryForObjList(EmailTemplateObj.class, query);
 		logger.debug("Finished fetching email template objects. Size ( " + emailTemplateObjs.size() + " )");  
 		return emailTemplateObjs;
 	}

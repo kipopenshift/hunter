@@ -26,6 +26,7 @@ import com.techmaster.hunter.cache.HunterCacheUtil;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.HunterURLConstants;
 import com.techmaster.hunter.constants.TaskProcessConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.obj.beans.AuditInfo;
 import com.techmaster.hunter.obj.beans.TaskProcessJob;
@@ -82,7 +83,7 @@ public class TaskProcessJobHandler {
 	public List<TaskProcessJob> getAllTaskProcessJobsForTaskId(Long taskId){
 		logger.debug("Fetching task process jobs for task id : " + taskId); 
 		String query = "FROM TaskProcessJob j WHERE j.taskId = " + taskId;
-		List<TaskProcessJob> processJobs  = HunterHibernateHelper.executeQueryForObjList(TaskProcessJob.class, query);
+		List<TaskProcessJob> processJobs  =  HunterDaoFactory.getObject(HunterHibernateHelper.class).executeQueryForObjList(TaskProcessJob.class, query);
 		if(processJobs != null && !processJobs.isEmpty()){
 			for(TaskProcessJob processJob : processJobs){
 				Blob docBlob = processJob.getDocBlob();
@@ -115,7 +116,7 @@ public class TaskProcessJobHandler {
 		Transaction trans = null;
 		byte[] bytes = processJob.getXmlService().toString().getBytes();
 		try {
-			session = HunterSessionFactory.getSessionFactory().openSession();
+			session = HunterDaoFactory.getDaoObject(HunterSessionFactory.class).getSessionFactory().openSession();
 			trans = session.beginTransaction();
 			
 			if(bytes != null && bytes.length != 0 ){

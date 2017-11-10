@@ -1,81 +1,102 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	
 	<groupId>com.techmaster.soft.hunter</groupId>
 	<artifactId>Hunter</artifactId>
 	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
+	
 	<name>Hunter Maven Webapp</name>
 	<url>http://maven.apache.org</url>
+	
+ 	<properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring.version>4.3.7.RELEASE</spring.version>
+        <hibernate.version>4.3.6.Final</hibernate.version>
+        <junit.version>4.12</junit.version>
+        <servlet.version>3.1.0</servlet.version>
+        <servlet.version>3.0.1</servlet.version>
+        <mysql.connector.version>5.1.9</mysql.connector.version>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    	<maven.compiler.source>1.8</maven.compiler.source>
+    </properties>
 
 
 	<dependencies>
-
+	
+	
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>${spring.version}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-context-support</artifactId>
+		    <version>${spring.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-expression</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-tx</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 
 		<!-- This is for spring security -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>4.2.3.RELEASE</version>
 		</dependency>
 
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-orm</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-oxm</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 
 		<dependency>
@@ -85,19 +106,18 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<version>4.0.1.Final</version>
-		</dependency>
 
+
+		<dependency>
+	      <groupId>org.hibernate</groupId>
+	      <artifactId>hibernate-core</artifactId>
+	      <version>4.3.6.Final</version>
+	    </dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
 			<version>4.2.0.Final</version>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.hibernate.common</groupId>
 			<artifactId>hibernate-commons-annotations</artifactId>
@@ -114,6 +134,8 @@
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>4.0.1.Final</version>
 		</dependency>
+		
+		
 		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
@@ -123,17 +145,17 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.4</version>
+			<version>1.7.12</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.logging</groupId>
 			<artifactId>jboss-logging</artifactId>
-			<version>3.1.0.CR2</version>
+			<version>3.3.0.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.4</version>
+			<version>1.7.12</version>
 		</dependency>
 
 		<dependency>
@@ -205,7 +227,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jms</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
@@ -291,7 +313,7 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
-			<version>3.0.5.RELEASE</version>
+			<version>4.2.3.RELEASE</version>
 		</dependency>
 
 
@@ -344,22 +366,17 @@
 		<!-- This is for sms library - sending text message -->
 
 		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-hibernate4</artifactId>
-			<version>2.6.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>2.0.4</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.0.4</version>
-		</dependency>
-
+	        <groupId>com.fasterxml.jackson.core</groupId>
+	        <artifactId>jackson-core</artifactId>
+	        <version>2.5.2</version>
+	    </dependency>
+	    
+	    <dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>2.9.0</version>
+		</dependency>	
+	    
 		<!-- This is for sending emails. Needs to be there for spring to send emails -->
 
 		<dependency>
@@ -371,31 +388,35 @@
 		<!-- URI Builder for get parameters -->
 
 		<dependency>
-			<groupId>org.codehaus.httpcache4j.uribuilder</groupId>
-			<artifactId>uribuilder</artifactId>
-			<version>2.0.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>2.5.2</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.0-alpha4</version>
+			<version>4.3.4</version>
 		</dependency>
+		
+		 <dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-core</artifactId>
+		    <version>2.5.0</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>2.5.0</version>
+		</dependency>
+
 
 
 	</dependencies>
 
-
-
-
 	<build>
 		<finalName>Hunter</finalName>
+		<plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
 	</build>
 
 

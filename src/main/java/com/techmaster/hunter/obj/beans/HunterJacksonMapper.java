@@ -3,22 +3,22 @@ package com.techmaster.hunter.obj.beans;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationConfig;
 import com.techmaster.hunter.constants.HunterConstants;
 
 
 
 public class HunterJacksonMapper extends ObjectMapper {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5349858647635851774L;
+
 	public HunterJacksonMapper() {
 		
-        this.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-        
         DateFormat myDateFormat = new SimpleDateFormat(HunterConstants.HUNTER_DATE_FORMAT_MIN);
-        this.getSerializationConfig().setDateFormat(myDateFormat);
-        this.getDeserializationConfig().setDateFormat(myDateFormat); 
     }
 	
 }

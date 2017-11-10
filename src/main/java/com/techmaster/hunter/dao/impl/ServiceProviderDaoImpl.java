@@ -3,6 +3,7 @@ package com.techmaster.hunter.dao.impl;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.techmaster.hunter.dao.types.ServiceProviderDao;
 import com.techmaster.hunter.obj.beans.ServiceProvider;
@@ -11,25 +12,26 @@ import com.techmaster.hunter.util.HunterHibernateHelper;
 public class ServiceProviderDaoImpl implements ServiceProviderDao{
 	
 	private Logger logger = Logger.getLogger(ServiceProviderDaoImpl.class);
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
 
 	@Override
 	public void insertServiceProvider(ServiceProvider serviceProvider) {
 		logger.debug("Inserting service provider : " + serviceProvider);
-		HunterHibernateHelper.saveEntity(serviceProvider); 
+		hunterHibernateHelper.saveEntity(serviceProvider); 
 		logger.debug("Finished inserting Service provider!");
 	}
 
 	@Override
 	public void insertServiceProviders(List<ServiceProvider> serviceProviders) {
 		logger.debug("Inserting service providers : size( " + serviceProviders.size() + " )");
-		HunterHibernateHelper.saveEntities(serviceProviders); 
+		hunterHibernateHelper.saveEntities(serviceProviders); 
 		logger.debug("Finished inserting Service providers!");
 	}
 
 	@Override
 	public ServiceProvider getServiceProviderById(Long id) {
 		logger.debug("Getting service provider by id : " + id); 
-		ServiceProvider serviceProvider = HunterHibernateHelper.getEntityById(id, ServiceProvider.class);
+		ServiceProvider serviceProvider = hunterHibernateHelper.getEntityById(id, ServiceProvider.class);
 		logger.debug("Finished gettting Service provider : " + serviceProvider); 
 		return serviceProvider;
 	}
@@ -38,7 +40,7 @@ public class ServiceProviderDaoImpl implements ServiceProviderDao{
 	public ServiceProvider getServiceProviderByName(String name) {
 		logger.debug("Getting service provider by name : " + name); 
 		String query = "FROM ServiceProvider s where s.providerName = '" + name + "'";
-		List<ServiceProvider> serviceProviders = HunterHibernateHelper.executeQueryForObjList(ServiceProvider.class, query);
+		List<ServiceProvider> serviceProviders = hunterHibernateHelper.executeQueryForObjList(ServiceProvider.class, query);
 		logger.debug("Service providers returned for the name ( " + name + " ) , size ( " + serviceProviders.size() + " )");  
 		ServiceProvider serviceProvider = null;
 		if(serviceProviders != null && !serviceProviders.isEmpty())
@@ -52,7 +54,7 @@ public class ServiceProviderDaoImpl implements ServiceProviderDao{
 	public List<ServiceProvider> getAllServiceProviders() {
 		
 		logger.debug("Getting all service providers..." ); 
-		List<ServiceProvider> serviceProviders = HunterHibernateHelper.getAllEntities(ServiceProvider.class);
+		List<ServiceProvider> serviceProviders = hunterHibernateHelper.getAllEntities(ServiceProvider.class);
 		logger.debug("Finished getting Service providers  " + serviceProviders);
 		return serviceProviders;
 	}
@@ -61,7 +63,7 @@ public class ServiceProviderDaoImpl implements ServiceProviderDao{
 	public void updateServiceProvider(ServiceProvider update) {
 		
 		logger.debug("Updating service provider : " + update); 
-		HunterHibernateHelper.updateEntity(update);;
+		hunterHibernateHelper.updateEntity(update);;
 		logger.debug("Finished updating service providers!");
 		
 		

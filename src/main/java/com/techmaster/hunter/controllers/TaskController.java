@@ -70,7 +70,7 @@ public class TaskController extends HunterBaseController{
 		
 		String baseDir = System.getProperty("catalina.base");
 		logger.debug(baseDir); 
-		List<Task> tasks = HunterHibernateHelper.getAllEntities(Task.class); //taskDao.getTaskForClientId(clientId);
+		List<Task> tasks = HunterDaoFactory.getObject(HunterHibernateHelper.class).getAllEntities(Task.class);
 		logger.debug("Returning Tasks for client >> " + tasks);
 		return tasks;
 	}

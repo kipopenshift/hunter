@@ -9,8 +9,8 @@
 <script src="<c:url value='/static/resources/scripts/plain/fieldProfile.js'/>"></script>
 <script src="<c:url value='/static/resources/scripts/plain/notify.js'/>"></script>
 <link rel="stylesheet" href="<c:url value='/static/resources/css/fieldProfile.css'/>" >
-<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.bootstrap.css" />
  
 <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">

@@ -83,7 +83,7 @@ public class HunterSocialHelper {
 	
 	public List<HunterSocialAppJson> getAllSocialAppsJsons(){
 		logger.debug("Getting all social apps jsons...");
-		List<HunterSocialApp>  socialApps = HunterHibernateHelper.getAllEntities(HunterSocialApp.class);
+		List<HunterSocialApp>  socialApps =   HunterDaoFactory.getObject(HunterHibernateHelper.class).getAllEntities(HunterSocialApp.class);
 		List<HunterSocialAppJson> socialAppJsons = new ArrayList<>();
 		if( HunterUtility.isCollectionNotEmpty(socialApps) ){
 			for(HunterSocialApp socialApp : socialApps){
@@ -109,14 +109,14 @@ public class HunterSocialHelper {
 		XMLService xmlService = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.HUNTER_SOCIAL_APP_CONFIG_PATH);
 		socialApp.setAppConfigs(HunterUtility.getStringBlob(xmlService.toString()));
 		if( update ){
-			HunterHibernateHelper.updateEntity(socialApp); 
+			 HunterDaoFactory.getObject(HunterHibernateHelper.class).updateEntity(socialApp); 
 		}
 		return xmlService;
 	}
 	
 	public HunterSocialApp createHunterSocialApp(HunterSocialApp socialApp){
 		logger.debug("creating social app..." + socialApp); 
-		HunterHibernateHelper.saveEntity(socialApp);
+		 HunterDaoFactory.getObject(HunterHibernateHelper.class).saveEntity(socialApp);
 		logger.debug("Successfully created social app " + socialApp); 
 		return socialApp;
 	}
@@ -128,7 +128,7 @@ public class HunterSocialHelper {
 		HunterSocialApp socialApp = null;
 		
 		if( updateApp ){
-			socialApp = HunterHibernateHelper.getEntityById(hunterSocialAppJson.getAppId(), HunterSocialApp.class);
+			socialApp =  HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(hunterSocialAppJson.getAppId(), HunterSocialApp.class);
 			auditInfo.setCreatedBy(socialApp.getAuditInfo().getCreatedBy());
 			auditInfo.setCretDate(socialApp.getAuditInfo().getCretDate());
 		}else{
@@ -145,10 +145,10 @@ public class HunterSocialHelper {
 		
 		if( updateApp ){
 			logger.debug("Updating ( " + socialApp +" )"); 
-			HunterHibernateHelper.updateEntity(socialApp);
+			 HunterDaoFactory.getObject(HunterHibernateHelper.class).updateEntity(socialApp);
 		}else{
 			logger.debug("Creating ( " + socialApp +" )"); 
-			HunterHibernateHelper.saveEntity(socialApp);
+			 HunterDaoFactory.getObject(HunterHibernateHelper.class).saveEntity(socialApp);
 		}
 		
 		hunterSocialAppJson.setAppId(socialApp.getAppId());
@@ -179,7 +179,7 @@ public class HunterSocialHelper {
 			logger.debug("Cannot delete social region since it is being used by social groups : " + bstr);
 			return bstr;
 		}else{
-			HunterHibernateHelper.deleteEntityByLongId(appId, HunterSocialApp.class); 
+			 HunterDaoFactory.getObject(HunterHibernateHelper.class).deleteEntityByLongId(appId, HunterSocialApp.class); 
 			return null;
 		}
 		
@@ -187,20 +187,20 @@ public class HunterSocialHelper {
 	
 	public HunterSocialApp updateHunterSocialApp(HunterSocialApp socialApp){
 		logger.debug("Updating social app..." + socialApp); 
-		HunterHibernateHelper.updateEntity(socialApp); 
+		 HunterDaoFactory.getObject(HunterHibernateHelper.class).updateEntity(socialApp); 
 		logger.debug("Successfully updated social app!"); 
 		return socialApp;
 	}
 	
 	public void deleteHunterSocialApp(HunterSocialApp socialApp){
 		logger.debug("Deleting social app : " + socialApp); 
-		HunterHibernateHelper.deleteEntity(socialApp);
+		 HunterDaoFactory.getObject(HunterHibernateHelper.class).deleteEntity(socialApp);
 		logger.debug("Successfully deleted social app!"); 
 	}
 	
 	public String tryDeleteSocialGroup(Long groupId){
 		logger.debug("Deleting social group : " + groupId);
-		HunterHibernateHelper.deleteEntityByLongId(groupId, HunterSocialGroup.class);
+		 HunterDaoFactory.getObject(HunterHibernateHelper.class).deleteEntityByLongId(groupId, HunterSocialGroup.class);
 		logger.debug("Successfully deleted social app!"); 
 		return null;
 	}
@@ -236,15 +236,15 @@ public class HunterSocialHelper {
 		logger.debug("Converting json to social group : " + socialGroupJson); 
 		
 		HunterSocialGroup socialGroup = new HunterSocialGroup();
-		HunterSocialRegion socialRegion = HunterHibernateHelper.getEntityById(socialGroupJson.getRegionId(), HunterSocialRegion.class);
+		HunterSocialRegion socialRegion =  HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(socialGroupJson.getRegionId(), HunterSocialRegion.class);
 		
 		if( socialGroupJson.getGroupId() != null && socialGroupJson.getGroupId() != 0 ){
-			socialGroup = HunterHibernateHelper.getEntityById(socialGroupJson.getGroupId(), HunterSocialGroup.class);
+			socialGroup =  HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(socialGroupJson.getGroupId(), HunterSocialGroup.class);
 			auditInfo.setCreatedBy(socialGroup.getAuditInfo().getCreatedBy()); 
 			auditInfo.setCretDate(socialGroup.getAuditInfo().getCretDate()); 
 		}
 		
-		HunterSocialApp defaultSocialApp = HunterHibernateHelper.getEntityById(socialGroupJson.getSocialAppId(), HunterSocialApp.class);
+		HunterSocialApp defaultSocialApp =  HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(socialGroupJson.getSocialAppId(), HunterSocialApp.class);
 		
 		socialGroup.setSocialRegion(socialRegion);
 		socialGroup.setAcquired(socialGroupJson.isAcquired());
@@ -272,10 +272,10 @@ public class HunterSocialHelper {
 		
 		if( socialGroup.getGroupId() != null &&  socialGroup.getGroupId() != 0){
 			logger.debug("Updating the social group...");
-			HunterHibernateHelper.updateEntity(socialGroup); 
+			 HunterDaoFactory.getObject(HunterHibernateHelper.class).updateEntity(socialGroup); 
 		}else{
 			logger.debug("Creating the social group...");
-			HunterHibernateHelper.saveEntity(socialGroup); 
+			 HunterDaoFactory.getObject(HunterHibernateHelper.class).saveEntity(socialGroup); 
 		}
 		
 		return socialGroupJson;
@@ -381,7 +381,7 @@ public class HunterSocialHelper {
 
 	public List<HunterSocialGroupJson> getAllSocialGroupsJsons(){
 		logger.debug("Getting all social group jsons..." ); 
-		List<HunterSocialGroup> socialGroups = HunterHibernateHelper.getAllEntities(HunterSocialGroup.class);
+		List<HunterSocialGroup> socialGroups =  HunterDaoFactory.getObject(HunterHibernateHelper.class).getAllEntities(HunterSocialGroup.class);
 		List<HunterSocialGroupJson> socialGroupJsons = convertSocialGroupToSocialGroupJson(socialGroups);
 		logger.debug("Returning groups. Size ( "+ socialGroupJsons.size() +" )" ); 
 		return socialGroupJsons;
@@ -428,7 +428,7 @@ public class HunterSocialHelper {
 	
 	
 	public List<HunterSocialRegionJson> getAllSocialRegionsJsons(){
-		List<HunterSocialRegion> socialRegions = HunterHibernateHelper.getAllEntities(HunterSocialRegion.class);
+		List<HunterSocialRegion> socialRegions =  HunterDaoFactory.getObject(HunterHibernateHelper.class).getAllEntities(HunterSocialRegion.class);
 		List<HunterSocialRegionJson> socialRegionJsons = new ArrayList<>();
 		for(HunterSocialRegion socialRegion : socialRegions){
 			HunterSocialRegionJson socialRegionJson = getSocialRegionJSONForRegion(socialRegion);
@@ -442,7 +442,7 @@ public class HunterSocialHelper {
 		HunterSocialRegion socialRegion = new HunterSocialRegion();
 		
 		if( socialRegionJson.getRegionId() != null && socialRegionJson.getRegionId() != 0 ){
-			socialRegion = HunterHibernateHelper.getEntityById( socialRegionJson.getRegionId(), HunterSocialRegion.class);
+			socialRegion =  HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById( socialRegionJson.getRegionId(), HunterSocialRegion.class);
 			auditInfo.setCreatedBy(socialRegionJson.getCreatedBy()); 
 			auditInfo.setCretDate(HunterUtility.parseDate(socialRegionJson.getCretDate(), HunterConstants.DATE_FORMAT_STRING));  
 		}
@@ -463,10 +463,10 @@ public class HunterSocialHelper {
 		
 		if( socialRegionJson.getRegionId() != null &&  socialRegionJson.getRegionId() != 0){
 			logger.debug("Updating the social region...");
-			HunterHibernateHelper.updateEntity(socialRegion);
+			 HunterDaoFactory.getObject(HunterHibernateHelper.class).updateEntity(socialRegion);
 		}else{
 			logger.debug("Creating the social region...");
-			HunterHibernateHelper.saveEntity(socialRegion);
+			 HunterDaoFactory.getObject(HunterHibernateHelper.class).saveEntity(socialRegion);
 			socialRegionJson.setRegionId(socialRegion.getRegionId());
 		}
 		
@@ -556,12 +556,12 @@ public class HunterSocialHelper {
 		}
 		String commaSepGrpIds = HunterUtility.getCommaDelimitedStrings(selGroupIds);
 		String query = "FROM HunterSocialGroup g WHERE g.groupId NOT IN ("+ commaSepGrpIds +")";
-		List<HunterSocialGroup> socialGroups = HunterHibernateHelper.executeQueryForObjList(HunterSocialGroup.class, query);
+		List<HunterSocialGroup> socialGroups =  HunterDaoFactory.getObject(HunterHibernateHelper.class).executeQueryForObjList(HunterSocialGroup.class, query);
 		return convertSocialGroupToSocialGroupJson(socialGroups);
 	}
 	
 	public List<HunterSocialGroupJson> getSelSocialMsgGroups(Long selMsgId) {
-		SocialMessage socialMessage = HunterHibernateHelper.getEntityById(selMsgId, SocialMessage.class);
+		SocialMessage socialMessage =  HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(selMsgId, SocialMessage.class);
 		Set<HunterSocialGroup> socialGroups = socialMessage != null ? socialMessage.getHunterSocialGroups() : new HashSet<HunterSocialGroup>();
 		List<HunterSocialGroup> socialGroup = new ArrayList<>();
 		socialGroup.addAll(socialGroups);
@@ -589,7 +589,7 @@ public class HunterSocialHelper {
 	
 	public synchronized TaskProcessJob getSocialProcessedJob(Long jobId){
 		String query = "FROM TaskProcessJob j WHERE j.jobId = " + jobId;
-		List<TaskProcessJob> processJobs  = HunterHibernateHelper.executeQueryForObjList(TaskProcessJob.class, query);
+		List<TaskProcessJob> processJobs  =  HunterDaoFactory.getObject(HunterHibernateHelper.class).executeQueryForObjList(TaskProcessJob.class, query);
 		if( HunterUtility.isCollectionNotEmpty(processJobs) ){
 			TaskProcessJob processJob = processJobs.get(0); 
 			try {
@@ -635,7 +635,7 @@ public class HunterSocialHelper {
 	}
 
 	public HunterSocialRegionJson getSocialRegionJsonForId(Long regionId) {
-		HunterSocialRegionJson regionJson = getSocialRegionJSONForRegion(HunterHibernateHelper.getEntityById(regionId, HunterSocialRegion.class));
+		HunterSocialRegionJson regionJson = getSocialRegionJSONForRegion( HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(regionId, HunterSocialRegion.class));
 		return regionJson;
 	}
 	

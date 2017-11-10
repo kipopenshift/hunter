@@ -13,7 +13,7 @@ public class TaskAngulater {
 	
 	public List<TaskAngular> getAllAngularTasks(){
 		List<TaskAngular> angularTasks = new ArrayList<>();		
-		List<Task> tasks = HunterHibernateHelper.getAllEntities(Task.class);
+		List<Task> tasks = HunterDaoFactory.getObject(HunterHibernateHelper.class).getAllEntities(Task.class); 
 		for( Task task : tasks ){
 			TaskAngular angularTask = new TaskAngular();
 			angularTask.setTaskId(task.getTaskId());

@@ -8,6 +8,7 @@ import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.dao.impl.HunterAddressDaoImpl;
 import com.techmaster.hunter.dao.impl.HunterClientDaoImpl;
 import com.techmaster.hunter.dao.impl.HunterCreditCardDaoImpl;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.impl.HunterMessageDaoHelper;
 import com.techmaster.hunter.dao.impl.TaskMessageReceiverDaoImpl;
 import com.techmaster.hunter.dao.impl.HunterUserDaoImpl;
@@ -158,7 +159,7 @@ public class HunterClientTest {
 		task.setCreatedBy("hlangat01");
 		task.setTaskLifeStatus(HunterConstants.STATUS_DRAFT); 
 		
-		Long nextTxtMsgId = HunterMessageDaoHelper.getNextMessageId(TextMessage.class);
+		Long nextTxtMsgId = HunterDaoFactory.getDaoObject(HunterMessageDaoHelper.class).getNextMessageId(TextMessage.class);
 		
 		TextMessage message = new TextMessage();
 		message.setMsgId(nextTxtMsgId);

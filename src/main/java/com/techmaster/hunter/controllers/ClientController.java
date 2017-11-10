@@ -4,14 +4,20 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -21,10 +27,14 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.techmaster.hunter.constants.HunterConstants;
+import com.techmaster.hunter.constants.HunterDaoConstants;
+import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterClientDao;
+import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
 import com.techmaster.hunter.obj.beans.HunterClient;
 import com.techmaster.hunter.util.HunterUtility;
 
+@CrossOrigin( origins=HunterConstants.ALLOWED_CORS_ORIGINS, maxAge=3600 )
 @Controller
 @RequestMapping(value="/client")
 public class ClientController extends HunterBaseController{
@@ -146,6 +156,39 @@ public class ClientController extends HunterBaseController{
 	@RequestMapping(value="/action/mainPage")
 	public String mainPage(){
 		return "views/clientMainPage";
+	}
+	
+
+	@RequestMapping(value="/action/angular/read", method = RequestMethod.POST)
+	@Produces("application/json") 
+	@Consumes("application/json")
+	public @ResponseBody String getClientsForAngularUI( @RequestBody Map<String, String> reqParams, HttpServletResponse response ){
+		try{			
+			HunterJDBCExecutor executor = HunterDaoFactory.getDaoObject(HunterJDBCExecutor.class);
+			String query = executor.getQueryForSqlId(HunterDaoConstants.GET_CLIENTS_FOR_ANGULAR_QUERY);
+			Map<Integer, List<Object>> rowListMap = executor.executeQueryRowList(query, null);
+			JSONArray clients = new JSONArray();
+			for( Map.Entry<Integer, List<Object>> entry : rowListMap.entrySet() ){
+				List<Object> rowList = entry.getValue();
+				JSONObject clientRow = new JSONObject();
+				clientRow.put("clientId", rowList.get(0));
+				clientRow.put("firstName", rowList.get(1));
+				clientRow.put("lastName", rowList.get(2));
+				clientRow.put("email", rowList.get(3));
+				clientRow.put("userName", rowList.get(4));
+				clientRow.put("receiver", HunterUtility.getBooleanForYN(rowList.get(5).toString()));
+				clientRow.put("budget", rowList.get(6));
+				clientRow.put("createdDate", rowList.get(7));
+				clientRow.put("createdBy", rowList.get(8));
+				clientRow.put("updatedBy", rowList.get(9));
+				clientRow.put("updatedOn", rowList.get(10));
+				logger.debug("Client = " + clientRow.toString() );
+				clients.put(clientRow);
+			}
+			return clients.toString();
+		}catch (Exception e) {
+			return HunterUtility.setJSONObjectForFailure(null, "Error occurred while getting clients").toString();
+		}
 	}
 	
 

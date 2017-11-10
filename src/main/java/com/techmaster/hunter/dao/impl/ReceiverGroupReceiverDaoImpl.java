@@ -3,6 +3,7 @@ package com.techmaster.hunter.dao.impl;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.techmaster.hunter.dao.types.ReceiverGroupReceiverDao;
 import com.techmaster.hunter.obj.beans.ReceiverGroupReceiver;
@@ -11,25 +12,27 @@ import com.techmaster.hunter.util.HunterHibernateHelper;
 public class ReceiverGroupReceiverDaoImpl implements ReceiverGroupReceiverDao {
 	
 	private Logger logger = Logger.getLogger(getClass());
+	
+	@Autowired private HunterHibernateHelper hunterHibernateHelper;
 
 	@Override
 	public void insertReceiverGroupReceiver(ReceiverGroupReceiver receiverGroupReceiver) {
 		logger.debug("inserting receiver group receiver..."); 
-		HunterHibernateHelper.saveEntity(receiverGroupReceiver);
+		hunterHibernateHelper.saveEntity(receiverGroupReceiver);
 		logger.debug("Done inserting receiver group receivers!"); 
 	}
 
 	@Override
 	public void insertReceiverGroupReceivers(List<ReceiverGroupReceiver> receiverGroupReceivers) {
 		logger.debug("inserting receiver group receivers..."); 
-		HunterHibernateHelper.saveEntities(receiverGroupReceivers);
+		hunterHibernateHelper.saveEntities(receiverGroupReceivers);
 		logger.debug("Done inserting receiver group receivers!");
 	}
 
 	@Override
 	public ReceiverGroupReceiver getReceiverById(Long receiverId) {
 		logger.debug("Getting receiver group receiver by id ( " + receiverId + " )"); 
-		ReceiverGroupReceiver receiverGroupReceiver =  HunterHibernateHelper.getEntityById(receiverId, ReceiverGroupReceiver.class);
+		ReceiverGroupReceiver receiverGroupReceiver =  hunterHibernateHelper.getEntityById(receiverId, ReceiverGroupReceiver.class);
 		logger.debug("Done getting receiver group receiver");
 		return receiverGroupReceiver;
 	}
@@ -56,14 +59,14 @@ public class ReceiverGroupReceiverDaoImpl implements ReceiverGroupReceiverDao {
 	@Override
 	public void deleteReceiver(ReceiverGroupReceiver receiverGroupReceiver) {
 		logger.debug("Deleting receiver group receiver : " + receiverGroupReceiver);
-		HunterHibernateHelper.deleteEntity(receiverGroupReceiver); 
+		hunterHibernateHelper.deleteEntity(receiverGroupReceiver); 
 		logger.debug("Successfully deleted receiver group receiver!" );
 	}
 
 	@Override
 	public void updateReceiverGroup(ReceiverGroupReceiver receiverGroupReceiver) {
 		logger.debug("Updating receiver group receiver : " + receiverGroupReceiver);		 
-		HunterHibernateHelper.updateEntity(receiverGroupReceiver);
+		hunterHibernateHelper.updateEntity(receiverGroupReceiver);
 		logger.debug("Done updating receiver group : " + receiverGroupReceiver); 
 	}
 

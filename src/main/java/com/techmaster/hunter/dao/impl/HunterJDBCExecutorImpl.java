@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
+import com.techmaster.hunter.exception.HunterRunTimeException;
 import com.techmaster.hunter.util.HunterHibernateHelper;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -38,8 +39,11 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 	@Override
 	public String getQueryForSqlId(String id) {
 		
-		if(id == null || id.trim().equalsIgnoreCase("")) 
-			throw new IllegalArgumentException("Id provided is null or empty >> " + id); 
+		if(id == null || id.trim().equalsIgnoreCase("")){			
+			String message = "Id provided is null or empty >> " + id;
+			logger.debug(message);
+			throw new IllegalArgumentException(message);
+		}
 		
 		String 
 		query = HunterUtility.getQueryForSqlId(id),
@@ -86,6 +90,7 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 			conn.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			throw new HunterRunTimeException(e.getMessage());
 		}finally{
 			HunterHibernateHelper.closeConnection(conn);
 		}

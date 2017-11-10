@@ -296,5 +296,7 @@ public class HunterConstants {
 	
 	public static final int DEFAULT_NUMBER_OF_YEARS_TASK_IS_ACTIVE = 3;
 	
+	public static final String ALLOWED_CORS_ORIGINS = "http://localhost:4200";
+	
 }
 

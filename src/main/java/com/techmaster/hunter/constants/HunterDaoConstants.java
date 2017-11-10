@@ -18,6 +18,9 @@ public class HunterDaoConstants {
 	public static final String TASK_HISTORY_DAO = "taskHistoryDao";
 	public static final String USER_ROLE_DAO = "userRoleDao";
 	public static final String HUNTER_USER_DAO = "hunterUserDao";
+	
+	public static final String GET_CLIENTS_FOR_ANGULAR_QUERY = "getClientsForAngular";
+	
 
 }
 
