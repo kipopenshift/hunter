@@ -84,7 +84,7 @@ public class ClientController extends HunterBaseController{
 	
 	@RequestMapping(value="/action/getClientForUserId", method = RequestMethod.POST)
 	@Produces("application/json") 
-	public @ResponseBody String getClientForUserId(HttpServletRequest request){
+	public @ResponseBody HunterClient getClientForUserId(HttpServletRequest request){
 		
 		String paramNames = HunterUtility.getParamNamesAsStringsFrmRqst(request);
 		logger.debug("param names > " + paramNames);
@@ -100,19 +100,7 @@ public class ClientController extends HunterBaseController{
 		mapper.setDateFormat(df);
 		String clientString = null;
 		
-		try {
-			clientString = mapper.writeValueAsString(client);
-			logger.debug("client String >> " + clientString); 
-		} catch (JsonGenerationException e) {
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		logger.debug("Successfully returned client >> " + clientString);  
-		return clientString;
+		return client;
 		
 	}
 	

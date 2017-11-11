@@ -41,7 +41,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 		logger.debug("Inserting receiver region...");
 		Long maxId = getNextReceiverRegionId();
 		receiverRegion.setRegionId(maxId);
-		hunterHibernateHelper.saveEntity(receiverRegion);
+		HunterDaoFactory.getObject(HunterHibernateHelper.class).saveEntity(receiverRegion);
 		logger.debug("Finished inserting receiver region...");
 		
 	}
@@ -55,7 +55,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 			region.setRegionId(maxId);
 			maxId++;
 		}
-		hunterHibernateHelper.saveEntities(receiverRegions); 
+		HunterDaoFactory.getObject(HunterHibernateHelper.class).saveEntities(receiverRegions); 
 		logger.debug("Finished inserting receiver region...");
 		
 	}
@@ -64,7 +64,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public ReceiverRegion getReceiverRegionById(Long receiverId) {
 		
 		logger.debug("Getting getReceiverRegionById...");
-		ReceiverRegion receiverRegion = hunterHibernateHelper.getEntityById(receiverId, ReceiverRegion.class);
+		ReceiverRegion receiverRegion = HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(receiverId, ReceiverRegion.class);
 		logger.debug("Finished getReceiverRegionById");
 		return receiverRegion;
 	}
@@ -93,7 +93,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public List<ReceiverRegion> getAllReceiverRegions() {
 
 		logger.debug("Getting all states");
-		List<ReceiverRegion> receiverRegions = hunterHibernateHelper.getAllEntities(ReceiverRegion.class);
+		List<ReceiverRegion> receiverRegions = HunterDaoFactory.getObject(HunterHibernateHelper.class).getAllEntities(ReceiverRegion.class);
 		logger.debug("Finished fetching all states size(" + receiverRegions != null ? receiverRegions.size() : null +  ")");
 		return receiverRegions;
 
@@ -103,7 +103,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public void updateReceiverRegion(ReceiverRegion receiverRegion) {
 
 		logger.debug("updateReceiverRegion ...");
-		hunterHibernateHelper.updateEntity(receiverRegion); 
+		HunterDaoFactory.getObject(HunterHibernateHelper.class).updateEntity(receiverRegion); 
 		logger.debug("Finished updateReceiverRegion!");
 		
 		
@@ -113,8 +113,8 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public void deleteReceiverById(Long receiverId) {
 		
 		logger.debug("deleting receiver region of id >> " + receiverId);
-		ReceiverRegion receiverRegion = hunterHibernateHelper.getEntityById(receiverId, ReceiverRegion.class);
-		hunterHibernateHelper.deleteEntity(receiverRegion); 
+		ReceiverRegion receiverRegion = HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(receiverId, ReceiverRegion.class);
+		HunterDaoFactory.getObject(HunterHibernateHelper.class).deleteEntity(receiverRegion); 
 		logger.debug("Finished deleting receiver region !"); 
 		
 	}
@@ -123,7 +123,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public void deleteReceiverRegion(ReceiverRegion receiverRegion) {
 		
 		logger.debug("deleting receiver region....");
-		hunterHibernateHelper.deleteEntity(receiverRegion); 
+		HunterDaoFactory.getObject(HunterHibernateHelper.class).deleteEntity(receiverRegion); 
 		logger.debug("Finished deleting receiver region !"); 
 		
 	}
@@ -131,7 +131,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void insertCountry(Country country) {
 		logger.debug("Inserting country...");
-		hunterHibernateHelper.saveEntity(country);
+		HunterDaoFactory.getObject(HunterHibernateHelper.class).saveEntity(country);
 		logger.debug("Finished inserting country"); 
 		
 	}
@@ -139,7 +139,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public void deleteCountry(Country country) {
 		logger.debug("Deleting countries");
-		hunterHibernateHelper.deleteEntity(country); 
+		HunterDaoFactory.getObject(HunterHibernateHelper.class).deleteEntity(country); 
 		logger.debug("Finished deleting country");
 		
 	}
@@ -147,7 +147,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public Country getCountryById(Long countryId) {
 		logger.debug("Getting country by Id");
-		Country country = hunterHibernateHelper.getEntityById(countryId, Country.class);
+		Country country = HunterDaoFactory.getObject(HunterHibernateHelper.class).getEntityById(countryId, Country.class);
 		logger.debug("Finished getting country by id");
 		return country;
 	}
@@ -156,7 +156,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public Country getCountryByName(String name) {
 		String query = "FROM Country c where c.countryName = '" + name + "'";
 		logger.debug("Fetcing country by name. Query >> " + query); 
-		List<Country> countries = hunterHibernateHelper.executeQueryForObjList(Country.class, "");
+		List<Country> countries = HunterDaoFactory.getObject(HunterHibernateHelper.class).executeQueryForObjList(Country.class, "");
 		Country country = countries.get(0);
 		logger.debug("Finished getting country by name >> " + country); 
 		return country;
@@ -166,7 +166,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	public List<County> getCountyByNameAndCountryId(String countyName, Long countryId) {
 		String query = "From County c where c.countyName = '" + countyName + "' and c.countryId = '" + countryId + "'";
 		logger.debug("Executing query : " + query); 
-		List<County> counties = hunterHibernateHelper.executeQueryForObjList(County.class, query);
+		List<County> counties = HunterDaoFactory.getObject(HunterHibernateHelper.class).executeQueryForObjList(County.class, query);
 		logger.debug("Returned counties. Size( " + counties.size() + " )"); 
 		return counties;
 	}
@@ -174,7 +174,7 @@ public class ReceiverRegionDaoImpl implements ReceiverRegionDao {
 	@Override
 	public List<Country> getAllCountries() {
 		logger.debug("Getting all countries...");
-		List<Country> countries = hunterHibernateHelper.getAllEntities(Country.class);
+		List<Country> countries = HunterDaoFactory.getObject(HunterHibernateHelper.class).getAllEntities(Country.class); 
 		logger.debug("Finished getting countries");
 		return countries;
 	}
