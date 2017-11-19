@@ -27,7 +27,7 @@ public class HunterDaoFactory {
 	}
 
 	public void setDaosMap(Map<String, Object> daosMap) {
-		this.daosMap = daosMap; 
+		HunterDaoFactory.daosMap = daosMap; 
 	}
 	public static Object get(String key){
 		Object obj = daosMap.get(key);

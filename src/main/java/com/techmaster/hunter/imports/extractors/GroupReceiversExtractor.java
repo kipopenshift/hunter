@@ -148,7 +148,7 @@ public class GroupReceiversExtractor extends AbstractExcelExtractor<ReceiverGrou
 						boolean isVoiceMail = receiverType != null && receiverType.equals(HunterConstants.RECEIVER_TYPE_VOICE_MAIL);
 						boolean isValidEmail = HunterUtility.validateEmail(objStr);
 						boolean isValidPhoneNumber = HunterUtility.validatePhoneNumber(objStr);
-						if(isEmail && isValidEmail){
+						if(isEmail && !isValidEmail){
 							rowErrors.add("Type is email but contact is not valid email");
 						}else if((isText || isCall || isVoiceMail) && !isValidPhoneNumber){
 							rowErrors.add("Type is one of (email, voice mail, call, text) but contact is invalid phone number");
@@ -206,11 +206,11 @@ public class GroupReceiversExtractor extends AbstractExcelExtractor<ReceiverGrou
 					receiver.setReceiverType(objStr); 				
 				// Active
 				}else if(i==2){
-					receiver.setActive(objStr.equals("Y") ? true : false);
+					receiver.setActive( HunterUtility.getBooleanForYN(objStr) );
 				}
 				// Approved
 				else if(i==3){
-					receiver.setApproved(objStr.equals("Y") ? true : false);
+					receiver.setApproved( HunterUtility.getBooleanForYN(objStr) );
 				}
 			}
 			if(receiver.isApproved()){

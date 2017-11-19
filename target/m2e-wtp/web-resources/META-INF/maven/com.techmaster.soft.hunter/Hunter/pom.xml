@@ -113,6 +113,11 @@
 	      <artifactId>hibernate-core</artifactId>
 	      <version>4.3.6.Final</version>
 	    </dependency>
+	    <dependency>
+		   <groupId>org.javassist</groupId>
+		   <artifactId>javassist</artifactId>
+		   <version>3.18.2-GA</version>
+		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
@@ -374,7 +379,7 @@
 	    <dependency>
 		    <groupId>com.fasterxml.jackson.core</groupId>
 		    <artifactId>jackson-databind</artifactId>
-		    <version>2.9.0</version>
+		    <version>2.5.1</version>
 		</dependency>	
 	    
 		<!-- This is for sending emails. Needs to be there for spring to send emails -->

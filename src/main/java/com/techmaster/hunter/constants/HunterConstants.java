@@ -243,7 +243,8 @@ public class HunterConstants {
 	public static final String EMAIL_TEMPLATES_CACHED_SERVICE = "EMAIL_TEMPLATES_CACHED_SERVICE";
 	public static final String EMAIL_CONFIG_CACHED_SERVICE = "EMAIL_CONFIG_CACHED_SERVICE";
 	public static final String TASK_PROCESS_JOBS_TEMPLATE = "TASK_PROCESS_JOBS_TEMPLATE";
-	public static final String LOGIN_DATA_SEED_XML = "LOGIN_DATA_SEE_XML"; 
+	public static final String LOGIN_DATA_SEED_XML = "LOGIN_DATA_SEE_XML";
+	public static final String QUERY_TO_BEAN_MAPPER = "QUERY_TO_BEAN_MAPPER";
 	
 	//Hunter Cache service names 
 	public static final String EMAIL_TEMPLATES_CACHE_SERVICE = "emailTemplateCacheService";
@@ -297,6 +298,8 @@ public class HunterConstants {
 	public static final int DEFAULT_NUMBER_OF_YEARS_TASK_IS_ACTIVE = 3;
 	
 	public static final String ALLOWED_CORS_ORIGINS = "http://localhost:4200";
+	
+	public static final String MAPPER_FIELD_HUNTER_USER_JSON = "http://localhost:4200";
 	
 }
 

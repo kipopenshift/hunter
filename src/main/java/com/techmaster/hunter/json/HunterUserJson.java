@@ -91,7 +91,7 @@ public class HunterUserJson {
 		return active;
 	}
 
-	public void setActive(boolean active) {
+	public void setActive(Boolean active) {
 		this.active = active;
 	}
 	public String getCretDate() {
@@ -126,7 +126,7 @@ public class HunterUserJson {
 	public boolean isBlocked() {
 		return blocked;
 	}
-	public void setBlocked(boolean blocked) {
+	public void setBlocked(Boolean blocked) {
 		this.blocked = blocked;
 	}
 

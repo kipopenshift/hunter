@@ -7,8 +7,8 @@ public class HunterClientJson {
 	private String lastName;
 	private String email;
 	private String userName;
-	private boolean receiver;
-	private float budget;
+	private Boolean receiver;
+	private Float budget;
 	
 	private String createdDate;
 	private String createdBy;
@@ -49,13 +49,13 @@ public class HunterClientJson {
 	public boolean isReceiver() {
 		return receiver;
 	}
-	public void setReceiver(boolean receiver) {
+	public void setReceiver(Boolean receiver) {
 		this.receiver = receiver;
 	}
 	public float getBudget() {
 		return budget;
 	}
-	public void setBudget(float budget) {
+	public void setBudget(Float budget) {
 		this.budget = budget;
 	}
 	public String getCreatedDate() {

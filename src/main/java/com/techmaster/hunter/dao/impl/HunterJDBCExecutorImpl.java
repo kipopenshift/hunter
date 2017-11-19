@@ -54,7 +54,7 @@ public class HunterJDBCExecutorImpl implements HunterJDBCExecutor {
 		
 		return query;
 	}
-
+	
 	@Override
 	public Map<Integer, List<Object>>  executeQueryRowList(String query, List<Object> values) {
 		

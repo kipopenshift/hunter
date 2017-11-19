@@ -65,7 +65,7 @@ public abstract class AbstractExcelExtractor<E> implements ExcelExtractor {
 		
 		if(sheetName == null || sheetName.trim().equalsIgnoreCase(""))
 			throw new IllegalArgumentException("Sheet name provided is not valid. Name >> " + sheetName);
-		Sheet sheet =workbook.getSheet(sheetName); 
+		Sheet sheet = workbook.getSheet(sheetName); 
 		if(sheet == null) throw new IllegalArgumentException("No sheet found >> " + sheetName);
 		
 		String[] headers = extractHeaders(sheetName,workbook);

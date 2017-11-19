@@ -20,6 +20,8 @@ public class HunterDaoConstants {
 	public static final String HUNTER_USER_DAO = "hunterUserDao";
 	
 	public static final String GET_CLIENTS_FOR_ANGULAR_QUERY = "getClientsForAngular";
+	public static final String GET_CLIENT_JSON_FOR_USR_ID = "getClientJSONForUserId";
+	public static final String GET_ALL_CLIENTS_DETAILS = "getAllClientsDetails";
 	
 
 }

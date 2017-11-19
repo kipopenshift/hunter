@@ -22,16 +22,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.techmaster.hunter.constants.HunterConstants;
 import com.techmaster.hunter.constants.HunterDaoConstants;
-import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterClientDao;
-import com.techmaster.hunter.dao.types.HunterJDBCExecutor;
+import com.techmaster.hunter.json.HunterClientJson;
 import com.techmaster.hunter.obj.beans.HunterClient;
+import com.techmaster.hunter.obj.converters.HunterClientConverter;
+import com.techmaster.hunter.util.HunterGenericJSONConverter;
+import com.techmaster.hunter.util.HunterQueryToBeanMapper;
 import com.techmaster.hunter.util.HunterUtility;
 
 @CrossOrigin( origins=HunterConstants.ALLOWED_CORS_ORIGINS, maxAge=3600 )
@@ -42,6 +45,7 @@ public class ClientController extends HunterBaseController{
 	@Autowired private HunterClientDao hunterClientDao;
 	private Logger logger = Logger.getLogger(ClientController.class);
 	
+	@JsonIgnore
 	@RequestMapping(value="/action/read", method = RequestMethod.GET)
 	@Produces("application/json") 
 	public @ResponseBody String readHunterClientUser(){
@@ -82,26 +86,13 @@ public class ClientController extends HunterBaseController{
 		return "clientCreate";
 	}
 	
+	@JsonIgnore
 	@RequestMapping(value="/action/getClientForUserId", method = RequestMethod.POST)
 	@Produces("application/json") 
-	public @ResponseBody HunterClient getClientForUserId(HttpServletRequest request){
-		
-		String paramNames = HunterUtility.getParamNamesAsStringsFrmRqst(request);
-		logger.debug("param names > " + paramNames);
-		Object userId = request.getParameter("userId");
-		logger.debug("Getting client for  user id >> " + userId);  
-		HunterClient client = hunterClientDao.getHunterClientForUserId(HunterUtility.getLongFromObject(userId)); 
-		System.out.println(client);
-		logger.debug("Obtained client >> " + client);
-		
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-		DateFormat df = new SimpleDateFormat(HunterConstants.HUNTER_DATE_FORMAT_SECS );
-		mapper.setDateFormat(df);
-		String clientString = null;
-		
+	public @ResponseBody HunterClientJson getClientForUserId(HttpServletRequest request){
+		Long userId = HunterUtility.getLongFromObject( request.getParameter("userId") );  
+		HunterClientJson client = HunterClientConverter.getInstance().getClientForUserId( userId );
 		return client;
-		
 	}
 	
 	@RequestMapping(value="/action/editHunterClient", method = RequestMethod.POST)
@@ -152,28 +143,9 @@ public class ClientController extends HunterBaseController{
 	@Consumes("application/json")
 	public @ResponseBody String getClientsForAngularUI( @RequestBody Map<String, String> reqParams, HttpServletResponse response ){
 		try{			
-			HunterJDBCExecutor executor = HunterDaoFactory.getDaoObject(HunterJDBCExecutor.class);
-			String query = executor.getQueryForSqlId(HunterDaoConstants.GET_CLIENTS_FOR_ANGULAR_QUERY);
-			Map<Integer, List<Object>> rowListMap = executor.executeQueryRowList(query, null);
-			JSONArray clients = new JSONArray();
-			for( Map.Entry<Integer, List<Object>> entry : rowListMap.entrySet() ){
-				List<Object> rowList = entry.getValue();
-				JSONObject clientRow = new JSONObject();
-				clientRow.put("clientId", rowList.get(0));
-				clientRow.put("firstName", rowList.get(1));
-				clientRow.put("lastName", rowList.get(2));
-				clientRow.put("email", rowList.get(3));
-				clientRow.put("userName", rowList.get(4));
-				clientRow.put("receiver", HunterUtility.getBooleanForYN(rowList.get(5).toString()));
-				clientRow.put("budget", rowList.get(6));
-				clientRow.put("createdDate", rowList.get(7));
-				clientRow.put("createdBy", rowList.get(8));
-				clientRow.put("updatedBy", rowList.get(9));
-				clientRow.put("updatedOn", rowList.get(10));
-				logger.debug("Client = " + clientRow.toString() );
-				clients.put(clientRow);
-			}
-			return clients.toString();
+			List<HunterClientJson> clientJsons = HunterQueryToBeanMapper.getInstance().map(HunterClientJson.class, HunterDaoConstants.GET_ALL_CLIENTS_DETAILS, null);
+			JSONArray array = HunterGenericJSONConverter.getInstance().convert(clientJsons);
+			return array.toString();
 		}catch (Exception e) {
 			return HunterUtility.setJSONObjectForFailure(null, "Error occurred while getting clients").toString();
 		}

@@ -1417,4 +1417,25 @@
 			  HNTR_CLINT c
 		</statement>
 	</query>
+	<query id="getClientJSONForUserId">
+		<description>
+		    Retrieves clients for angular client grid
+		</description>
+		<statement>
+		  	SELECT 
+			  c.HNTR_CLNT_ID,
+			  c.FRST_NAM,
+			  c.LST_NAM,
+			  c.EMAIL,
+			  c.USR_NAM,
+			  c.IS_RCVR,
+			  c.CLNT_TL_BDGT,
+			  TO_CHAR(c.CRET_DATE, 'yyyy-MM-dd HH:mm:ss') as CRET_DATE,
+			  c.CRTD_BY,
+			  TO_CHAR(c.LST_UPDATE, 'yyyy-MM-dd HH:mm:ss') as LST_UPDATE,
+			  c.LST_UPDTD_BY
+			FROM 
+			  HNTR_CLINT c WHERE c.HNTR_CLNT_ID = ?
+		</statement>
+	</query>
 </queries>

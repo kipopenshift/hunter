@@ -90,6 +90,11 @@ public class HunterCacheUtil {
 		XMLService loginDataSeedXMLService = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.LOGIN_DATA_SEE_XML);
 		HunterCache.getInstance().put(HunterConstants.LOGIN_DATA_SEED_XML, loginDataSeedXMLService);
 		logger.debug("Done cachingg login data seed xml!!");
+		
+		XMLService queryToBeanMapper = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.QUERY_TO_BEAN_MAPPER);
+		HunterCache.getInstance().put(HunterConstants.QUERY_TO_BEAN_MAPPER, queryToBeanMapper);
+		logger.debug("Done cachingg login data seed xml!!");
+		
 	}
 	
 	public void refreshCacheService(String xmlName){
@@ -143,6 +148,11 @@ public class HunterCacheUtil {
 			logger.debug("Caching existing email template names..."); 
 			HunterCacheUtil.getInstance().loadExistentEmailTemplatesNames();
 			logger.debug("Done caching existing email template names!!"); 
+			break;
+		case "queryToBeanMapper" :
+			XMLService queryToBeanMapper = HunterUtility.getXMLServiceForFileLocation(HunterURLConstants.QUERY_TO_BEAN_MAPPER);
+			HunterCache.getInstance().put(HunterConstants.QUERY_TO_BEAN_MAPPER, queryToBeanMapper);
+			logger.debug("Done cachingg login data seed xml!!");
 			break;
 		default:
 			break;

@@ -1,5 +1,6 @@
 package com.techmaster.hunter.controllers;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +22,8 @@ import com.techmaster.hunter.constants.HunterURLConstants;
 import com.techmaster.hunter.dao.impl.HunterDaoFactory;
 import com.techmaster.hunter.dao.types.HunterClientDao;
 import com.techmaster.hunter.dao.types.HunterUserDao;
+import com.techmaster.hunter.json.HunterClientJson;
+import com.techmaster.hunter.json.HunterClientsDetailsJson;
 import com.techmaster.hunter.obj.beans.HunterClient;
 import com.techmaster.hunter.util.HunterUtility;
 

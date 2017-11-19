@@ -27,8 +27,8 @@ import com.techmaster.hunter.obj.beans.HunterAddress;
 import com.techmaster.hunter.obj.beans.HunterCreditCard;
 import com.techmaster.hunter.obj.beans.HunterUser;
 import com.techmaster.hunter.obj.beans.UserLoginBean;
-import com.techmaster.hunter.obj.converters.HunterUserConverter;
 import com.techmaster.hunter.util.HunterHibernateHelper;
+import com.techmaster.hunter.util.HunterQueryToBeanMapper;
 import com.techmaster.hunter.util.HunterSessionFactory;
 import com.techmaster.hunter.util.HunterUtility;
 
@@ -316,10 +316,7 @@ public class HunterUserDaoImpl implements HunterUserDao{
 
 	@Override
 	public List<HunterUserJson> getAllUserJson() {
-		//logger.debug("Fetching all user jsons..."); 
-		List<HunterUser> hunterUsers = getAllUsers(); 
-		List<HunterUserJson> hunterUserJsons = HunterUserConverter.getInstance().createJsonFromUsers(hunterUsers);
-		//logger.debug("Finished fetching user jsons. Size ( " + hunterUserJsons.size() + " )");  
+		List<HunterUserJson> hunterUserJsons = HunterQueryToBeanMapper.getInstance().map(HunterUserJson.class, HunterDaoConstants.GET_ALL_CLIENTS_DETAILS, null);
 		return hunterUserJsons;
 	}
 

@@ -630,6 +630,14 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 		return lng;
 	}
 	
+	public static Float getFloatFromObject(Object obj){
+		if(obj == null || obj.toString().trim().equals("")) return null;
+		if(!isNumeric(obj)) throw new IllegalArgumentException("Object passed in is not numeric. Object > " + obj);
+		String str = obj.toString() + 'f';
+		Float flt = Float.parseFloat(str);
+		return flt;
+	}
+	
 	public static String getStackTrace(Throwable t){
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -647,6 +655,16 @@ public static  Logger logger = Logger.getLogger(HunterUtility.class);
 	
 	
 	public static String getQueryForSqlId(String id) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("queries/query[@id=\"");
+		builder.append(id);
+		builder.append("\"]/statement");
+		XMLService service = HunterCacheUtil.getInstance().getXMLService(HunterConstants.QUERY_XML_CACHED_SERVICE);
+		String query  = service.getTextValue(builder.toString());
+		return query.trim();
+	}
+	
+	public static String getQueryMapperForMapId(String id) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("queries/query[@id=\"");
 		builder.append(id);

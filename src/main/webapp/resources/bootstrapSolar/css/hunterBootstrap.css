@@ -49,6 +49,7 @@ a {
 
 .dataTables_info, .dataTables_length, .dataTables_filter label {
 	color: #61A5B6 !important;
+	background-color: #093B47
 }
 
 .previous disabled {
@@ -57,7 +58,11 @@ a {
 
 
 #example_previous:hover {
-	background-color:yellow !important;
+	color:gray !important;
+}
+
+.paginate_button:hover {
+	background-color:red;
 }
 
 
